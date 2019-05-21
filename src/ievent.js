@@ -1,0 +1,934 @@
+/**************************************************************************
+ *      IEvent GClass
+
+DEBUG: {
+    "realm_name": "",
+    "yuno_role": "Mobile",
+    "yuno_name": "mobile",
+    "yuno_alias": "",
+    "yuno_version": "1.0.0",
+    "yuno_release": "1.0.0",
+    "yuneta_version": "3.8.8",
+    "playing": false,
+    "pid": 0,
+    "jwt": "",
+    "launch_id": 0,
+    "required_services": [],
+    "__md_iev__": {
+        "ievent_gate_stack": [
+            {
+                "dst_yuno": null,
+                "dst_role": "mobile_gate",
+                "dst_service": "agent",
+                "src_yuno": "mobile",
+                "src_role": "Mobile",
+                "src_service": "iev___default_service__"
+            }
+        ]
+    }
+}
+
+ *      Interevents to remote yuno
+ **************************************************************************/
+(function (exports) {
+    'use strict';
+
+    /********************************************
+     *      Configuration (C attributes)
+     ********************************************/
+    var CONFIG = {
+        timeout_retry: 5,               // retry websocket connection
+        timeout_idack: 5,               // timeout waiting idAck
+
+        _wanted_yuno_name: null,        // wanted yuno service names
+        _wanted_yuno_role: null,
+        _wanted_yuno_service: null,
+
+        remote_yuno_name: null,         // confirmed remote yuno names
+        remote_yuno_role: null,
+        remote_yuno_service: null,
+
+        jwt: null,
+        urls: null
+    };
+
+    var IEVENT_MESSAGE_AREA_ID = "ievent_gate_stack";
+
+
+            /***************************
+             *      Local Methods
+             ***************************/
+
+
+
+
+    /****************************************
+     *      Setup websocket
+     *  Mixin DOM events -> Yuneta events
+     ****************************************/
+    function setup_websocket(self)
+    {
+        function on_open_event(gobj) {
+            return function() {
+                gobj.gobj_send_event('EV_ON_OPEN', {}, gobj);
+            }
+        }
+        function on_close_event(gobj) {
+            return function() {
+                gobj.gobj_send_event('EV_ON_CLOSE', {}, gobj);
+            }
+        }
+        function on_error_event(gobj) {
+            return function() {
+                gobj.gobj_send_event('EV_ON_CLOSE', {}, gobj);
+            }
+        }
+        function on_message_event(gobj) {
+            return function(e) {
+                gobj.gobj_send_event(
+                    'EV_ON_MESSAGE',
+                    {
+                        data:e.data
+                    },
+                    gobj
+                );
+            }
+        }
+        var url = self.config.urls[self.idx_url];
+        _logger("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
+
+        try {
+            var websocket = new WebSocket(url);
+            if (!websocket) {
+                _logger("Cannot open WebSocket to '" + url + "'");
+                return;
+            }
+        } catch (e) {
+            _logger("Cannot open WebSocket to '" + url + "'");
+            return;
+        }
+
+        websocket.onopen = on_open_event(self);
+        websocket.onclose = on_close_event(self);
+        websocket.onerror = on_error_event(self);
+        websocket.onmessage = on_message_event(self);
+        return websocket;
+    }
+
+    /*****************************************
+     *      Trace intra event
+     *****************************************/
+    function trace_inter_event(self, prefix, iev)
+    {
+        var hora = get_current_datetime();
+        var fields= null;
+        try {
+            _logger("\n" + hora + " " + prefix + "\n");
+            var trace = JSON.stringify(iev,  null, 4);
+            _logger(trace);
+        } catch (e) {
+            _logger("ERROR in trace_inter_event: " + e);
+        }
+    }
+
+    /************************************************************
+     *  inter event container
+     ************************************************************/
+    function InterEvent(
+            event,
+            kw) {
+        this.event = event;
+        this.kw = kw || {};
+    }
+
+    /************************************************************
+     *        Create inter-event
+     ************************************************************/
+    function iev_create(
+            event,
+            kw)
+    {
+        if(empty_string(event)) {
+            _logger("ERROR iev_create() event NULL");
+            return null;
+        }
+        var iev = new InterEvent(
+            event,
+            kw
+        );
+
+        return iev;
+    }
+
+    /**************************************
+     *  Send jsonify inter-event message
+     **************************************/
+    function send_iev(self, iev)
+    {
+        var msg = JSON.stringify(iev);
+        self.websocket.send(msg);
+        return 0;
+    }
+
+    /**************************************
+     *
+     **************************************/
+    function send_static_iev(self, event, kw)
+    {
+        var iev = iev_create(
+            event,
+            kw
+        );
+
+        if (self.yuno.config.trace_inter_event) {
+            var url = self.config.urls[self.idx_url];
+            var prefix = self.yuno.yuno_name + ' ==> ' + url;
+            trace_inter_event(self, prefix, iev);
+        }
+
+        return send_iev(self, iev);
+    }
+
+    /**************************************
+     *
+     **************************************/
+    function build_ievent_request(self, src_service)
+    {
+        var jn_ievent_chain = {
+            dst_yuno: self.config._wanted_yuno_name,
+            dst_role: self.config._wanted_yuno_role,
+            dst_service: self.config._wanted_yuno_service,
+            src_yuno: self.yuno.yuno_name,
+            src_role: self.yuno.yuno_role,
+            src_service: src_service
+        };
+        return jn_ievent_chain;
+    }
+
+    /**************************************
+     *
+     **************************************/
+    function ievent_answer_filter(self, kw_answer, area_key, ivent_gate_stack, src)
+    {
+        var ievent = json_array_get(ievent_gate_stack, 0);
+
+        /*
+        *  Dale la vuelta src->dst dst->src
+        */
+        var iev_src_service = kw_get_str(ievent, "src_service", "");
+
+        ievent["dst_yuno"] = self.config.remote_yuno_name;
+        ievent["dst_role"] = self.config.remote_yuno_role;
+        ievent["dst_service"] = iev_src_service;
+
+        ievent["src_yuno"] = self.yuno.yuno_name;
+        ievent["src_role"] = self.yuno.yuno_role;
+        ievent["src_service"] = src.name;
+    }
+
+    /********************************************
+     *      Send identity card
+     ********************************************/
+    function send_identity_card(self)
+    {
+        var kw = {
+            "realm_name": "",
+            "yuno_role": self.yuno.yuno_role,
+            "yuno_name": self.yuno.yuno_name,
+            "yuno_alias": "",
+            "yuno_version": self.yuno.yuno_version,
+            "yuno_release": self.yuno.yuno_version,
+            "yuneta_version": "3.8.8",
+            "playing": false,
+            "pid": 0,
+            "jwt": self.config.jwt,
+            "launch_id" : 0,
+            "yuno_startdate" : "", // TODO
+            "required_services": []
+        };
+        /*
+         *      __REQUEST__ __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            self,
+            self.parent.name
+        );
+        msg_iev_push_stack(
+            kw,
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        self.set_timeout(self.config.timeout_idack*1000);
+
+        return send_static_iev(self, "EV_IDENTITY_CARD", kw);
+    }
+
+    /********************************************
+     *      Send goodbye
+     ********************************************/
+    function send_goodbye(self, cause)
+    {
+        var kw = {
+            "cause": cause
+        };
+        /*
+         *      __REQUEST__ __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            self,
+            self.parent.name
+        );
+        msg_iev_push_stack(
+            kw,
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        return send_static_iev(self, "EV_GOODBYE", kw);
+    }
+
+    /********************************************
+     *  Create iev from data received
+     *  on websocket connection
+     ********************************************/
+    function iev_create_from_json(self, data)
+    {
+        try {
+            var x = JSON.parse(data);
+        } catch (e) {
+            _logger("ERROR parsing inter_event json: " + e);
+            return null;
+        }
+
+        if(!(x instanceof Object)) {
+            _logger("ERROR parsing inter_event: websocket data not a json object");
+            return null;
+        }
+        var event = x['event'];
+        if(!event) {
+            _logger("ERROR parsing inter_event: no event");
+            return null;
+        }
+        if(!(typeof event === 'string' )) {
+            _logger("ERROR parsing inter_event: event not a string");
+            return null;
+        }
+
+        var kw = x['kw'];
+        if(!kw) {
+            _logger("ERROR parsing inter_kw: no kw");
+            return null;
+        }
+        if(!(kw instanceof Object)) {
+            _logger("ERROR parsing inter_event: kw not a json object");
+            return null;
+        }
+
+        var iev = new InterEvent(
+            event,
+            kw
+        );
+        return iev;
+    }
+
+
+
+
+            /***************************
+             *      Actions
+             ***************************/
+
+
+
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_on_open(self, event, kw, src)
+    {
+        var url = self.config.urls[self.idx_url];
+        _logger('Websocket opened: ' + url); // TODO que no se vea en prod
+        send_identity_card(self);
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_on_close(self, event, kw, src)
+    {
+        var url = self.config.urls[self.idx_url];
+        _logger('Websocket closed: ' + url); // TODO que no se vea en prod
+
+        if(self.websocket) {
+            self.websocket.close();
+            self.websocket = null;
+        }
+
+        if(self.inform_on_close) {
+            self.inform_on_close = false;
+            // Any interesting information for on_close event?
+            self.gobj_publish_event(
+                'EV_ON_CLOSE',
+                {
+                    remote_yuno_name: self.config.remote_yuno_name,
+                    remote_yuno_role: self.config.remote_yuno_role,
+                    remote_yuno_service: self.config.remote_yuno_service
+                }
+            );
+        }
+
+        if(self.gobj_is_running()) {
+            // point to next url
+            var ln = self.config.urls.length;
+            self.idx_url = (++self.idx_url) % ln;
+            self.set_timeout(self.config.timeout_retry*1000);
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_timeout_disconnected(self, event, kw, src)
+    {
+        if(self.websocket) {
+            self.websocket.close();
+        }
+        if(self.gobj_is_running()) {
+            self.websocket = setup_websocket(self);
+            self.inform_on_close = true;  // the on_close if websocket is because yuno nak id-card
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_identity_card_ack(self, event, kw, src)
+    {
+        /*---------------------------------------*
+         *  Clear timeout
+         *---------------------------------------*/
+        self.clear_timeout();
+
+        /*---------------------------------------*
+         *  Update remote values
+         *---------------------------------------*/
+        /*
+         *  Here is the end point of the request.
+         *  Don't pop the request, because
+         *  the event can be publish to serveral users.
+         */
+        /*
+         *      __ANSWER__ __MESSAGE__
+         */
+        // TODO comprueba result, ahora puede venir negativo
+
+        var request = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID);
+        var src_yuno = kw_get_str(request, "src_yuno", "");
+        var src_role = kw_get_str(request, "src_role", "");
+        var src_service = kw_get_str(request, "src_service", "");
+
+        self.config.remote_yuno_role = src_role;
+        self.config.remote_yuno_name = src_yuno;
+        self.config.remote_yuno_service = src_service;
+
+        self.gobj_change_state("ST_SESSION");
+
+        if(!self.inform_on_close) {
+            self.inform_on_close = true;
+            self.gobj_publish_event(
+                'EV_ON_OPEN',
+                {
+                    remote_yuno_name: src_yuno,
+                    remote_yuno_role: src_role,
+                    remote_yuno_service: src_service
+                }
+            );
+        }
+
+        /*
+         *  Resend subscriptions
+         */
+        self.resend_subscriptions();
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_timeout_wait_idAck(self, event, kw, src)
+    {
+        send_identity_card(self);
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_on_message(self, event, kw, src)
+    {
+        var url = self.config.urls[self.idx_url];
+
+        /*------------------------------------------*
+         *  Create inter_event from received data
+         *------------------------------------------*/
+        var iev_msg = iev_create_from_json(self, kw.data);
+
+        /*---------------------------------------*
+         *          trace inter_event
+         *---------------------------------------*/
+        if (self.yuno.config.trace_inter_event) {
+            var prefix = self.yuno.yuno_name + ' <== ' + url;
+            trace_inter_event(self, prefix, iev_msg);
+        }
+
+        /*----------------------------------------*
+         *
+         *----------------------------------------*/
+        var iev_event = iev_msg.event;
+        var iev_kw = iev_msg.kw;
+
+        /*-----------------------------------------*
+         *  If state is not SESSION send self.
+         *  Mainly process EV_IDENTITY_CARD_ACK
+         *-----------------------------------------*/
+        if(!self.gobj_in_this_state('ST_SESSION')) {
+            if(self.gobj_event_in_input_event_list(iev_event)) {
+                self.gobj_send_event(iev_event, iev_kw, self);
+            } else {
+                _logger("ERROR ignoring event: " + iev_event + " for " + self.name);
+            }
+            return 0;
+        }
+
+        /*------------------------------------*
+         *   Analyze inter_event
+         *------------------------------------*/
+        var msg_type = msg_get_msg_type(iev_kw);
+
+        /*----------------------------------------*
+         *  Pop inter-event routing information.
+         *----------------------------------------*/
+        var event_id = msg_iev_get_stack(iev_kw, IEVENT_MESSAGE_AREA_ID);
+        var dst_service = kw_get_str(event_id, "dst_service", "");
+        // Chequea tb el nombre TODO
+        var dst_role = kw_get_str(event_id, "dst_role", "");
+
+        if(dst_role != self.yuno.yuno_role) {
+            _logger("It's not my role, yuno_role: " + dst_role + ", my_role: " + self.yuno.yuno_role);
+            return 0;
+        }
+
+        /*------------------------------------*
+         *   Is the event a subscription?
+         *------------------------------------*/
+        if(msg_type == '__subscribing__') {
+            /*
+             *  it's a external subscription
+             */
+            // TODO subscription
+            return 0;
+        }
+
+        /*---------------------------------------*
+         *   Is the event is a unsubscription?
+         *---------------------------------------*/
+        if(msg_type == '__unsubscribing__') {
+            /*
+             *  it's a external unsubscription
+             */
+            // TODO unsubscription
+            return 0;
+        }
+
+        /*-------------------------------------------------------*
+         *  Filter public events of this gobj
+         *-------------------------------------------------------*/
+        if(self.gobj_event_in_input_event_list(iev_event)) {
+            self.gobj_send_event(iev_event, iev_kw, self);
+            return 0;
+        }
+
+        /*-------------------------*
+         *  Dispatch the event
+         *-------------------------*/
+        var gobj_service = self.yuno.gobj_find_unique_gobj(dst_service);
+        if(gobj_service) {
+            if(gobj_service.gobj_event_in_input_event_list(iev_event)) {
+                gobj_service.gobj_send_event(iev_event, iev_kw, self);
+            } else {
+                _logger("ERROR " + gobj_service.gobj_short_name() + " event '" + iev_event + "' not in input event list");
+            }
+        } else {
+            self.gobj_publish_event( /* NOTE original behaviour */
+                iev_event,
+                iev_kw
+            );
+        }
+
+        return 0;
+    }
+
+
+
+
+            /***************************
+             *      GClass/Machine
+             ***************************/
+
+
+
+
+    var FSM = {
+        "event_list": [
+            "EV_ON_MESSAGE",
+            "EV_IDENTITY_CARD_ACK",
+            "EV_ON_OPEN",
+            "EV_ON_CLOSE",
+            "EV_TIMEOUT"
+        ],
+        "state_list": [
+            "ST_DISCONNECTED",
+            "ST_WAIT_IDENTITY_CARD_ACK",
+            "ST_SESSION"
+        ],
+        "machine": {
+            "ST_DISCONNECTED":
+            [
+                ["EV_ON_OPEN",              ac_on_open,             "ST_WAIT_IDENTITY_CARD_ACK"],
+                ["EV_ON_CLOSE",             ac_on_close,            undefined],
+                ["EV_TIMEOUT",              ac_timeout_disconnected,undefined]
+            ],
+            "ST_WAIT_IDENTITY_CARD_ACK":
+            [
+                ["EV_ON_MESSAGE",           ac_on_message,          undefined],
+                ["EV_IDENTITY_CARD_ACK",    ac_identity_card_ack,   undefined],
+                ["EV_ON_CLOSE",             ac_on_close,            "ST_DISCONNECTED"],
+                ["EV_TIMEOUT",              ac_timeout_wait_idAck,  undefined]
+            ],
+            "ST_SESSION":
+            [
+                ["EV_ON_MESSAGE",           ac_on_message,          undefined],
+                ["EV_ON_CLOSE",             ac_on_close,            "ST_DISCONNECTED"]
+            ]
+        }
+    };
+
+    var IEvent = GObj.__makeSubclass__();
+    var proto = IEvent.prototype; // Easy access to the prototype
+    proto.__init__= function(name, kw) {
+        GObj.prototype.__init__.call(
+            this,
+            FSM,
+            CONFIG,
+            name,
+            "IEvent",
+            kw,
+            gcflag_no_check_ouput_events
+        );
+        return this;
+    };
+
+
+
+
+            /***************************
+             *      Framework Methods
+             ***************************/
+
+
+
+
+    /************************************************
+     *      Framework Method create
+     ************************************************/
+    proto.mt_create = function(kw)
+    {
+        var self = this;
+        self.config._wanted_yuno_name = self.config.remote_yuno_name;
+        self.config._wanted_yuno_role = self.config.remote_yuno_role;
+        self.config._wanted_yuno_service = self.config.remote_yuno_service;
+    }
+
+    /************************************************
+     *      Framework Method destroy
+     ************************************************/
+    proto.mt_destroy = function()
+    {
+    }
+
+    /************************************************
+     *      Framework Method start
+     ************************************************/
+    proto.mt_start = function(kw)
+    {
+        var self = this;
+
+        self.idx_url = 0;
+        msg_iev_add_answer_filter(self, IEVENT_MESSAGE_AREA_ID, ievent_answer_filter);
+        self.websocket = setup_websocket(self);
+    }
+
+    /************************************************
+     *      Framework Method stop
+     ************************************************/
+    proto.mt_stop = function(kw)
+    {
+        var self = this;
+        self.clear_timeout();
+        send_goodbye(self, 'stopped by user');
+    }
+
+    /************************************************
+     *      Framework Method stats
+     ************************************************/
+    proto.mt_stats = function(stats, kw, src)
+    {
+        var self = this;
+        if(self.gobj_current_state() != 'ST_SESSION') {
+            return self.gobj_build_webix_answer(
+                self,
+                -1,
+                self.config.remote_yuno_role + "^" + self.config.remote_yuno_name + " not in session.",
+                null,
+                null,
+                kw
+            );
+        }
+
+        if(!kw) {
+            kw = {};
+        }
+
+        /*
+         *      __REQUEST__ __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            self,
+            src.name
+        );
+        msg_iev_push_stack(
+            kw,         // not owned
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        return send_static_iev(self, "EV_MT_STATS", kw);
+    }
+
+    /************************************************
+     *      Framework Method command
+     ************************************************/
+    proto.mt_command = function(command, kw, src)
+    {
+        var self = this;
+        if(self.gobj_current_state() != 'ST_SESSION') {
+            return self.gobj_build_webix_answer(
+                self,
+                -1,
+                self.config.remote_yuno_role + "^" + self.config.remote_yuno_name + " not in session.",
+                null,
+                null,
+                kw
+            );
+        }
+
+        if(!kw) {
+            kw = {};
+        }
+
+        /*
+         *      __REQUEST__ __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            self,
+            src.name
+        );
+        msg_iev_push_stack(
+            kw,         // not owned
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        kw["__command__"] = command;
+
+        return send_static_iev(self, "EV_MT_COMMAND", kw);
+    }
+
+    /************************************************
+     *      Framework Method inject_event
+     ************************************************/
+    proto.mt_inject_event = function(event, kw, src)
+    {
+        var self = this;
+        if(self.gobj_current_state() != 'ST_SESSION') {
+            self.log_error("Not in session, ignore event", event);
+            return -1;
+        }
+
+        if(!kw) {
+            kw = {};
+        }
+        /*
+         *      __MESSAGE__
+         */
+        var jn_request = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID);
+        if(!jn_request) {
+            /*
+             *  Pon el ievent si no viene con él,
+             *  si lo trae es que será alguna respuesta/redirección
+             */
+            var jn_ievent_id = build_ievent_request(
+                self,
+                src.name
+            );
+            msg_iev_push_stack(
+                kw,         // not owned
+                IEVENT_MESSAGE_AREA_ID,
+                jn_ievent_id   // owned
+            );
+        }
+        return send_static_iev(self, event, kw);
+    }
+
+    /************************************************
+     *      Framework Method subscription_added
+     *
+     *  SCHEMA subs
+     *  ===========
+     *
+        publisher           gobj
+        subscriber          gobj
+        event               str
+        renamed_event       str
+        hard_subscription   bool
+        __config__          json (dict)
+        __global__          json (dict)
+        __filter__          json (dict)
+
+     *
+     ************************************************/
+    proto.send_remote_subscription = function(subs)
+    {
+        if(empty_string(subs.event)) {
+            // HACK only resend explicit subscriptions
+            return;
+        }
+
+        var kw = {};
+
+        var __global__ = subs.__global__;
+        var __config__ = subs.__config__;
+        var __filter__ = subs.__filter__;
+
+        if(__config__) {
+            kw["__config__"] = __clone__(__config__);
+        }
+        if(__global__) {
+            kw["__global__"] = __clone__(__global__);
+        }
+        if(__filter__) {
+            kw["__filter__"] = __clone__(__filter__);
+        }
+
+        msg_set_msg_type(kw, "__subscribing__");
+
+        /*
+         *      __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            this,
+            subs.subscriber.name
+        );
+        msg_iev_push_stack(
+            kw,         // not owned
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        send_static_iev(this, subs.event, kw);
+    }
+
+    /************************************************
+     *      Framework Method subscription_added
+     ************************************************/
+    proto.mt_subscription_added = function(subs)
+    {
+        if(!this.gobj_in_this_state("ST_SESSION")) {
+            // on_open will send all subscriptions
+            return;
+        }
+        this.send_remote_subscription(subs);
+    }
+
+    /************************************************
+     *      Framework Method subscription_deleted
+     ************************************************/
+    proto.mt_subscription_deleted = function(subs)
+    {
+        if(!this.gobj_in_this_state("ST_SESSION")) {
+            // Nothing to do. On open this subscription will be not sent.
+            return;
+        }
+
+        if(empty_string(subs.event)) {
+            // HACK only resend explicit subscriptions
+            return;
+        }
+
+        var kw = {};
+
+        var __global__ = subs.__global__;
+        var __config__ = subs.__config__;
+        var __filter__ = subs.__filter__;
+
+        if(__config__) {
+            kw["__config__"] = __clone__(__config__);
+        }
+        if(__global__) {
+            kw["__global__"] = __clone__(__global__);
+        }
+        if(__filter__) {
+            kw["__filter__"] = __clone__(__filter__);
+        }
+
+        msg_set_msg_type(kw, "__unsubscribing__");
+
+        /*
+         *      __MESSAGE__
+         */
+        var jn_ievent_id = build_ievent_request(
+            this,
+            subs.subscriber.name
+        );
+        msg_iev_push_stack(
+            kw,         // not owned
+            IEVENT_MESSAGE_AREA_ID,
+            jn_ievent_id   // owned
+        );
+
+        send_static_iev(this, subs.event, kw);
+    }
+
+    /**************************************
+     *
+     **************************************/
+    proto.resend_subscriptions = function()
+    {
+        var dl_subs = this.gobj_find_subscriptions();
+        for(var i=0; i<dl_subs.length; i++) {
+            var subs = dl_subs[i];
+            this.send_remote_subscription(subs);
+        }
+    }
+
+    //=======================================================================
+    //      Expose the class via the global object
+    //=======================================================================
+    exports.IEvent = IEvent;
+})(this);
