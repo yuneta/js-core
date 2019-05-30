@@ -626,13 +626,16 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_bool(kw, key, default_value)
+    function kw_get_bool(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
             return default_value;
         }
         var b = kw[key];
         if(b == undefined) {
+            if(create) {
+                kw[key] = default_value;
+            }
             return default_value;
         }
         return b;
@@ -641,13 +644,16 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_int(kw, key, default_value)
+    function kw_get_int(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
             return default_value;
         }
         var i = kw[key];
         if(i == undefined) {
+            if(create) {
+                kw[key] = default_value;
+            }
             return default_value;
         }
         return i;
@@ -656,13 +662,16 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_str(kw, key, default_value)
+    function kw_get_str(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
             return default_value;
         }
         var str = kw[key];
         if(str == undefined) {
+            if(create) {
+                kw[key] = default_value;
+            }
             return default_value;
         }
         return str;
@@ -671,13 +680,16 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_dict_value(kw, key, default_value)
+    function kw_get_dict_value(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
             return default_value;
         }
         var v = kw[key];
         if(v == undefined) {
+            if(create) {
+                kw[key] = default_value;
+            }
             return default_value;
         }
         return v;
@@ -711,6 +723,31 @@
     function _logger(msg)
     {
         console.log(msg);
+    }
+
+    /************************************************************
+     *          Load json file from server
+     ************************************************************/
+    function load_json_file(url, on_success, on_error)
+    {
+        var req = new XMLHttpRequest();
+        req.open('GET', url, true);
+        req.setRequestHeader('Accept', 'application/json');
+
+        req.onreadystatechange = function () {
+            if (req.readyState == 4) {
+                if (req.status == 200 || fileLoaded(req)) {
+                    var json = JSON.parse(req.responseText);
+                    on_success(json);
+                } else {
+                    if(on_error) {
+                        on_error(req.status);
+                    }
+                }
+            }
+        };
+
+        req.send();
     }
 
     //=======================================================================
@@ -759,5 +796,6 @@
     exports.get_unique_id = get_unique_id;
     exports._logger = _logger;
     exports.trace_msg = trace_msg;
+    exports.load_json_file = load_json_file;
 
 })(this);

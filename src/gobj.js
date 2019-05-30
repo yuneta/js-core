@@ -69,6 +69,7 @@ __inside_event_loop__ = 0;
         __update_dict__(this.config, kw || {});
         this.gcflag = gcflag;
 
+        this.user_data = {};
         this.yuno = undefined;
         this.parent = undefined;
         this.dl_subscriptions = [];
@@ -203,10 +204,39 @@ __inside_event_loop__ = 0;
     {
         if(key in this.config) {
             if (this.config.hasOwnProperty(key)) {
-                this.config.key = value;
+                this.config[key] = value;
             }
         }
         return false;
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_read_attr = function(key)
+    {
+        if(key in this.config) {
+            if (this.config.hasOwnProperty(key)) {
+                return this.config[key];
+            }
+        }
+        return null;
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_write_user_data = function(key, value)
+    {
+        this.user_data[key] = value;
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_read_user_data = function(key)
+    {
+        return this.user_data[key];
     };
 
     /************************************************************
