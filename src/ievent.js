@@ -242,6 +242,7 @@ DEBUG: {
             "playing": false,
             "pid": 0,
             "jwt": self.config.jwt,
+            "user_agent": navigator.userAgent,
             "launch_id" : 0,
             "yuno_startdate" : "", // TODO
             "required_services": []
