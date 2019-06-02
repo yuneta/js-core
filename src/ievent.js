@@ -432,6 +432,7 @@ DEBUG: {
         var src_yuno = kw_get_str(request, "src_yuno", "");
         var src_role = kw_get_str(request, "src_role", "");
         var src_service = kw_get_str(request, "src_service", "");
+        var data = kw_get_dict_value(request, "data", null);
 
         self.config.remote_yuno_role = src_role;
         self.config.remote_yuno_name = src_yuno;
@@ -446,7 +447,8 @@ DEBUG: {
                 {
                     remote_yuno_name: src_yuno,
                     remote_yuno_role: src_role,
-                    remote_yuno_service: src_service
+                    remote_yuno_service: src_service,
+                    data: data
                 }
             );
         }
