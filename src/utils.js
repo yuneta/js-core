@@ -629,16 +629,16 @@
     function kw_get_bool(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
-            return default_value;
+            return default_value?true:false;
         }
         var b = kw[key];
         if(b == undefined) {
             if(create) {
-                kw[key] = default_value;
+                kw[key] = default_value?true:false;
             }
-            return default_value;
+            return default_value?true:false;
         }
-        return b;
+        return b?true:false;
     }
 
     /************************************************************
@@ -647,16 +647,16 @@
     function kw_get_int(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
-            return default_value;
+            return parseInt(default_value);
         }
         var i = kw[key];
         if(i == undefined) {
             if(create) {
-                kw[key] = default_value;
+                kw[key] = parseInt(default_value);
             }
-            return default_value;
+            return parseInt(default_value);
         }
-        return i;
+        return parseInt(i);
     }
 
     /************************************************************
@@ -665,16 +665,16 @@
     function kw_get_str(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
-            return default_value;
+            return default_value.toString();
         }
         var str = kw[key];
         if(str == undefined) {
             if(create) {
-                kw[key] = default_value;
+                kw[key] = default_value.toString();
             }
-            return default_value;
+            return default_value.toString();
         }
-        return str;
+        return str.toString();
     }
 
     /************************************************************

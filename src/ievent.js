@@ -400,7 +400,6 @@ DEBUG: {
         }
         if(self.gobj_is_running()) {
             self.websocket = setup_websocket(self);
-            self.inform_on_close = true;  // the on_close if websocket is because yuno nak id-card
         }
         return 0;
     }
@@ -426,37 +425,53 @@ DEBUG: {
         /*
          *      __ANSWER__ __MESSAGE__
          */
-        // TODO comprueba result, ahora puede venir negativo
-
         var request = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID);
         var src_yuno = kw_get_str(request, "src_yuno", "");
         var src_role = kw_get_str(request, "src_role", "");
         var src_service = kw_get_str(request, "src_service", "");
-        var data = kw_get_dict_value(request, "data", null);
 
-        self.config.remote_yuno_role = src_role;
-        self.config.remote_yuno_name = src_yuno;
-        self.config.remote_yuno_service = src_service;
-
-        self.gobj_change_state("ST_SESSION");
-
-        if(!self.inform_on_close) {
-            self.inform_on_close = true;
+        var result = kw_get_int(kw, "result", -1);
+        if(result < 0) {
+            if(self.websocket) {
+                self.websocket.close();
+                self.websocket = null;
+            }
             self.gobj_publish_event(
-                'EV_ON_OPEN',
+                'EV_IDENTITY_CARD_REFUSED',
                 {
+                    result: result,
                     remote_yuno_name: src_yuno,
                     remote_yuno_role: src_role,
-                    remote_yuno_service: src_service,
-                    data: data
+                    remote_yuno_service: src_service
                 }
             );
-        }
+        } else {
+            var data = kw_get_dict_value(kw, "data", null);
 
-        /*
-         *  Resend subscriptions
-         */
-        self.resend_subscriptions();
+            self.config.remote_yuno_role = src_role;
+            self.config.remote_yuno_name = src_yuno;
+            self.config.remote_yuno_service = src_service;
+
+            self.gobj_change_state("ST_SESSION");
+
+            if(!self.inform_on_close) {
+                self.inform_on_close = true;
+                self.gobj_publish_event(
+                    'EV_ON_OPEN',
+                    {
+                        remote_yuno_name: src_yuno,
+                        remote_yuno_role: src_role,
+                        remote_yuno_service: src_service,
+                        data: data
+                    }
+                );
+            }
+
+            /*
+            *  Resend subscriptions
+            */
+            self.resend_subscriptions();
+        }
 
         return 0;
     }
@@ -685,6 +700,11 @@ DEBUG: {
         var self = this;
         self.clear_timeout();
         send_goodbye(self, 'stopped by user');
+
+        if(self.websocket) {
+            self.websocket.close();
+            self.websocket = null;
+        }
     }
 
     /************************************************
