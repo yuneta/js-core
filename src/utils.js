@@ -696,6 +696,22 @@
     }
 
     /************************************************************
+     *  TODO implement path,
+     *  and change key by path in all kw_get_...() functions
+     ************************************************************/
+    function kw_set_dict_value(kw, path, value)
+    {
+        if(!(kw === Object(kw))) {
+            return -1;
+        }
+        var v = kw[key];
+        if(v == undefined) {
+            kw[key] = value;
+        }
+        return 0;
+    }
+
+    /************************************************************
      *
      ************************************************************/
     var unique_id = 0;

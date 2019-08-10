@@ -48,6 +48,9 @@ DEBUG: {
         remote_yuno_role: null,
         remote_yuno_service: null,
 
+        inside_on_open: false,  // avoid duplicates, no subscriptions while in on_open,
+                                // will send in resend_subscriptions
+
         jwt: null,
         urls: null
     };
@@ -453,6 +456,7 @@ DEBUG: {
             self.config.remote_yuno_service = src_service;
 
             self.gobj_change_state("ST_SESSION");
+            self.config.inside_on_open = true;
 
             if(!self.inform_on_close) {
                 self.inform_on_close = true;
@@ -466,10 +470,11 @@ DEBUG: {
                     }
                 );
             }
+            self.config.inside_on_open = false;
 
             /*
-            *  Resend subscriptions
-            */
+             *  Resend subscriptions
+             */
             self.resend_subscriptions();
         }
 
@@ -884,6 +889,10 @@ DEBUG: {
     {
         if(!this.gobj_in_this_state("ST_SESSION")) {
             // on_open will send all subscriptions
+            return;
+        }
+        if(this.config.inside_on_open) {
+            // avoid duplicates of subscriptions
             return;
         }
         this.send_remote_subscription(subs);

@@ -75,6 +75,7 @@ __inside_event_loop__ = 0;
         this.dl_subscriptions = [];
         this.dl_childs = [];
         this.tracing = 0;
+        this.trace_timer = 0;
         this.running = false;
         this._destroyed = false;
         this.timer_id = -1; // for now, only one timer per fsm, and hardcoded.
@@ -234,9 +235,25 @@ __inside_event_loop__ = 0;
     /************************************************************
      *
      ************************************************************/
+    proto.gobj_kw_set_user_data = function(path, value)
+    {
+        return kw_set_dict_value(this.user_data, path, value)
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
     proto.gobj_read_user_data = function(key)
     {
         return this.user_data[key];
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_kw_get_user_data = function(path, default_value, create)
+    {
+        return kw_get_dict_value(this.user_data, path, default_value, create)
     };
 
     /************************************************************
@@ -412,10 +429,16 @@ __inside_event_loop__ = 0;
     /************************************************************
      *        set tracing for this gobj.
      ************************************************************/
-    proto.set_machine_trace = function(value) {
+    proto.set_machine_trace = function(value)
+    {
         this.tracing = value;
     };
-    proto.is_tracing = function() {
+    proto.is_tracing = function(event)
+    {
+        if(event && event == this.timer_event_name &&
+                (this.yuno && !this.yuno.config.trace_timer)) {
+            return false;
+        }
         return this.tracing || (this.yuno && this.yuno.config.tracing);
     }
 
@@ -1294,7 +1317,8 @@ __inside_event_loop__ = 0;
             action = fsm.states[fsm.current_state][event_id];
         }
 
-        var tracing = this.is_tracing();
+        var tracing = this.is_tracing(event);
+
         var hora = null;
         if (tracing) {
             hora = get_current_datetime();
