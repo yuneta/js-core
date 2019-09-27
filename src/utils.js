@@ -369,18 +369,27 @@
      *  From a list of objects (dict_list),
      *  get a new list with the same objects with only attributes in keylist
      */
+    function filter_dict(dict, keylist)
+    {
+        var new_dict = {};
+        for(var j=0; j<keylist.length; j++) {
+            var key = keylist[j];
+            if(dict.hasOwnProperty(key)) {
+                new_dict[key] = dict[key];
+            }
+        }
+        return new_dict;
+    }
+
+    /*
+     *  From a list of objects (dict_list),
+     *  get a new list with the same objects with only attributes in keylist
+     */
     function filter_dictlist(dict_list, keylist)
     {
         var new_dictlist = [];
         for(var i=0; i<dict_list.length; i++) {
-            var dict = dict_list[i];
-            var new_dict = {};
-            for(var j=0; j<keylist.length; j++) {
-                var key = keylist[j];
-                if(dict.hasOwnProperty(key)) {
-                    new_dict[key] = dict[key];
-                }
-            }
+            var new_dict = filter_dict(dict_list[i], keylist)
             new_dictlist.push(new_dict);
         }
         return new_dictlist;
