@@ -802,6 +802,7 @@
     exports.kw_match = kw_match;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
+    exports.filter_dict = filter_dict;
     exports.filter_list = filter_list;
 
     exports.msg_read_MIA_key = msg_read_MIA_key;
