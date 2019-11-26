@@ -186,7 +186,11 @@ DEBUG: {
         if (self.yuno.config.trace_inter_event) {
             var url = self.config.urls[self.idx_url];
             var prefix = self.yuno.yuno_name + ' ==> ' + url;
-            trace_inter_event(self, prefix, iev);
+            if(self.yuno.config.trace_ievent_callback) {
+                self.yuno.config.trace_ievent_callback(prefix, iev);
+            } else {
+                trace_inter_event(self, prefix, iev);
+            }
         }
 
         return send_iev(self, iev);
@@ -506,9 +510,15 @@ DEBUG: {
          *          trace inter_event
          *---------------------------------------*/
         if (self.yuno.config.trace_inter_event) {
+            var url = self.config.urls[self.idx_url];
             var prefix = self.yuno.yuno_name + ' <== ' + url;
-            trace_inter_event(self, prefix, iev_msg);
+            if(self.yuno.config.trace_ievent_callback) {
+                self.yuno.config.trace_ievent_callback(prefix, iev_msg);
+            } else {
+                trace_inter_event(self, prefix, iev_msg);
+            }
         }
+
 
         /*----------------------------------------*
          *
