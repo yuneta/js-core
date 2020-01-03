@@ -370,7 +370,10 @@ DEBUG: {
         _logger('Websocket closed: ' + url); // TODO que no se vea en prod
 
         if(self.websocket) {
-            self.websocket.close();
+            try {
+                self.websocket.close();
+            } catch (e) {
+            }
             self.websocket = null;
         }
 
