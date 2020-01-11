@@ -369,11 +369,8 @@ DEBUG: {
         var url = self.config.urls[self.idx_url];
         _logger('Websocket closed: ' + url); // TODO que no se vea en prod
 
-        if(self.websocket) {
-            try {
-                self.websocket.close();
-            } catch (e) {
-            }
+        if(self.websocket.close) {
+            self.websocket.close();
             self.websocket = null;
         }
 
@@ -405,7 +402,7 @@ DEBUG: {
      ********************************************/
     function ac_timeout_disconnected(self, event, kw, src)
     {
-        if(self.websocket) {
+        if(self.websocket.close) {
             self.websocket.close();
         }
         if(self.gobj_is_running()) {
@@ -442,7 +439,7 @@ DEBUG: {
 
         var result = kw_get_int(kw, "result", -1);
         if(result < 0) {
-            if(self.websocket) {
+            if(self.websocket.close) {
                 self.websocket.close();
                 self.websocket = null;
             }
@@ -719,7 +716,7 @@ DEBUG: {
         self.clear_timeout();
         send_goodbye(self, 'stopped by user');
 
-        if(self.websocket) {
+        if(self.websocket.close) {
             self.websocket.close();
             self.websocket = null;
         }
