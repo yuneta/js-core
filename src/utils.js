@@ -39,22 +39,38 @@
      */
     function __clone__(obj) {
         'use strict';
-        if(obj === null || obj === undefined) {
-            return obj;
+
+        var copy;
+
+        // Handle the 3 simple types, and null or undefined
+        if (null == obj || "object" != typeof obj) return obj;
+
+        // Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
         }
-        if(Array.isArray(obj)) {
-            return obj.slice(0);
-        }
-        if(typeof(obj) !== 'object') {
-            return obj;
-        }
-        var temp = new obj.constructor();
-        for(var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                temp[key] = __clone__(obj[key]);
+
+        // Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = __clone__(obj[i]);
             }
+            return copy;
         }
-        return temp;
+
+        // Handle Object
+        if (obj instanceof Object) {
+            copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = __clone__(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
     /* Update a dict with another dict: ONLY existing items!! (NOT recursive) */
@@ -775,6 +791,40 @@
         req.send();
     }
 
+    /************************************************************
+     *
+     ************************************************************/
+    function strstr(haystack, needle, bool)
+    {
+        // Finds first occurrence of a string within another
+        //
+        // version: 1103.1210
+        // discuss at: http://phpjs.org/functions/strstr
+        // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +   bugfixed by: Onno Marsman
+        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // *     example 1: strstr(‘Kevin van Zonneveld’, ‘van’);
+        // *     returns 1: ‘van Zonneveld’
+        // *     example 2: strstr(‘Kevin van Zonneveld’, ‘van’, true);
+        // *     returns 2: ‘Kevin ‘
+        // *     example 3: strstr(‘name@example.com’, ‘@’);
+        // *     returns 3: ‘@example.com’
+        // *     example 4: strstr(‘name@example.com’, ‘@’, true);
+        // *     returns 4: ‘name’
+        var pos = 0;
+
+        haystack += "";
+        pos = haystack.indexOf(needle); if (pos == -1) {
+            return false;
+        } else {
+            if (bool) {
+                return haystack.substr(0, pos);
+            } else {
+                return haystack.slice(pos);
+            }
+        }
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -823,5 +873,6 @@
     exports._logger = _logger;
     exports.trace_msg = trace_msg;
     exports.load_json_file = load_json_file;
+    exports.strstr = strstr;
 
 })(this);
