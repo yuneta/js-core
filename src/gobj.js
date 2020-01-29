@@ -1328,11 +1328,13 @@ __inside_event_loop__ = 0;
             if (!hora) {
                 hora = get_current_datetime();
             }
+
             var msg = hora + this._tab() + '<> mach: ' +
                 this.gclass_name + '^' + this.name +
                 ', st: ' + fsm.state_list[fsm.current_state-1] +
                 ', ev: ' + event + " (REFUSED, no match action)";
             _logger(msg);
+            console.log("%c" + msg, "color:yellow"); // Que resalte
             this._decrease_inside();
             return -1;  //# EventNotAcceptedError
         }
