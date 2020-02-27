@@ -989,6 +989,22 @@
         return null;
     }
 
+    /********************************************
+     *  Log functions
+     ********************************************/
+    function log_error(msg)
+    {
+        console.log("%c ERROR: " + msg, "color:yellow");
+    }
+    function log_info(msg)
+    {
+        console.log(msg);
+    }
+    function log_debug(msg)
+    {
+        console.log(msg);
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -1043,5 +1059,9 @@
     exports.jdb_update = jdb_update;
     exports.jdb_delete = jdb_delete;
     exports.jdb_get = jdb_get;
+
+    exports.log_error = log_error;
+    exports.log_info = log_info;
+    exports.log_debug = log_debug;
 
 })(this);
