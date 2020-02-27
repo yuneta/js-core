@@ -825,6 +825,170 @@
         }
     }
 
+    /************************************************************
+     *   Init json database
+     ************************************************************/
+    function jdb_init(jdb)
+    {
+        var type = kw_get_dict_value(jdb, "type", [], 1);
+        var hook = kw_get_str(jdb, "hook", "data", 1);
+        var schema = kw_get_dict_value(jdb, "schema", {}, 1);
+        var topics = kw_get_dict_value(jdb, "topics", {}, 1);
+
+        // Create topics defined in schema
+        for(var key in schema) {
+            kw_get_dict_value(topics, key, __clone__(type), 1);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function jdb_update(jdb, topic_name, path, kw)
+    {
+        var topics = kw_get_dict_value(jdb, "topics", null, 0);
+        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        if(!topic) {
+            log_error("Topic not found: " + topic_name);
+            return null;
+        }
+        if(empty_string(kw["id"])) {
+            log_error("Record without id: " + kw);
+            return null;
+        }
+
+        var ids = path.split('`');
+
+        var id;
+        var v = topic;
+        while((id = ids.shift())) {
+            if(empty_string(id) || !v) {
+                break;
+            }
+            if(is_object(v)) {
+                v = kw_get_dict_value(v, jdb.hook, [], 1);
+            }
+            v = _jdb_get(v, null, id, false);
+        }
+
+        if(ids.length==0 && v) {
+            if(is_array(v)) {
+                v.push(kw);
+            } else {
+                if(v["id"]==kw["id"]) {
+                    Object.assign(v, kw);
+                } else {
+                    var v_ = kw_get_dict_value(v, jdb.hook, [], 1);
+                    var v__ = _jdb_get(v_, jdb.hook, kw["id"], false);
+                    if(v__) {
+                        Object.assign(v__, kw);
+                    } else {
+                        v_.push(kw);
+                    }
+                }
+            }
+        }
+
+        //trace_msg(JSON.stringify(topic, null, 4));
+
+        return topic;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function jdb_delete(jdb, topic_name, path, kw)
+    {
+        var topics = kw_get_dict_value(jdb, "topics", null, 0);
+        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        if(!topic) {
+            log_error("Topic not found: " + topic_name);
+            return null;
+        }
+        if(empty_string(kw["id"])) {
+            log_error("Record without id: " + kw);
+            return null;
+        }
+
+        var ids = path.split('`');
+
+        var id;
+        var v = topic;
+        while((id = ids.shift())) {
+            if(empty_string(id) || !v) {
+                break;
+            }
+            if(is_object(v)) {
+                v = kw_get_dict_value(v, jdb.hook, null, 0);
+            }
+            v = _jdb_get(v, null, id, false);
+        }
+
+        if(ids.length==0 && v) {
+            if(is_array(v)) {
+                var idx = id_index_in_obj_list(v, kw["id"]);
+                if(idx >= 0) {
+                    v.splice(idx, 1);
+                }
+            } else {
+                var v_ = kw_get_dict_value(v, jdb.hook, null, 0);
+                var idx = id_index_in_obj_list(v_, kw["id"]);
+                if(idx >= 0) {
+                    v_.splice(idx, 1);
+                }
+            }
+        }
+
+        //trace_msg(JSON.stringify(topic, null, 4));
+
+        return topic;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function jdb_get(jdb, topic_name, id)
+    {
+        var topics = kw_get_dict_value(jdb, "topics", null, 0);
+        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        if(!topic) {
+            log_error("Topic not found: " + topic_name);
+            return null;
+        }
+        return _jdb_get(topic, jdb.hook, id, true);
+    }
+
+    /**************************************************
+     *  Busca el id en el arbol.
+     *  Los id deben ser únicos, como requiere webix
+     **************************************************/
+    function _jdb_get(v, hook, id, recursive)
+    {
+        if(!v) {
+            return null;
+        }
+        var j;
+        var ln = v.length;
+        for(j=0; j<ln; j++) {
+            var v_ = v[j];
+            if(v_) {
+                var id_ = v_["id"];
+                if(id_ && (id_ == id)) {
+                    return v_;
+                }
+                if(recursive) {
+                    if(kw_has_key(v_, hook)) {
+                        var v__ = _jdb_get(v_[hook], hook, id, recursive);
+                        if(v__) {
+                            return v__;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -874,5 +1038,10 @@
     exports.trace_msg = trace_msg;
     exports.load_json_file = load_json_file;
     exports.strstr = strstr;
+
+    exports.jdb_init = jdb_init;
+    exports.jdb_update = jdb_update;
+    exports.jdb_delete = jdb_delete;
+    exports.jdb_get = jdb_get;
 
 })(this);
