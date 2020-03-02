@@ -133,7 +133,7 @@
         }
 
         if (!(typeof parent === 'string' || parent instanceof GObj)) {
-            _logger("ERROR: Yuno.gobj_create(): BAD TYPE of parent");
+            _logger("ERROR: Yuno.gobj_create() BAD TYPE of parent: " + parent);
         }
 
         if (typeof parent === 'string') {
