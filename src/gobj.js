@@ -203,7 +203,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_write_attr = function(key, value)
     {
-        var previous_value = null;
+        var previous_value = undefined;
         if(key in this.config) {
             if (this.config.hasOwnProperty(key)) {
                 previous_value = this.config[key]
