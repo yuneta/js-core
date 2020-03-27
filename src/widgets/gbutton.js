@@ -124,14 +124,14 @@
     {
         var $t = $(self.config.svg_id);
         if(!$t.length) {
-            _logger("ERROR svg_id '" + self.config.svg_id + "'INVALID");
+            log_error("svg_id '" + self.config.svg_id + "'INVALID");
             return -1;
         }
         self.$svg = $t.clone().attr({
             'id': self.name
         });
         if(!self.$svg.length) {
-            _logger("ERROR cannot create snap");
+            log_error("cannot create snap");
             return -1;
         }
         if(self.config.extra_cls) {
@@ -150,7 +150,7 @@
          *---------------------------------*/
         self.snap = Snap('#' + self.name);
         if(!self.snap) {
-            _logger("ERROR Snap('" + self.name + "') failed");
+            log_error("Snap('" + self.name + "') failed");
             return -1;
         }
         self.snap.

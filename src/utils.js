@@ -751,22 +751,6 @@
     }
 
     /************************************************************
-     *          log function
-     ************************************************************/
-    function trace_msg(msg)
-    {
-        exports._logger(msg);
-    }
-
-    /************************************************************
-     *          low level log function
-     ************************************************************/
-    function _logger(msg)
-    {
-        console.log(msg);
-    }
-
-    /************************************************************
      *          Load json file from server
      ************************************************************/
     function load_json_file(url, on_success, on_error)
@@ -989,20 +973,80 @@
         return null;
     }
 
+    /************************************************************
+     *          log function
+     ************************************************************/
+
+    /************************************************************
+     *          low level log function
+     ************************************************************/
+    function _logger(msg)
+    {
+        console.log(msg);
+    }
+
     /********************************************
      *  Log functions
      ********************************************/
+    var f_error = null;
+    var f_warning = null;
+    var f_info = null;
+    var f_debug = null;
+
+    function set_log_functions(f_error_, f_warning_, f_info_, f_debug_)
+    {
+        if(f_error_) {
+            f_error = f_error_;
+        }
+        if(f_warning_) {
+            f_warning = f_warning_;
+        }
+        if(f_info_) {
+            f_info = f_info_;
+        }
+        if(f_debug_) {
+            f_debug = f_debug_;
+        }
+    }
+
     function log_error(msg)
     {
-        console.log("%c ERROR: " + msg, "color:yellow");
+        console.log("%c ERROR: " + String(msg), "color:yellow");
+        if(f_error) {
+            f_error(String(msg));
+        }
     }
+
+    function log_warning(msg)
+    {
+        console.log("%c ERROR: " + String(msg), "color:yellow");
+        if(f_warning) {
+            f_warning(String(msg));
+        }
+    }
+
     function log_info(msg)
     {
-        console.log(msg);
+        console.log(String(msg));
+        if(f_info) {
+            f_info(String(msg));
+        }
     }
+
     function log_debug(msg)
     {
+        console.log(String(msg));
+        if(f_debug) {
+            f_debug(String(msg));
+        }
+    }
+
+    function trace_msg(msg)
+    {
         console.log(msg);
+        if(f_debug) {
+            f_debug(String(msg));
+        }
     }
 
     //=======================================================================
@@ -1050,8 +1094,6 @@
     exports.kw_get_str = kw_get_str;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.get_unique_id = get_unique_id;
-    exports._logger = _logger;
-    exports.trace_msg = trace_msg;
     exports.load_json_file = load_json_file;
     exports.strstr = strstr;
 
@@ -1060,8 +1102,12 @@
     exports.jdb_delete = jdb_delete;
     exports.jdb_get = jdb_get;
 
+    exports._logger = _logger;
+    exports.set_log_functions = set_log_functions;
     exports.log_error = log_error;
+    exports.log_warning = log_warning;
     exports.log_info = log_info;
     exports.log_debug = log_debug;
+    exports.trace_msg = trace_msg;
 
 })(this);

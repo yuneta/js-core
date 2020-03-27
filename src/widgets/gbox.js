@@ -154,7 +154,7 @@
             var paper_name = 'paper-' + self.name;
             var paper = self.paper = Snap(sw, sh);
             if(!self.paper) {
-                self.log_error(1, "Snap() FAILED");
+                log_error("Snap() FAILED");
             }
             paper.attr({
                 'id': paper_name,

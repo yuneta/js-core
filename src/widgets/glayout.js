@@ -443,7 +443,7 @@ que corresponde a cada tipo de layout (vertical u horizontal).
              *-------------------------------------*/
             if(self.parent.gclass_name != 'GBox') {
                 var msg = "ERROR parent of 2ºlevel GLayout must be GBox gclass";
-                _logger(msg);
+                log_error(msg);
             } else {
                 self.parent.gobj_subscribe_event(
                     'EV_RESIZE',

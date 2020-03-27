@@ -91,7 +91,7 @@ __inside_event_loop__ = 0;
     proto.gobj_start = function()
     {
         if(this.running) {
-            this.log_error("gobj_start() ALREADY RUNNING");
+            log_error("gobj_start() ALREADY RUNNING");
             return -1;
         }
         this.running = true;
@@ -107,7 +107,7 @@ __inside_event_loop__ = 0;
     proto.gobj_stop = function()
     {
         if(!this.running) {
-            this.log_error("gobj_stop() NOT RUNNING");
+            log_error("gobj_stop() NOT RUNNING");
             return -1;
         }
         this.running = false;
@@ -167,7 +167,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto._add_child = function(gobj) {
         if (gobj.parent) {
-            this.log_error("GObj._add_child(): ALREADY HAS PARENT");
+            log_error("GObj._add_child(): ALREADY HAS PARENT");
         }
         this.dl_childs.push(gobj);
         gobj.parent = this;
@@ -397,7 +397,7 @@ __inside_event_loop__ = 0;
                 } else {
                     msg += ', src: undefined';
                 }
-                _logger(msg);
+                log_debug(msg);
             }
             return this.mt_command(command, kw, src);
         }
@@ -445,72 +445,6 @@ __inside_event_loop__ = 0;
     }
 
     /************************************************************
-     *          log error
-     ************************************************************/
-    proto.log_error = function(msg, param1, param2, param3)
-    {
-        var msg = "ERROR " + this.gobj_short_name() + "(): " + msg;
-
-        if(param1) {
-            msg += " '" + param1 + "'";
-        }
-        if(param2) {
-            msg += " '" + param2 + "'";
-        }
-        if(param3) {
-            msg += " '" + param3 + "'";
-        }
-        _logger(msg);
-        if(this.is_tracing()) {
-            throw msg;
-        }
-    }
-
-    /************************************************************
-     *          log warning
-     ************************************************************/
-    proto.log_warning = function(msg, param1, param2, param3)
-    {
-        var msg = "WARNING " + this.gobj_short_name() + "(): " + msg;
-
-        if(param1) {
-            msg += ' ' + param1;
-        }
-        if(param2) {
-            msg += ' ' + param2;
-        }
-        if(param3) {
-            msg += " '" + param3 + "'";
-        }
-        _logger(msg);
-        if(this.is_tracing()) {
-            throw msg;
-        }
-    }
-
-    /************************************************************
-     *          log info
-     ************************************************************/
-    proto.log_info = function(msg, param1, param2, param3)
-    {
-        var msg = "INFO " + this.gobj_short_name() + "(): " + msg;
-
-        if(param1) {
-            msg += ' ' + param1;
-        }
-        if(param2) {
-            msg += ' ' + param2;
-        }
-        if(param3) {
-            msg += " '" + param3 + "'";
-        }
-        _logger(msg);
-        if(this.is_tracing()) {
-            throw msg;
-        }
-    }
-
-    /************************************************************
      *        Timeout functions
      ************************************************************/
     proto.set_timeout = function(msec)
@@ -545,7 +479,7 @@ __inside_event_loop__ = 0;
     {
         if(!src) {
             // Let events without src, from yuneta outside world.
-            //this.log_error("gobj_send_event('" + event + "') with no src");
+            //log_error("gobj_send_event('" + event + "') with no src");
         }
         if(!kw) {
             kw = {};
@@ -558,7 +492,7 @@ __inside_event_loop__ = 0;
                         this.gclass_name + '^' + this.name +
                         ', ev: ' + event +
                         ', kw: ' + JSON.stringify(kw);;
-                    _logger(msg);
+                    log_debug(msg);
                 }
 
                 return this.mt_inject_event(event, kw, src);
@@ -746,7 +680,7 @@ __inside_event_loop__ = 0;
          *  Check subscriber
          */
         if(!subscriber) {
-            this.log_error("GObj.gobj_subscribe_event(): subscriber NULL");
+            log_error("GObj.gobj_subscribe_event(): subscriber NULL");
             return;
         }
 
@@ -754,19 +688,19 @@ __inside_event_loop__ = 0;
          *  Si el subscriber es un string, búsca su object
          */
         if (!(typeof subscriber === 'string' || subscriber instanceof GObj)) {
-            this.log_error("GObj.gobj_subscribe_event(): BAD TYPE subscriber");
+            log_error("GObj.gobj_subscribe_event(): BAD TYPE subscriber");
         }
 
         if (typeof subscriber === 'string') {
             var new_subscriber = this.yuno.gobj_find_unique_gobj(subscriber);
             if (!new_subscriber) {
-                this.log_error("GObj.gobj_subscribe_event(): '" + subscriber + "' gobj NOT FOUND");
+                log_error("GObj.gobj_subscribe_event(): '" + subscriber + "' gobj NOT FOUND");
                 return;
             }
             subscriber = new_subscriber;
         } else if(subscriber instanceof GObj) {
         } else {
-            this.log_error("GObj.gobj_subscribe_event(): BAD TYPE subscriber");
+            log_error("GObj.gobj_subscribe_event(): BAD TYPE subscriber");
             return;
         }
 
@@ -784,7 +718,7 @@ __inside_event_loop__ = 0;
                     this.gobj_short_name() +
                     "') from " + subscriber.gobj_short_name() + ": '"
                     + event + "' is not a string";
-                this.log_error(msg);
+                log_error(msg);
                 return 0;
             }
 
@@ -794,7 +728,7 @@ __inside_event_loop__ = 0;
                         this.gobj_short_name() +
                         "') from " + subscriber.gobj_short_name() + ": '"
                         + event + "' not in output-event list";
-                    this.log_error(msg);
+                    log_error(msg);
                     return 0;
                 }
             }
@@ -841,7 +775,7 @@ __inside_event_loop__ = 0;
                 this._delete_subscription(sub_list[i], false)
             }
         } else {
-            this.log_error("GObj.gobj_unsubscribe_event(): sub '" + event + "' NOT FOUND");
+            log_error("GObj.gobj_unsubscribe_event(): sub '" + event + "' NOT FOUND");
             return -1;
         }
         return 0;
@@ -885,7 +819,7 @@ __inside_event_loop__ = 0;
                 this.gobj_short_name() +
                 "'): '"
                 + event + "' event NULL";
-            this.log_error(msg);
+            log_error(msg);
             return -1;
         }
 
@@ -899,7 +833,7 @@ __inside_event_loop__ = 0;
                     this.gobj_short_name() +
                     "'): '"
                     + event + "' not in output-event list";
-                this.log_error(msg);
+                log_error(msg);
                 return -1;
             }
         }
@@ -992,7 +926,7 @@ __inside_event_loop__ = 0;
 
         if(!sent_count) {
             //if(!(ev->flag & EVF_NO_WARN_SUBS)) { TODO
-                this.log_warning("publishing event " + event + " WITHOUT subscribers");
+                log_warning("publishing event " + event + " WITHOUT subscribers");
             //}
         }
         return ret_sum;
@@ -1060,11 +994,11 @@ __inside_event_loop__ = 0;
             if (elm_in_list(st_name, state_names)) {
                 delete_from_list(state_names, st_name);
             } else {
-                this.log_error("machine state: " + st_name + " is NOT in state-list");
+                log_error("machine state: " + st_name + " is NOT in state-list");
             }
         }
         if (state_names.length > 0) {
-            this.log_error("state-list OVERFILLED: " + state_names);
+            log_error("state-list OVERFILLED: " + state_names);
         }
 
         // remove attributes from event_list and move attrs to _event_attr list
@@ -1116,14 +1050,14 @@ __inside_event_loop__ = 0;
                     if (elm_in_list(ev_name, event_names)) {
                         set_event_names.push(ev_name);
                     } else {
-                        this.log_error("event NOT in event-list", ev_name);
+                        log_error("event NOT in event-list: " + ev_name);
                     }
                 }
               }
         }
         set_event_names = __set__(set_event_names);
         if (event_names.length !== set_event_names.length) {
-            this.log_error("event-list OVERFILLED: /" + event_names + " /" + set_event_names);
+            log_error("event-list OVERFILLED: /" + event_names + " /" + set_event_names);
         }
 
         // check next state names and actions
@@ -1143,10 +1077,10 @@ __inside_event_loop__ = 0;
                     var nt = ev_ac_nt[2];
 
                     if (nt && !elm_in_list(nt, state_names)) {
-                        this.log_error("next statename: "+ nt + " is NOT in state-list");
+                        log_error("next statename: "+ nt + " is NOT in state-list");
                     }
                     if(ac && typeof ac !== 'function') {
-                        this.log_error("action: "+ ac + " is NOT a FUNCTION");
+                        log_error("action: "+ ac + " is NOT a FUNCTION");
                     }
                 }
             }
@@ -1239,7 +1173,7 @@ __inside_event_loop__ = 0;
     {
         var state_id = this.fsm.state_index[new_state] || 0;
         if (state_id <= 0) {
-            this.log_error("change_state() state UNKNOWN", new_state);
+            log_error("change_state() state UNKNOWN: " + new_state);
             return;
         }
         this._change_state(state_id);
@@ -1253,7 +1187,7 @@ __inside_event_loop__ = 0;
         var fsm = this.fsm;
 
         if (state_id <= 0 || state_id > fsm.state_list.length) {
-            this.log_error("_change_state() state_id INVALID " + state_id);
+            log_error("_change_state() state_id INVALID " + state_id);
         }
         var tracing = this.is_tracing();
         fsm.last_state = fsm.current_state;
@@ -1263,7 +1197,7 @@ __inside_event_loop__ = 0;
                 var hora = get_current_datetime();
                 var msg = hora + this._tab(fsm) + ' - mach: ' + this.gclass_name + ":" + this.name +
                     ', new_st: ' + fsm.state_list[state_id-1];
-                _logger(msg);
+                log_debug(msg);
             }
         }
     };
@@ -1303,13 +1237,13 @@ __inside_event_loop__ = 0;
         var action;
 
         if (typeof event !== 'string') {
-            this.log_error("inject_event() invalid event TYPE");
+            log_error("inject_event() invalid event TYPE");
             return -1;  //# EventNotAcceptedError
         }
 
         var event_id = fsm.event_index[event] || 0;
         if (event_id <= 0) {
-            this.log_error("inject_event() event UNKNOWN", event);
+            log_error("inject_event() event UNKNOWN: " + event);
             return -1;  //# EventNotAcceptedError
         }
 
@@ -1335,8 +1269,7 @@ __inside_event_loop__ = 0;
                 this.gclass_name + '^' + this.name +
                 ', st: ' + fsm.state_list[fsm.current_state-1] +
                 ', ev: ' + event + " (REFUSED, no match action)";
-            _logger(msg);
-            console.log("%c" + msg, "color:yellow"); // Que resalte
+            log_warning(msg);
             this._decrease_inside();
             return -1;  //# EventNotAcceptedError
         }
@@ -1365,7 +1298,7 @@ __inside_event_loop__ = 0;
                 }
 
             } catch (e) {
-                this.log_info("ERROR tracing: " + e);
+                log_error("tracing: " + e);
 
                 var msg = hora + this._tab() + '-> mach: ' +
                     this.gclass_name + '^' + this.name +
@@ -1379,7 +1312,7 @@ __inside_event_loop__ = 0;
                     msg += ', src: undefined';
                 }
             }
-            _logger(msg);
+            log_debug(msg);
         }
 
         if (action[1]) {
@@ -1399,7 +1332,7 @@ __inside_event_loop__ = 0;
                     result = action[0](this, event, kw, src);
                 }
             } catch (e) {
-                _logger("executing the action: " + e);
+                log_error(e);
             }
         }
 
@@ -1408,7 +1341,7 @@ __inside_event_loop__ = 0;
                     this.gclass_name + '^' + this.name +
                     ', st: ' + fsm.state_list[fsm.current_state-1] +
                     ', ret: ' + result;
-                _logger(msg);
+                log_debug(msg);
             }
 
         this._decrease_inside();

@@ -125,7 +125,7 @@
             var paper_name = 'paper-' + self.name;
             var paper = self.paper = Snap(1200, 900);
             if(!self.paper) {
-                self.log_error(1, "Snap() FAILED");
+                log_error("Snap() FAILED");
             }
             paper.attr({
                 'id': paper_name
@@ -205,7 +205,7 @@
             *  Subscribe to resize event
             *-------------------------------------*/
         if(self.parent.gclass_name != 'GBox') {
-            self.log_error(0, "parent must be GBox gclass");
+            log_error("parent must be GBox gclass");
         } else {
             self.parent.gobj_subscribe_event(
                 'EV_RESIZE',

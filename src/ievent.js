@@ -98,16 +98,16 @@ DEBUG: {
             }
         }
         var url = self.config.urls[self.idx_url];
-        _logger("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
+        log_debug("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
 
         try {
             var websocket = new WebSocket(url);
             if (!websocket) {
-                _logger("Cannot open WebSocket to '" + url + "'");
+                log_error("Cannot open WebSocket to '" + url + "'");
                 return;
             }
         } catch (e) {
-            _logger("Cannot open WebSocket to '" + url + "'");
+            log_error("Cannot open WebSocket to '" + url + "'");
             return;
         }
 
@@ -126,11 +126,11 @@ DEBUG: {
         var hora = get_current_datetime();
         var fields= null;
         try {
-            _logger("\n" + hora + " " + prefix + "\n");
+            log_debug("\n" + hora + " " + prefix + "\n");
             var trace = JSON.stringify(iev,  null, 4);
-            _logger(trace);
+            log_debug(trace);
         } catch (e) {
-            _logger("ERROR in trace_inter_event: " + e);
+            log_debug("ERROR in trace_inter_event: " + e);
         }
     }
 
@@ -152,7 +152,7 @@ DEBUG: {
             kw)
     {
         if(empty_string(event)) {
-            _logger("ERROR iev_create() event NULL");
+            log_error("iev_create() event NULL");
             return null;
         }
         var iev = new InterEvent(
@@ -305,31 +305,31 @@ DEBUG: {
         try {
             var x = JSON.parse(data);
         } catch (e) {
-            _logger("ERROR parsing inter_event json: " + e);
+            log_error("parsing inter_event json: " + e);
             return null;
         }
 
         if(!(x instanceof Object)) {
-            _logger("ERROR parsing inter_event: websocket data not a json object");
+            log_error("parsing inter_event: websocket data not a json object");
             return null;
         }
         var event = x['event'];
         if(!event) {
-            _logger("ERROR parsing inter_event: no event");
+            log_error("parsing inter_event: no event");
             return null;
         }
         if(!(typeof event === 'string' )) {
-            _logger("ERROR parsing inter_event: event not a string");
+            log_error("parsing inter_event: event not a string");
             return null;
         }
 
         var kw = x['kw'];
         if(!kw) {
-            _logger("ERROR parsing inter_kw: no kw");
+            log_error("parsing inter_kw: no kw");
             return null;
         }
         if(!(kw instanceof Object)) {
-            _logger("ERROR parsing inter_event: kw not a json object");
+            log_error("parsing inter_event: kw not a json object");
             return null;
         }
 
@@ -356,7 +356,7 @@ DEBUG: {
     function ac_on_open(self, event, kw, src)
     {
         var url = self.config.urls[self.idx_url];
-        _logger('Websocket opened: ' + url); // TODO que no se vea en prod
+        log_debug('Websocket opened: ' + url); // TODO que no se vea en prod
         send_identity_card(self);
         return 0;
     }
@@ -367,7 +367,7 @@ DEBUG: {
     function ac_on_close(self, event, kw, src)
     {
         var url = self.config.urls[self.idx_url];
-        _logger('Websocket closed: ' + url); // TODO que no se vea en prod
+        log_debug('Websocket closed: ' + url); // TODO que no se vea en prod
 
         if(self.websocket.close) {
             self.websocket.close();
@@ -534,7 +534,7 @@ DEBUG: {
             if(self.gobj_event_in_input_event_list(iev_event)) {
                 self.gobj_send_event(iev_event, iev_kw, self);
             } else {
-                _logger("ERROR ignoring event: " + iev_event + " for " + self.name);
+                log_error("ignoring event: " + iev_event + " for " + self.name);
             }
             return 0;
         }
@@ -553,7 +553,7 @@ DEBUG: {
         var dst_role = kw_get_str(event_id, "dst_role", "");
 
         if(dst_role != self.yuno.yuno_role) {
-            _logger("It's not my role, yuno_role: " + dst_role + ", my_role: " + self.yuno.yuno_role);
+            log_error("It's not my role, yuno_role: " + dst_role + ", my_role: " + self.yuno.yuno_role);
             return 0;
         }
 
@@ -595,7 +595,7 @@ DEBUG: {
             if(gobj_service.gobj_event_in_input_event_list(iev_event)) {
                 gobj_service.gobj_send_event(iev_event, iev_kw, self);
             } else {
-                _logger("ERROR " + gobj_service.gobj_short_name() + " event '" + iev_event + "' not in input event list");
+                log_error(gobj_service.gobj_short_name() + ": event '" + iev_event + "' not in input event list");
             }
         } else {
             self.gobj_publish_event( /* NOTE original behaviour */
@@ -805,7 +805,7 @@ DEBUG: {
     {
         var self = this;
         if(self.gobj_current_state() != 'ST_SESSION') {
-            self.log_error("Not in session, ignore event", event);
+            log_error("Not in session, ignore event: " + event);
             return -1;
         }
 

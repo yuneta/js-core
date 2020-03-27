@@ -83,17 +83,17 @@
     function gobj_register_gclass(gclass, gclass_name)
     {
         if(!gclass || !gclass_name) {
-            var msg = "ERROR Yuno.gobj_register_gclass(): gclass undefined";
-            _logger(msg);
+            var msg = "Yuno.gobj_register_gclass(): gclass undefined";
+            log_error(msg);
             throw msg;
             return false;
         }
         var gclass_ = _gclass_register[gclass_name];
         if (gclass_) {
-            var msg = "ERROR Yuno.gobj_register_gclass(): '" +
+            var msg = "Yuno.gobj_register_gclass(): '" +
                 gclass_name +
                 "' ALREADY REGISTERED";
-            _logger(msg);
+            log_error(msg);
             throw msg;
             return false;
         }
@@ -133,21 +133,21 @@
         }
 
         if (!(typeof parent === 'string' || parent instanceof GObj)) {
-            _logger("ERROR: Yuno.gobj_create() BAD TYPE of parent: " + parent);
+            log_error("Yuno.gobj_create() BAD TYPE of parent: " + parent);
         }
 
         if (typeof parent === 'string') {
             // find the named gobj
             parent = this.gobj_find_unique_gobj(parent);
             if (!parent) {
-                var msg = "WARNING: Yuno.gobj_create('" + name + "'): " +
+                var msg = "Yuno.gobj_create('" + name + "'): " +
                     "WITHOUT registered named PARENT: '" + parent + "'";
-                _logger(msg);
+                log_warning(msg);
             }
         }
 
         if (this.config.trace_creation) {
-            _logger("==========> CREATING " + name);
+            log_debug("==========> CREATING " + name);
         }
 
         var gobj = new gclass(name, kw);
@@ -167,7 +167,7 @@
         }
         if (this.config.trace_creation) {
             var gclass_name = gobj.gclass_name || '';
-            _logger("<========== CREATED  " + gclass_name + ':' + name);
+            log_debug("<========== CREATED  " + gclass_name + ':' + name);
         }
         return gobj;
     };
@@ -192,11 +192,11 @@
         var self = this;
 
         if (this.config.trace_creation) {
-            _logger("<========== DESTROYING " + gobj.name);
+            log_debug("<========== DESTROYING " + gobj.name);
         }
         if (gobj._destroyed) {
             // Already deleted
-            _logger("<========== ALREADY DESTROYED! " + gobj.name);
+            log_debug("<========== ALREADY DESTROYED! " + gobj.name);
             return;
         }
         if(gobj.gobj_is_running()) {
@@ -239,10 +239,8 @@
         var self = this;
         var named_gobj = self._unique_gobjs[gobj.name];
         if (named_gobj) {
-            var msg = "ERROR Yuno._register_unique_gobj(): '" +
-                gobj.name +
-                "' ALREADY REGISTERED";
-            _logger(msg);
+            var msg = "Yuno._register_unique_gobj() ALREADY REGISTERED: " + gobj.name;
+            log_error(msg);
             throw msg;
             return false;
         }
@@ -270,10 +268,8 @@
         var self = this;
         var named_gobj = self._service_gobjs[gobj.name];
         if (named_gobj) {
-            var msg = "ERROR Yuno._register_service_gobj(): '" +
-                gobj.name +
-                "' ALREADY REGISTERED";
-            _logger(msg);
+            var msg = "Yuno._register_service_gobj() ALREADY REGISTERED: " + gobj.name;
+            log_error(msg);
             throw msg;
             return false;
         }
