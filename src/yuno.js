@@ -191,6 +191,10 @@
     proto.gobj_destroy = function (gobj) {
         var self = this;
 
+        if(!gobj) {
+            log_error("gobj_destroy(): gobj NULL");
+            return;
+        }
         if (this.config.trace_creation) {
             log_debug("<========== DESTROYING " + gobj.name);
         }
