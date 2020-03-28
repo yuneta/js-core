@@ -753,6 +753,9 @@
     /************************************************************
      *          Load json file from server
      ************************************************************/
+    function fileLoaded(xhr) {
+        return xhr.status == 0 && xhr.responseText && xhr.responseURL.startsWith('file:');
+    }
     function load_json_file(url, on_success, on_error)
     {
         var req = new XMLHttpRequest();
