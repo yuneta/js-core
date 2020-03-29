@@ -1052,6 +1052,53 @@
         }
     }
 
+    /********************************************
+     *  Get a local attribute
+     ********************************************/
+    function kw_get_local_storage_value(key, default_value, create)
+    {
+        if(!(key && window.JSON && window.localStorage)) {
+            return undefined;
+        }
+
+        var value = window.localStorage.getItem(key);
+        if(value === null) {
+            if(create) {
+                kw_set_local_storage_value(key, default_value);
+            }
+            return default_value;
+        }
+
+        try {
+            value = JSON.parse(value);
+        } catch (e) {
+        }
+
+        return value;
+    }
+
+    /********************************************
+     *  Save a local attribute
+     ********************************************/
+    function kw_set_local_storage_value(key, value)
+    {
+        if(key && window.JSON && window.localStorage) {
+            if(value !== undefined) {
+                window.localStorage.setItem(key, JSON.stringify(value));
+            }
+        }
+    }
+
+    /********************************************
+     *  Remove local attribute
+     ********************************************/
+    function kw_remove_local_storage_value(key)
+    {
+        if(key && window.localStorage) {
+            window.localStorage.removeItem(key);
+        }
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -1112,5 +1159,9 @@
     exports.log_info = log_info;
     exports.log_debug = log_debug;
     exports.trace_msg = trace_msg;
+
+    exports.kw_get_local_storage_value = kw_get_local_storage_value;
+    exports.kw_set_local_storage_value = kw_set_local_storage_value;
+    exports.kw_remove_local_storage_value = kw_remove_local_storage_value;
 
 })(this);

@@ -546,5 +546,6 @@
     exports.Yuno = Yuno;
     exports.gobj_register_gclass = gobj_register_gclass;
     exports.gobj_find_gclass = gobj_find_gclass;
+    exports.gobj_start_up = gobj_start_up;
 
 })(this);
