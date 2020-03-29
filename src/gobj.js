@@ -234,6 +234,19 @@ __inside_event_loop__ = 0;
     /************************************************************
      *
      ************************************************************/
+    proto.gobj_get_writable_attrs = function()
+    {
+        // TODO tabla de atributos como en C. De momento una lista aparte
+        if(this.config && this.config.__writable_attrs__) {
+            return this.config.__writable_attrs__;
+        } else {
+            return [];
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     proto.gobj_write_attr = function(key, value)
     {
         var previous_value = undefined;

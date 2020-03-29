@@ -12,9 +12,22 @@
     /************************************************************
      *
      ************************************************************/
+    function _get_persistent_path(gobj)
+    {
+        var path = "persistent-attrs-" + gobj.gobj_full_name();
+        return path;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function db_load_persistent_attrs(gobj)
     {
-        // TODO
+        var attrs = kw_get_local_storage_value(_get_persistent_path(gobj), {}, false);
+        __update_dict__(
+            gobj.config,
+            filter_dict(attrs, gobj.gobj_get_writable_attrs())
+        );
     }
 
     /************************************************************
@@ -22,7 +35,10 @@
      ************************************************************/
     function db_save_persistent_attrs(gobj)
     {
-        // TODO
+        kw_set_local_storage_value(
+            _get_persistent_path(gobj),
+            filter_dict(gobj.config, gobj.gobj_get_writable_attrs())
+        );
     }
 
     /************************************************************
@@ -30,7 +46,7 @@
      ************************************************************/
     function db_remove_persistent_attrs(gobj)
     {
-        // TODO
+        kw_remove_local_storage_value(_get_persistent_path(gobj));
     }
 
     /************************************************************
