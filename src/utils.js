@@ -1062,7 +1062,7 @@
         }
 
         var value = window.localStorage.getItem(key);
-        if(value === null) {
+        if(value === null || value===undefined) {
             if(create) {
                 kw_set_local_storage_value(key, default_value);
             }
