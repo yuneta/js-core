@@ -207,6 +207,9 @@
             // All js gobjs are unique-named!
             this._register_unique_gobj(gobj);
         }
+
+        gobj.gobj_load_persistent_attrs();
+
         if (parent) {
             parent._add_child(gobj)
         }

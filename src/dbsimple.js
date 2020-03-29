@@ -23,11 +23,13 @@
      ************************************************************/
     function db_load_persistent_attrs(gobj)
     {
-        var attrs = kw_get_local_storage_value(_get_persistent_path(gobj), {}, false);
-        __update_dict__(
-            gobj.config,
-            filter_dict(attrs, gobj.gobj_get_writable_attrs())
-        );
+        var attrs = kw_get_local_storage_value(_get_persistent_path(gobj), null, false);
+        if(attrs && is_object(attrs)) {
+            __update_dict__(
+                gobj.config,
+                filter_dict(attrs, gobj.gobj_get_writable_attrs())
+            );
+        }
     }
 
     /************************************************************
