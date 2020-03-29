@@ -21,6 +21,13 @@
     /************************************************************
      *      Global system of yunos
      ************************************************************/
+    var __jn_global_settings__ =  null;
+    var __global_load_persistent_attrs_fn__ = null;
+    var __global_save_persistent_attrs_fn__ = null;
+    var __global_remove_persistent_attrs_fn__ = null;
+    var __global_list_persistent_attrs_fn__ = null;
+    var __global_command_parser_fn__ = null;
+    var __global_stats_parser_fn__ = null;
 
     /************************************************************
      *      Yuno class.
@@ -67,6 +74,14 @@
         this._unique_gobjs = {};
         this._service_gobjs = {};
 
+        this.__jn_global_settings__ =  __jn_global_settings__;
+        this.__global_load_persistent_attrs_fn__ = __global_load_persistent_attrs_fn__;
+        this.__global_save_persistent_attrs_fn__ = __global_save_persistent_attrs_fn__;
+        this.__global_remove_persistent_attrs_fn__ = __global_remove_persistent_attrs_fn__;
+        this.__global_list_persistent_attrs_fn__ = __global_list_persistent_attrs_fn__;
+        this.__global_command_parser_fn__ = null;
+        this.__global_stats_parser_fn__ = null;
+
         this.mt_create();   // auto-create
     };
 
@@ -78,6 +93,30 @@
     };
 
     /************************************************************
+     *      Start up
+     ************************************************************/
+    function gobj_start_up(
+        jn_global_settings,
+        load_persistent_attrs_fn,
+        save_persistent_attrs_fn,
+        remove_persistent_attrs_fn,
+        list_persistent_attrs_fn,
+        global_command_parser_fn,
+        global_stats_parser_fn
+    )
+    {
+        __jn_global_settings__ =  0; // TODO kw_apply_json_config_variables(jn_global_settings, 0);
+        __global_load_persistent_attrs_fn__ = load_persistent_attrs_fn;
+        __global_save_persistent_attrs_fn__ = save_persistent_attrs_fn;
+        __global_remove_persistent_attrs_fn__ = remove_persistent_attrs_fn;
+        __global_list_persistent_attrs_fn__ = list_persistent_attrs_fn;
+        __global_command_parser_fn__ = global_command_parser_fn;
+        __global_stats_parser_fn__ = global_stats_parser_fn;
+
+        return 0;
+    };
+
+    /************************************************************
      *      Register gclass
      ************************************************************/
     function gobj_register_gclass(gclass, gclass_name)
@@ -86,7 +125,7 @@
             var msg = "Yuno.gobj_register_gclass(): gclass undefined";
             log_error(msg);
             throw msg;
-            return false;
+            return -1;
         }
         var gclass_ = _gclass_register[gclass_name];
         if (gclass_) {
@@ -95,10 +134,10 @@
                 "' ALREADY REGISTERED";
             log_error(msg);
             throw msg;
-            return false;
+            return -1;
         }
         _gclass_register[gclass_name] = gclass;
-        return true;
+        return 0;
     };
 
     /************************************************************
