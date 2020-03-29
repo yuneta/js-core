@@ -273,7 +273,7 @@
         if (gobj.mt_destroy) {
             gobj.mt_destroy();
         }
-    }
+    };
 
     /************************************************************
      *        register a unique gobj
@@ -289,7 +289,7 @@
         }
         self._unique_gobjs[gobj.name] = gobj;
         return true;
-    }
+    };
 
     /************************************************************
      *        deregister a unique gobj
@@ -302,7 +302,7 @@
             return true
         }
         return false
-    }
+    };
 
     /************************************************************
      *        register a service gobj
@@ -318,7 +318,7 @@
         }
         self._service_gobjs[gobj.name] = gobj;
         return true;
-    }
+    };
 
     /************************************************************
      *        deregister a service gobj
@@ -331,7 +331,7 @@
             return true
         }
         return false
-    }
+    };
 
     /************************************************************
      *        find a unique gobj
@@ -345,7 +345,7 @@
             return null;
         }
         return named_gobj;
-    }
+    };
 
     /************************************************************
      *        find a service
@@ -359,7 +359,7 @@
             return null;
         }
         return service_gobj;
-    }
+    };
 
     /************************************************************
      *
@@ -384,7 +384,7 @@
             return true;
         }
         return false;
-    }
+    };
 
     /************************************************************
      *
@@ -430,7 +430,7 @@
         p.splice(0, 1);
         p = p.join("`");
         return _gobj_search_path(child, p);
-    }
+    };
 
     /************************************************************
      *        Find a gobj by path
@@ -438,7 +438,7 @@
     proto.gobj_find_gobj = function(path)
     {
         return _gobj_search_path(this, path);
-    }
+    };
 
     /************************************************************
      *      find the unique gobj with the public event
@@ -456,7 +456,7 @@
             }
         }
         return null;
-    }
+    };
 
     /************************************************************
      *
@@ -486,7 +486,7 @@
         var data = [];
         _add_gobj_to_webix_tree(data, gobj);
         return data;
-    }
+    };
 
     /************************************************************
      *
@@ -522,7 +522,16 @@
         });
 
         return data;
-    }
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_list_persistent_attrs = function()
+    {
+        // TODO
+    };
+
 
     /************************************************
      *          Expose to the global object

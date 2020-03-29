@@ -201,6 +201,30 @@ __inside_event_loop__ = 0;
     /************************************************************
      *
      ************************************************************/
+    proto.gobj_load_persistent_attrs = function()
+    {
+        // TODO
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_save_persistent_attrs = function()
+    {
+        // TODO
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_remove_persistent_attrs = function(recursive)
+    {
+        // TODO
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
     proto.gobj_write_attr = function(key, value)
     {
         var previous_value = undefined;
@@ -442,7 +466,7 @@ __inside_event_loop__ = 0;
             return false;
         }
         return this.tracing || (this.yuno && this.yuno.config.tracing);
-    }
+    };
 
     /************************************************************
      *        Timeout functions
@@ -555,7 +579,7 @@ __inside_event_loop__ = 0;
         if(__filter__) {
             this.__filter__ = __clone__(__filter__);
         }
-    }
+    };
 
     /************************************************************
      *  Return a iter of subscriptions (sdata),
