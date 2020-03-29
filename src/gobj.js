@@ -203,7 +203,10 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_load_persistent_attrs = function()
     {
-        // TODO
+        if(this.yuno.__global_load_persistent_attrs_fn__) {
+            return this.yuno.__global_load_persistent_attrs_fn__(this);
+        }
+        return -1;
     };
 
     /************************************************************
@@ -211,7 +214,10 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_save_persistent_attrs = function()
     {
-        // TODO
+        if(this.yuno.__global_save_persistent_attrs_fn__) {
+            return this.yuno.__global_save_persistent_attrs_fn__(this);
+        }
+        return -1;
     };
 
     /************************************************************
@@ -219,7 +225,10 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_remove_persistent_attrs = function(recursive)
     {
-        // TODO
+        if(this.yuno.__global_remove_persistent_attrs_fn__) {
+            return this.yuno.__global_remove_persistent_attrs_fn__(this, recursive);
+        }
+        return -1;
     };
 
     /************************************************************
