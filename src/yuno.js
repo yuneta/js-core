@@ -157,6 +157,18 @@
     };
 
     /************************************************************
+     *
+     ************************************************************/
+    function gobj_list_persistent_attrs()
+    {
+        // TODO
+        if(!__global_list_persistent_attrs_fn__) {
+            return null;
+        }
+        return __global_list_persistent_attrs_fn__();
+    };
+
+    /************************************************************
      *      gobj_create factory.
      ************************************************************/
     proto.gobj_create = function(name, gclass, kw, parent)
@@ -523,15 +535,6 @@
 
         return data;
     };
-
-    /************************************************************
-     *
-     ************************************************************/
-    proto.gobj_list_persistent_attrs = function()
-    {
-        // TODO
-    };
-
 
     /************************************************
      *          Expose to the global object
