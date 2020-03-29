@@ -14,7 +14,7 @@
      ************************************************************/
     function _get_persistent_path(gobj)
     {
-        var path = "persistent-attrs-" + gobj.gobj_full_name();
+        var path = "persistent-attrs-" + gobj.gobj_short_name();
         return path;
     }
 

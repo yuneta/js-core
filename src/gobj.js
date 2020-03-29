@@ -225,6 +225,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_remove_persistent_attrs = function(recursive)
     {
+        // TODO implement recursive
         if(this.yuno.__global_remove_persistent_attrs_fn__) {
             return this.yuno.__global_remove_persistent_attrs_fn__(this, recursive);
         }
@@ -241,6 +242,21 @@ __inside_event_loop__ = 0;
             return this.config.__writable_attrs__;
         } else {
             return [];
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_update_writable_attrs = function(attrs)
+    {
+        if(this.config && this.config.__writable_attrs__) {
+            for(var attr in attrs) {
+                if(elm_in_list(attr, this.config.__writable_attrs__)) {
+                    var new_value = attrs[attr];
+                    this.config[attr] = new_value;
+                }
+            }
         }
     }
 
