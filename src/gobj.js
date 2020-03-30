@@ -1305,7 +1305,7 @@ __inside_event_loop__ = 0;
 
         var event_id = fsm.event_index[event] || 0;
         if (event_id <= 0) {
-            log_error("inject_event() event UNKNOWN: " + event);
+            log_error(this.gobj_short_name() + " inject_event() event UNKNOWN: " + event);
             return -1;  //# EventNotAcceptedError
         }
 
