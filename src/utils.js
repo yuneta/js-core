@@ -387,6 +387,144 @@
     }
 
     /*
+        Being `kw` a row's list or list of dicts [{},...],
+        return a new list of incref (clone) kw filtering the rows by `jn_filter` (where),
+        If match_fn is 0 then kw_match_simple is used.
+     */
+    function kw_collect(kw, jn_filter, match_fn)
+    {
+        if(!kw) {
+            return null;
+        }
+        if(!match_fn) {
+            match_fn = kw_match;
+        }
+        var kw_new = [];
+
+        if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var jn_value = kw[i];
+                if(match_fn(jn_value, jn_filter)) {
+                    kw_new.push(jn_value);
+                }
+            }
+        } else if(is_object(kw)) {
+            if(match_fn(kw, jn_filter)) {
+                kw_new.push(kw);
+            }
+        } else {
+            log_error("kw_collect() BAD kw parameter");
+            return null;
+        }
+
+        return kw_new;
+    }
+
+    /*
+        Utility for databases.
+        Return TRUE if `id` is in the list/dict/str `ids`
+     */
+    function kwid_match_id(ids, id)
+    {
+        if(!ids || !id) {
+            // Si no hay filtro pasan todos.
+            return true;
+        }
+
+        if(is_array(ids)) {
+            if(ids.length==0) {
+                // A empty object at first level evaluate as true.
+                return true;
+            }
+            for(var i=0; i<ids.length; i++) {
+                var value = ids[i];
+                if(value == id) {
+                    return true;
+                }
+            }
+
+        } else if(is_object(ids)) {
+            if(Object.keys(ids).length==0) {
+                // A empty object at first level evaluate as true.
+                return true;
+            }
+            for(var key in ids) {
+                if(key == id) {
+                    return true;
+                }
+            }
+
+        } else if(is_string(ids)) {
+            if(ids = id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+        Utility for databases.
+        Being `kw` a:
+            - list of strings [s,...]
+            - list of dicts [{},...]
+            - dict of dicts {id:{},...}
+        return a **NEW** list of incref (clone) kw filtering the rows by `jn_filter` (where),
+        and matching the ids.
+        If match_fn is 0 then kw_match_simple is used.
+        NOTE Using JSON_INCREF/JSON_DECREF HACK
+     */
+    function kwid_collect(kw, ids, jn_filter, match_fn)
+    {
+        if(!kw) {
+            return null;
+        }
+        if(!match_fn) {
+            match_fn = kw_match;
+        }
+        var kw_new = [];
+
+        if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var jn_value = kw[i];
+
+                var id;
+                if(is_object(jn_value)) {
+                    id = kw_get_str(jn_value, "id", 0, 0);
+                } else if(json_is_string(jn_value)) {
+                    id = jn_value;
+                } else {
+                    continue;
+                }
+
+                if(!kwid_match_id(ids, id)) {
+                    continue;
+                }
+                if(match_fn(jn_value, jn_filter)) {
+                    kw_new.push(jn_value);
+                }
+            }
+        } else if(is_object(kw)) {
+            for(var id in kw) {
+                var jn_value = kw[id];
+
+                if(!kwid_match_id(ids, id)) {
+                    continue;
+                }
+                if(match_fn(jn_value, jn_filter)) {
+                    kw_new.push(jn_value);
+                }
+            }
+
+        } else  {
+            log_error("kw_collect() BAD kw parameter");
+            return null;
+        }
+
+        return kw_new;
+    }
+
+    /*
      *  From a list of objects (dict_list),
      *  get a new list with the same objects with only attributes in keylist
      */
@@ -1129,6 +1267,9 @@
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
     exports.kw_match = kw_match;
+    exports.kw_collect = kw_collect;
+    exports.kwid_match_id = kwid_match_id;
+    exports.kwid_collect = kwid_collect;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
