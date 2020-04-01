@@ -65,7 +65,7 @@ __inside_event_loop__ = 0;
     proto.__init__ = function(fsm_desc, config, name, gclass_name, kw, gcflag) {
         this.name = name || '';
         this.gclass_name = gclass_name || '';
-        this.config = __clone__(config);
+        this.config = __duplicate__(config);
         __update_dict__(this.config, kw || {});
         this.gcflag = gcflag;
 
@@ -592,10 +592,10 @@ __inside_event_loop__ = 0;
         var __filter__ = kw["__filter__"];
 
         if(__global__) {
-            this.__global__ = __clone__(__global__);
+            this.__global__ = __duplicate__(__global__);
         }
         if(__config__) {
-            this.__config__ = __clone__(__config__);
+            this.__config__ = __duplicate__(__config__);
             if(kw_has_key(this.__config__, "__rename_event_name__")) {
                 var renamed_event = kw_get_str(this.__config__, "__rename_event_name__", 0);
                 this.renamed_event = renamed_event;
@@ -615,7 +615,7 @@ __inside_event_loop__ = 0;
             }
         }
         if(__filter__) {
-            this.__filter__ = __clone__(__filter__);
+            this.__filter__ = __duplicate__(__filter__);
         }
     };
 
@@ -953,7 +953,7 @@ __inside_event_loop__ = 0;
                     kw2publish = __clone(__global__);
                     __extend_dict__(kw2publish, kw);
                 } else {
-                    kw2publish = __clone__(kw);
+                    kw2publish = __duplicate__(kw);
                 }
 
                 /*
@@ -1051,7 +1051,7 @@ __inside_event_loop__ = 0;
         self.current_state = 1;
 
         // check state names
-        var state_names = __clone__(self.state_list); // dup list
+        var state_names = __duplicate__(self.state_list); // dup list
         for (var st_name in fsm_desc.machine) {
             if (elm_in_list(st_name, state_names)) {
                 delete_from_list(state_names, st_name);
@@ -1093,8 +1093,8 @@ __inside_event_loop__ = 0;
         self.output_set = __set__(output_set);
 
         // check event names
-        var event_names = __clone__(self.event_list);
-        var set_event_names = __clone__(self.output_set);  // start with output_set!
+        var event_names = __duplicate__(self.event_list);
+        var set_event_names = __duplicate__(self.output_set);  // start with output_set!
         for (var st in fsm_desc.machine) {
             if (fsm_desc.machine.hasOwnProperty(st)) {
                 var st_desc = fsm_desc.machine[st];
@@ -1123,7 +1123,7 @@ __inside_event_loop__ = 0;
         }
 
         // check next state names and actions
-        state_names = __clone__(self.state_list);
+        state_names = __duplicate__(self.state_list);
         for (var st in fsm_desc.machine) {
             if (fsm_desc.machine.hasOwnProperty(st)) {
                 var st_desc = fsm_desc.machine[st];

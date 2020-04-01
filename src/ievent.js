@@ -865,13 +865,13 @@ DEBUG: {
         var __filter__ = subs.__filter__;
 
         if(__config__) {
-            kw["__config__"] = __clone__(__config__);
+            kw["__config__"] = __duplicate__(__config__);
         }
         if(__global__) {
-            kw["__global__"] = __clone__(__global__);
+            kw["__global__"] = __duplicate__(__global__);
         }
         if(__filter__) {
-            kw["__filter__"] = __clone__(__filter__);
+            kw["__filter__"] = __duplicate__(__filter__);
         }
 
         msg_set_msg_type(kw, "__subscribing__");
@@ -930,13 +930,13 @@ DEBUG: {
         var __filter__ = subs.__filter__;
 
         if(__config__) {
-            kw["__config__"] = __clone__(__config__);
+            kw["__config__"] = __duplicate__(__config__);
         }
         if(__global__) {
-            kw["__global__"] = __clone__(__global__);
+            kw["__global__"] = __duplicate__(__global__);
         }
         if(__filter__) {
-            kw["__filter__"] = __clone__(__filter__);
+            kw["__filter__"] = __duplicate__(__filter__);
         }
 
         msg_set_msg_type(kw, "__unsubscribing__");

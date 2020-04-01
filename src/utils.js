@@ -36,8 +36,13 @@
 
     /*
      *  Clona arrays y objects, remains return the same.
+        WARNING
+
+        **duplicate** is a copy with new references
+
+        **clone** is a copy with incref references
      */
-    function __clone__(obj) {
+    function __duplicate__(obj) {
         'use strict';
 
         var copy;
@@ -56,7 +61,7 @@
         if (obj instanceof Array) {
             copy = [];
             for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = __clone__(obj[i]);
+                copy[i] = __duplicate__(obj[i]);
             }
             return copy;
         }
@@ -65,7 +70,7 @@
         if (obj instanceof Object) {
             copy = {};
             for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = __clone__(obj[attr]);
+                if (obj.hasOwnProperty(attr)) copy[attr] = __duplicate__(obj[attr]);
             }
             return copy;
         }
@@ -824,7 +829,7 @@
 
         // Create topics defined in schema
         for(var key in schema) {
-            kw_get_dict_value(topics, key, __clone__(type), 1);
+            kw_get_dict_value(topics, key, __duplicate__(type), 1);
         }
     }
 
@@ -1102,7 +1107,7 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.__clone__ = __clone__;
+    exports.__duplicate__ = __duplicate__;
     exports.__update_dict__ = __update_dict__;
     exports.__extend_dict__ = __extend_dict__;
     exports.index_of_list = index_of_list;
