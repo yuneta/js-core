@@ -525,7 +525,7 @@
     }
 
     /*
-     *  From a list of objects (dict_list),
+     *  From a dict,
      *  get a new list with the same objects with only attributes in keylist
      */
     function filter_dict(dict, keylist)
