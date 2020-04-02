@@ -988,8 +988,12 @@ __inside_event_loop__ = 0;
 
         if(!sent_count) {
             //if(!(ev->flag & EVF_NO_WARN_SUBS)) { TODO
-                log_warning("publishing event " + event + " WITHOUT subscribers");
-            //}
+            if(!this._destroyed) {
+                log_warning(
+                    "publishing event WITHOUT subscribers: " +
+                    this.gobj_short_name() + ", " + event
+                );
+            }
         }
         return ret_sum;
     };
