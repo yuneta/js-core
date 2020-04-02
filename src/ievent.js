@@ -404,6 +404,7 @@ DEBUG: {
     {
         if(self.websocket.close) {
             self.websocket.close();
+            self.websocket = null;
         }
         if(self.gobj_is_running()) {
             self.websocket = setup_websocket(self);
