@@ -52,7 +52,8 @@ DEBUG: {
                                 // will send in resend_subscriptions
 
         jwt: null,
-        urls: null
+        urls: null,
+        idx_url: 0
     };
 
     var IEVENT_MESSAGE_AREA_ID = "ievent_gate_stack";
@@ -71,19 +72,22 @@ DEBUG: {
      ****************************************/
     function setup_websocket(self)
     {
+        var url = self.config.urls[self.config.idx_url];
+        log_debug("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
+
         function on_open_event(gobj) {
             return function() {
-                gobj.gobj_send_event('EV_ON_OPEN', {}, gobj);
+                gobj.gobj_send_event('EV_ON_OPEN', {url:url}, gobj);
             }
         }
         function on_close_event(gobj) {
             return function() {
-                gobj.gobj_send_event('EV_ON_CLOSE', {}, gobj);
+                gobj.gobj_send_event('EV_ON_CLOSE', {url:url}, gobj);
             }
         }
         function on_error_event(gobj) {
             return function() {
-                gobj.gobj_send_event('EV_ON_CLOSE', {}, gobj);
+                gobj.gobj_send_event('EV_ON_CLOSE', {url:url}, gobj);
             }
         }
         function on_message_event(gobj) {
@@ -91,15 +95,13 @@ DEBUG: {
                 gobj.gobj_send_event(
                     'EV_ON_MESSAGE',
                     {
+                        url:url,
                         data:e.data
                     },
                     gobj
                 );
             }
         }
-        var url = self.config.urls[self.idx_url];
-        log_debug("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
-
         try {
             var websocket = new WebSocket(url);
             if (!websocket) {
@@ -184,7 +186,7 @@ DEBUG: {
         );
 
         if (self.yuno.config.trace_inter_event) {
-            var url = self.config.urls[self.idx_url];
+            var url = self.config.urls[self.config.idx_url];
             var prefix = self.yuno.yuno_name + ' ==> ' + url;
             if(self.yuno.config.trace_ievent_callback) {
                 self.yuno.config.trace_ievent_callback(prefix, iev, 1);
@@ -355,7 +357,7 @@ DEBUG: {
      ********************************************/
     function ac_on_open(self, event, kw, src)
     {
-        var url = self.config.urls[self.idx_url];
+        var url = self.config.urls[self.config.idx_url];
         log_debug('Websocket opened: ' + url); // TODO que no se vea en prod
         send_identity_card(self);
         return 0;
@@ -366,7 +368,7 @@ DEBUG: {
      ********************************************/
     function ac_on_close(self, event, kw, src)
     {
-        var url = self.config.urls[self.idx_url];
+        var url = self.config.urls[self.config.idx_url];
         log_debug('Websocket closed: ' + url); // TODO que no se vea en prod
 
         if(self.websocket.close) {
@@ -380,6 +382,7 @@ DEBUG: {
             self.gobj_publish_event(
                 'EV_ON_CLOSE',
                 {
+                    url: url,
                     remote_yuno_name: self.config.remote_yuno_name,
                     remote_yuno_role: self.config.remote_yuno_role,
                     remote_yuno_service: self.config.remote_yuno_service
@@ -390,7 +393,7 @@ DEBUG: {
         if(self.gobj_is_running()) {
             // point to next url
             var ln = self.config.urls.length;
-            self.idx_url = (++self.idx_url) % ln;
+            self.config.idx_url = (++self.config.idx_url) % ln;
             self.set_timeout(self.config.timeout_retry*1000);
         }
 
@@ -447,6 +450,7 @@ DEBUG: {
             self.gobj_publish_event(
                 'EV_IDENTITY_CARD_REFUSED',
                 {
+                    url: self.config.urls[self.config.idx_url],
                     result: result,
                     remote_yuno_name: src_yuno,
                     remote_yuno_role: src_role,
@@ -468,6 +472,7 @@ DEBUG: {
                 self.gobj_publish_event(
                     'EV_ON_OPEN',
                     {
+                        url: self.config.urls[self.config.idx_url],
                         remote_yuno_name: src_yuno,
                         remote_yuno_role: src_role,
                         remote_yuno_service: src_service,
@@ -500,7 +505,7 @@ DEBUG: {
      ********************************************/
     function ac_on_message(self, event, kw, src)
     {
-        var url = self.config.urls[self.idx_url];
+        var url = self.config.urls[self.config.idx_url];
 
         /*------------------------------------------*
          *  Create inter_event from received data
@@ -511,7 +516,7 @@ DEBUG: {
          *          trace inter_event
          *---------------------------------------*/
         if (self.yuno.config.trace_inter_event) {
-            var url = self.config.urls[self.idx_url];
+            var url = self.config.urls[self.config.idx_url];
             var prefix = self.yuno.yuno_name + ' <== ' + url;
             if(self.yuno.config.trace_ievent_callback) {
                 self.yuno.config.trace_ievent_callback(prefix, iev_msg, 2);
@@ -703,7 +708,7 @@ DEBUG: {
     {
         var self = this;
 
-        self.idx_url = 0;
+        self.config.idx_url = 0;
         msg_iev_add_answer_filter(self, IEVENT_MESSAGE_AREA_ID, ievent_answer_filter);
         self.websocket = setup_websocket(self);
     }
