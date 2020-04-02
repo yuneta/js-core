@@ -124,7 +124,6 @@
         if(!gclass || !gclass_name) {
             var msg = "Yuno.gobj_register_gclass(): gclass undefined";
             log_error(msg);
-            throw msg;
             return -1;
         }
         var gclass_ = _gclass_register[gclass_name];
@@ -133,7 +132,6 @@
                 gclass_name +
                 "' ALREADY REGISTERED";
             log_error(msg);
-            throw msg;
             return -1;
         }
         _gclass_register[gclass_name] = gclass;
@@ -185,6 +183,7 @@
 
         if (!(typeof parent === 'string' || parent instanceof GObj)) {
             log_error("Yuno.gobj_create() BAD TYPE of parent: " + parent);
+            return null;
         }
 
         if (typeof parent === 'string') {
@@ -299,7 +298,6 @@
         if (named_gobj) {
             var msg = "Yuno._register_unique_gobj() ALREADY REGISTERED: " + gobj.name;
             log_error(msg);
-            throw msg;
             return false;
         }
         self._unique_gobjs[gobj.name] = gobj;
@@ -328,7 +326,6 @@
         if (named_gobj) {
             var msg = "Yuno._register_service_gobj() ALREADY REGISTERED: " + gobj.name;
             log_error(msg);
-            throw msg;
             return false;
         }
         self._service_gobjs[gobj.name] = gobj;
