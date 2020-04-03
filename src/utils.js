@@ -455,7 +455,7 @@
             }
 
         } else if(is_string(ids)) {
-            if(ids = id) {
+            if(ids == id) {
                 return true;
             }
         }
@@ -527,14 +527,23 @@
     /*
      *  From a dict,
      *  get a new list with the same objects with only attributes in keylist
+     *  keylist can be a [s,...] of {s:..., ...}
      */
     function filter_dict(dict, keylist)
     {
         var new_dict = {};
-        for(var j=0; j<keylist.length; j++) {
-            var key = keylist[j];
-            if(dict.hasOwnProperty(key)) {
-                new_dict[key] = dict[key];
+        if(is_array(keylist)) {
+            for(var j=0; j<keylist.length; j++) {
+                var key = keylist[j];
+                if(dict.hasOwnProperty(key)) {
+                    new_dict[key] = dict[key];
+                }
+            }
+        } else if(is_object(keylist)) {
+            for(var key in keylist) {
+                if(dict.hasOwnProperty(key)) {
+                    new_dict[key] = dict[key];
+                }
             }
         }
         return new_dict;
@@ -568,6 +577,24 @@
             }
         }
         return new_list;
+    }
+
+    /************************************************************
+     *   [{id:..}, ...] convierte en "id,id2,..."
+     ************************************************************/
+    function ids2str(dictlist)
+    {
+        var s = "";
+
+        for(var i=0; i<dictlist.length; i++) {
+            var dict = dictlist[i];
+            if(i==0) {
+                s += dict.id;
+            } else {
+                s += "," + dict.id;
+            }
+        }
+        return s;
     }
 
     /************************************************************
@@ -1274,6 +1301,7 @@
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
     exports.filter_list = filter_list;
+    exports.ids2str = ids2str;
 
     exports.msg_read_MIA_key = msg_read_MIA_key;
     exports.msg_write_MIA_key = msg_write_MIA_key;

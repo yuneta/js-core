@@ -720,10 +720,11 @@ DEBUG: {
     {
         var self = this;
         self.clear_timeout();
-        send_goodbye(self, 'stopped by user');
-
-        if(self.websocket.close) {
-            self.websocket.close();
+        if(self.websocket) {
+            send_goodbye(self, 'stopped by user');
+            if(self.websocket.close) {
+                self.websocket.close();
+            }
             self.websocket = null;
         }
     }
