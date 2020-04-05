@@ -193,6 +193,7 @@
                 var msg = "Yuno.gobj_create('" + name + "'): " +
                     "WITHOUT registered named PARENT: '" + parent + "'";
                 log_warning(msg);
+                return null;
             }
         }
 
@@ -204,7 +205,9 @@
         gobj.yuno = this;
         if (name) {
             // All js gobjs are unique-named!
-            this._register_unique_gobj(gobj);
+            if(!this._register_unique_gobj(gobj)) {
+                return null;
+            }
         }
 
         gobj.gobj_load_persistent_attrs();
