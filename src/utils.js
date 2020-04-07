@@ -316,6 +316,15 @@
         return (!!a) && (a.constructor === Object);
     }
 
+    // Return length of dict
+    function json_object_size(a)
+    {
+        if(is_object) {
+            return Object.keys(a).length;
+        }
+        return 0;
+    }
+
     // Return if a value is an array
     function is_array(a)
     {
@@ -328,9 +337,14 @@
         return typeof value === 'string' || value instanceof String;
     }
 
-    // Return if a value is really a number
+    // Return if a value is a number
     function is_number(value) {
         return typeof value === 'number' && isFinite(value);
+    }
+
+    // Return if a value is a boolean
+    function is_boolean(value) {
+        return val === false || val === true;
     }
 
     function empty_string(s)
@@ -368,22 +382,184 @@
         return (kw1_ == kw2_)? true: false;
     }
 
-    // TODO cambia kw_simple_match()
-    function kw_match(kw, __filter__)
+    function strcmp(str1, str2)
     {
-        if(!__filter__ || !kw) {
+        // http://kevin.vanzonneveld.net
+        // +   original by: Waldo Malqui Silva
+        // +      input by: Steve Hilder
+        // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+        // +    revised by: gorthaur
+        // *     example 1: strcmp( 'waldo', 'owald' );
+        // *     returns 1: 1
+        // *     example 2: strcmp( 'owald', 'waldo' );
+        // *     returns 2: -1
+
+        return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
+    }
+
+    /***************************************************************************
+        Only compare str/int/real/bool items
+        Complex types are done as matched
+        Return lower, iqual, higher (-1, 0, 1), like strcmp
+    ***************************************************************************/
+    function cmp_two_simple_json(jn_var1, jn_var2)
+    {
+        /*
+         *  Discard complex types, done as matched
+         */
+        if(is_object(jn_var1) ||
+                is_object(jn_var2) ||
+                is_array(jn_var1) ||
+                is_array(jn_var2)) {
+            return 0;
+        }
+
+        /*
+         *  First try number
+         */
+        if(is_number(jn_var1) || is_number(jn_var2)) {
+            var val1 = Number(jn_var1);
+            var val2 = Number(jn_var2);
+            if(val1 > val2) {
+                return 1;
+            } else if(val1 < val2) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+
+        /*
+         *  Try boolean
+         */
+        if(is_boolean(jn_var1) || is_boolean(jn_var2)) {
+            var val1 = Number(jn_var1);
+            var val2 = Number(jn_var2);
+            if(val1 > val2) {
+                return 1;
+            } else if(val1 < val2) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+
+        /*
+         *  Try string
+         */
+        var val1 = String(jn_var1);
+        var val2 = String(jn_var2);
+        var ret = strcmp(val1, val2);
+        return ret;
+    }
+
+    function _kw_match_simple(kw, jn_filter, level)
+    {
+//         for (var key in __filter__) {
+//             if (!kw.hasOwnProperty(key)) {
+//                 return false; // si el filtro no exite en kw, fuera
+//             }
+//             if(kw[key] != __filter__[key]) {
+//                 return false;
+//             }
+//         }
+//         return true;
+
+        var matched = false;
+
+        level++;
+
+        if(is_array(jn_filter)) {
+            // Empty array evaluate as false, until a match condition occurs.
+            matched = false;
+            for(var idx = 0; idx < jn_filter.length; idx++) {
+                var jn_filter_value = jn_filter[idx];
+                matched = _kw_match_simple(
+                    kw,                 // not owned
+                    jn_filter_value,    // owned
+                    level
+                );
+                if(matched) {
+                    break;
+                }
+            }
+
+        } else if(is_object(jn_filter)) {
+            if(json_object_size(jn_filter)==0) {
+                // Empty object evaluate as false.
+                matched = false;
+            } else {
+                // Not Empty object evaluate as true, until a NOT match condition occurs.
+                matched = true;
+            }
+
+            for(var filter_path in jn_filter) {
+                var jn_filter_value = jn_filter[filter_path];
+                /*
+                 *  Variable compleja, recursivo
+                 */
+                if(is_array(jn_filter_value) || is_object(jn_filter_value)) {
+                    matched = _kw_match_simple(
+                        kw,
+                        jn_filter_value,
+                        level
+                    );
+                    break;
+                }
+
+                /*
+                 *  Variable sencilla
+                 */
+                /*
+                 * TODO get the name and op.
+                 */
+                var path = filter_path; // TODO
+                var op = "__equal__";
+
+                /*
+                 *  Get the record value, firstly by path else by name
+                 */
+                var jn_record_value;
+                // Firstly try the key as pointers
+                jn_record_value = kw_get_dict_value(kw, path, 0, 0);
+                if(!jn_record_value) {
+                    // Secondly try the key with points (.) as full key
+                    jn_record_value = kw[path];
+                }
+                if(!jn_record_value) {
+                    matched = false;
+                    break;
+                }
+
+                /*
+                 *  Do simple operation
+                 */
+                if(op == "__equal__") { // TODO __equal__ by default
+                    var cmp = cmp_two_simple_json(jn_record_value, jn_filter_value);
+                    if(cmp!=0) {
+                        matched = false;
+                        break;
+                    }
+                } else {
+                    // TODO op: __lower__ __higher__ __re__ __equal__
+                }
+            }
+        }
+
+        return matched;
+    }
+
+    function kw_match_simple(kw, jn_filter)
+    {
+        if(!jn_filter) {
          // Si no hay filtro pasan todos.
            return true;
         }
-        for (var key in __filter__) {
-            if (!kw.hasOwnProperty(key)) {
-                return false; // si el filtro no exite en kw, fuera
-            }
-            if(kw[key] != __filter__[key]) {
-                return false;
-            }
+        if(is_object(jn_filter) && Object.keys(jn_filter).length==0) {
+            // A empty object at first level evaluate as true.
+            return true;
         }
-        return true;
+        return _kw_match_simple(kw, jn_filter, 0);
     }
 
     /*
@@ -397,7 +573,7 @@
             return null;
         }
         if(!match_fn) {
-            match_fn = kw_match;
+            match_fn = kw_match_simple;
         }
         var kw_new = [];
 
@@ -480,7 +656,7 @@
             return null;
         }
         if(!match_fn) {
-            match_fn = kw_match;
+            match_fn = kw_match_simple;
         }
         var kw_new = [];
 
@@ -877,6 +1053,7 @@
      ************************************************************/
     function kw_get_dict_value(kw, key, default_value, create)
     {
+        // TODO implement _kw_search_path
         if(!(kw === Object(kw))) {
             return default_value;
         }
@@ -1288,12 +1465,16 @@
     exports.get_object_from_list = get_object_from_list;
     exports.strncmp = strncmp;
     exports.is_object = is_object;
+    exports.json_object_size = json_object_size;
     exports.is_array = is_array;
     exports.is_string = is_string;
     exports.is_number = is_number;
+    exports.is_boolean = is_boolean;
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
-    exports.kw_match = kw_match;
+    exports.strcmp = strcmp;
+    exports.cmp_two_simple_json = cmp_two_simple_json;
+    exports.kw_match_simple = kw_match_simple;
     exports.kw_collect = kw_collect;
     exports.kwid_match_id = kwid_match_id;
     exports.kwid_collect = kwid_collect;

@@ -979,7 +979,7 @@ __inside_event_loop__ = 0;
                         subscriber
                     );
                 } else if(__filter__) {
-                    topublish = kw_match(kw2publish , __filter__);
+                    topublish = kw_match_simple(kw2publish , __filter__);
                 }
                 if(!topublish) {
                     continue;
