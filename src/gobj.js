@@ -225,11 +225,22 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_remove_persistent_attrs = function(recursive)
     {
-        // TODO implement recursive
-        if(this.yuno.__global_remove_persistent_attrs_fn__) {
-            return this.yuno.__global_remove_persistent_attrs_fn__(this, recursive);
+        if(!this.yuno.__global_remove_persistent_attrs_fn__) {
+            return -1;
         }
-        return -1;
+        this.yuno.__global_remove_persistent_attrs_fn__(this, recursive);
+
+        if(recursive)  {
+            var set = this.dl_childs;
+            for(var i=0; i<set.length; i++) {
+                var child = set[i];
+                if(child) {
+                    child.gobj_remove_persistent_attrs(recursive);
+                }
+            }
+        }
+
+        return 0;
     };
 
     /************************************************************
