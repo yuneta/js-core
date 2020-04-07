@@ -299,7 +299,7 @@
         var self = this;
         var named_gobj = self._unique_gobjs[gobj.name];
         if (named_gobj) {
-            var msg = "Yuno._register_unique_gobj() ALREADY REGISTERED: " + gobj.name;
+            var msg = "GObj Name ALREADY REGISTERED: " + gobj.name;
             log_error(msg);
             return false;
         }
