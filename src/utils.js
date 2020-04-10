@@ -1086,15 +1086,25 @@
     /************************************************************
      *
      ************************************************************/
-    var unique_id = 0;
-
     function get_unique_id(prefix)
     {
         if(!prefix) {
             prefix = 'random-id-';
         }
-        ++unique_id;
-        return prefix + unique_id;
+        return prefix + uuidv4();
+    }
+
+    /************************************************************
+     *  https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#2117523
+     ************************************************************/
+    function uuidv4()
+    {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+            function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            }
+        );
     }
 
     /************************************************************
@@ -1499,6 +1509,7 @@
     exports.kw_get_str = kw_get_str;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.get_unique_id = get_unique_id;
+    exports.uuidv4 = uuidv4;
     exports.load_json_file = load_json_file;
     exports.strstr = strstr;
 
