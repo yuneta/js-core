@@ -1089,9 +1089,9 @@
     function get_unique_id(prefix)
     {
         if(!prefix) {
-            prefix = 'random-id-';
+            prefix = 'random';
         }
-        return prefix + uuidv4();
+        return prefix + "-" + uuidv4();
     }
 
     /************************************************************
