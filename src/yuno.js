@@ -171,7 +171,22 @@
      ************************************************************/
     proto.gobj_create = function(name, gclass, kw, parent)
     {
-        if (!name) {
+        if (name) {
+            /*
+             *  Check that the name: cannot contain `
+             */
+            if(name.indexOf("`")>=0) {
+                log_error("GObj name cannot contain \"`\" char: '" + name + "'");
+                return null;
+            }
+            /*
+             *  Check that the name: cannot contain ^
+             */
+            if(name.indexOf("^")>=0) {
+                log_error("GObj name cannot contain \"^\" char: '" + name + "'");
+                return null;
+            }
+        } else {
             /*
              *  To facilite the work with jquery, I generate all gobjs as named gobjs.
              *  If a gobj has no name, generate a unique name with uniqued_id.
