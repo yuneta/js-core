@@ -461,7 +461,12 @@ __inside_event_loop__ = 0;
                     this.gclass_name + ":" + this.name +
                     ", cmd: '" + command + "'";
                 if(tracing > 1) {
-                    msg += ', kw: ' + JSON.stringify(kw, replacer);
+                    try {
+                        var kw_ = JSON.stringify(kw, replacer);
+                    } catch (e) {
+                        kw_ = kw;
+                    }
+                    msg += ', kw: ' + kw_;
                 } else {
                     msg += ', kw: ' + kw;
                 }
@@ -561,10 +566,15 @@ __inside_event_loop__ = 0;
             if(!this.gobj_event_in_input_event_list(event)) {
                 if(0) {
                     var hora = get_current_datetime();
+                    try {
+                        var kw_ = JSON.stringify(kw);
+                    } catch (e) {
+                        kw_ = kw;
+                    }
                     var msg = hora + '+++++> mach: ' +
                         this.gclass_name + '^' + this.name +
                         ', ev: ' + event +
-                        ', kw: ' + JSON.stringify(kw);;
+                        ', kw: ' + kw_;
                     log_debug(msg);
                 }
 
@@ -1328,12 +1338,18 @@ __inside_event_loop__ = 0;
 
         var event_id = fsm.event_index[event] || 0;
         if (event_id <= 0) {
+            try {
+                var kw_ = JSON.stringify(kw);
+            } catch (e) {
+                kw_ = kw;
+            }
+
             log_error(
                 this.gobj_short_name() +
                 " inject_event() event UNKNOWN: "  +
                 event +
                 " kw:" +
-                JSON.stringify(kw)
+                kw_
             );
             return -1;  //# EventNotAcceptedError
         }
@@ -1377,7 +1393,12 @@ __inside_event_loop__ = 0;
                     ', ev: ' + fsm.event_list[event_id - 1] +
                     ', ac: ' + action_name;
                 if(tracing > 1) {
-                    msg += ', kw: ' + JSON.stringify(kw, replacer);
+                    try {
+                        var kw_ = JSON.stringify(kw, replacer);
+                    } catch (e) {
+                        kw_ = kw;
+                    }
+                    msg += ', kw: ' + kw_;
                 } else {
                     msg += ', kw: ' + kw;
                 }
