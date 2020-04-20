@@ -596,6 +596,92 @@
         return kw_new;
     }
 
+
+
+
+    /*
+        Utility for databases.
+        Being `ids` a:
+
+            "$id"
+
+            {
+                "$id": {
+                    "id": "$id",
+                    ...
+                }
+                ...
+            }
+
+            ["$id", ...]
+
+            [
+                "$id",
+                {
+                    "id":$id,
+                    ...
+                },
+                ...
+            ]
+
+        return a list of all ids (all duplicated items)
+    */
+    function kwid_get_ids(ids)
+    {
+        if(!ids) {
+            return [];
+        }
+
+        var new_ids = [];
+
+        if(is_string(ids)) {
+            /*
+                "$id"
+            */
+            new_ids.push(ids);
+        } else if(is_object(ids)) {
+            /*
+                {
+                    "$id": {
+                        "id": "$id",
+                        ...
+                    }
+                    ...
+                }
+            */
+            for(var id in ids) {
+                new_ids.push(id);
+            }
+        } else if(is_array(ids)) {
+            ids.foreach(function(item) {
+                if(is_string(item)) {
+                    /*
+                        ["$id", ...]
+                     */
+                    if(!empty_string(item)) {
+                        new_ids.push(item);
+                    }
+                } else if(is_object(item)) {
+                    /*
+                        [
+                            {
+                                "id":$id,
+                                ...
+                            },
+                            ...
+                        ]
+                     */
+                    var id = kw_get_str(item, "id", 0, 0);
+                    if(id) {
+                        new_ids.push(item);
+                    }
+                }
+            });
+        }
+
+        return new_ids;
+    }
+
     /*
         Utility for databases.
         Return TRUE if `id` is in the list/dict/str `ids`
@@ -1488,6 +1574,7 @@
     exports.kw_collect = kw_collect;
     exports.kwid_match_id = kwid_match_id;
     exports.kwid_collect = kwid_collect;
+    exports.kwid_get_ids = kwid_get_ids;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
