@@ -1388,6 +1388,24 @@
         return _jdb_get(topic, jdb.hook, id, true);
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function jdb_get_by_idx(jdb, topic_name, idx)
+    {
+        var topics = kw_get_dict_value(jdb, "topics", null, 0);
+        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        if(!topic) {
+            log_error("Topic not found: " + topic_name);
+            return null;
+        }
+        if(idx < topic.length)  {
+            return topic[idx];
+        } else {
+            return {};
+        }
+    }
+
     /**************************************************
      *  Busca el id en el arbol.
      *  Los id deben ser únicos, como requiere webix
@@ -1604,6 +1622,7 @@
     exports.jdb_update = jdb_update;
     exports.jdb_delete = jdb_delete;
     exports.jdb_get = jdb_get;
+    exports.jdb_get_by_idx = jdb_get_by_idx;
 
     exports._logger = _logger;
     exports.set_log_functions = set_log_functions;
