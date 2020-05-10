@@ -34,6 +34,7 @@
      ************************************************************/
     var CONFIG = {
         tracing: 0,
+        no_poll: 0,
         trace_timer: 0,
         trace_inter_event: false,
         trace_creation: false,
