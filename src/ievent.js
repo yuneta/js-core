@@ -73,7 +73,7 @@ DEBUG: {
     function setup_websocket(self)
     {
         var url = self.config.urls[self.config.idx_url];
-        log_debug("====> Starting WebSocket to: " + url); // TODO que no se vea en prod
+        log_debug("====> Starting WebSocket to '" + url + "' (" + self.gobj_short_name() + ")");
 
         function on_open_event(gobj) {
             return function() {
@@ -105,11 +105,11 @@ DEBUG: {
         try {
             var websocket = new WebSocket(url);
             if (!websocket) {
-                log_error("Cannot open WebSocket to '" + url + "'");
+                log_error(self.gobj_short_name() + ": Cannot open WebSocket to '" + url + "'");
                 return;
             }
         } catch (e) {
-            log_error("Cannot open WebSocket to '" + url + "'");
+            log_error(self.gobj_short_name() + ": Cannot open WebSocket to '" + url + "'");
             return;
         }
 
