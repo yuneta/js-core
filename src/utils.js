@@ -344,7 +344,7 @@
 
     // Return if a value is a boolean
     function is_boolean(value) {
-        return val === false || val === true;
+        return value === false || value === true;
     }
 
     function empty_string(s)
