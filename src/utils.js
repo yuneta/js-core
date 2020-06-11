@@ -653,7 +653,7 @@
                 new_ids.push(id);
             }
         } else if(is_array(ids)) {
-            ids.foreach(function(item) {
+            ids.forEach(function(item) {
                 if(is_string(item)) {
                     /*
                         ["$id", ...]
@@ -673,7 +673,7 @@
                      */
                     var id = kw_get_str(item, "id", 0, 0);
                     if(id) {
-                        new_ids.push(item);
+                        new_ids.push(id);
                     }
                 }
             });
