@@ -1084,12 +1084,48 @@
     /************************************************************
      *
      ************************************************************/
+    function search_delimiter(s, delimiter_)
+    {
+        if(!delimiter_) {
+            return 0;
+        }
+        return strchr(s, delimiter_);
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function _kw_search_path(kw, path)
+    {
+        if(!is_object(kw)) {
+            // silence
+            return 0;
+        }
+        if(!is_string(path)) {
+            log_error("path NULL or NOT STRING");
+            return 0;
+        }
+        var ss = path.split("`");
+        if(ss.length<=1) {
+            return kw[path];
+        }
+        var len = ss.length;
+        for(var i=0; i<len; i++) {
+            var key = ss[i];
+            kw = kw[key];
+        }
+        return kw;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function kw_get_bool(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
             return default_value?true:false;
         }
-        var b = kw[key];
+        var b = _kw_search_path(kw, key);
         if(b == undefined) {
             if(create) {
                 kw[key] = default_value?true:false;
@@ -1107,7 +1143,7 @@
         if(!(kw === Object(kw))) {
             return parseInt(default_value);
         }
-        var i = kw[key];
+        var i = _kw_search_path(kw, key);
         if(i == undefined) {
             if(create) {
                 kw[key] = parseInt(default_value);
@@ -1125,7 +1161,7 @@
         if(!(kw === Object(kw))) {
             return default_value.toString();
         }
-        var str = kw[key];
+        var str = _kw_search_path(kw, key);
         if(str == undefined) {
             if(create) {
                 kw[key] = default_value.toString();
@@ -1140,11 +1176,10 @@
      ************************************************************/
     function kw_get_dict_value(kw, key, default_value, create)
     {
-        // TODO implement _kw_search_path
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var v = kw[key];
+        var v = _kw_search_path(kw, key);
         if(v == undefined) {
             if(create) {
                 kw[key] = default_value;
