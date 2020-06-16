@@ -225,6 +225,11 @@
                 return null;
             }
         }
+        if(!gobj.gobj_load_persistent_attrs) {
+            var msg = "Check GClass of '" + name + "': don't look a GClass";
+            log_error(msg);
+            return null;
+        }
 
         gobj.gobj_load_persistent_attrs();
 
