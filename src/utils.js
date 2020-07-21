@@ -1527,7 +1527,9 @@
 
     function log_info(msg)
     {
-        console.log(String(msg));
+        if(!empty_string(msg)) {
+            console.log(String(msg));
+        }
         if(f_info) {
             f_info(String(msg));
         }
@@ -1535,7 +1537,9 @@
 
     function log_debug(msg)
     {
-        console.log(String(msg));
+        if(!empty_string(msg)) {
+            console.log(String(msg));
+        }
         if(f_debug) {
             f_debug(String(msg));
         }
