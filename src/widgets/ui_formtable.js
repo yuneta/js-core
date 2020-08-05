@@ -68,7 +68,7 @@
      ************************************************************/
     function build_name(self, name)
     {
-        return self.gobj_escaped_short_name() + name;
+        return self.gobj_escaped_short_name() + "-" + name;
     }
 
     /************************************************************

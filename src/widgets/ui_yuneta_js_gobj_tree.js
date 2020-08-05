@@ -13,6 +13,7 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        gobj_graph: null,
         timeout_request: 1000,
 
         // Control anclaje al "app_menu"
@@ -37,7 +38,7 @@
      ************************************************************/
     function build_name(self, name)
     {
-        return self.gobj_escaped_short_name()  + name;
+        return self.gobj_escaped_short_name() + "-" + name;
     }
 
     /************************************************************
@@ -82,7 +83,7 @@
                     css: "webix_transparent btn_icon_toolbar_16",
                     label: "Refresh",
                     click: function() {
-                        refresh_gobj_tree(self);
+                        refresh_gobj_tree(self, true);
                     }
                 },
                 {
@@ -161,31 +162,6 @@
             ]
         };
 
-        var wx_tree = {
-            id: build_name(self, "wx_tree"),
-            view: "tree",
-            scroll:"xy",
-            type:"lineTree",
-            gravity: 2,
-            select:true,
-            on:{
-                onAfterSelect:function(id) {
-                    var gobj_id = this.getItem(id).id;
-                    var gobj_ijs = __yuno__.gobj_find_unique_gobj(gobj_id);
-                    if(!gobj_ijs) {
-                        gobj_ijs = __yuno__.gobj_find_gobj(gobj_id);
-                    }
-                    if(gobj_ijs) {
-                        var $dt = $$(build_name(self, "dt_attrs"));
-                        $dt.clearAll();
-                        var data = __yuno__.gobj_list_gobj_attr(gobj_ijs);
-                        $dt.parse(data);
-                    } else {
-                        log_error("gobj not found: '" + gobj_id + "'");
-                    }
-                }
-            }
-        };
 
         /*---------------------------------------*
          *      UI
@@ -195,6 +171,7 @@
             scroll: "auto",
             id: self.gobj_name(),
             body: {
+                id: build_name(self, "work_area"),
                 cols: [
                     {
                         rows: [
@@ -204,8 +181,7 @@
                     },
                     { view:"resizer" },
                     database,
-                    { view:"resizer" },
-                    wx_tree
+                    { view:"resizer" }
                 ]
             }
         });
@@ -242,9 +218,23 @@
     /********************************************
      *
      ********************************************/
-    function refresh_gobj_tree(self)
+    function refresh_gobj_tree(self, destroy)
     {
         var data = __yuno__.gobj_list_gobj_tree(__yuno__);
+
+        if(destroy) {
+
+        }
+        self.config.gobj_graph.gobj_send_event(
+            "EV_LOAD_DATA",
+            {
+                //layer: "",
+                type: "webix-tree",
+                data: data
+            },
+            self
+        );
+
         var $tree = $$(build_name(self, "webix_tree"));
         $tree.clearAll();
         $tree.parse(data);
@@ -267,7 +257,7 @@
      ********************************************/
     function ac_timeout_request(self, event, kw, src)
     {
-        refresh_gobj_tree(self);
+        refresh_gobj_tree(self, false);
         return 0;
     }
 
@@ -351,6 +341,25 @@
         var self = this;
 
         build_webix(self);
+
+        /*
+         *  Create mxgraph js gobj tree
+         */
+        self.config.gobj_graph = self.yuno.gobj_create(
+            build_name(self, "graph"),
+            Ui_mxgraph,
+            {
+                ui_properties: {
+                    gravity: 2
+                }
+            },
+            self
+        );
+        $$(build_name(self, "work_area")).addView(
+            self.config.gobj_graph.gobj_read_attr("$ui"),
+            4
+        );
+
     }
 
     /************************************************
