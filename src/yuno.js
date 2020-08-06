@@ -33,6 +33,7 @@
      *      Yuno class.
      ************************************************************/
     var CONFIG = {
+        changesLost: false,
         tracing: 0,
         no_poll: 0,
         trace_timer: 0,
