@@ -1,7 +1,7 @@
 /***********************************************************************
- *          ui_mxgraph.js
+ *          mx_tree.js
  *
- *          MxGraph GObj
+ *          Tree with mxgrah
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -38,7 +38,7 @@
      ************************************************************/
     function build_name(self, name)
     {
-        return self.gobj_escaped_short_name() + name;
+        return self.gobj_escaped_short_name() + "-"+ name;
     }
 
     /************************************************************
@@ -51,7 +51,7 @@
             id: self.gobj_name(),
             scroll: "auto",
             body: {
-                view: "mxgraph",
+                view: "template",
                 id: build_name(self, "mxgraph"),
                 gobj: self,
                 mxgraph_options: self.config.mxgraph_options

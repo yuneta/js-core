@@ -556,11 +556,38 @@
                 fillspace: tranger_col.fillspace
             }
 
-            if(webix_col) {
-                if(!self.config.fields_enabled ||
-                        elm_in_list(webix_col.id, self.config.fields_enabled)) {
-                    webix_schema.push(webix_col);
-                }
+            switch(tranger_col.type) {
+                case "string":
+                    break;
+                case "integer":
+                    break;
+                case "object":
+                    break;
+                case "dict":
+                    break;
+                case "array":
+                    break;
+                case "list":
+                    break;
+                case "real":
+                    break;
+                case "boolean":
+                    webix_col["template"] = "{common.checkbox()}";
+                    break;
+                case "enum":
+                    break;
+                case "blob":
+                    break;
+                default:
+                    log_error("col type unknown:" + tranger_col.type);
+                    break;
+            }
+            if(tranger_col.template) {
+                webix_col["template"] = tranger_col.template;
+            }
+            if(!self.config.fields_enabled ||
+                    elm_in_list(webix_col.id, self.config.fields_enabled)) {
+                webix_schema.push(webix_col);
             }
         }
         return webix_schema;
@@ -740,12 +767,11 @@
                     break;
                 case "boolean":
                     webix_element = {
-                        view:"text",
+                        view:"checkbox",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        type: "text"
+                        readonly: is_writable?false:true
                     };
                     break;
                 case "enum":
@@ -968,12 +994,30 @@
         var data = [];
         var $widget = $$(build_name(self, "list_table"));
 
-
+        // TODO pongo filtros?
         var ids = kwid_get_ids(kw.id);
         for(var i=0; i<ids.length; i++) {
             var id = ids[i];
             var record = $widget.getItem(id);
             data.push(record);
+        }
+        return data;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_get_checked_data(self, event, kw, src)
+    {
+        var data = [];
+        var $widget = $$(build_name(self, "list_table"));
+
+        if(self.config.with_checkbox) {
+            $widget.data.each(function(obj){
+                if(obj.row) {
+                    data.push(obj);
+                }
+            });
         }
         return data;
     }
@@ -1353,6 +1397,7 @@
             "EV_UPDATE_RECORD",
             "EV_UNDO_RECORD",
             "EV_GET_DATA",
+            "EV_GET_CHECKED_DATA",
             "EV_CREATE_RECORD",
             "EV_CANCEL_RECORD",
             "EV_LIST_MODE",
@@ -1382,6 +1427,7 @@
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
+                ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_CANCEL_RECORD",            ac_cancel_record,           undefined],
                 ["EV_LIST_MODE",                ac_list_mode,               undefined],
