@@ -158,47 +158,6 @@
     /************************************************************
      *
      ************************************************************/
-    function create_graph(self)
-    {
-        var layers = self.config.layers;
-        if(!layers.length) {
-            log_error("No layers defined");
-            return;
-        }
-
-        // Create the mx root
-        var root = new mxCell();
-        root.setId("__mx_root__");
-
-        // Create layers
-        for(var i=0; i<layers.length; i++) {
-            var layer = layers[i];
-
-            // Create the layer
-            var __mx_cell__ = root.insert(new mxCell({gobj:self}));
-
-            // Set reference
-            layer["__mx_cell__"] = __mx_cell__;
-
-            var id = kw_get_str(layer, "id", null, false);
-            if(id) {
-                __mx_cell__.setId(id);
-            }
-        }
-
-        // Create the graph
-        var graph = self.config._mxgraph = new mxGraph(
-            document.getElementById(build_name(self, "mxgraph")),
-            new mxGraphModel(root)
-        );
-        graph["gobj"] = self;
-        graph["__mx_layout__"] = new mxGraphLayout(graph);
-        graph.setPanning(true);
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
     function get_layer(self, layer)
     {
         var layers = self.config.layers;
@@ -375,6 +334,9 @@
 
         build_webix(self);
 
+        /*
+         *  Initialize mxgraph
+         */
         var _mxgraph = self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
         _mxgraph["__mx_layout__"] = new mxGraphLayout(_mxgraph);
         _mxgraph.setPanning(true);
@@ -401,11 +363,8 @@
     {
         var self = this;
         mxEvent.disableContextMenu(
-            //document.getElementById(build_name(self, "mxgraph"))
             $$(build_name(self, "mxgraph")).getNode()
         );
-
-        //create_graph(self);
     }
 
     /************************************************
