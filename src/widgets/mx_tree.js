@@ -50,6 +50,7 @@
      ************************************************************/
     function resize_container(self, rect)
     {
+        return;
         self.config._mxgraph.view.setTranslate(0, 0);
         trace_msg(rect);
         var w = rect.width;
@@ -89,8 +90,6 @@
                     label: t("reset view"),
                     click: function() {
                         self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
-                        var rect = self.config._mxgraph.getGraphBounds();
-                        resize_container(self, rect);
                     }
                 },
                 {
@@ -102,8 +101,6 @@
                     label: t("fit"),
                     click: function() {
                         self.config._mxgraph.fit();
-                        var rect = self.config._mxgraph.getGraphBounds();
-                        resize_container(self, rect);
                     }
                 },
                 {
@@ -115,8 +112,7 @@
                     label: t("zoom in"),
                     click: function() {
                         self.config._mxgraph.zoomIn();
-                        var rect = self.config._mxgraph.getGraphBounds();
-                        resize_container(self, rect);
+                        self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
                 {
@@ -128,8 +124,7 @@
                     label: t("zoom out"),
                     click: function() {
                         self.config._mxgraph.zoomOut();
-                        var rect = self.config._mxgraph.getGraphBounds();
-                        resize_container(self, rect);
+                        self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
                 { view:"label", label: ""}
@@ -139,24 +134,13 @@
         /*---------------------------------------*
          *      UI
          *---------------------------------------*/
-//         if(!self.config.cx_graph) {
-//             self.config.cx_graph = $$(build_name(self, "mxgraph")).$width;
-//         }
-//         if(!self.config.cy_graph) {
-//             self.config.cy_graph = $$(build_name(self, "mxgraph")).$height;
-//         }
-
         self.config.$ui = webix.ui({
-            view: "layout",
             id: self.gobj_name(),
             rows: [
                 {
-                    view: "scrollview",
-                    scroll: "auto",
-                    body: {
-                        id: build_name(self, "mxgraph"),
-                        template: "<div id='" + build_name(self, "mxgraph") + "' style='width:" + self.config.cx_graph + "px;height:" + self.config.cy_graph + "px; border:1px solid blue;'></div>"
-                    }
+                    view: "mxgraph",
+                    id: build_name(self, "mxgraph"),
+                    gobj: self
                 },
                 toolbar
             ]
@@ -390,6 +374,10 @@
         var self = this;
 
         build_webix(self);
+
+        var _mxgraph = self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
+        _mxgraph["__mx_layout__"] = new mxGraphLayout(_mxgraph);
+        _mxgraph.setPanning(true);
     }
 
     /************************************************
@@ -412,9 +400,12 @@
     proto.mt_start = function(kw)
     {
         var self = this;
-        mxEvent.disableContextMenu(document.getElementById(build_name(self, "mxgraph")));
+        mxEvent.disableContextMenu(
+            //document.getElementById(build_name(self, "mxgraph"))
+            $$(build_name(self, "mxgraph")).getNode()
+        );
 
-        create_graph(self);
+        //create_graph(self);
     }
 
     /************************************************
