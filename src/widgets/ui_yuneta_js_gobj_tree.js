@@ -162,7 +162,6 @@
             ]
         };
 
-
         /*---------------------------------------*
          *      UI
          *---------------------------------------*/
@@ -347,14 +346,15 @@
          */
         self.config.gobj_graph = self.yuno.gobj_create(
             build_name(self, "graph"),
-            Ui_mxgraph,
+            Mx_tree,
             {
                 ui_properties: {
-                    gravity: 2
+                    gravity: 3
                 }
             },
             self
         );
+        self.config.gobj_graph.gobj_start();
         $$(build_name(self, "work_area")).addView(
             self.config.gobj_graph.gobj_read_attr("$ui"),
             4

@@ -1089,11 +1089,13 @@ __inside_event_loop__ = 0;
             if (elm_in_list(st_name, state_names)) {
                 delete_from_list(state_names, st_name);
             } else {
-                log_error("machine state: " + st_name + " is NOT in state-list");
+                log_error(
+                    this.gclass_name + ": machine state: " + st_name + " is NOT in state-list"
+                );
             }
         }
         if (state_names.length > 0) {
-            log_error("state-list OVERFILLED: " + state_names);
+            log_error(this.gclass_name + ": state-list OVERFILLED: " + state_names);
         }
 
         // remove attributes from event_list and move attrs to _event_attr list
@@ -1145,7 +1147,7 @@ __inside_event_loop__ = 0;
                     if (elm_in_list(ev_name, event_names)) {
                         set_event_names.push(ev_name);
                     } else {
-                        log_error("event NOT in event-list: " + ev_name);
+                        log_error(this.gclass_name + ": event NOT in event-list: " + ev_name);
                     }
                 }
               }
@@ -1172,10 +1174,10 @@ __inside_event_loop__ = 0;
                     var nt = ev_ac_nt[2];
 
                     if (nt && !elm_in_list(nt, state_names)) {
-                        log_error("next statename: "+ nt + " is NOT in state-list");
+                        log_error(this.gclass_name + ": next statename: "+ nt + " is NOT in state-list");
                     }
                     if(ac && typeof ac !== 'function') {
-                        log_error("action: "+ ac + " is NOT a FUNCTION");
+                        log_error(this.gclass_name + ": action: "+ ac + " is NOT a FUNCTION");
                     }
                 }
             }
@@ -1268,7 +1270,7 @@ __inside_event_loop__ = 0;
     {
         var state_id = this.fsm.state_index[new_state] || 0;
         if (state_id <= 0) {
-            log_error("change_state() state UNKNOWN: " + new_state);
+            log_error(this.gclass_name + ": change_state() state UNKNOWN: " + new_state);
             return;
         }
         this._change_state(state_id);
@@ -1282,7 +1284,7 @@ __inside_event_loop__ = 0;
         var fsm = this.fsm;
 
         if (state_id <= 0 || state_id > fsm.state_list.length) {
-            log_error("_change_state() state_id INVALID " + state_id);
+            log_error(this.gclass_name + ": _change_state() state_id INVALID " + state_id);
         }
         var tracing = this.is_tracing();
         fsm.last_state = fsm.current_state;

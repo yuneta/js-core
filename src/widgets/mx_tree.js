@@ -13,9 +13,13 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        mxgraph_options: {
-            //layers: []
-        },
+        cx_graph: 400,
+        cy_graph: 200,
+        layers: [
+            {
+                id: "__mx_default_layer__"
+            }
+        ],
         _mxgraph: null,
         ui_properties: null,
         $ui: null,
@@ -42,23 +46,123 @@
     }
 
     /************************************************************
+     *
+     ************************************************************/
+    function resize_container(self, rect)
+    {
+        self.config._mxgraph.view.setTranslate(0, 0);
+        trace_msg(rect);
+        var w = rect.width;
+        if(rect.x<0) {
+            w += -rect.x;
+        } else {
+            w += rect.x;
+        }
+        var h = rect.y + rect.height;
+        if(rect.y<0) {
+            h += -rect.y;
+        } else {
+            h += rect.y;
+        }
+        trace_msg("w: " + w + ", h: " + h);
+        $$(build_name(self, "mxgraph")).define("width", w+10);
+        $$(build_name(self, "mxgraph")).define("height", h+10);
+        $$(build_name(self, "mxgraph")).resize();
+    }
+
+    /************************************************************
      *   Webix UI
      ************************************************************/
     function build_webix(self)
     {
-        self.config.$ui = webix.ui({
-            view: "scrollview",
-            id: self.gobj_name(),
-            scroll: "auto",
-            body: {
-                view: "template",
-                id: build_name(self, "mxgraph"),
-                gobj: self,
-                mxgraph_options: self.config.mxgraph_options
-            }
-        });
-        self.config.$ui.gobj = self;
+        var toolbar = {
+            view:"toolbar",
+            height: 30,
+            css: "toolbar2color",
+            cols:[
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-expand",
+                    css: "webix_transparent btn_icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("reset view"),
+                    click: function() {
+                        self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
+                        var rect = self.config._mxgraph.getGraphBounds();
+                        resize_container(self, rect);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "fas fa-expand-arrows-alt",
+                    css: "webix_transparent btn_icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("fit"),
+                    click: function() {
+                        self.config._mxgraph.fit();
+                        var rect = self.config._mxgraph.getGraphBounds();
+                        resize_container(self, rect);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-plus",
+                    css: "webix_transparent btn_icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("zoom in"),
+                    click: function() {
+                        self.config._mxgraph.zoomIn();
+                        var rect = self.config._mxgraph.getGraphBounds();
+                        resize_container(self, rect);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-minus",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("zoom out"),
+                    click: function() {
+                        self.config._mxgraph.zoomOut();
+                        var rect = self.config._mxgraph.getGraphBounds();
+                        resize_container(self, rect);
+                    }
+                },
+                { view:"label", label: ""}
+            ]
+        };
 
+        /*---------------------------------------*
+         *      UI
+         *---------------------------------------*/
+//         if(!self.config.cx_graph) {
+//             self.config.cx_graph = $$(build_name(self, "mxgraph")).$width;
+//         }
+//         if(!self.config.cy_graph) {
+//             self.config.cy_graph = $$(build_name(self, "mxgraph")).$height;
+//         }
+
+        self.config.$ui = webix.ui({
+            view: "layout",
+            id: self.gobj_name(),
+            rows: [
+                {
+                    view: "scrollview",
+                    scroll: "auto",
+                    body: {
+                        id: build_name(self, "mxgraph"),
+                        template: "<div id='" + build_name(self, "mxgraph") + "' style='width:" + self.config.cx_graph + "px;height:" + self.config.cy_graph + "px; border:1px solid blue;'></div>"
+                    }
+                },
+                toolbar
+            ]
+        });
+
+        self.config.$ui.gobj = self;
         if(self.config.ui_properties) {
             self.config.$ui.define(self.config.ui_properties);
             if(self.config.$ui.refresh) {
@@ -70,9 +174,50 @@
     /************************************************************
      *
      ************************************************************/
+    function create_graph(self)
+    {
+        var layers = self.config.layers;
+        if(!layers.length) {
+            log_error("No layers defined");
+            return;
+        }
+
+        // Create the mx root
+        var root = new mxCell();
+        root.setId("__mx_root__");
+
+        // Create layers
+        for(var i=0; i<layers.length; i++) {
+            var layer = layers[i];
+
+            // Create the layer
+            var __mx_cell__ = root.insert(new mxCell({gobj:self}));
+
+            // Set reference
+            layer["__mx_cell__"] = __mx_cell__;
+
+            var id = kw_get_str(layer, "id", null, false);
+            if(id) {
+                __mx_cell__.setId(id);
+            }
+        }
+
+        // Create the graph
+        var graph = self.config._mxgraph = new mxGraph(
+            document.getElementById(build_name(self, "mxgraph")),
+            new mxGraphModel(root)
+        );
+        graph["gobj"] = self;
+        graph["__mx_layout__"] = new mxGraphLayout(graph);
+        graph.setPanning(true);
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function get_layer(self, layer)
     {
-        var layers = self.config.mxgraph_options.layers;
+        var layers = self.config.layers;
         for(var i=0; i<layers.length; i++) {
             if(layers[i].id == layer) {
                 return layers[i].__mx_cell__;
@@ -98,6 +243,13 @@
                 style
             );
         }
+            self.config._mxgraph.insertVertex(
+                parent,
+                data.id,
+                data.value,
+                x+cx+10, y+cy+10, cx, cy,
+                style
+            );
     }
 
     /************************************************************
@@ -138,19 +290,11 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        $$(build_name(self, "mxgraph")).destructor();
-        if(self.config._mxgraph) {
-            self.config._mxgraph.destroy();
-        }
-
-        var $new_mx = webix.ui({
-            view: "mxgraph",
-            id: build_name(self, "mxgraph"),
-            gobj: self,
-            mxgraph_options: self.config.mxgraph_options
-        });
-        $$(self.gobj_name()).addView($new_mx);
-
+//         if(self.config._mxgraph) {
+//             self.config._mxgraph.destroy();
+//             self.config._mxgraph = null;
+//         }
+        // TODO crea de nuevo
         return 0;
     }
 
@@ -194,7 +338,7 @@
     var FSM = {
         "event_list": [
             "EV_LOAD_DATA",
-            "EV_MXGRAPH_INITIALIZED",
+            "EV_CLEAR_DATA",
             "EV_SELECT",
             "EV_REFRESH"
         ],
@@ -206,28 +350,27 @@
             [
                 ["EV_LOAD_DATA",            ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,              undefined],
-                ["EV_MXGRAPH_INITIALIZED",  ac_mxgraph_initialized,     undefined],
                 ["EV_SELECT",               ac_select,                  undefined],
                 ["EV_REFRESH",              ac_refresh,                 undefined]
             ]
         }
     };
 
-    var Ui_mxgraph = GObj.__makeSubclass__();
-    var proto = Ui_mxgraph.prototype; // Easy access to the prototype
+    var Mx_tree = GObj.__makeSubclass__();
+    var proto = Mx_tree.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_mxgraph",
+            "Mx_tree",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_mxgraph, "Ui_mxgraph");
+    gobj_register_gclass(Mx_tree, "Mx_tree");
 
 
 
@@ -269,7 +412,9 @@
     proto.mt_start = function(kw)
     {
         var self = this;
+        mxEvent.disableContextMenu(document.getElementById(build_name(self, "mxgraph")));
 
+        create_graph(self);
     }
 
     /************************************************
@@ -284,6 +429,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_mxgraph = Ui_mxgraph;
+    exports.Mx_tree = Mx_tree;
 
 })(this);
