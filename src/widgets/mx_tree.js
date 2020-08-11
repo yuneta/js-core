@@ -13,15 +13,13 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        cx_graph: 400,
-        cy_graph: 200,
         layers: [
             {
                 id: "__mx_default_layer__"
             }
         ],
         _mxgraph: null,
-        ui_properties: null,
+        ui_properties: null,    // creator can set webix properties
         $ui: null,
         __writable_attrs__: [
         ]
@@ -46,32 +44,6 @@
     }
 
     /************************************************************
-     *
-     ************************************************************/
-    function resize_container(self, rect)
-    {
-        return;
-        self.config._mxgraph.view.setTranslate(0, 0);
-        trace_msg(rect);
-        var w = rect.width;
-        if(rect.x<0) {
-            w += -rect.x;
-        } else {
-            w += rect.x;
-        }
-        var h = rect.y + rect.height;
-        if(rect.y<0) {
-            h += -rect.y;
-        } else {
-            h += rect.y;
-        }
-        trace_msg("w: " + w + ", h: " + h);
-        $$(build_name(self, "mxgraph")).define("width", w+10);
-        $$(build_name(self, "mxgraph")).define("height", h+10);
-        $$(build_name(self, "mxgraph")).resize();
-    }
-
-    /************************************************************
      *   Webix UI
      ************************************************************/
     function build_webix(self)
@@ -84,7 +56,7 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "far fa-expand",
+                    icon: "fad fa-compress-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
                     maxWidth: 120,
                     label: t("reset view"),
@@ -95,7 +67,7 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "fas fa-expand-arrows-alt",
+                    icon: "fad fa-expand-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
                     maxWidth: 120,
                     label: t("fit"),
@@ -106,7 +78,7 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "far fa-plus",
+                    icon: "far fa-search-plus",
                     css: "webix_transparent btn_icon_toolbar_16",
                     maxWidth: 120,
                     label: t("zoom in"),
@@ -118,7 +90,7 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "far fa-minus",
+                    icon: "far fa-search-minus",
                     css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("zoom out"),
@@ -155,44 +127,193 @@
         }
     }
 
+    /********************************************
+     *  Create root and layers
+     ********************************************/
+    function create_root_and_layers(graph, layers)
+    {
+        var root = null;
+        if(layers && layers.length) { // TODO
+            root = new mxCell();
+            root.setId("__mx_root__");
+
+            for(var i=0; i<layers.length; i++) {
+                var layer = layers[i];
+
+                // Create the layer
+                var __mx_cell__ = root.insert(new mxCell());
+
+                // Set reference
+                layer["__mx_cell__"] = __mx_cell__;
+
+                var id = kw_get_str(layer, "id", null, false);
+                if(id) {
+                    __mx_cell__.setId(id);
+                }
+            }
+        } else {
+            root = graph.getModel().createRoot()
+        }
+
+        graph.getModel().beginUpdate();
+        try {
+            graph.getModel().setRoot(root);
+        } finally {
+            graph.getModel().endUpdate();
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function initialize_mxgraph(self)
+    {
+        var graph = self.config._mxgraph;
+
+        create_root_and_layers(graph, self.config.layers);
+
+        // Enables rubberband selection
+        new mxRubberband(graph);
+
+        // Panning? HACK if panning is setted then rubberband selection will not work
+        graph.setPanning(false);
+
+        // Negative coordenates?
+        graph.allowNegativeCoordinates = false;
+
+        // Multiple connections between the same pair of vertices.
+        graph.setMultigraph(false);
+
+        // Enable/Disable basic selection and cell handling
+        graph.setEnabled(false);
+
+        // Enable/Disable tooltips
+        graph.setTooltips(true);
+
+        // Adds a highlight on the cell under the mousepointer
+        new mxCellTracker(graph);
+
+        // Celdas seleccionables? (marco de redimensionamiento)
+        graph.setCellsSelectable(true);
+
+        // Avoids overlap of edges and collapse icons
+        graph.keepEdgesInBackground = true;
+
+        // Enables automatic sizing for vertices after editing
+        graph.setAutoSizeCells(true);
+
+        // Creates the default style for vertices
+        var style = [];
+        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+        style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+        style[mxConstants.STYLE_STROKECOLOR] = 'gray';
+        style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_FILLCOLOR] = '#D2E3EF';
+        style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+        style[mxConstants.STYLE_FONTCOLOR] = '#774400';
+        style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+        style[mxConstants.STYLE_FONTSIZE] = '12';
+        style[mxConstants.STYLE_FONTSTYLE] = 1;
+        graph.getStylesheet().putDefaultVertexStyle(style);
+
+        graph.setHtmlLabels(true);
+
+        // Enables automatic layout on the graph and installs
+        // a tree layout for all groups who's children are
+        // being changed, added or removed.
+        var layout = new mxCompactTreeLayout(graph, false);
+        layout.useBoundingBox = false;
+        layout.edgeRouting = false;
+        layout.levelDistance = 30;
+        layout.nodeDistance = 10;
+
+        var layoutMgr = new mxLayoutManager(graph);
+
+        layoutMgr.getLayout = function(cell)
+        {
+            if (cell.getChildCount() > 0)
+            {
+                return layout;
+            }
+        };
+
+        // Handles clicks on cells
+        graph.addListener(mxEvent.CLICK, function(sender, evt) {
+            var cell = evt.getProperty('cell');
+            if (cell != null) {
+                self.parent.gobj_send_event("EV_CLICK_CELL", cell, self);
+            }
+        });
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function br(short_name)
+    {
+        var n = short_name.split('^');
+        return n[0] + "^<br/>" + n[1];
+    }
+
     /************************************************************
      *
      ************************************************************/
     function get_layer(self, layer)
     {
-        var layers = self.config.layers;
-        for(var i=0; i<layers.length; i++) {
-            if(layers[i].id == layer) {
-                return layers[i].__mx_cell__;
-            }
-        }
-        var x = self.config._mxgraph.getModel().getCell(layer);
+// TODO        var layers = self.config.layers;
+//         for(var i=0; i<layers.length; i++) {
+//             if(layers[i].id == layer) {
+//                 return layers[i].__mx_cell__;
+//             }
+//         }
+//         var x = self.config._mxgraph.getModel().getCell(layer);
         return self.config._mxgraph.getDefaultParent();
     }
 
     /************************************************************
      *
      ************************************************************/
-    function _load_webix_tree(self, parent, data)
+    function _load_webix_tree(self, group, x, y, parent, childs)
     {
-        var x=0, y=0, cx=100, cy=100;
+        var cx=120, cy=50, sep=30;
         var style = "";
-        for(var i=0; i<data.length; i++) {
-            self.config._mxgraph.insertVertex(
-                parent,
-                data.id,
-                data.value,
+
+        /*
+         *  Paint Childs
+         */
+        for(var i=0; i<childs.length; i++) {
+            var record = childs[i];
+            var child = self.config._mxgraph.insertVertex(
+                group,
+                record.id,
+                br(record.value),
                 x, y, cx, cy,
                 style
             );
+            if(parent) {
+                self.config._mxgraph.insertEdge(
+                    group,          // group
+                    null,           // id
+                    '',             // value
+                    parent,         // source
+                    child,          // target
+                    null            // style
+                );
+            }
+            if(kw_has_key(record, "data")) {
+                _load_webix_tree(
+                    self,
+                    group,
+                    x,
+                    y + cy + sep,
+                    child,
+                    record.data
+                );
+            }
+            x += cx + sep;
         }
-            self.config._mxgraph.insertVertex(
-                parent,
-                data.id,
-                data.value,
-                x+cx+10, y+cy+10, cx, cy,
-                style
-            );
+
     }
 
     /************************************************************
@@ -200,8 +321,10 @@
      ************************************************************/
     function load_webix_tree(self, data, layer)
     {
-        var layer = get_layer(self, layer);
-        _load_webix_tree(self, layer, data);
+        var group = get_layer(self, layer);
+        var x=0;
+        var y=0; // si meto separación aparece scrollbar al ajustar
+        _load_webix_tree(self, group, x, y, 0, data);
     }
 
 
@@ -219,12 +342,20 @@
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
-        switch(kw.type) {
-            case "webix-tree":
-            default:
-                load_webix_tree(self, kw.data, kw.layer);
-                break;
+        var model = self.config._mxgraph.getModel();
+        model.beginUpdate();
+        try {
+            switch(kw.type) {
+                case "webix-tree":
+                default:
+                    load_webix_tree(self, kw.data, kw.layer);
+                    break;
+            }
+        } finally {
+            // Updates the display
+            model.endUpdate();
         }
+
         return 0;
     }
 
@@ -233,20 +364,8 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-//         if(self.config._mxgraph) {
-//             self.config._mxgraph.destroy();
-//             self.config._mxgraph = null;
-//         }
-        // TODO crea de nuevo
-        return 0;
-    }
+        initialize_mxgraph(self);
 
-    /********************************************
-     *
-     ********************************************/
-    function ac_mxgraph_initialized(self, event, kw, src)
-    {
-        self.config._mxgraph = kw._mxgraph;
         return 0;
     }
 
@@ -333,13 +452,9 @@
         var self = this;
 
         build_webix(self);
+        self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
 
-        /*
-         *  Initialize mxgraph
-         */
-        var _mxgraph = self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
-        _mxgraph["__mx_layout__"] = new mxGraphLayout(_mxgraph);
-        _mxgraph.setPanning(true);
+        initialize_mxgraph(self);
     }
 
     /************************************************
@@ -352,6 +467,7 @@
         var self = this;
         if(self.config._mxgraph) {
             self.config._mxgraph.destroy();
+            self.config._mxgraph = null;
         }
         $$(self.gobj_name()).destructor();
     }

@@ -14,16 +14,11 @@
 webix.protoUI({
     name: "mxgraph",
     defaults: {
-        layers: [
-            {
-                id: "__mx_default_layer__"
-            }
-        ]
     },
 
     $init: function() {
         this.$view.innerHTML =
-            "<div class='webix_mxgraph_content' style='width:100%;height:100%;overflow:auto;'></div>";
+            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:auto;background:#FFFFFF;'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);
@@ -34,30 +29,8 @@ webix.protoUI({
     },
 
     render: function() {
-        // Create the mx root
-        var root = new mxCell();
-        root.setId("__mx_root__");
-
-        // Create layers
-        var layers = this.config.layers;
-        for(var i=0; i<layers.length; i++) {
-            var layer = layers[i];
-
-            // Create the layer
-            var __mx_cell__ = root.insert(new mxCell());
-
-            // Set reference
-            layer["__mx_cell__"] = __mx_cell__;
-
-            var id = kw_get_str(layer, "id", null, false);
-            if(id) {
-                __mx_cell__.setId(id);
-            }
-        }
-
         // Create the graph
-        this._mxgraph = new mxGraph(this._contentobj, new mxGraphModel(root));
-        this._mxgraph["gobj"] = this.config.gobj;
+        this._mxgraph = new mxGraph(this._contentobj);
     },
 
     getMxgraph: function() {

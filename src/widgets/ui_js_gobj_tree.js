@@ -217,11 +217,17 @@
     /********************************************
      *
      ********************************************/
-    function refresh_gobj_tree(self, destroy)
+    function refresh_gobj_tree(self, clear)
     {
         var data = __yuno__.gobj_list_gobj_tree(__yuno__);
 
-        if(destroy) {
+        if(clear) {
+            self.config.gobj_graph.gobj_send_event(
+                "EV_CLEAR_DATA",
+                {
+                },
+                self
+            );
 
         }
         self.config.gobj_graph.gobj_send_event(
@@ -250,6 +256,15 @@
 
 
 
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_click_cell(self, event, kw, src)
+    {
+        $$(build_name(self, "webix_tree")).select(kw.id);
+        return 0;
+    }
 
     /********************************************
      *
@@ -289,6 +304,7 @@
 
     var FSM = {
         "event_list": [
+            "EV_CLICK_CELL",
             "EV_TIMEOUT",
             "EV_SELECT",
             "EV_REFRESH"
@@ -299,6 +315,8 @@
         "machine": {
             "ST_IDLE":
             [
+
+                ["EV_CLICK_CELL",           ac_click_cell,          undefined],
                 ["EV_TIMEOUT",              ac_timeout_request,     undefined],
                 ["EV_SELECT",               ac_select,              undefined],
                 ["EV_REFRESH",              ac_refresh,             undefined]
@@ -306,21 +324,21 @@
         }
     };
 
-    var Ui_yuneta_js_gobj_tree = GObj.__makeSubclass__();
-    var proto = Ui_yuneta_js_gobj_tree.prototype; // Easy access to the prototype
+    var Ui_js_gobj_tree = GObj.__makeSubclass__();
+    var proto = Ui_js_gobj_tree.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_yuneta_js_gobj_tree",
+            "Ui_js_gobj_tree",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_yuneta_js_gobj_tree, "Ui_yuneta_js_gobj_tree");
+    gobj_register_gclass(Ui_js_gobj_tree, "Ui_js_gobj_tree");
 
 
 
@@ -345,7 +363,7 @@
          *  Create mxgraph js gobj tree
          */
         self.config.gobj_graph = self.yuno.gobj_create(
-            build_name(self, "graph"),
+            "graph",
             Mx_tree,
             {
                 ui_properties: {
@@ -394,7 +412,7 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_yuneta_js_gobj_tree = Ui_yuneta_js_gobj_tree;
+    exports.Ui_js_gobj_tree = Ui_js_gobj_tree;
 
 })(this);
 
