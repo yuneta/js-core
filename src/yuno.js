@@ -33,7 +33,8 @@
      *      Yuno class.
      ************************************************************/
     var CONFIG = {
-        changesLost: false,
+        changesLost: false, // Use with window.onbeforeunload in __yuno__.
+                            // Set true to warning about leaving page.
         tracing: 0,
         no_poll: 0,
         trace_timer: 0,
@@ -171,7 +172,7 @@
     /************************************************************
      *      gobj_create factory.
      ************************************************************/
-    proto.gobj_create = function(name, gclass, kw, parent)
+    proto._gobj_create = function(name, gclass, kw, parent, is_service, is_unique)
     {
         if (name) {
             /*
@@ -195,7 +196,8 @@
              */
             // force all gobj to have a name.
             // useful to make DOM elements with id depending of his gobj.
-            name = get_unique_id('gobj');
+            // WARNING danger change, 13/Ago/2020, now anonymous gobjs in js
+            name = ""; // get_unique_id('gobj');
         }
 
         if (!(typeof parent === 'string' || parent instanceof GObj)) {
@@ -222,17 +224,22 @@
         gobj.yuno = this;
         if (name) {
             // All js gobjs are unique-named!
-            if(!this._register_unique_gobj(gobj)) {
-                return null;
-            }
+            // WARNING danger change, 13/Ago/2020, now anonymous gobjs in js
+            //if(!this._register_unique_gobj(gobj)) {
+            //    return null;
+            //}
         }
         if(!gobj.gobj_load_persistent_attrs) {
             var msg = "Check GClass of '" + name + "': don't look a GClass";
             log_error(msg);
             return null;
         }
+        gobj.config.__service__ = is_service;
+        gobj.config.__unique__ = is_unique;
 
-        gobj.gobj_load_persistent_attrs();
+        if(is_service || is_unique) {
+            gobj.gobj_load_persistent_attrs();
+        }
 
         if (parent) {
             parent._add_child(gobj)
@@ -253,14 +260,37 @@
     /************************************************************
      *      gobj_create factory.
      ************************************************************/
+    proto.gobj_create = function(name, gclass, kw, parent)
+    {
+        return this._gobj_create(name, gclass, kw, parent, false, false);
+    };
+
+    /************************************************************
+     *      gobj_create factory.
+     ************************************************************/
+    proto.gobj_create_unique = function(name, gclass, kw, parent)
+    {
+        if(this._exist_unique_gobj(name)) {
+            var msg = "GObj unique ALREADY exits: " + name;
+            log_error(msg);
+            return null;
+        }
+
+        return this._gobj_create(name, gclass, kw, parent, false, true);
+    };
+
+    /************************************************************
+     *      gobj_create factory.
+     ************************************************************/
     proto.gobj_create_service = function(name, gclass, kw, parent)
     {
-        var gobj = this.gobj_create(name, gclass, kw, parent);
-        if(!gobj)
-            return undefined;
+        if(this._exist_service_gobj(name)) {
+            var msg = "GObj service ALREADY exists: " + name;
+            log_error(msg);
+            return null;
+        }
 
-        this._register_service_gobj(gobj);
-        return gobj;
+        return this._gobj_create(name, gclass, kw, parent, true, false);
     };
 
     /************************************************************
@@ -292,8 +322,11 @@
         if (gobj.parent) {
             gobj.parent._remove_child(gobj)
         }
-        if (gobj.name) {
-            self._deregister_unique_gobj(gobj);
+        if(gobj.gobj_is_unique()) {
+            this._deregister_unique_gobj(gobj);
+        }
+        if(gobj.gobj_is_service()) {
+            this._deregister_service_gobj(gobj);
         }
 
         var dl_childs = gobj.dl_childs.slice();
@@ -315,17 +348,29 @@
     };
 
     /************************************************************
+     *        exist a unique gobj?
+     ************************************************************/
+    proto._exist_unique_gobj = function(name) {
+        var self = this;
+        if(kw_has_key(self._unique_gobjs, name)) {
+            return true;
+        }
+        return false;
+    };
+
+    /************************************************************
      *        register a unique gobj
      ************************************************************/
     proto._register_unique_gobj = function(gobj) {
         var self = this;
         var named_gobj = self._unique_gobjs[gobj.name];
         if (named_gobj) {
-            var msg = "GObj Name ALREADY REGISTERED: " + gobj.name;
+            var msg = "GObj unique ALREADY REGISTERED: " + gobj.name;
             log_error(msg);
             return false;
         }
         self._unique_gobjs[gobj.name] = gobj;
+        self.config.is_unique = true;
         return true;
     };
 
@@ -339,7 +384,19 @@
             delete self._unique_gobjs[gobj.name];
             return true
         }
-        return false
+        self.config.is_unique = false;
+        return false;
+    };
+
+    /************************************************************
+     *        exist a service gobj?
+     ************************************************************/
+    proto._exist_service_gobj = function(name) {
+        var self = this;
+        if(kw_has_key(self._service_gobjs, name)) {
+            return true;
+        }
+        return false;
     };
 
     /************************************************************
@@ -349,11 +406,12 @@
         var self = this;
         var named_gobj = self._service_gobjs[gobj.name];
         if (named_gobj) {
-            var msg = "Yuno._register_service_gobj() ALREADY REGISTERED: " + gobj.name;
+            var msg = "GObj service ALREADY REGISTERED: " + gobj.name;
             log_error(msg);
             return false;
         }
         self._service_gobjs[gobj.name] = gobj;
+        self.config.is_service = true;
         return true;
     };
 
@@ -365,9 +423,10 @@
         var named_gobj = self._service_gobjs[gobj.name];
         if (named_gobj) {
             delete self._service_gobjs[gobj.name];
-            return true
+            return true;
         }
-        return false
+        self.config.is_service = false;
+        return false;
     };
 
     /************************************************************

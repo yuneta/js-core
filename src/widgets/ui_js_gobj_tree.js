@@ -363,7 +363,7 @@
          *  Create mxgraph js gobj tree
          */
         self.config.gobj_graph = self.yuno.gobj_create(
-            "graph",
+            "",
             Mx_tree,
             {
                 ui_properties: {

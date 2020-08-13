@@ -198,14 +198,34 @@ __inside_event_loop__ = 0;
         return this.dl_childs.length;
     };
 
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_is_service = function()
+    {
+        return this.config.__service__;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_is_unique = function()
+    {
+        return this.config.__unique__;
+    }
+
     /************************************************************
      *
      ************************************************************/
     proto.gobj_load_persistent_attrs = function()
     {
-        if(this.yuno.__global_load_persistent_attrs_fn__) {
-            return this.yuno.__global_load_persistent_attrs_fn__(this);
+        if(this.gobj_is_service() || this.gobj_is_unique()) {
+            if(this.yuno.__global_load_persistent_attrs_fn__) {
+                return this.yuno.__global_load_persistent_attrs_fn__(this);
+            }
         }
+        log_error("gobj_load_persistent_attrs() failed");
         return -1;
     };
 
@@ -214,9 +234,12 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_save_persistent_attrs = function()
     {
-        if(this.yuno.__global_save_persistent_attrs_fn__) {
-            return this.yuno.__global_save_persistent_attrs_fn__(this);
+        if(this.gobj_is_service() || this.gobj_is_unique()) {
+            if(this.yuno.__global_save_persistent_attrs_fn__) {
+                return this.yuno.__global_save_persistent_attrs_fn__(this);
+            }
         }
+        log_error("gobj_save_persistent_attrs() failed");
         return -1;
     };
 
