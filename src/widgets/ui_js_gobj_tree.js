@@ -3,6 +3,11 @@
  *
  *          JS Gobj's tree UI
  *
+ *
+ *  Version
+ *  -------
+ *  1.0     Initial release
+ *
  *          Copyright (c) 2020 Niyamaka
  *          All Rights Reserved.
  ***********************************************************************/

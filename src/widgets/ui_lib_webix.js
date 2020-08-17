@@ -3,6 +3,10 @@
  *
  *          Webix Helpers
  *
+ *  Version
+ *  -------
+ *  1.0     Initial release
+ *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
@@ -12,7 +16,7 @@
     /********************************************
      *
      ********************************************/
-    function setup_webix()
+    function setup_webix(config)
     {
         /*
          *  Multicombo propio
@@ -104,8 +108,15 @@
         /*
          *  Habilita scroll de webix, mas delgada
          */
-        if (!webix.env.touch && webix.env.scrollSize) {
+        if(!webix.env.touch && webix.env.scrollSize) {
             webix.CustomScroll.init();
+        }
+
+        /*
+         *  Habilita full screen
+         */
+        if(config && config.full_screen) {
+            webix.ui.fullScreen();
         }
     }
 

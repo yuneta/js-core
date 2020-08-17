@@ -163,6 +163,9 @@
         if(!list) {
             throw "ERROR: elm_in_list() list empty";
         }
+        if(!elm) {
+            throw "ERROR: elm_in_list() elm empty";
+        }
         for(var i=0; i<list.length; i++) {
             if(elm === list[i]) {
                 return true;

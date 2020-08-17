@@ -587,17 +587,24 @@ __inside_event_loop__ = 0;
         }
         if(this.mt_inject_event) {
             if(!this.gobj_event_in_input_event_list(event)) {
-                if(0) {
+                var tracing = this.is_tracing();
+                if(tracing) {
                     var hora = get_current_datetime();
                     try {
                         var kw_ = JSON.stringify(kw);
                     } catch (e) {
                         kw_ = kw;
                     }
-                    var msg = hora + '+++++> mach: ' +
+                    var msg = hora + '+> mach: ' +
                         this.gclass_name + '^' + this.name +
                         ', ev: ' + event +
                         ', kw: ' + kw_;
+
+                    if(src) {
+                        msg += ', src: ' + src.gclass_name + '^' + src.name;
+                    } else {
+                        msg += ', src: undefined';
+                    }
                     log_debug(msg);
                 }
 

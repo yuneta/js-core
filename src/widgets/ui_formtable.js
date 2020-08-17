@@ -7,7 +7,11 @@
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  *
- *  V 1.0
+ *
+ *  Version
+ *  -------
+ *  1.0     Initial release
+ *
  *
  ***********************************************************************/
 (function (exports) {
@@ -1394,6 +1398,7 @@
     var FSM = {
         "event_list": [
             "EV_LOAD_DATA",
+            "EV_CLEAR_DATA",
             "EV_UPDATE_RECORD",
             "EV_UNDO_RECORD",
             "EV_GET_DATA",
@@ -1413,7 +1418,6 @@
             "EV_RECORD_BY_ID",
             "EV_PAGE",
             "EV_REBUILD_TABLE",
-            "EV_CLEAR_DATA",
             "EV_REFRESH",
             "EV_SELECT"
         ],
@@ -1424,6 +1428,7 @@
             "ST_IDLE":
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
+                ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
@@ -1443,7 +1448,6 @@
                 ["EV_RECORD_BY_ID",             ac_record_by_id,            undefined],
                 ["EV_PAGE",                     ac_page,                    undefined],
                 ["EV_REBUILD_TABLE",            ac_rebuild_table,           undefined],
-                ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_REFRESH",                  ac_refresh,                 undefined],
                 ["EV_SELECT",                   ac_select,                  undefined]
             ]
