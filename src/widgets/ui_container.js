@@ -55,7 +55,7 @@
                         template: "top_toolbar",
                         id: build_name(self, "top_toolbar"),
                         height: self.config.toolbar_size,
-                        hidden: false
+                        hidden: true
                     },
                     {
                         view: "layout",
@@ -65,7 +65,7 @@
                                 template: "left_toolbar",
                                 id: build_name(self, "left_toolbar"),
                                 width: self.config.toolbar_size,
-                                hidden: false
+                                hidden: true
                             },
                             {
                                 view: "scrollview",
@@ -82,7 +82,7 @@
                                 template: "right_toolbar",
                                 id: build_name(self, "right_toolbar"),
                                 width: self.config.toolbar_size,
-                                hidden: false
+                                hidden: true
                             }
                         ]
                     },
@@ -90,7 +90,7 @@
                         template: "bottom_toolbar",
                         id: build_name(self, "bottom_toolbar"),
                         height: self.config.toolbar_size,
-                        hidden: false
+                        hidden: true
                     }
                 ]
             });
@@ -103,7 +103,7 @@
                         template: "top_toolbar",
                         id: build_name(self, "top_toolbar"),
                         height: self.config.toolbar_size,
-                        hidden: false
+                        hidden: true
                     },
                     {
                         view: "layout",
@@ -113,7 +113,7 @@
                                 template: "left_toolbar",
                                 id: build_name(self, "left_toolbar"),
                                 width: self.config.toolbar_size,
-                                hidden: false
+                                hidden: true
                             },
                             {
                                 view: "scrollview",
@@ -130,7 +130,7 @@
                                 template: "right_toolbar",
                                 id: build_name(self, "right_toolbar"),
                                 width: self.config.toolbar_size,
-                                hidden: false
+                                hidden: true
                             }
                         ]
                     },
@@ -138,7 +138,7 @@
                         template: "bottom_toolbar",
                         id: build_name(self, "bottom_toolbar"),
                         height: self.config.toolbar_size,
-                        hidden: false
+                        hidden: true
                     }
                 ]
             });
@@ -152,25 +152,6 @@
                 self.config.$ui.refresh();
             }
         }
-
-        /*---------------------------------------*
-         *      Automatic Resizing
-         *---------------------------------------*/
-        function automatic_resizing_cb()
-        {
-            var window_width = window.innerWidth;
-            var window_height = window.innerHeight;
-
-            var childs = self.gobj_match_childs({});
-            for(var i=0; i < childs.length; i++) {
-                var child = childs[i];
-                var $ui = child.gobj_read_attr("$ui");
-                $ui.define("minWidth", window_width);
-                $ui.resize();
-            }
-        }
-
-        //webix.event(window, "resize", automatic_resizing_cb);
     }
 
 
