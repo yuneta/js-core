@@ -222,21 +222,32 @@
 
         var gobj = new gclass(name, kw);
         gobj.yuno = this;
-        if (name) {
+        gobj.config.__service__ = is_service;
+        gobj.config.__unique__ = is_unique;
+
+        if(!gobj.gobj_load_persistent_attrs) {
+            var msg = "Check GClass of '" + name + "': don't look a GClass";
+            log_error(msg);
+            return null;
+        }
+        if(name) {
             // All js gobjs are unique-named!
             // WARNING danger change, 13/Ago/2020, now anonymous gobjs in js
             //if(!this._register_unique_gobj(gobj)) {
             //    return null;
             //}
         }
-        if(!gobj.gobj_load_persistent_attrs) {
-            var msg = "Check GClass of '" + name + "': don't look a GClass";
-            log_error(msg);
-            return null;
-        }
-        gobj.config.__service__ = is_service;
-        gobj.config.__unique__ = is_unique;
 
+        if(is_unique) {
+            if(!this._register_unique_gobj(gobj)) {
+               return null;
+            }
+        }
+        if(is_service) {
+            if(!this._register_service_gobj(gobj)) {
+               return null;
+            }
+        }
         if(is_service || is_unique) {
             gobj.gobj_load_persistent_attrs();
         }
