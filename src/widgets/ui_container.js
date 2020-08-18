@@ -50,6 +50,9 @@
             self.config.$ui = webix.ui({
                 view: "layout",
                 id: self.gobj_name(),
+                type: "space",
+                padding: 5,
+                margin: 5,
                 rows: [
                     {
                         template: "top_toolbar",
@@ -74,7 +77,8 @@
                                 body: {
                                     view: "layout",
                                     id: build_name(self, "work_place"),
-                                    type: "space",
+                                    type: "wide",
+                                    margin: 5,
                                     cols: []
                                 }
                             },
@@ -98,6 +102,9 @@
             self.config.$ui = webix.ui({
                 view: "layout",
                 id: self.gobj_name(),
+                type: "space",
+                padding: 5,
+                margin: 5,
                 rows: [
                     {
                         template: "top_toolbar",
@@ -122,7 +129,8 @@
                                 body: {
                                     view: "layout",
                                     id: build_name(self, "work_place"),
-                                    type: "space",
+                                    type: "wide",
+                                    margin: 5,
                                     rows: []
                                 }
                             },
@@ -221,7 +229,8 @@
             work_place = {
                 view: "layout",
                 id: build_name(self, "work_place"),
-                type: "space",
+                type: "wide",
+                margin: 5,
                 rows: []
             };
             self.config.mode = "vertical";
@@ -229,7 +238,8 @@
             work_place = {
                 view: "layout",
                 id: build_name(self, "work_place"),
-                type: "space",
+                type: "wide",
+                margin: 5,
                 cols: []
             };
             self.config.mode = "horizontal";
