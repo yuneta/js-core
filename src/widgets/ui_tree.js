@@ -125,14 +125,22 @@
     /********************************************
      *
      ********************************************/
+    function ac_select_item(self, event, kw, src)
+    {
+        var $tree = $$(build_name(self, "webix_tree"));
+        $tree.select(kw.id);
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_load_data(self, event, kw, src)
     {
         var data = __duplicate__(kw.data);
         var $tree = $$(build_name(self, "webix_tree"));
         $tree.clearAll();
         $tree.parse(data);
-        $tree.openAll();
-        //$tree.select($tree.getFirstId());
+        $tree.openAll(); // TODO configura el openAll
 
         return 0;
     }
@@ -178,6 +186,7 @@
 
     var FSM = {
         "event_list": [
+            "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
             "EV_SELECT",
@@ -189,6 +198,7 @@
         "machine": {
             "ST_IDLE":
             [
+                ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_LOAD_DATA",            ac_load_data,       undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
                 ["EV_SELECT",               ac_select,          undefined],

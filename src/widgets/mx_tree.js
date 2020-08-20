@@ -242,7 +242,7 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
-                self.parent.gobj_send_event("EV_CLICK_CELL", cell, self);
+                self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
             }
         });
     }
@@ -340,19 +340,29 @@
     /********************************************
      *
      ********************************************/
+    function ac_select_item(self, event, kw, src)
+    {
+        self.config._mxgraph.setSelectionCell(self.config._mxgraph.model.getCell(kw.id));
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_load_data(self, event, kw, src)
     {
+        var layer = kw.layer;
+        var data = __duplicate__(kw.data);
+
         var model = self.config._mxgraph.getModel();
         model.beginUpdate();
         try {
             switch(kw.type) {
                 case "webix-tree":
                 default:
-                    load_webix_tree(self, kw.data, kw.layer);
+                    load_webix_tree(self, data, layer);
                     break;
             }
         } finally {
-            // Updates the display
             model.endUpdate();
         }
 
@@ -399,6 +409,7 @@
 
     var FSM = {
         "event_list": [
+            "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
             "EV_SELECT",
@@ -410,10 +421,11 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_LOAD_DATA",            ac_load_data,               undefined],
-                ["EV_CLEAR_DATA",           ac_clear_data,              undefined],
-                ["EV_SELECT",               ac_select,                  undefined],
-                ["EV_REFRESH",              ac_refresh,                 undefined]
+                ["EV_SELECT_ITEM",          ac_select_item,     undefined],
+                ["EV_LOAD_DATA",            ac_load_data,       undefined],
+                ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
+                ["EV_SELECT",               ac_select,          undefined],
+                ["EV_REFRESH",              ac_refresh,         undefined]
             ]
         }
     };
