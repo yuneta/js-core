@@ -44,6 +44,24 @@
     }
 
     /************************************************************
+     *   Rebuild
+     ************************************************************/
+    function rebuild(self)
+    {
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
+        if(self.config._mxgraph) {
+            self.config._mxgraph.destroy();
+            self.config._mxgraph = null;
+        }
+        build_webix(self);
+        self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
+        initialize_mxgraph(self);
+    }
+
+    /************************************************************
      *   Webix UI
      ************************************************************/
     function build_webix(self)
@@ -393,7 +411,7 @@
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
-
+        rebuild(self);
         return 0;
     }
 
@@ -463,10 +481,7 @@
     {
         var self = this;
 
-        build_webix(self);
-        self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
-
-        initialize_mxgraph(self);
+        rebuild(self);
     }
 
     /************************************************
@@ -481,7 +496,10 @@
             self.config._mxgraph.destroy();
             self.config._mxgraph = null;
         }
-        $$(self.gobj_name()).destructor();
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
     }
 
     /************************************************

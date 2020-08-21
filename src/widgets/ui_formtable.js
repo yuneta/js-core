@@ -76,6 +76,19 @@
     }
 
     /************************************************************
+     *   Rebuild
+     ************************************************************/
+    function rebuild(self)
+    {
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
+        build_webix(self);
+        build_table(self);
+    }
+
+    /************************************************************
      *   Webix UI
      ************************************************************/
     function build_webix(self)
@@ -308,7 +321,17 @@
                         tooltip: t("refresh"),
                         width: 50,
                         click: function() {
-                            self.gobj_send_event("EV_REFRESH", {}, self);
+                            var $table = $$(build_name(self, "list_table"));
+                            $table.clearAll();
+
+                            self.gobj_send_event("EV_UNDO_RECORD", {}, self);
+                            self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
+
+                            self.parent.gobj_send_event(
+                                self.config.refresh_data_event_name,
+                                {},
+                                self
+                            );
                         }
                     }
                 ]
@@ -1361,18 +1384,7 @@
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
-        var $table = $$(build_name(self, "list_table"));
-        $table.clearAll();
-
-        self.gobj_send_event("EV_UNDO_RECORD", {}, self);
-        self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
-
-        self.parent.gobj_send_event(
-            self.config.refresh_data_event_name,
-            {},
-            self
-        );
-
+        rebuild(self);
         return 0;
     }
 
@@ -1381,7 +1393,6 @@
      ********************************************/
     function ac_select(self, event, kw, src)
     {
-
         return 0;
     }
 
@@ -1487,8 +1498,7 @@
     {
         var self = this;
 
-        build_webix(self);
-        build_table(self);
+        rebuild(self);
     }
 
     /************************************************
@@ -1498,6 +1508,11 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        var self = this;
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
     }
 
     /************************************************

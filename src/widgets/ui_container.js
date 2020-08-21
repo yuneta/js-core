@@ -219,9 +219,9 @@
         for(var i=0; i < childs.length; i++) {
             var child = childs[i];
 
-            if(child.config.$parent) {
-                child.config.$parent.removeView(child.config.$ui);
-                child.config.$parent = null;
+            if(child.config.$container_parent) {
+                child.config.$container_parent.removeView(child.config.$ui);
+                child.config.$container_parent = null;
             }
         }
 
@@ -247,12 +247,12 @@
 
         webix.ui(work_place, $$(build_name(self, "scrollview")), $$(build_name(self, "work_place")));
 
-        var $parent = $$(build_name(self, "work_place"));
+        var $container_parent = $$(build_name(self, "work_place"));
         for(var i=0; i < childs.length; i++) {
             var child = childs[i];
             child.gobj_send_event("EV_REFRESH", {}, self);
-            $parent.addView(child.config.$ui);
-            child.config.$parent = $parent;
+            $container_parent.addView(child.config.$ui);
+            child.config.$container_parent = $container_parent;
         }
 
         return 0;
@@ -385,9 +385,9 @@
     {
         var self = this;
 
-        var $parent = $$(build_name(self, "work_place"));
-        $parent.addView(child.config.$ui);
-        child.config.$parent = $parent;
+        var $container_parent = $$(build_name(self, "work_place"));
+        $container_parent.addView(child.config.$ui);
+        child.config.$container_parent = $container_parent;
     }
 
     /************************************************
@@ -396,9 +396,9 @@
     proto.mt_child_removed = function(child)
     {
         var self = this;
-        if(child.config.$parent) {
-            child.config.$parent.removeView(child.config.$ui);
-            child.config.$parent = null;
+        if(child.config.$container_parent) {
+            child.config.$container_parent.removeView(child.config.$ui);
+            child.config.$container_parent = null;
         }
     }
 

@@ -42,6 +42,18 @@
     }
 
     /************************************************************
+     *   Rebuild
+     ************************************************************/
+    function rebuild(self)
+    {
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
+        build_webix(self);
+    }
+
+    /************************************************************
      *   Webix UI
      ************************************************************/
     function build_webix(self)
@@ -95,6 +107,13 @@
             ]
         };
 
+        /*---------------------------------------*
+         *      UI
+         *---------------------------------------*/
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
         self.config.$ui = webix.ui({
             id: self.gobj_name(),
             rows: [
@@ -170,7 +189,7 @@
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
-        build_webix(self);
+        rebuild(self);
         return 0;
     }
 
@@ -240,7 +259,7 @@
     {
         var self = this;
 
-        build_webix(self);
+        rebuild(self);
     }
 
     /************************************************
@@ -250,6 +269,11 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        var self = this;
+        if(self.config.$ui) {
+            self.config.$ui.destructor();
+            self.config.$ui = 0;
+        }
     }
 
     /************************************************
