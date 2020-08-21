@@ -260,7 +260,9 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
-                self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                if(cell.isVertex()) {
+                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                }
             }
         });
     }
