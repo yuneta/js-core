@@ -1,7 +1,14 @@
 /***********************************************************************
  *          ui_tree.js
  *
- *          Tree
+ *          Webix Tree
+ *
+            {
+                "id":
+                "value":
+                "data": [] hook
+            }
+ *
  *
  *
  *  Version
@@ -226,21 +233,21 @@
         }
     };
 
-    var Ui_tree = GObj.__makeSubclass__();
-    var proto = Ui_tree.prototype; // Easy access to the prototype
+    var Ui_webix_tree = GObj.__makeSubclass__();
+    var proto = Ui_webix_tree.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_tree",
+            "Ui_webix_tree",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_tree, "Ui_tree");
+    gobj_register_gclass(Ui_webix_tree, "Ui_webix_tree");
 
 
 
@@ -296,6 +303,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_tree = Ui_tree;
+    exports.Ui_webix_tree = Ui_webix_tree;
 
 })(this);

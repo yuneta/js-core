@@ -1,7 +1,14 @@
 /***********************************************************************
- *          mx_tree.js
+ *          mx_webix_tree.js
  *
- *          Tree with mxgrah
+ *          Webix Tree with mxgrah
+ *
+ *
+            {
+                "id":
+                "value":
+                "data": [] hook
+            }
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -450,21 +457,21 @@
         }
     };
 
-    var Mx_tree = GObj.__makeSubclass__();
-    var proto = Mx_tree.prototype; // Easy access to the prototype
+    var Mx_webix_tree = GObj.__makeSubclass__();
+    var proto = Mx_webix_tree.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Mx_tree",
+            "Mx_webix_tree",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Mx_tree, "Mx_tree");
+    gobj_register_gclass(Mx_webix_tree, "Mx_webix_tree");
 
 
 
@@ -527,6 +534,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Mx_tree = Mx_tree;
+    exports.Mx_webix_tree = Mx_webix_tree;
 
 })(this);
