@@ -843,7 +843,7 @@ DEBUG: {
             var jn_ievent_id = build_ievent_request(
                 self,
                 src.name,
-                kw.__service__?kw.__service__:null
+                null
             );
             msg_iev_push_stack(
                 kw,         // not owned
