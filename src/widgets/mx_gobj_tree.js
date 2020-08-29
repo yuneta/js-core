@@ -223,7 +223,17 @@
      ********************************************/
     function initialize_mxgraph(self)
     {
+        function click_handler(sender, evt)
+        {
+            var cell = evt.getProperty('cell');
+            if (cell != null) {
+                if(cell.isVertex()) {
+                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                }
+            }
+        }
         var graph = self.config._mxgraph;
+        graph.removeListener(click_handler);
 
         create_root_and_layers(graph, self.config.layers);
 
@@ -237,10 +247,10 @@
         graph.allowNegativeCoordinates = false;
 
         // Multiple connections between the same pair of vertices.
-        graph.setMultigraph(false);
+        graph.setMultigraph(true);
 
         // Enable/Disable basic selection and cell handling
-        graph.setEnabled(false);
+        graph.setEnabled(true);
 
         // Enable/Disable tooltips
         graph.setTooltips(true);
@@ -277,31 +287,24 @@
         // Enables automatic layout on the graph and installs
         // a tree layout for all groups who's children are
         // being changed, added or removed.
-        var layout = new mxCompactTreeLayout(graph, false);
-        layout.useBoundingBox = false;
-        layout.edgeRouting = false;
-        layout.levelDistance = 30;
-        layout.nodeDistance = 10;
+//         var layout = new mxCompactTreeLayout(graph, false);
+//         layout.useBoundingBox = false;
+//         layout.edgeRouting = false;
+//         layout.levelDistance = 30;
+//         layout.nodeDistance = 10;
 
-        var layoutMgr = new mxLayoutManager(graph);
-
-        layoutMgr.getLayout = function(cell)
-        {
-            if (cell.getChildCount() > 0)
-            {
-                return layout;
-            }
-        };
+//         var layoutMgr = new mxLayoutManager(graph);
+//
+//         layoutMgr.getLayout = function(cell)
+//         {
+//             if (cell.getChildCount() > 0)
+//             {
+//                 return layout;
+//             }
+//         };
 
         // Handles clicks on cells
-        graph.addListener(mxEvent.CLICK, function(sender, evt) {
-            var cell = evt.getProperty('cell');
-            if (cell != null) {
-                if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
-                }
-            }
-        });
+        graph.addListener(mxEvent.CLICK, click_handler);
     }
 
     /************************************************************
@@ -331,24 +334,24 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_gobj_tree(self, group, x, y, parent, childs)
+    function _load_gobj_treedb(self, group, data)
     {
-        var cx=120, cy=50, sep=30;
+        var x = 0;
+        var y = 0; // si meto separación aparece scrollbar al ajustar
+        var cx = 120, cy = 50, sep = 30;
         var style = "";
 
-        /*
-         *  Paint Childs
-         */
-        for(var i=0; i<childs.length; i++) {
-            var record = childs[i];
+        for(var i=0; i<data.length; i++) {
+            var record = data[i];
             var child = self.config._mxgraph.insertVertex(
                 group,
                 record.id,
-                br(record.value),
+                br(record.shortname),
                 x, y, cx, cy,
                 style
             );
-            if(parent) {
+            if(record.parent_id) {
+                var parent = self.config._mxgraph.model.getCell(record.parent_id);
                 self.config._mxgraph.insertEdge(
                     group,          // group
                     null,           // id
@@ -358,17 +361,10 @@
                     null            // style
                 );
             }
-            if(kw_has_key(record, "data")) {
-                _load_gobj_tree(
-                    self,
-                    group,
-                    x,
-                    y + cy + sep,
-                    child,
-                    record.data
-                );
-            }
             x += cx + sep;
+
+            //y + cy + sep,
+
         }
 
     }
@@ -379,9 +375,7 @@
     function load_gobj_tree(self, data, layer)
     {
         var group = get_layer(self, layer);
-        var x=0;
-        var y=0; // si meto separación aparece scrollbar al ajustar
-        _load_gobj_tree(self, group, x, y, 0, data);
+        _load_gobj_treedb(self, group, data);
     }
 
 
@@ -431,7 +425,9 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        initialize_mxgraph(self);
+        self.config.$container_parent.removeView(self.config.$ui);
+        rebuild(self);
+        self.config.$container_parent.addView(self.config.$ui);
 
         return 0;
     }
@@ -446,7 +442,7 @@
     }
 
     /********************************************
-     *
+     *  Order from container (parent): re-create
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {

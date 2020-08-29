@@ -8,7 +8,7 @@ DEBUG: {
     "yuno_alias": "",
     "yuno_version": "1.0.0",
     "yuno_release": "1.0.0",
-    "yuneta_version": "4.2.6",
+    "yuneta_version": "4.2.7",
     "playing": false,
     "pid": 0,
     "jwt": "",
@@ -247,7 +247,7 @@ DEBUG: {
             "yuno_alias": "",
             "yuno_version": self.yuno.yuno_version,
             "yuno_release": self.yuno.yuno_version,
-            "yuneta_version": "4.2.6",
+            "yuneta_version": "4.2.7",
             "playing": false,
             "pid": 0,
             "jwt": self.config.jwt,
@@ -764,7 +764,7 @@ DEBUG: {
         var jn_ievent_id = build_ievent_request(
             self,
             src.name,
-            kw.__service__?kw.__service__:null
+            kw.service?kw.service:null
         );
         msg_iev_push_stack(
             kw,         // not owned
@@ -804,7 +804,7 @@ DEBUG: {
         var jn_ievent_id = build_ievent_request(
             self,
             src.name,
-            kw.__service__?kw.__service__:null
+            kw.service?kw.service:null
         );
         msg_iev_push_stack(
             kw,         // not owned

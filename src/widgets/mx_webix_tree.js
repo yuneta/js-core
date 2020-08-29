@@ -407,7 +407,8 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        initialize_mxgraph(self);
+        // initialize_mxgraph(self);
+        self.parent.gobj_send_event("EV_CHANGE_MODE", {same_mode:true}, self); // Raise new child $ui
 
         return 0;
     }
@@ -422,7 +423,7 @@
     }
 
     /********************************************
-     *
+     *  Order from container (parent): re-create
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
