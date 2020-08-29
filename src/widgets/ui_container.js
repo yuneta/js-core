@@ -63,6 +63,8 @@
                     {
                         view: "layout",
                         id: build_name(self, "cols"),
+                        type: "wide",
+                        margin: 5,
                         cols: [
                             {
                                 template: "left_toolbar",
@@ -115,6 +117,8 @@
                     {
                         view: "layout",
                         id: build_name(self, "cols"),
+                        type: "wide",
+                        margin: 5,
                         cols: [
                             {
                                 template: "left_toolbar",

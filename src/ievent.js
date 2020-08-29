@@ -201,12 +201,12 @@ DEBUG: {
     /**************************************
      *
      **************************************/
-    function build_ievent_request(self, src_service)
+    function build_ievent_request(self, src_service, dst_service)
     {
         var jn_ievent_chain = {
             dst_yuno: self.config._wanted_yuno_name,
             dst_role: self.config._wanted_yuno_role,
-            dst_service: self.config._wanted_yuno_service,
+            dst_service: dst_service?dst_service:self.config._wanted_yuno_service,
             src_yuno: self.yuno.yuno_name,
             src_role: self.yuno.yuno_role,
             src_service: src_service
@@ -261,7 +261,8 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             self,
-            self.parent.name
+            self.parent.name,
+            null
         );
         msg_iev_push_stack(
             kw,
@@ -287,7 +288,8 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             self,
-            self.parent.name
+            self.parent.name,
+            null
         );
         msg_iev_push_stack(
             kw,
@@ -761,13 +763,16 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             self,
-            src.name
+            src.name,
+            kw.__service__?kw.__service__:null
         );
         msg_iev_push_stack(
             kw,         // not owned
             IEVENT_MESSAGE_AREA_ID,
             jn_ievent_id   // owned
         );
+
+        kw["__stats__"] = stats;
 
         return send_static_iev(self, "EV_MT_STATS", kw);
     }
@@ -798,7 +803,8 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             self,
-            src.name
+            src.name,
+            kw.__service__?kw.__service__:null
         );
         msg_iev_push_stack(
             kw,         // not owned
@@ -836,7 +842,8 @@ DEBUG: {
              */
             var jn_ievent_id = build_ievent_request(
                 self,
-                src.name
+                src.name,
+                kw.__service__?kw.__service__:null
             );
             msg_iev_push_stack(
                 kw,         // not owned
@@ -894,7 +901,8 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             this,
-            subs.subscriber.name
+            subs.subscriber.name,
+            null
         );
         msg_iev_push_stack(
             kw,         // not owned
@@ -959,7 +967,8 @@ DEBUG: {
          */
         var jn_ievent_id = build_ievent_request(
             this,
-            subs.subscriber.name
+            subs.subscriber.name,
+            null
         );
         msg_iev_push_stack(
             kw,         // not owned
