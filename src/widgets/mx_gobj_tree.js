@@ -425,9 +425,10 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
+        var idx = self.config.$container_parent.index(self.config.$ui);
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
-        self.config.$container_parent.addView(self.config.$ui);
+        self.config.$container_parent.addView(self.config.$ui, idx);
 
         return 0;
     }
