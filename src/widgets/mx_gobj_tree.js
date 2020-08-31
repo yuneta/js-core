@@ -50,6 +50,29 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        layout_options: [
+            {
+                id: "tree_layout",
+                value: "Tree Layout",
+                layout: tree_layout
+            },
+            {
+                id: "organic_layout",
+                value: "Organic Layout",
+                layout: organic_layout
+            },
+            {
+                id: "circle_layout",
+                value: "Circle Layout",
+                layout: circle_layout
+            }
+        ],
+        layout_selected: "tree_layout",
+
+        vertex_cx: 140,
+        vertex_cy: 80,
+        vertex_sep: 30,
+
         layers: [
             {
                 id: "__mx_default_layer__"
@@ -104,6 +127,7 @@
         build_webix(self);
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
         initialize_mxgraph(self);
+        rebuild_layouts(self);
     }
 
     /************************************************************
@@ -116,6 +140,34 @@
             height: 30,
             css: "toolbar2color",
             cols:[
+                {
+                    view: "richselect",
+                    id: build_name(self, "layout_options"),
+                    tooltip: t("Select layout"),
+                    width: 180,
+                    options: self.config.layout_options,
+                    value: self.config.layout_selected,
+                    label: "",
+                    on: {
+                        onChange(newVal, oldVal) {
+                            var cur_layout = kwid_collect(
+                                self.config.layout_options,
+                                newVal,
+                                null, null
+                            )[0];
+                            if(!cur_layout) {
+                                cur_layout = self.config.layout_options[0];
+                            }
+                            self.config.layout_selected = cur_layout.id;
+
+                            execute_layout(self);
+
+                            if(self.gobj_is_unique() || self.gobj_is_service()) {
+                                self.gobj_save_persistent_attrs();
+                            }
+                        }
+                    }
+                },
                 {
                     view:"button",
                     type: "icon",
@@ -191,6 +243,75 @@
     }
 
     /********************************************
+     *  Tree layout
+     ********************************************/
+    function tree_layout(layout_option, graph)
+    {
+        // Enables automatic layout on the graph and installs
+        // a tree layout for all groups who's children are
+        // being changed, added or removed.
+        var layout = new mxCompactTreeLayout(graph, false);
+        layout.useBoundingBox = false;
+        layout.edgeRouting = false;
+        layout.levelDistance = 30;
+        layout.nodeDistance = 10;
+        return layout;
+    }
+
+    /********************************************
+     *  Organic layout
+     ********************************************/
+    function organic_layout(layout_option, graph)
+    {
+        var layout = new mxFastOrganicLayout(graph);
+        return layout;
+    }
+
+    /********************************************
+     *  Circle layout
+     ********************************************/
+    function circle_layout(layout_option, graph)
+    {
+        var layout = new mxCircleLayout(graph);
+        return layout;
+    }
+
+    /********************************************
+     *  Rebuild layouts
+     ********************************************/
+    function rebuild_layouts(self)
+    {
+        for(var i=0; i<self.config.layout_options.length; i++) {
+            var layout = self.config.layout_options[i];
+            layout.exe = layout.layout(layout, self.config._mxgraph);
+        }
+    }
+
+    /********************************************
+     *  Execute layout
+     ********************************************/
+    function execute_layout(self)
+    {
+        var graph = self.config._mxgraph;
+        var group = get_layer(self, "layer?");
+
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+
+        if(cur_layout) {
+            graph.getModel().beginUpdate();
+            try {
+                cur_layout.exe.execute(group);
+            } finally {
+                graph.getModel().endUpdate();
+            }
+        }
+    }
+
+    /********************************************
      *  Create root and layers
      ********************************************/
     function create_root_and_layers(graph, layers)
@@ -248,7 +369,7 @@
         // Enables rubberband selection
         new mxRubberband(graph);
 
-        // Panning? HACK if panning is setted then rubberband selection will not work
+        // Panning? HACK if panning is set then rubberband selection will not work
         graph.setPanning(false);
 
         // Negative coordenates?
@@ -257,14 +378,16 @@
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(true);
 
-        // Enable/Disable basic selection and cell handling
-        graph.setEnabled(true);
-
         // Enable/Disable tooltips
         graph.setTooltips(true);
 
         // Adds a highlight on the cell under the mousepointer
         new mxCellTracker(graph);
+
+        graph.setHtmlLabels(true);
+
+        // Enable/Disable basic selection and cell handling
+        graph.setEnabled(true);
 
         // Celdas seleccionables? (marco de redimensionamiento)
         graph.setCellsSelectable(true);
@@ -290,29 +413,15 @@
         style[mxConstants.STYLE_FONTSTYLE] = 1;
         graph.getStylesheet().putDefaultVertexStyle(style);
 
-        graph.setHtmlLabels(true);
-
-        // Enables automatic layout on the graph and installs
-        // a tree layout for all groups who's children are
-        // being changed, added or removed.
-//         var layout = new mxCompactTreeLayout(graph, false);
-//         layout.useBoundingBox = false;
-//         layout.edgeRouting = false;
-//         layout.levelDistance = 30;
-//         layout.nodeDistance = 10;
-
-//         var layoutMgr = new mxLayoutManager(graph);
-//
-//         layoutMgr.getLayout = function(cell)
-//         {
-//             if (cell.getChildCount() > 0)
-//             {
-//                 return layout;
-//             }
-//         };
-
         // Handles clicks on cells
         graph.addListener(mxEvent.CLICK, click_handler);
+
+        graph.getLabel = function(cell) {
+            if (this.getModel().isVertex(cell)) {
+                return br(cell.value.shortname);
+            }
+        };
+
     }
 
     /************************************************************
@@ -344,22 +453,47 @@
      ************************************************************/
     function _load_gobj_treedb(self, group, data)
     {
+        var x_acc = [];
         var x = 0;
         var y = 0; // si meto separación aparece scrollbar al ajustar
-        var cx = 120, cy = 50, sep = 30;
+        var sep = self.config.vertex_sep;
         var style = "";
 
+        // WARNING without a built-in layout, the graph is horrible.
         for(var i=0; i<data.length; i++) {
             var record = data[i];
+            var parent = record.parent_id?self.config._mxgraph.model.getCell(record.parent_id):null;
+
+            var cx = self.config.vertex_cx;
+            var cy = self.config.vertex_cy;
+            if(!(record.service || record.unique)) {
+                cx = (cx/5)*3;
+                cy = (cy/5)*3;
+            }
+            if(empty_string(record.name)) {
+                cx = cx/2;
+                cy = cy/2;
+            }
+
+            y = record.id.split("`");
+            y = Number(y.length) - 1;
+            if(!x_acc[y]) {
+                x_acc[y] = (y>0)?x_acc[y-1]-1:0;
+            }
+
+            x = (x_acc[y]) * (cx+sep);
+            (x_acc[y])++;
+
             var child = self.config._mxgraph.insertVertex(
                 group,
                 record.id,
-                br(record.shortname),
-                x, y, cx, cy,
+                record,
+                x,
+                (y)*(cy+sep),
+                cx, cy,
                 style
             );
-            if(record.parent_id) {
-                var parent = self.config._mxgraph.model.getCell(record.parent_id);
+            if(parent) {
                 self.config._mxgraph.insertEdge(
                     group,          // group
                     null,           // id
@@ -369,12 +503,7 @@
                     null            // style
                 );
             }
-            x += cx + sep;
-
-            //y + cy + sep,
-
         }
-
     }
 
     /************************************************************
@@ -384,6 +513,16 @@
     {
         var group = get_layer(self, layer);
         _load_gobj_treedb(self, group, data);
+
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+
+        if(cur_layout) {
+            cur_layout.exe.execute(group);
+        }
     }
 
 
@@ -416,11 +555,12 @@
         model.beginUpdate();
         try {
             switch(kw.type) {
-                case "webix-tree":
+                case "gobj-tree":
                 default:
                     load_gobj_tree(self, data, layer);
                     break;
             }
+
         } finally {
             model.endUpdate();
         }
@@ -526,7 +666,20 @@
     {
         var self = this;
 
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+        self.config.layout_selected = cur_layout.id;
+
         rebuild(self);
+
+        $$(build_name(self, "layout_options")).define("options", self.config.layout_options);
+        $$(build_name(self, "layout_options")).setValue(cur_layout.id);
     }
 
     /************************************************
