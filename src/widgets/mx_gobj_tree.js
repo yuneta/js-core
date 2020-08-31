@@ -1,38 +1,44 @@
 /***********************************************************************
  *          mx_gobj_tree.js
  *
- *          GObj Tree with mxgrah
+ *          Yuneta GObj Tree with mxgrah
  *
  *
 
-        {
-            "id": "1`4`7`2`2",
-            "name": "1600-4",
-            "fullname": "YFichador^mulesol`IOGate^__top_side__`IEvent_srv^1600-4`Channel^1600-4`GWebSocket^1600-4",
-            "GClass": "GWebSocket",
-            "__running__": true,
-            "__playing__": false,
-            "__service__": false,
-            "__disabled__": false,
-            "__attrs__": {
-                "connected": false,
-                "timeout_handshake": 5000,
-                "timeout_close": 3000,
-                "pingT": 50000,
-                "tcp0": 0,
-                "user_data": 0,
-                "user_data2": 0,
-                "iamServer": true,
-                "resource": "/",
-                "kw_connex": null,
-                "subscriber": 94727856305400
-            },
-            "__machine_state__": "ST_DISCONNECTED",
-            "__gobj_trace_level__": 0,
-            "__gobj_no_trace_level__": 0,
-            "childs": [
-            ]
+        Schema
+        ------
+
+        Jerarquica Tree with bidirectional link to the same class/rol/object
+        (Parent creates the child)
+
+           {
+                "id": "1`1",
+                "name": "yuno",
+                "shortname": "Timer^yuno",
+                "fullname": "YFichador^mulesol`Timer^yuno",
+                "gclass_name": "Timer",
+                "running": true,
+                "playing": true,
+                "service": false,
+                "unique": false,
+                "disabled": false,
+                "state": "ST_COUNTDOWN",
+                "gobj_trace_level": 0,
+                "gobj_no_trace_level": 65536,
+                "attrs": {
+                    "msec": 1000,
+                    "periodic": true,
+                    "user_data": 0,
+                    "user_data2": 0,
+                    "timeout_event_name": "EV_TIMEOUT",
+                    "stopped_event_name": "EV_STOPPED"
+                },
+                "parent_id": "1",                           NOTE fkey to self
+                "childs": []                                NOTE hook of self
+            }
+
         }
+
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -71,6 +77,7 @@
      ************************************************************/
     function build_name(self, name)
     {
+        // We need unique names
         if(empty_string(self.gobj_name())) {
             if(!self._uuid_name) {
                 self._uuid_name = get_unique_id(self.gobj_gclass_name());
@@ -85,6 +92,7 @@
      ************************************************************/
     function rebuild(self)
     {
+        // Destroy UI, Build UI
         if(self.config.$ui) {
             self.config.$ui.destructor();
             self.config.$ui = 0;
@@ -425,6 +433,7 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
+        // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
         var idx = self.config.$container_parent.index(self.config.$ui);
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);

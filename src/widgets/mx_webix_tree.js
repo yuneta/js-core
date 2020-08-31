@@ -4,11 +4,17 @@
  *          Webix Tree with mxgrah
  *
  *
+        Schema
+        ------
+
+        Jerarquica Tree with one-direction link to the same class/rol/object
+
             {
                 "id":
                 "value":
-                "data": [] hook
+                "data": []                                  NOTE hook of self
             }
+
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -47,6 +53,7 @@
      ************************************************************/
     function build_name(self, name)
     {
+        // We need unique names
         if(empty_string(self.gobj_name())) {
             if(!self._uuid_name) {
                 self._uuid_name = get_unique_id(self.gobj_gclass_name());
@@ -61,6 +68,7 @@
      ************************************************************/
     function rebuild(self)
     {
+        // Destroy UI, Build UI
         if(self.config.$ui) {
             self.config.$ui.destructor();
             self.config.$ui = 0;
@@ -407,8 +415,11 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        // initialize_mxgraph(self);
-        self.parent.gobj_send_event("EV_CHANGE_MODE", {same_mode:true}, self); // Raise new child $ui
+        // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
+        var idx = self.config.$container_parent.index(self.config.$ui);
+        self.config.$container_parent.removeView(self.config.$ui);
+        rebuild(self);
+        self.config.$container_parent.addView(self.config.$ui, idx);
 
         return 0;
     }
