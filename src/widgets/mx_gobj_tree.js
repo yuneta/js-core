@@ -51,7 +51,7 @@
         layout_options: [
             {
                 id: "tree_layout",
-                value: "Tree Layout",
+                value: "Compact Tree Layout",
                 layout: function(layout_option, graph) {
                     // Enables automatic layout on the graph and installs
                     // a tree layout for all groups who's children are
@@ -380,19 +380,20 @@
 
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
+        mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
         graph.setCellsLocked(false);
         graph.setPortsEnabled(true);
 
-// TODO mira si sirve
-// graph.disconnectOnMove = false;
-// graph.foldingEnabled = false;
-// graph.cellsResizable = false;
-// graph.extendParents = false;
+        // TODO mira si sirve
+        // graph.disconnectOnMove = false;
+        // graph.foldingEnabled = false;
+        // graph.cellsResizable = false;
+        // graph.extendParents = false;
 
-// // Disables automatic handling of ports. This disables the reset of the
-// // respective style in mxGraph.cellConnected. Note that this feature may
-// // be useful if floating and fixed connections are combined.
-// graph.setPortsEnabled(false);
+        // // Disables automatic handling of ports. This disables the reset of the
+        // // respective style in mxGraph.cellConnected. Note that this feature may
+        // // be useful if floating and fixed connections are combined.
+        // graph.setPortsEnabled(false);
 
         // Enable/Disable basic selection (selected = se activa marco de redimensionamiento)
         graph.setCellsSelectable(true);
@@ -458,7 +459,7 @@
         };
 
         // Defines the position of the folding icon
-        graph.cellRenderer.getControlBounds = function(state) {
+        graph.cellRenderer.getControlBounds = function(state, w, h) {
             if (state.control != null) {
                 var oldScale = state.control.scale;
                 var w = state.control.bounds.width / oldScale;
@@ -540,8 +541,59 @@
     /************************************************************
      *
      ************************************************************/
+    function addOverlay(graph, cell)
+    {
+        // Creates a new overlay with an image and a tooltip
+        var overlay = new mxCellOverlay(new mxImage('/static/app/images/add.png', 24, 24), 'Add outgoing');
+        overlay.cursor = 'hand';
+
+        // Installs a handler for clicks on the overlay
+        overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+            trace_msg("XXX");
+//             graph.clearSelection();
+//             var geo = graph.getCellGeometry(cell);
+//
+//             var v2;
+//
+//             executeLayout(function()
+//             {
+//                 v2 = graph.insertVertex(parent, null, 'World!', geo.x, geo.y, 80, 30);
+//                 addOverlay(graph, v2);
+//                 graph.view.refresh(v2);
+//                 var e1 = graph.insertEdge(parent, null, '', cell, v2);
+//             }, function()
+//             {
+//                 graph.scrollCellToVisible(v2);
+//             });
+        });
+
+        // Special CMS event
+        overlay.addListener('pointerdown', function(sender, eo)
+        {
+            var evt2 = eo.getProperty('event');
+            var state = eo.getProperty('state');
+
+            graph.popupMenuHandler.hideMenu();
+            graph.stopEditing(false);
+
+            var pt = mxUtils.convertPoint(graph.container,
+                    mxEvent.getClientX(evt2), mxEvent.getClientY(evt2));
+            graph.connectionHandler.start(state, pt.x, pt.y);
+            graph.isMouseDown = true;
+            graph.isMouseTrigger = mxEvent.isMouseEvent(evt2);
+            mxEvent.consume(evt2);
+        });
+
+        // Sets the overlay for the cell in the graph
+        graph.addCellOverlay(cell, overlay);
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function _load_gobj_treedb(self, group, data)
     {
+        var graph = self.config._mxgraph;
         var x_acc = [];
         var x = 0;
         var y = 0; // si meto separación aparece scrollbar al ajustar
@@ -551,7 +603,7 @@
         // WARNING without a built-in layout, the graph is horrible.
         for(var i=0; i<data.length; i++) {
             var record = data[i];
-            var parent = record.parent_id?self.config._mxgraph.model.getCell(record.parent_id):null;
+            var parent = record.parent_id?graph.model.getCell(record.parent_id):null;
 
             var cx = self.config.vertex_cx;
             var cy = self.config.vertex_cy;
@@ -573,7 +625,7 @@
             x = (x_acc[y]) * (cx+sep);
             (x_acc[y])++;
 
-            var child = self.config._mxgraph.insertVertex(
+            var child = graph.insertVertex(
                 group,
                 record.id,
                 record,
@@ -582,8 +634,11 @@
                 cx, cy,
                 style
             );
+
+            addOverlay(graph, child);
+
             if(parent) {
-                self.config._mxgraph.insertEdge(
+                graph.insertEdge(
                     group,          // group
                     null,           // id
                     '',             // value
