@@ -54,17 +54,41 @@
             {
                 id: "tree_layout",
                 value: "Tree Layout",
-                layout: tree_layout
+                layout: function(layout_option, graph) {
+                    // Enables automatic layout on the graph and installs
+                    // a tree layout for all groups who's children are
+                    // being changed, added or removed.
+                    var layout = new mxCompactTreeLayout(graph, false);
+                    layout.useBoundingBox = false;
+                    layout.edgeRouting = false;
+                    layout.levelDistance = 30;
+                    layout.nodeDistance = 10;
+                    return layout;
+                }
             },
             {
-                id: "organic_layout",
-                value: "Organic Layout",
-                layout: organic_layout
+                id: "herarchical_layout",
+                value: "Herarchical Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxHierarchicalLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "fastorganic_layout",
+                value: "FastOrganic Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxFastOrganicLayout(graph);
+                    return layout;
+                }
             },
             {
                 id: "circle_layout",
                 value: "Circle Layout",
-                layout: circle_layout
+                layout: function(layout_option, graph) {
+                    var layout = new mxCircleLayout(graph);
+                    return layout;
+                }
             }
         ],
         layout_selected: "tree_layout",
@@ -243,40 +267,6 @@
     }
 
     /********************************************
-     *  Tree layout
-     ********************************************/
-    function tree_layout(layout_option, graph)
-    {
-        // Enables automatic layout on the graph and installs
-        // a tree layout for all groups who's children are
-        // being changed, added or removed.
-        var layout = new mxCompactTreeLayout(graph, false);
-        layout.useBoundingBox = false;
-        layout.edgeRouting = false;
-        layout.levelDistance = 30;
-        layout.nodeDistance = 10;
-        return layout;
-    }
-
-    /********************************************
-     *  Organic layout
-     ********************************************/
-    function organic_layout(layout_option, graph)
-    {
-        var layout = new mxFastOrganicLayout(graph);
-        return layout;
-    }
-
-    /********************************************
-     *  Circle layout
-     ********************************************/
-    function circle_layout(layout_option, graph)
-    {
-        var layout = new mxCircleLayout(graph);
-        return layout;
-    }
-
-    /********************************************
      *  Rebuild layouts
      ********************************************/
     function rebuild_layouts(self)
@@ -378,50 +368,150 @@
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(true);
 
-        // Enable/Disable tooltips
-        graph.setTooltips(true);
-
-        // Adds a highlight on the cell under the mousepointer
-        new mxCellTracker(graph);
-
-        graph.setHtmlLabels(true);
-
-        // Enable/Disable basic selection and cell handling
-        graph.setEnabled(true);
-
-        // Celdas seleccionables? (marco de redimensionamiento)
-        graph.setCellsSelectable(true);
-
         // Avoids overlap of edges and collapse icons
         graph.keepEdgesInBackground = true;
 
         // Enables automatic sizing for vertices after editing
         graph.setAutoSizeCells(true);
 
-        // Creates the default style for vertices
-        var style = [];
+        /*---------------------------*
+         *      PERMISOS
+         *---------------------------*/
+        // Enable/Disable cell handling
+        graph.setEnabled(true);
+
+        graph.setConnectable(false); // Crear edges/links
+        graph.setCellsDisconnectable(false); // Modificar egdes/links
+        graph.setCellsLocked(false);
+        graph.setPortsEnabled(true);
+
+// TODO
+// graph.disconnectOnMove = false;
+// graph.foldingEnabled = false;
+// graph.cellsResizable = false;
+// graph.extendParents = false;
+
+// // Disables automatic handling of ports. This disables the reset of the
+// // respective style in mxGraph.cellConnected. Note that this feature may
+// // be useful if floating and fixed connections are combined.
+// graph.setPortsEnabled(false);
+
+        // Enable/Disable basic selection (selected = se activa marco de redimensionamiento)
+        graph.setCellsSelectable(true);
+
+        mxGraph.prototype.isCellSelectable = function(cell) {
+            if(cell.isVertex()) {
+                return true;
+            }
+            return false; // edges no selectable
+        };
+
+        // Set stylesheet options
+        var style = graph.getStylesheet().getDefaultVertexStyle();
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-        style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-        style[mxConstants.STYLE_STROKECOLOR] = 'gray';
-        style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_FILLCOLOR] = '#D2E3EF';
+        style[mxConstants.STYLE_SHAPE] = 'treenode';
         style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
-        style[mxConstants.STYLE_FONTCOLOR] = '#774400';
-        style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
-        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+        style[mxConstants.STYLE_SHADOW] = true;
+        style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_FONTFAMILY] = "Arial";
+        style[mxConstants.STYLE_FONTSTYLE] = '0';
         style[mxConstants.STYLE_FONTSIZE] = '12';
-        style[mxConstants.STYLE_FONTSTYLE] = 1;
-        graph.getStylesheet().putDefaultVertexStyle(style);
+
+        style = graph.getStylesheet().getDefaultEdgeStyle();
+        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
+        style[mxConstants.STYLE_ROUNDED] = true;
 
         // Handles clicks on cells
         graph.addListener(mxEvent.CLICK, click_handler);
 
+        /*
+         *  Own getLabel
+         */
+        graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
                 return br(cell.value.shortname);
             }
         };
 
+        /*
+         *  Own getTooltip
+         */
+        graph.setTooltips(true);
+        graph.getTooltip = function(state) {
+            if(this.model.isVertex(state.cell)) {
+                return br(state.cell.value.shortname);
+            }
+            return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
+        };
+
+
+        // Defines the condition for showing the folding icon
+        graph.isCellFoldable = function(cell)
+        {
+            return this.model.getOutgoingEdges(cell).length > 0;
+        };
+
+        // Defines the position of the folding icon
+        graph.cellRenderer.getControlBounds = function(state)
+        {
+            if (state.control != null)
+            {
+                var oldScale = state.control.scale;
+                var w = state.control.bounds.width / oldScale;
+                var h = state.control.bounds.height / oldScale;
+                var s = state.view.scale;
+
+                // 0 = TreeNodeShape.prototype.segment * s
+                return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
+                    state.y + state.height + 10 - h / 2 * s,
+                    w * s, h * s);
+            }
+
+            return null;
+        };
+
+        // Implements the click on a folding icon
+        graph.foldCells = function(collapse, recurse, cells)
+        {
+            this.model.beginUpdate();
+            try
+            {
+                toggleSubtree(this, cells[0], !collapse);
+                this.model.setCollapsed(cells[0], collapse);
+
+                // Executes the layout for the new graph since
+                // changes to visiblity and collapsed state do
+                // not trigger a layout in the current manager.
+
+                execute_layout(self);
+            }
+            finally
+            {
+                this.model.endUpdate();
+            }
+        };
+
+        // Updates the visible state of a given subtree taking into
+        // account the collapsed state of the traversed branches
+        function toggleSubtree(graph, cell, show)
+        {
+            show = (show != null) ? show : true;
+            var cells = [];
+
+            graph.traverse(cell, true, function(vertex)
+            {
+                if (vertex != cell)
+                {
+                    cells.push(vertex);
+                }
+
+                // Stops recursion if a collapsed cell is seen
+                return vertex == cell || !graph.isCellCollapsed(vertex);
+            });
+
+            graph.toggleCells(show, cells, true);
+        };
     }
 
     /************************************************************
@@ -430,7 +520,7 @@
     function br(short_name)
     {
         var n = short_name.split('^');
-        return n[0] + "^<br/>" + n[1];
+        return "<b>" + n[0] + "</b>^<br/>" + n[1];
     }
 
     /************************************************************
@@ -467,12 +557,12 @@
             var cx = self.config.vertex_cx;
             var cy = self.config.vertex_cy;
             if(!(record.service || record.unique)) {
-                cx = (cx/5)*3;
-                cy = (cy/5)*3;
+                cx = (cx*5)/8;
+                cy = (cy*5)/8;
             }
             if(empty_string(record.name)) {
-                cx = cx/2;
-                cy = cy/2;
+                cx = (cx*4)/8;
+                cy = (cy*4)/8;
             }
 
             y = record.id.split("`");
