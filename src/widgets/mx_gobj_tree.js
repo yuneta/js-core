@@ -11,32 +11,30 @@
         Jerarquica Tree with bidirectional link to the same class/rol/object
         (Parent creates the child)
 
-           {
-                "id": "1`1",
-                "name": "yuno",
-                "shortname": "Timer^yuno",
-                "fullname": "YFichador^mulesol`Timer^yuno",
-                "gclass_name": "Timer",
-                "running": true,
-                "playing": true,
-                "service": false,
-                "unique": false,
-                "disabled": false,
-                "state": "ST_COUNTDOWN",
-                "gobj_trace_level": 0,
-                "gobj_no_trace_level": 65536,
-                "attrs": {
-                    "msec": 1000,
-                    "periodic": true,
-                    "user_data": 0,
-                    "user_data2": 0,
-                    "timeout_event_name": "EV_TIMEOUT",
-                    "stopped_event_name": "EV_STOPPED"
-                },
-                "parent_id": "1",                           NOTE fkey to self
-                "childs": []                                NOTE hook of self
-            }
-
+        {
+            "id": "1`1",
+            "name": "yuno",
+            "shortname": "Timer^yuno",
+            "fullname": "YFichador^mulesol`Timer^yuno",
+            "gclass_name": "Timer",
+            "running": true,
+            "playing": true,
+            "service": false,
+            "unique": false,
+            "disabled": false,
+            "state": "ST_COUNTDOWN",
+            "gobj_trace_level": 0,
+            "gobj_no_trace_level": 65536,
+            "attrs": {
+                "msec": 1000,
+                "periodic": true,
+                "user_data": 0,
+                "user_data2": 0,
+                "timeout_event_name": "EV_TIMEOUT",
+                "stopped_event_name": "EV_STOPPED"
+            },
+            "parent_id": "1",                           NOTE fkey to self
+            "childs": []                                NOTE hook of self
         }
 
  *
@@ -385,7 +383,7 @@
         graph.setCellsLocked(false);
         graph.setPortsEnabled(true);
 
-// TODO
+// TODO mira si sirve
 // graph.disconnectOnMove = false;
 // graph.foldingEnabled = false;
 // graph.cellsResizable = false;
@@ -445,18 +443,23 @@
             return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
         };
 
-
         // Defines the condition for showing the folding icon
         graph.isCellFoldable = function(cell)
         {
             return this.model.getOutgoingEdges(cell).length > 0;
         };
 
+        graph.getCursorForCell = function(cell) {
+            if(this.model.isEdge(cell)) {
+                return 'default';
+            } else {
+                return 'default';
+            }
+        };
+
         // Defines the position of the folding icon
-        graph.cellRenderer.getControlBounds = function(state)
-        {
-            if (state.control != null)
-            {
+        graph.cellRenderer.getControlBounds = function(state) {
+            if (state.control != null) {
                 var oldScale = state.control.scale;
                 var w = state.control.bounds.width / oldScale;
                 var h = state.control.bounds.height / oldScale;
@@ -465,18 +468,17 @@
                 // 0 = TreeNodeShape.prototype.segment * s
                 return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
                     state.y + state.height + 10 - h / 2 * s,
-                    w * s, h * s);
+                    w * s, h * s
+                );
             }
 
             return null;
         };
 
         // Implements the click on a folding icon
-        graph.foldCells = function(collapse, recurse, cells)
-        {
+        graph.foldCells = function(collapse, recurse, cells) {
             this.model.beginUpdate();
-            try
-            {
+            try {
                 toggleSubtree(this, cells[0], !collapse);
                 this.model.setCollapsed(cells[0], collapse);
 
@@ -485,17 +487,14 @@
                 // not trigger a layout in the current manager.
 
                 execute_layout(self);
-            }
-            finally
-            {
+            } finally {
                 this.model.endUpdate();
             }
         };
 
         // Updates the visible state of a given subtree taking into
         // account the collapsed state of the traversed branches
-        function toggleSubtree(graph, cell, show)
-        {
+        function toggleSubtree(graph, cell, show) {
             show = (show != null) ? show : true;
             var cells = [];
 
