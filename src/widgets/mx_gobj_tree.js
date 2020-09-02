@@ -91,8 +91,15 @@
         ],
         layout_selected: "tree_layout",
 
+        icons_size: 16,
+        image_running: null,
+        image_playing: null,
+        image_service: null,
+        image_unique: null,
+        image_disabled: null,
+
         vertex_cx: 140,
-        vertex_cy: 80,
+        vertex_cy: 90,
         vertex_sep: 30,
 
         layers: [
@@ -101,6 +108,7 @@
             }
         ],
         _mxgraph: null,
+
         ui_properties: null,    // creator can set webix properties
         $ui: null,
         __writable_attrs__: [
@@ -340,17 +348,7 @@
      ********************************************/
     function initialize_mxgraph(self)
     {
-        function click_handler(sender, evt)
-        {
-            var cell = evt.getProperty('cell');
-            if (cell != null) {
-                if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
-                }
-            }
-        }
         var graph = self.config._mxgraph;
-        graph.removeListener(click_handler);
 
         create_root_and_layers(graph, self.config.layers);
 
@@ -421,7 +419,16 @@
         style[mxConstants.STYLE_ROUNDED] = true;
 
         // Handles clicks on cells
-        graph.addListener(mxEvent.CLICK, click_handler);
+        graph.addListener(mxEvent.CLICK, function(sender, evt)
+            {
+                var cell = evt.getProperty('cell');
+                if (cell != null) {
+                    if(cell.isVertex()) {
+                        self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                    }
+                }
+            }
+        );
 
         /*
          *  Own getLabel
@@ -438,7 +445,7 @@
          */
         graph.setTooltips(true);
         graph.getTooltip = function(state) {
-            if(this.model.isVertex(state.cell)) {
+            if(state.cell.value.shortname) {
                 return br(state.cell.value.shortname);
             }
             return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
@@ -512,6 +519,26 @@
 
             graph.toggleCells(show, cells, true);
         };
+
+        // Load control buttons
+        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
+            self.config.icons_size, self.config.icons_size
+        );
+        self.config.image_stopping = new mxImage('/static/app/images/yuneta/instance_stopping.svg',
+            self.config.icons_size, self.config.icons_size
+        );
+        self.config.image_playing = new mxImage('/static/app/images/yuneta/instance_playing.svg',
+            self.config.icons_size, self.config.icons_size
+        );
+        self.config.image_service = new mxImage('/static/app/images/yuneta/instance_service.svg',
+            self.config.icons_size, self.config.icons_size
+        );
+        self.config.image_unique = new mxImage('/static/app/images/yuneta/instance_unique.svg',
+            self.config.icons_size, self.config.icons_size
+        );
+        self.config.image_disabled = new mxImage('/static/app/images/yuneta/instance_disabled.svg',
+            self.config.icons_size, self.config.icons_size
+        );
     }
 
     /************************************************************
@@ -541,51 +568,93 @@
     /************************************************************
      *
      ************************************************************/
-    function addOverlay(graph, cell)
+    function add_state_overlays(self, graph, cell, record)
     {
-        // Creates a new overlay with an image and a tooltip
-        var overlay = new mxCellOverlay(new mxImage('/static/app/images/add.png', 24, 24), 'Add outgoing');
-        overlay.cursor = 'hand';
+        var icons_size = self.config.icons_size;
+        var x = 10;
+        var y = -10;
+        var i = 0;
 
-        // Installs a handler for clicks on the overlay
-        overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-            trace_msg("XXX");
-//             graph.clearSelection();
-//             var geo = graph.getCellGeometry(cell);
-//
-//             var v2;
-//
-//             executeLayout(function()
-//             {
-//                 v2 = graph.insertVertex(parent, null, 'World!', geo.x, geo.y, 80, 30);
-//                 addOverlay(graph, v2);
-//                 graph.view.refresh(v2);
-//                 var e1 = graph.insertEdge(parent, null, '', cell, v2);
-//             }, function()
-//             {
-//                 graph.scrollCellToVisible(v2);
-//             });
-        });
+        if(record.running) {
+            var overlay_running = new mxCellOverlay(
+                self.config.image_running,
+                "object running",           // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_running);
+            i++;
+        } else {
+            var overlay_stopping = new mxCellOverlay(
+                self.config.image_stopping,
+                "object stopped",           // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_stopping);
+            i++;
+        }
 
-        // Special CMS event
-        overlay.addListener('pointerdown', function(sender, eo)
-        {
-            var evt2 = eo.getProperty('event');
-            var state = eo.getProperty('state');
+        if(record.playing) {
+            var overlay_playing = new mxCellOverlay(
+                self.config.image_playing,
+                "object playing",           // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_playing);
+            i++;
+        }
 
-            graph.popupMenuHandler.hideMenu();
-            graph.stopEditing(false);
+        if(record.service) {
+            var overlay_service = new mxCellOverlay(
+                self.config.image_service,
+                "object service",           // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_service);
+            i++;
+        }
 
-            var pt = mxUtils.convertPoint(graph.container,
-                    mxEvent.getClientX(evt2), mxEvent.getClientY(evt2));
-            graph.connectionHandler.start(state, pt.x, pt.y);
-            graph.isMouseDown = true;
-            graph.isMouseTrigger = mxEvent.isMouseEvent(evt2);
-            mxEvent.consume(evt2);
-        });
+        if(record.unique) {
+            var overlay_unique = new mxCellOverlay(
+                self.config.image_unique,
+                "object unique",            // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_unique);
+            i++;
+        }
 
-        // Sets the overlay for the cell in the graph
-        graph.addCellOverlay(cell, overlay);
+        if(record.disabled) {
+            var overlay_disabled = new mxCellOverlay(
+                self.config.image_disabled,
+                "object disabled",          // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
+                new mxPoint(x + icons_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay_disabled);
+            i++;
+        }
+
+//         // Installs a handler for clicks on the overlay
+//         overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+//             trace_msg("XXX");
+//         });
     }
 
     /************************************************************
@@ -609,11 +678,11 @@
             var cy = self.config.vertex_cy;
             if(!(record.service || record.unique)) {
                 cx = (cx*5)/8;
-                cy = (cy*5)/8;
+                cy = (cy*6)/8;
             }
             if(empty_string(record.name)) {
                 cx = (cx*4)/8;
-                cy = (cy*4)/8;
+                cy = (cy*6)/8;
             }
 
             y = record.id.split("`");
@@ -635,7 +704,7 @@
                 style
             );
 
-            addOverlay(graph, child);
+            add_state_overlays(self, graph, child, record);
 
             if(parent) {
                 graph.insertEdge(
