@@ -91,7 +91,8 @@
         ],
         layout_selected: "tree_layout",
 
-        icons_size: 16,
+        top_overlay_icon_size: 24,
+        bottom_overlay_icon_size: 16,
         image_running: null,
         image_playing: null,
         image_service: null,
@@ -381,6 +382,7 @@
         mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
         graph.setCellsLocked(false);
         graph.setPortsEnabled(true);
+        graph.setCellsEditable(false);
 
         // TODO mira si sirve
         // graph.disconnectOnMove = false;
@@ -419,16 +421,14 @@
         style[mxConstants.STYLE_ROUNDED] = true;
 
         // Handles clicks on cells
-        graph.addListener(mxEvent.CLICK, function(sender, evt)
-            {
-                var cell = evt.getProperty('cell');
-                if (cell != null) {
-                    if(cell.isVertex()) {
-                        self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
-                    }
+        graph.addListener(mxEvent.CLICK, function(sender, evt) {
+            var cell = evt.getProperty('cell');
+            if (cell != null) {
+                if(cell.isVertex()) {
+                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
                 }
             }
-        );
+        });
 
         /*
          *  Own getLabel
@@ -520,24 +520,70 @@
             graph.toggleCells(show, cells, true);
         };
 
+        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
+            /*
+             *  HACK "added" vs "removed"
+             *  The names are inverted due to historic reasons.  This cannot be changed.
+             *
+             *  HACK don't change the order, first removed, then added
+             */
+            try {
+                var cells_removed = evt.getProperty('added');
+                if(cells_removed) {
+                    for (var i = 0; i < cells_removed.length; i++) {
+                        var cell = cells_removed[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                        add_state_overlays(self, graph, cell, cell.value);
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+
+            try {
+                var cells_added = evt.getProperty('removed');
+                if(cells_added) {
+                    for (var i = 0; i < cells_added.length; i++) {
+                        var cell = cells_added[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                        add_state_overlays(self, graph, cell, cell.value);
+                        add_class_overlays(self, graph, cell, cell.value);
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+        });
+
         // Load control buttons
-        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
-            self.config.icons_size, self.config.icons_size
+
+        self.config.image_role_class = new mxImage('/static/app/images/yuneta/circle_red.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
-        self.config.image_stopping = new mxImage('/static/app/images/yuneta/instance_stopping.svg',
-            self.config.icons_size, self.config.icons_size
+        self.config.image_role_instance =new mxImage('/static/app/images/yuneta/circle_yellow.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+
+        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_stopped = new mxImage('/static/app/images/yuneta/instance_stopped.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
         self.config.image_playing = new mxImage('/static/app/images/yuneta/instance_playing.svg',
-            self.config.icons_size, self.config.icons_size
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
         self.config.image_service = new mxImage('/static/app/images/yuneta/instance_service.svg',
-            self.config.icons_size, self.config.icons_size
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
         self.config.image_unique = new mxImage('/static/app/images/yuneta/instance_unique.svg',
-            self.config.icons_size, self.config.icons_size
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
         self.config.image_disabled = new mxImage('/static/app/images/yuneta/instance_disabled.svg',
-            self.config.icons_size, self.config.icons_size
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_tracing = new mxImage('/static/app/images/yuneta/instance_tracing.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
     }
 
@@ -568,93 +614,183 @@
     /************************************************************
      *
      ************************************************************/
+    function add_class_overlays(self, graph, cell, record)
+    {
+        var offs = self.config.top_overlay_icon_size/2;
+
+        var overlay_role = new mxCellOverlay(
+            self.config.image_role_class,
+            "Role Class",               // tooltip
+            mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+            mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+            new mxPoint(offs, offs),    // offset
+            "pointer"                   // cursor
+        );
+        graph.addCellOverlay(cell, overlay_role);
+
+        // Installs a handler for clicks on the overlay
+        overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
+            var record = evt2.getProperty('cell').value;
+            self.parent.gobj_send_event("EV_MX_ROLE_CLASS_CLICKED", record, self);
+        });
+
+        var overlay_instance = new mxCellOverlay(
+            self.config.image_role_instance,
+            "Role Instance",            // tooltip
+            mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+            mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+            new mxPoint(-offs, offs),   // offset
+            "pointer"                   // cursor
+        );
+        graph.addCellOverlay(cell, overlay_instance);
+
+        // Installs a handler for clicks on the overlay
+        overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+            var record = evt2.getProperty('cell').value;
+            self.parent.gobj_send_event("EV_MX_ROLE_INSTANCE_CLICKED", record, self);
+        });
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function add_state_overlays(self, graph, cell, record)
     {
-        var icons_size = self.config.icons_size;
+        var bottom_overlay_icon_size = self.config.bottom_overlay_icon_size;
         var x = 10;
         var y = -10;
         var i = 0;
 
         if(record.running) {
-            var overlay_running = new mxCellOverlay(
+            var overlay = new mxCellOverlay(
                 self.config.image_running,
                 "object running",           // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_running);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_RUNNING_CLICKED", record, self);
+            });
         } else {
-            var overlay_stopping = new mxCellOverlay(
-                self.config.image_stopping,
+            var overlay = new mxCellOverlay(
+                self.config.image_stopped,
                 "object stopped",           // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_stopping);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_STOPPED_CLICKED", record, self);
+            });
         }
 
         if(record.playing) {
-            var overlay_playing = new mxCellOverlay(
+            var overlay = new mxCellOverlay(
                 self.config.image_playing,
                 "object playing",           // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_playing);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_PLAYING_CLICKED", record, self);
+            });
         }
 
         if(record.service) {
-            var overlay_service = new mxCellOverlay(
+            var overlay = new mxCellOverlay(
                 self.config.image_service,
                 "object service",           // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_service);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_SERVICE_CLICKED", record, self);
+            });
         }
 
         if(record.unique) {
-            var overlay_unique = new mxCellOverlay(
+            var overlay = new mxCellOverlay(
                 self.config.image_unique,
                 "object unique",            // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_unique);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_UNIQUE_CLICKED", record, self);
+            });
         }
 
         if(record.disabled) {
-            var overlay_disabled = new mxCellOverlay(
+            var overlay = new mxCellOverlay(
                 self.config.image_disabled,
                 "object disabled",          // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT><ALIGN_CENTER><ALIGN_RIGH>
-                mxConstants.ALIGN_BOTTOM,   // vertical align  <ALIGN_TOP><ALIGN_MIDDLE><ALIGN_BOTTOM>
-                new mxPoint(x + icons_size*i, y),   // offset
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
                 "default"                           // cursor
             );
-            graph.addCellOverlay(cell, overlay_disabled);
+            graph.addCellOverlay(cell, overlay);
             i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_DISABLED_CLICKED", record, self);
+            });
         }
 
-//         // Installs a handler for clicks on the overlay
-//         overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-//             trace_msg("XXX");
-//         });
+        if(record.gobj_trace_level) {
+            var overlay = new mxCellOverlay(
+                self.config.image_tracing,
+                "object tracing",           // tooltip
+                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
+                "default"                           // cursor
+            );
+            graph.addCellOverlay(cell, overlay);
+            i++;
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var record = evt2.properties.cell.value;
+                self.parent.gobj_send_event("EV_MX_TRACING_CLICKED", record, self);
+            });
+        }
     }
 
     /************************************************************
@@ -704,6 +840,7 @@
                 style
             );
 
+            graph.removeCellOverlays(child); // Delete all previous overlays
             add_state_overlays(self, graph, child, record);
 
             if(parent) {
@@ -753,7 +890,8 @@
      ********************************************/
     function ac_select_item(self, event, kw, src)
     {
-        self.config._mxgraph.setSelectionCell(self.config._mxgraph.model.getCell(kw.id));
+        var cell = self.config._mxgraph.model.getCell(kw.id);
+        self.config._mxgraph.setSelectionCell(cell);
     }
 
     /********************************************
