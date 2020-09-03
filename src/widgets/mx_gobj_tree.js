@@ -748,8 +748,6 @@
                 menu.addSeparator();
             };
         }
-
-        add_float_toolbar(self, graph); // prueba
     }
 
     /************************************************************
@@ -777,42 +775,6 @@
 //         }
 //         var x = self.config._mxgraph.getModel().getCell(layer);
         return self.config._mxgraph.getDefaultParent();
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function add_float_toolbar(self, graph)
-    {
-        // Prueba de concepto, icono (button) en posición absoluta
-        var domNode = document.createElement('div');
-        domNode.style.position = 'absolute';
-        domNode.style.whiteSpace = 'nowrap';
-        domNode.style.left = 50 + 'px';
-        domNode.style.top = 50 + 'px';
-
-        var img = mxUtils.createImage('/static/app/images/yuneta/circle_red.svg');
-        img.setAttribute('title', 'Prueba');
-        img.style.cursor = 'pointer';
-        img.style.width = '32px';
-        img.style.height = '32px';
-        mxEvent.addGestureListeners(img,
-            mxUtils.bind(this, function(evt)
-            {
-                // Disables dragging the image
-                mxEvent.consume(evt);
-            })
-        );
-        mxEvent.addListener(img, 'click',
-            mxUtils.bind(this, function(evt)
-            {
-                trace_msg("XXXX");
-                mxEvent.consume(evt);
-            })
-        );
-        domNode.appendChild(img);
-
-        document.body.appendChild(domNode);
     }
 
     /************************************************************
