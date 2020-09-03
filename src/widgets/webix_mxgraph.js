@@ -38,6 +38,10 @@ webix.protoUI({
         return this._mxgraph;
     },
 
+    getContainer: function() {
+        return this._contentobj;
+    },
+
     $setSize:function(x,y) {
         webix.ui.view.prototype.$setSize.call(this,x,y);
         if(this._mxgraph) {

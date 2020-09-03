@@ -88,6 +88,7 @@
                     return layout;
                 }
             }
+
         ],
         layout_selected: "tree_layout",
 
@@ -142,6 +143,44 @@
     }
 
     /************************************************************
+     *
+     ************************************************************/
+    function load_icons(self)
+    {
+        /*
+         *  Load control button images
+         */
+        self.config.image_role_class = new mxImage('/static/app/images/yuneta/circle_red.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_role_instance =new mxImage('/static/app/images/yuneta/circle_yellow.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+
+        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_stopped = new mxImage('/static/app/images/yuneta/instance_stopped.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_playing = new mxImage('/static/app/images/yuneta/instance_playing.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_service = new mxImage('/static/app/images/yuneta/instance_service.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_unique = new mxImage('/static/app/images/yuneta/instance_unique.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_disabled = new mxImage('/static/app/images/yuneta/instance_disabled.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+        self.config.image_tracing = new mxImage('/static/app/images/yuneta/instance_tracing.svg',
+            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        );
+    }
+
+    /************************************************************
      *   Rebuild
      ************************************************************/
     function rebuild(self)
@@ -157,6 +196,7 @@
         }
         build_webix(self);
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
+
         initialize_mxgraph(self);
         rebuild_layouts(self);
     }
@@ -166,6 +206,77 @@
      ************************************************************/
     function build_webix(self)
     {
+        /*---------------------------------------*
+         *      Ventana help
+         *---------------------------------------*/
+        if($$(build_name(self, "help_window"))) {
+            $$(build_name(self, "help_window")).destructor();
+        }
+        webix.ui({
+            view: "window",
+            id: build_name(self, "help_window"),
+            width: 500,
+            height: 400,
+            move: true,
+            resize: true,
+            position: "center",
+            head:{
+                cols:[
+                    { view:"label", align:"center", label:t("help")},
+                    { view:"icon", icon:"wxi-close", click:function() {
+                        this.getTopParentView().hide();
+                    }}
+                ]
+            },
+            body: {
+                view: "list",
+                select: false,
+                borderless:true,
+                template: '<div style="cursor:default;display:table;height:40px;"><img src="#url#" alt="#help#" width="32" height="32"><span style="display:table-cell;vertical-align:middle;padding-left:10px;width:100%;">#help#</span></div>',
+                data: [
+                    {
+                        url:'/static/app/images/yuneta/circle_red.svg',
+                        help: "Open GClass (Role, Class)"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/circle_yellow.svg',
+                        help: "Open GObj (instance, object)"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_running.svg',
+                        help: "gobj is running"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_stopped.svg',
+                        help: "gobj is stopped"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_playing.svg',
+                        help: "gobj is playing"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_service.svg',
+                        help: "gobj is service (public service)"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_unique.svg',
+                        help: "gobj is unique (internal service)"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_disabled.svg',
+                        help: "gobj is disabled"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/instance_tracing.svg',
+                        help: "gobj is tracing"
+                    }
+                ]
+            }
+        });
+
+        /*---------------------------------------*
+         *      Toolbar
+         *---------------------------------------*/
         var toolbar = {
             view:"toolbar",
             height: 30,
@@ -245,7 +356,22 @@
                         self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
-                { view:"label", label: ""}
+                { view:"label", label: ""},
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-question",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("help"),
+                    click: function() {
+                        if($$(build_name(self, "help_window")).isVisible()) {
+                            $$(build_name(self, "help_window")).hide();
+                        } else {
+                            $$(build_name(self, "help_window")).show();
+                        }
+                    }
+                }
             ]
         };
 
@@ -271,6 +397,45 @@
                 self.config.$ui.refresh();
             }
         }
+
+        /*---------------------------------------*
+         *      Automatic Resizing
+         *---------------------------------------*/
+        function automatic_resizing(gadget, window_width, window_height)
+        {
+            var $gadget = $$(gadget);
+            var new_width = -1;
+            var new_height = -1;
+            var new_x = $gadget.config.left;
+            var new_y = $gadget.config.top;
+
+            if($gadget.$width + new_x > window_width) {
+                new_width = window_width;
+                new_x = 0;
+            }
+            if($gadget.$height + new_y > window_height) {
+                new_height = window_height;
+                new_y = 0;
+            }
+
+            if(new_width < 0 && new_height < 0) {
+                return;
+            }
+
+            $gadget.config.width = new_width<0? $gadget.$width:new_width,
+            $gadget.config.height = new_height<0? $gadget.$height:new_height;
+            $gadget.resize();
+            $gadget.setPosition(new_x, new_y);
+        }
+
+        function automatic_resizing_cb()
+        {
+            var window_width = window.innerWidth;
+            var window_height = window.innerHeight;
+            automatic_resizing(build_name(self, "help_window"), window_width, window_height);
+        }
+
+        webix.event(window, "resize", automatic_resizing_cb);
     }
 
     /********************************************
@@ -350,6 +515,8 @@
     function initialize_mxgraph(self)
     {
         var graph = self.config._mxgraph;
+
+        mxEvent.disableContextMenu(graph.container);
 
         create_root_and_layers(graph, self.config.layers);
 
@@ -452,7 +619,7 @@
         };
 
         // Defines the condition for showing the folding icon
-        graph.isCellFoldable = function(cell)
+        graph.isCellFoldable = function(cell, collapse)
         {
             return this.model.getOutgoingEdges(cell).length > 0;
         };
@@ -555,36 +722,29 @@
             }
         });
 
-        // Load control buttons
+        if(0) {
+            /*
+             *  Context Menu
+             */
+            // Configures automatic expand on mouseover
+            graph.popupMenuHandler.autoExpand = true;
 
-        self.config.image_role_class = new mxImage('/static/app/images/yuneta/circle_red.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
-        self.config.image_role_instance =new mxImage('/static/app/images/yuneta/circle_yellow.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
+            // Installs context menu
+            graph.popupMenuHandler.factoryMethod = function(menu, cell, evt)
+            {
+                menu.addItem('Item 1', null, function()
+                {
+                    alert('Item 1');
+                });
 
-        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_stopped = new mxImage('/static/app/images/yuneta/instance_stopped.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_playing = new mxImage('/static/app/images/yuneta/instance_playing.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_service = new mxImage('/static/app/images/yuneta/instance_service.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_unique = new mxImage('/static/app/images/yuneta/instance_unique.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_disabled = new mxImage('/static/app/images/yuneta/instance_disabled.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_tracing = new mxImage('/static/app/images/yuneta/instance_tracing.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
+                menu.addItem('Item 2', null, function()
+                {
+                    alert('Item 2');
+                });
+
+                menu.addSeparator();
+            };
+        }
     }
 
     /************************************************************
@@ -796,14 +956,12 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_gobj_treedb(self, group, data)
+    function _load_gobj_treedb(self, graph, group, data)
     {
-        var graph = self.config._mxgraph;
         var x_acc = [];
         var x = 0;
         var y = 0; // si meto separación aparece scrollbar al ajustar
         var sep = self.config.vertex_sep;
-        var style = "";
 
         // WARNING without a built-in layout, the graph is horrible.
         for(var i=0; i<data.length; i++) {
@@ -837,7 +995,7 @@
                 x,
                 (y)*(cy+sep),
                 cx, cy,
-                style
+                ""
             );
 
             graph.removeCellOverlays(child); // Delete all previous overlays
@@ -861,8 +1019,9 @@
      ************************************************************/
     function load_gobj_tree(self, data, layer)
     {
+        var graph = self.config._mxgraph;
         var group = get_layer(self, layer);
-        _load_gobj_treedb(self, group, data);
+        _load_gobj_treedb(self, graph, group, data);
 
         var cur_layout = kwid_collect(
             self.config.layout_options,
@@ -1016,6 +1175,8 @@
     proto.mt_create = function(kw)
     {
         var self = this;
+
+        load_icons(self);
 
         var cur_layout = kwid_collect(
             self.config.layout_options,
