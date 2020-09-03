@@ -41,6 +41,7 @@
         with_navigation: false,
         with_top_title: false,
         with_total_in_title: false,
+        with_hide_btn: false,
 
         _writable_fields: null, // automatic built
 
@@ -117,7 +118,14 @@
                     hidden: self.config.with_total_in_title?false:true,
                     id: build_name(self, "top_table_toolbar_total")
                 },
-                {}
+                {},
+                {
+                    view:"icon",
+                    icon:"fas fa-angle-double-right",
+                    click: function() {
+                        this.getParentView().getParentView().hide();
+                    }
+                }
             ]
         };
 
