@@ -507,7 +507,7 @@
                         id: build_name(self, "update_form"),
                         scroll:true,
                         minWidth: 400,
-                        elementsConfig:{
+                        elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
                         },
@@ -541,7 +541,7 @@
                         id: build_name(self, "create_form"),
                         scroll:true,
                         minWidth: 400,
-                        elementsConfig:{
+                        elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
                         },
@@ -1027,6 +1027,7 @@
         });
         return collection;
     }
+
 
 
 

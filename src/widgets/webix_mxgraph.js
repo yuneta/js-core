@@ -19,7 +19,7 @@ webix.protoUI({
 
     $init: function() {
         this.$view.innerHTML =
-            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:auto;background:" + this.config.background_color + ";'></div>";
+            "<div id='xxx' class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:scroll;background:" + this.config.background_color + ";'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);
@@ -27,6 +27,22 @@ webix.protoUI({
         webix.event(this.$view, "touchstart", function(e){
             e.cancelBubble = true;
         });
+
+// TODO scrollbar dentro de otra scrollbar, no consigo que sean independientes
+//         webix.event(this._contentobj, "mousewheel", function(e) {
+//             // stop propagation
+//                 e.cancelBubble = true;
+//                 e.defaultPrevented = true;
+//                 e.originalEvent.preventDefault();
+//                 e.originalEvent.stopPropagation();
+//         });
+//         webix.event(this._contentobj, "scroll", function(e) {
+//             // stop propagation
+//             e.stopPropagation();
+//             e.preventDefault();
+//             e.returnValue = false;
+//             return false;
+//         });
     },
 
     render: function() {

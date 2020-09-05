@@ -75,7 +75,7 @@
                             {
                                 view: "scrollview",
                                 id: build_name(self, "scrollview"),
-                                scroll: "auto",
+                                scroll: "auto", // Si lo quitas la cagas
                                 body: {
                                     view: "layout",
                                     id: build_name(self, "work_place"),
@@ -202,11 +202,13 @@
             if(!kw_has_key(toolbar, "height")) {
                 toolbar["height"] = self.config.toolbar_size;
             }
+            // HACK Dynamic UI Modifications: replace toolbar
             webix.ui(toolbar, $$(self.gobj_name()), $$(build_name(self, type)));
         } else {
             if(!kw_has_key(toolbar, "width")) {
                 toolbar["width"] = self.config.toolbar_size;
             }
+            // HACK Dynamic UI Modifications: replace toolbar
             webix.ui(toolbar, $$(build_name(self, "cols")), $$(build_name(self, type)));
         }
         return 0;
@@ -249,6 +251,7 @@
             self.config.mode = "horizontal";
         }
 
+        // HACK Dynamic UI Modifications: replace "work_place"
         webix.ui(work_place, $$(build_name(self, "scrollview")), $$(build_name(self, "work_place")));
 
         var $container_parent = $$(build_name(self, "work_place"));
