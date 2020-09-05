@@ -42,6 +42,7 @@
         with_top_title: false,
         with_total_in_title: false,
         with_hide_btn: false,
+        with_fullscreen_btn: false,
 
         _writable_fields: null, // automatic built
 
@@ -121,8 +122,48 @@
                 {},
                 {
                     view:"icon",
-                    icon:"fas fa-angle-double-right",
+                    id: build_name(self, "fullscreen"),
+                    hidden: self.config.with_fullscreen_btn?false:true,
+                    icon: "fas fa-expand-wide",
                     click: function() {
+                        this.hide();
+                        webix.fullscreen.set(
+                            self.config.$ui,
+                            {
+                                head: {
+                                    view:"toolbar",
+                                    elements: [
+                                        {
+                                        },
+                                        {
+                                            view: "label",
+                                            label: t("exit full screen") + " ->",
+                                            autowidth: true
+                                        },
+                                        {
+                                            view:"icon",
+                                            icon:"fas fa-compress",
+                                            click:function() {
+                                                webix.fullscreen.exit();
+                                                $$(build_name(self, "fullscreen")).show();
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        );
+                    }
+                },
+                {
+                    view:"icon",
+                    id: build_name(self, "hide_btn"),
+                    hidden: self.config.with_hide_btn?false:true,
+                    icon:"fas fa-times",
+                    click: function() {
+                        if(this.getTopParentView().config.fullscreen) {
+                            webix.fullscreen.exit();
+                            $$(build_name(self, "fullscreen")).show();
+                        }
                         this.getParentView().getParentView().hide();
                     }
                 }
