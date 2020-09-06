@@ -281,8 +281,11 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
+                //var record = evt.properties.cell.value; TODO save record in value
                 if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                    self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", cell, self);
+                } else {
+                    self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", cell, self);
                 }
             }
         });

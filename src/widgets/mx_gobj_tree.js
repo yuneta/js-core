@@ -236,11 +236,11 @@
                 data: [
                     {
                         url:'/static/app/images/yuneta/circle_red.svg',
-                        help: "Open GClass (Role, Class) properties"
+                        help: "Open GClass (Role, Class) window"
                     },
                     {
                         url:'/static/app/images/yuneta/circle_yellow.svg',
-                        help: "Open GObj (instance, object) properties"
+                        help: "Open GObj (instance, object) window"
                     },
                     {
                         url:'/static/app/images/yuneta/instance_running.svg',
@@ -591,8 +591,11 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
+                var record = evt.properties.cell.value;
                 if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_CELL_CLICKED", cell, self);
+                    self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
+                } else {
+                    self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
                 }
             }
         });

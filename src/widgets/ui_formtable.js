@@ -21,7 +21,7 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        topic_name: "",
+        title: "",
         schema: null,
         update_mode_enabled: false,
         create_mode_enabled: false,
@@ -39,7 +39,7 @@
         with_textfilter: false,
         with_sort: false,
         with_navigation: false,
-        with_top_title: false,
+        with_top_toolbar: false,
         with_total_in_title: false,
         with_hide_btn: false,
         with_fullscreen_btn: false,
@@ -101,23 +101,24 @@
      ************************************************************/
     function build_webix(self)
     {
-        var top_table_toolbar = {
+        var top_toolbar = {
             view:"toolbar",
-            id: build_name(self, "top_table_toolbar"),
-            hidden: self.config.with_top_title?false:true,
+            id: build_name(self, "top_toolbar"),
+            hidden: self.config.with_top_toolbar?false:true,
             css: "toolbar2color",
             cols: [
                 {},
                 {
                     view: "label",
-                    id: build_name(self, "top_table_toolbar_title"),
+                    id: build_name(self, "top_toolbar_title"),
+                    label: self.config.title,
                     click: function() {
                     }
                 },
                 {
                     view: "label",
                     hidden: self.config.with_total_in_title?false:true,
-                    id: build_name(self, "top_table_toolbar_total")
+                    id: build_name(self, "top_toolbar_total")
                 },
                 {},
                 {
@@ -207,7 +208,7 @@
             );
         }
 
-        var navigation_table_toolbar = {
+        var navigation_toolbar = {
             view: "scrollview",
             height: 70,
             scroll: "auto",
@@ -565,7 +566,7 @@
 
         self.config.$ui = webix.ui({
             rows: [
-                top_table_toolbar,
+                top_toolbar,
                 {
                     animate: false,
                     cells: [
@@ -574,7 +575,7 @@
                         create_form_window
                     ]
                 },
-                navigation_table_toolbar
+                navigation_toolbar
             ]
         });
         self.config.$ui.gobj = self;
@@ -948,7 +949,7 @@
         self.config.total = total;
         $$(build_name(self, "total")).setValue(total);
 
-        $$(build_name(self, "top_table_toolbar_total")).setHTML(
+        $$(build_name(self, "top_toolbar_total")).setHTML(
             "(" + total + ")"
         );
     }
@@ -977,15 +978,8 @@
      ********************************************/
     function build_table(self)
     {
-        var topic_name = self.config.topic_name;
+        var title = self.config.title;
         var schema = self.config.schema;
-
-        /*
-         *  Set topic_name in top toolbar
-         */
-        $$(build_name(self, "top_table_toolbar_title")).setHTML(
-            "&nbsp;&nbsp;&nbsp;" + topic_name + "&nbsp;"
-        );
 
         /*
          *  Tabla
@@ -1404,10 +1398,10 @@
      ********************************************/
     function ac_rebuild_table(self, event, kw, src)
     {
-        if(kw_has_key(kw, "topic_name")) {
+        if(kw_has_key(kw, "title")) {
             // Parameters can be passed here as event's attrs
             //  or with previously attributes writing
-            self.config.topic_name = kw_get_str(kw, "topic_name", "", 0);
+            self.config.title = kw_get_str(kw, "title", "", 0);
             self.config.schema = kw_get_dict_value(kw, "schema", [], 0);
         }
         build_table(self);
