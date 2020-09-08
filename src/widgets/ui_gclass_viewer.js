@@ -21,10 +21,12 @@
      ********************************************/
     var CONFIG = {
         title: "",
-        schema: null,
         with_top_toolbar: false,
-        with_hide_btn: false,
+        with_hidden_btn: false,
         with_fullscreen_btn: false,
+        with_resize_btn: false,
+
+        schema: null,
 
         ui_properties: null,
         $ui: null,
@@ -78,6 +80,7 @@
             id: build_name(self, "top_toolbar"),
             hidden: self.config.with_top_toolbar?false:true,
             css: "toolbar2color",
+            height: 30,
             cols: [
                 {},
                 {
@@ -90,32 +93,61 @@
                 {},
                 {
                     view:"icon",
-                    id: build_name(self, "fullscreen"),
+                    hidden: self.config.with_resize_btn?false:true,
+                    icon: "far fa-expand-alt",
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity++;
+                        self.config.$ui.define({gravity:gravity});
+                        if(self.config.$ui.refresh) {
+                            self.config.$ui.refresh();
+                        } else if(self.config.$ui.resize) {
+                            self.config.$ui.resize();
+                        }
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_resize_btn?false:true,
+                    icon: "far fa-compress-alt",
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity--;
+                        if(gravity>0) {
+                            self.config.$ui.define({gravity:gravity});
+                            if(self.config.$ui.refresh) {
+                                self.config.$ui.refresh();
+                            } else if(self.config.$ui.resize) {
+                                self.config.$ui.resize();
+                            }
+                        }
+                    }
+                },
+                {
+                    view:"icon",
                     hidden: self.config.with_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
                     click: function() {
-                        this.hide();
+                        $$(build_name(self, "top_toolbar")).hide();
                         webix.fullscreen.set(
                             self.config.$ui,
                             {
                                 head: {
                                     view:"toolbar",
+                                    height: 40,
                                     elements: [
                                         {
-                                        },
-                                        {
-                                            view: "label",
-                                            label: t("exit full screen") + " ->",
-                                            autowidth: true
-                                        },
-                                        {
-                                            view:"icon",
-                                            icon:"fas fa-compress",
-                                            click:function() {
+                                            view: "button",
+                                            type: "icon",
+                                            icon: "fas fa-chevron-left",
+                                            autowidth: true,
+                                            label: t("exit full screen"),
+                                            click: function() {
                                                 webix.fullscreen.exit();
-                                                $$(build_name(self, "fullscreen")).show();
+                                                $$(build_name(self, "top_toolbar")).show();
                                             }
-                                        }
+                                        },
+                                        {}
                                     ]
                                 }
                             }
@@ -124,13 +156,11 @@
                 },
                 {
                     view:"icon",
-                    id: build_name(self, "hide_btn"),
-                    hidden: self.config.with_hide_btn?false:true,
-                    icon:"fas fa-times",
+                    hidden: self.config.with_hidden_btn?false:true,
+                    icon:"far fa-window-minimize",
                     click: function() {
                         if(this.getTopParentView().config.fullscreen) {
                             webix.fullscreen.exit();
-                            $$(build_name(self, "fullscreen")).show();
                         }
                         this.getParentView().getParentView().hide();
                     }
@@ -141,10 +171,12 @@
         var form = {
             view: "form",
             id: build_name(self, "form"),
-            scroll:true,
+            scroll: true,
+            margin: 0,
+            padding: 10,
             elementsConfig: {
-                labelAlign:"left",
-                labelWidth: 160
+                labelAlign: "left",
+                labelWidth: 140
             },
             elements: [
                 {

@@ -48,6 +48,12 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        title: "",
+        with_top_toolbar: false,
+        with_hidden_btn: false,
+        with_fullscreen_btn: false,
+        with_resize_btn: false,
+
         layout_options: [
             {
                 id: "tree_layout",
@@ -275,9 +281,106 @@
         });
 
         /*---------------------------------------*
-         *      Toolbar
+         *      Top Toolbar
          *---------------------------------------*/
-        var toolbar = {
+        var top_toolbar = {
+            view:"toolbar",
+            id: build_name(self, "top_toolbar"),
+            hidden: self.config.with_top_toolbar?false:true,
+            css: "toolbar2color",
+            height: 30,
+            cols: [
+                {},
+                {
+                    view: "label",
+                    id: build_name(self, "top_toolbar_title"),
+                    label: self.config.title,
+                    click: function() {
+                    }
+                },
+                {},
+                {
+                    view:"icon",
+                    hidden: self.config.with_resize_btn?false:true,
+                    icon: "far fa-expand-alt",
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity++;
+                        self.config.$ui.define({gravity:gravity});
+                        if(self.config.$ui.refresh) {
+                            self.config.$ui.refresh();
+                        } else if(self.config.$ui.resize) {
+                            self.config.$ui.resize();
+                        }
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_resize_btn?false:true,
+                    icon: "far fa-compress-alt",
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity--;
+                        if(gravity>0) {
+                            self.config.$ui.define({gravity:gravity});
+                            if(self.config.$ui.refresh) {
+                                self.config.$ui.refresh();
+                            } else if(self.config.$ui.resize) {
+                                self.config.$ui.resize();
+                            }
+                        }
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_fullscreen_btn?false:true,
+                    icon: "fas fa-expand-wide",
+                    click: function() {
+                        $$(build_name(self, "top_toolbar")).hide();
+                        webix.fullscreen.set(
+                            self.config.$ui,
+                            {
+                                head: {
+                                    view:"toolbar",
+                                    height: 40,
+                                    elements: [
+                                        {
+                                            view: "button",
+                                            type: "icon",
+                                            icon: "fas fa-chevron-left",
+                                            autowidth: true,
+                                            label: t("exit full screen"),
+                                            click: function() {
+                                                webix.fullscreen.exit();
+                                                $$(build_name(self, "top_toolbar")).show();
+                                            }
+                                        },
+                                        {}
+                                    ]
+                                }
+                            }
+                        );
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_hidden_btn?false:true,
+                    icon:"far fa-window-minimize",
+                    click: function() {
+                        if(this.getTopParentView().config.fullscreen) {
+                            webix.fullscreen.exit();
+                            $$(build_name(self, "fullscreen")).show();
+                        }
+                        this.getParentView().getParentView().hide();
+                    }
+                }
+            ]
+        };
+
+        /*---------------------------------------*
+         *      Bottom Toolbar
+         *---------------------------------------*/
+        var bottom_toolbar = {
             view:"toolbar",
             height: 30,
             css: "toolbar2color",
@@ -381,12 +484,13 @@
         self.config.$ui = webix.ui({
             id: self.gobj_name(),
             rows: [
+                top_toolbar,
                 {
                     view: "mxgraph",
                     id: build_name(self, "mxgraph"),
                     gobj: self
                 },
-                toolbar
+                bottom_toolbar
             ]
         });
 
