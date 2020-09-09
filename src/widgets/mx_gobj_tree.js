@@ -280,9 +280,9 @@
             }
         });
 
-        /*---------------------------------------*
-         *      Top Toolbar
-         *---------------------------------------*/
+        /*------------------------------------------*
+         *      Top Toolbar of Container panel
+         *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
             id: build_name(self, "top_toolbar"),
@@ -290,19 +290,11 @@
             css: "toolbar2color",
             height: 30,
             cols: [
-                {},
-                {
-                    view: "label",
-                    id: build_name(self, "top_toolbar_title"),
-                    label: self.config.title,
-                    click: function() {
-                    }
-                },
-                {},
                 {
                     view:"icon",
                     hidden: self.config.with_resize_btn?false:true,
-                    icon: "far fa-expand-alt",
+                    icon: "far fa-arrow-from-right",
+                    tooltip: t("enlarge"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity++;
@@ -317,7 +309,8 @@
                 {
                     view:"icon",
                     hidden: self.config.with_resize_btn?false:true,
-                    icon: "far fa-compress-alt",
+                    icon: "far fa-arrow-from-left",
+                    tooltip: t("narrow"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity--;
@@ -331,10 +324,20 @@
                         }
                     }
                 },
+                {},
+                {
+                    view: "label",
+                    id: build_name(self, "top_toolbar_title"),
+                    label: self.config.title,
+                    click: function() {
+                    }
+                },
+                {},
                 {
                     view:"icon",
                     hidden: self.config.with_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
+                    tooltip: t("fullscreen"),
                     click: function() {
                         $$(build_name(self, "top_toolbar")).hide();
                         webix.fullscreen.set(
@@ -345,15 +348,18 @@
                                     height: 40,
                                     elements: [
                                         {
-                                            view: "button",
-                                            type: "icon",
+                                            view: "icon",
                                             icon: "fas fa-chevron-left",
-                                            autowidth: true,
-                                            label: t("exit full screen"),
+                                            tooltip: t("exit fullscreen"),
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
                                             }
+                                        },
+                                        {},
+                                        {
+                                            view: "label",
+                                            label: self.config.title,
                                         },
                                         {}
                                     ]
@@ -366,10 +372,10 @@
                     view:"icon",
                     hidden: self.config.with_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
+                    tooltip: t("minimize"),
                     click: function() {
                         if(this.getTopParentView().config.fullscreen) {
                             webix.fullscreen.exit();
-                            $$(build_name(self, "fullscreen")).show();
                         }
                         this.getParentView().getParentView().hide();
                     }

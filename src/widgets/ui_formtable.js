@@ -43,9 +43,16 @@
         with_webix_id: false,   // Set true when your id is repeated
         with_textfilter: false,
         with_sort: false,
-        with_navigation: false,
+        with_navigation_toolbar: false,
 
-        with_total_in_title: false,
+        with_tooltip: true,
+        with_footer: true,
+        with_select: true,
+        with_multiselect: false,
+        with_keyboard_navigation: true,
+        with_resizeColumn: true,
+        with_resizeRow: false,
+        with_fixedRowHeight: true,
 
         _writable_fields: null, // automatic built
 
@@ -104,6 +111,9 @@
      ************************************************************/
     function build_webix(self)
     {
+        /*------------------------------------------*
+         *      Top Toolbar of Container panel
+         *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
             id: build_name(self, "top_toolbar"),
@@ -111,24 +121,11 @@
             css: "toolbar2color",
             height: 30,
             cols: [
-                {},
-                {
-                    view: "label",
-                    id: build_name(self, "top_toolbar_title"),
-                    label: self.config.title,
-                    click: function() {
-                    }
-                },
-                {
-                    view: "label",
-                    hidden: self.config.with_total_in_title?false:true,
-                    id: build_name(self, "top_toolbar_total")
-                },
-                {},
                 {
                     view:"icon",
                     hidden: self.config.with_resize_btn?false:true,
-                    icon: "far fa-expand-alt",
+                    icon: "far fa-arrow-from-right",
+                    tooltip: t("enlarge"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity++;
@@ -143,7 +140,8 @@
                 {
                     view:"icon",
                     hidden: self.config.with_resize_btn?false:true,
-                    icon: "far fa-compress-alt",
+                    icon: "far fa-arrow-from-left",
+                    tooltip: t("narrow"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity--;
@@ -157,10 +155,20 @@
                         }
                     }
                 },
+                {},
+                {
+                    view: "label",
+                    id: build_name(self, "top_toolbar_title"),
+                    label: self.config.title,
+                    click: function() {
+                    }
+                },
+                {},
                 {
                     view:"icon",
                     hidden: self.config.with_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
+                    tooltip: t("fullscreen"),
                     click: function() {
                         $$(build_name(self, "top_toolbar")).hide();
                         webix.fullscreen.set(
@@ -171,15 +179,18 @@
                                     height: 40,
                                     elements: [
                                         {
-                                            view: "button",
-                                            type: "icon",
+                                            view: "icon",
                                             icon: "fas fa-chevron-left",
-                                            autowidth: true,
-                                            label: t("exit full screen"),
+                                            tooltip: t("exit fullscreen"),
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
                                             }
+                                        },
+                                        {},
+                                        {
+                                            view: "label",
+                                            label: self.config.title,
                                         },
                                         {}
                                     ]
@@ -192,6 +203,7 @@
                     view:"icon",
                     hidden: self.config.with_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
+                    tooltip: t("minimize"),
                     click: function() {
                         if(this.getTopParentView().config.fullscreen) {
                             webix.fullscreen.exit();
@@ -243,7 +255,7 @@
             view: "scrollview",
             height: 70,
             scroll: "auto",
-            hidden: self.config.with_navigation?false:true,
+            hidden: self.config.with_navigation_toolbar?false:true,
             body: {
                 view:"toolbar",
                 css: "toolbar2color",
@@ -494,12 +506,14 @@
         var list_table = {
             view: "datatable",
             id: build_name(self, "list_table"),
-            tooltip: true,
-            select: true,
-            navigation: true,
-            resizeColumn: true,
-            resizeRow: true,
-            fixedRowHeight: false,
+            tooltip: self.config.with_tooltip,
+            footer: self.config.with_footer,
+            select: self.config.with_select,
+            multiselect: self.config.with_multiselect,
+            navigation: self.config.with_keyboard_navigation,
+            resizeColumn: self.config.with_resizeColumn,
+            resizeRow: self.config.with_resizeRow,
+            fixedRowHeight: self.config.with_fixedRowHeight,
             drag: self.config.with_drag? "source":false, // TODO let "target" too?
             gobj: self, // HACK needed for factory. Available in config.gobj
             on: {
@@ -668,6 +682,17 @@
                     tranger_col.type === 'integer'? "int":"string":false,
                 minWidth: tranger_col.fillspace * 10,
                 fillspace: tranger_col.fillspace
+            }
+            if(self.config.with_footer) {
+                if(webix_schema.length==0) {
+                    webix_col.footer = {
+                        content: "countColumn"
+                    };
+                } else if(webix_schema.length==1) {
+                    webix_col.footer = {
+                        text: t("records")
+                    };
+                }
             }
 
             switch(tranger_col.type) {
