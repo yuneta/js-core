@@ -48,6 +48,9 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        /*
+         *  Top Toolbar of "Container Panel"
+         */
         title: "",
         with_top_toolbar: false,
         with_hidden_btn: false,
@@ -96,7 +99,6 @@
             }
 
         ],
-        layout_selected: "tree_layout",
 
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
@@ -117,9 +119,13 @@
         ],
         _mxgraph: null,
 
+        layout_selected: "tree_layout",
+
         ui_properties: null,    // creator can set webix properties
         $ui: null,
+
         __writable_attrs__: [
+            "layout_selected"
         ]
     };
 
@@ -281,7 +287,7 @@
         });
 
         /*------------------------------------------*
-         *      Top Toolbar of Container panel
+         *      Top Toolbar of "Container Panel"
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
@@ -378,6 +384,7 @@
                             webix.fullscreen.exit();
                         }
                         this.getParentView().getParentView().hide();
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
                     }
                 }
             ]
@@ -413,7 +420,7 @@
 
                             execute_layout(self);
 
-                            if(self.gobj_is_unique() || self.gobj_is_service()) {
+                            if(self.gobj_is_unique()) {
                                 self.gobj_save_persistent_attrs();
                             }
                         }
@@ -508,6 +515,13 @@
             }
         }
 
+        /*----------------------------------------------*
+         *  Inform of view viewed to "Container Panel"
+         *----------------------------------------------*/
+        self.config.$ui.attachEvent("onViewShow", function() {
+            self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+        });
+
         /*---------------------------------------*
          *      Automatic Resizing
          *---------------------------------------*/
@@ -572,6 +586,9 @@
             self.config.layout_selected,
             null, null
         )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
 
         if(cur_layout) {
             graph.getModel().beginUpdate();
@@ -1161,6 +1178,9 @@
             self.config.layout_selected,
             null, null
         )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
 
         if(cur_layout) {
             cur_layout.exe.execute(group);
@@ -1176,6 +1196,21 @@
 
 
 
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_click_item(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+
+        var cell = graph.model.getCell(kw.id);
+//         if(cell) {
+//             cell.fireEvent(new mxEventObject(
+//                 mxEvent.CLICK
+//             ));
+//         }
+    }
 
     /********************************************
      *
@@ -1258,6 +1293,7 @@
             "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
+            "EV_CLICK_ITEM",
             "EV_SELECT",
             "EV_REFRESH"
         ],
@@ -1270,6 +1306,7 @@
                 ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_LOAD_DATA",            ac_load_data,       undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
+                ["EV_CLICK_ITEM",           ac_click_item,      undefined],
                 ["EV_SELECT",               ac_select,          undefined],
                 ["EV_REFRESH",              ac_refresh,         undefined]
             ]

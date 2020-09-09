@@ -19,8 +19,16 @@
     var CONFIG = {
         toolbar_size: 40,
         mode: "horizontal",     // "horizontal" or "vertical"
+
         ui_properties: null,
-        $ui: null
+        $ui: null,
+
+        views_opened: {
+        },
+
+        __writable_attrs__: [
+            "views_opened"
+        ]
     };
 
 
@@ -268,6 +276,28 @@
     /********************************************
      *
      ********************************************/
+    function ac_on_view_show(self, event, kw, src)
+    {
+        self.config.views_opened = {};
+
+        var childs = self.gobj_match_childs({});
+
+        for(var i=0; i<childs.length; i++) {
+            var child = childs[i];
+            if(child.config.$ui.isVisible()) {
+                self.config.views_opened[child.gobj_name()] = true;
+            }
+        }
+
+        if(self.gobj_is_unique()) {
+            self.gobj_save_persistent_attrs();
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_select(self, event, kw, src)
     {
 
@@ -295,6 +325,7 @@
 
     var FSM = {
         "event_list": [
+            "EV_ON_VIEW_SHOW",
             "EV_CHANGE_MODE",
             "EV_ADD_TOOLBAR",
             "EV_SELECT",
@@ -306,6 +337,7 @@
         "machine": {
             "ST_IDLE":
             [
+                ["EV_ON_VIEW_SHOW",         ac_on_view_show,    undefined],
                 ["EV_CHANGE_MODE",          ac_change_mode,     undefined],
                 ["EV_ADD_TOOLBAR",          ac_add_toolbar,     undefined],
                 ["EV_SELECT",               ac_select,          undefined],
@@ -395,6 +427,10 @@
         var $container_parent = $$(build_name(self, "work_place"));
         $container_parent.addView(child.config.$ui);
         child.config.$container_parent = $container_parent;
+
+        if(kw_has_key(self.config.views_opened, child.gobj_name())) {
+            child.config.$ui.show();
+        }
     }
 
     /************************************************

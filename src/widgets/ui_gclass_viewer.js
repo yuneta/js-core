@@ -106,11 +106,16 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        /*
+         *  Top Toolbar of "Container Panel"
+         */
         title: "",
         with_top_toolbar: false,
         with_hidden_btn: false,
         with_fullscreen_btn: false,
         with_resize_btn: false,
+
+        view_handler: "view1", // "json", "view1",... TODO
 
         layout_options: [
             {
@@ -154,11 +159,14 @@
             }
 
         ],
+
         layout_selected: "tree_layout",
 
         ui_properties: null,
         $ui: null,
+
         __writable_attrs__: [
+            "layout_selected"
         ]
     };
 
@@ -213,7 +221,7 @@
     function build_webix(self)
     {
         /*------------------------------------------*
-         *      Top Toolbar of Container panel
+         *      Top Toolbar of "Container Panel"
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
@@ -310,6 +318,7 @@
                             webix.fullscreen.exit();
                         }
                         this.getParentView().getParentView().hide();
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
                     }
                 }
             ]
@@ -345,7 +354,7 @@
 
                             execute_layout(self);
 
-                            if(self.gobj_is_unique() || self.gobj_is_service()) {
+                            if(self.gobj_is_unique()) {
                                 self.gobj_save_persistent_attrs();
                             }
                         }
@@ -439,6 +448,13 @@
                 self.config.$ui.refresh();
             }
         }
+
+        /*----------------------------------------------*
+         *  Inform of view viewed to "Container Panel"
+         *----------------------------------------------*/
+        self.config.$ui.attachEvent("onViewShow", function() {
+            self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+        });
     }
 
     /********************************************
@@ -465,6 +481,9 @@
             self.config.layout_selected,
             null, null
         )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
 
         if(cur_layout) {
             graph.getModel().beginUpdate();
@@ -578,7 +597,10 @@
         // Set stylesheet options
         var style = graph.getStylesheet().getDefaultVertexStyle();
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-        style[mxConstants.STYLE_SHAPE] = 'treenode';
+
+        style[mxConstants.STYLE_FILLCOLOR] = '#FBB5CA';
+        style[mxConstants.STYLE_STROKECOLOR] = '#F8CECC';
+
         style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
         style[mxConstants.STYLE_SHADOW] = true;
         style[mxConstants.STYLE_ROUNDED] = true;
@@ -594,12 +616,12 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
-                var record = evt.properties.cell.value;
-                if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
-                } else {
-                    self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
-                }
+//                 var record = evt.properties.cell.value;
+//                 if(cell.isVertex()) {
+//                     self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
+//                 } else {
+//                     self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
+//                 }
             }
         });
 
@@ -724,15 +746,46 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_gclass(self, graph, group, record)
+    function load_gclass(self, data, layer)
     {
-        var x_acc = [];
+        // HACK is already in a beginUpdate/endUpdate
+        var graph = self.config._mxgraph;
+        var group = get_layer(self, layer);
+
+        switch(self.config.view_handler) {
+            case "viewer1":
+            default:
+                show_view1(self, graph, group, data);
+                break;
+        }
+
+        /*---------------------------*
+         *      Execute layout
+         *---------------------------*/
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+
+        if(cur_layout) {
+            cur_layout.exe.execute(group);
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function show_view1(self, graph, group, record)
+    {
         var x = 100;
-        var y = 100; // si meto separación aparece scrollbar al ajustar
+        var y = 100;
         var cx = 200;
         var cy = 200;
-        var sep = self.config.vertex_sep;
-
+        var sep = 20;
 
         var child = graph.insertVertex(
             group,
@@ -748,27 +801,7 @@
 //             "base": "",
 //             "priv_size": 72,
 //             "instances": 2
-    }
 
-    /************************************************************
-     *
-     ************************************************************/
-    function load_gclass(self, data, layer)
-    {
-        // HACK is already in a beginUpdate/endUpdate
-        var graph = self.config._mxgraph;
-        var group = get_layer(self, layer);
-        _load_gclass(self, graph, group, data);
-
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-
-        if(cur_layout) {
-            cur_layout.exe.execute(group);
-        }
     }
 
 

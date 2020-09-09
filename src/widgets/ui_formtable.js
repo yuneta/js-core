@@ -21,6 +21,9 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        /*
+         *  Top Toolbar of "Container Panel"
+         */
         title: "",
         with_top_toolbar: false,
         with_hidden_btn: false,
@@ -112,7 +115,7 @@
     function build_webix(self)
     {
         /*------------------------------------------*
-         *      Top Toolbar of Container panel
+         *      Top Toolbar of "Container Panel"
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
@@ -209,6 +212,7 @@
                             webix.fullscreen.exit();
                         }
                         this.getParentView().getParentView().hide();
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
                     }
                 }
             ]
@@ -609,6 +613,9 @@
             }
         };
 
+        /*---------------------------------------*
+         *      UI
+         *---------------------------------------*/
         self.config.$ui = webix.ui({
             rows: [
                 top_toolbar,
@@ -631,6 +638,13 @@
                 self.config.$ui.refresh();
             }
         }
+
+        /*----------------------------------------------*
+         *  Inform of view viewed to "Container Panel"
+         *----------------------------------------------*/
+        self.config.$ui.attachEvent("onViewShow", function() {
+            self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+        });
     }
 
     /********************************************

@@ -207,11 +207,11 @@ __inside_event_loop__ = 0;
     }
 
     /************************************************************
-     *
+     *  HACK Los servicios se registran como únicos
      ************************************************************/
     proto.gobj_is_unique = function()
     {
-        return this.config.__unique__;
+        return this.config.__unique__ || this.config.__service__;
     }
 
     /************************************************************
