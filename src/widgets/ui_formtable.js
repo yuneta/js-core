@@ -992,27 +992,6 @@
     /********************************************
      *
      ********************************************/
-    function set_total(self, $table)
-    {
-        var data = $table.data.pull;
-        var total = 0;
-        if(is_object(data)) {
-            total = json_object_size(data);
-        } else if(is_array(data)) {
-            total = data.length;
-        }
-
-        self.config.total = total;
-        $$(build_name(self, "total")).setValue(total);
-
-        $$(build_name(self, "top_toolbar_total")).setHTML(
-            "(" + total + ")"
-        );
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function set_current_table_record(self)
     {
         var $table = $$(build_name(self, "list_table"));
@@ -1113,8 +1092,6 @@
         } else if(data.length > 1) {
             self.gobj_send_event("EV_FIRST_RECORD", {}, self);
         }
-
-        set_total(self, $table);
 
         return 0;
     }
@@ -1479,8 +1456,6 @@
 
         self.gobj_send_event("EV_UNDO_RECORD", {}, self);
         self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
-
-        set_total(self, $table);
 
         return 0;
     }
