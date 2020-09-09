@@ -384,6 +384,10 @@
                             webix.fullscreen.exit();
                         }
                         this.getParentView().getParentView().hide();
+
+                        /*----------------------------------------------*
+                         *  Inform of view viewed to "Container Panel"
+                         *----------------------------------------------*/
                         self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
                     }
                 }
@@ -1205,11 +1209,14 @@
         var graph = self.config._mxgraph;
 
         var cell = graph.model.getCell(kw.id);
-//         if(cell) {
-//             cell.fireEvent(new mxEventObject(
-//                 mxEvent.CLICK
-//             ));
-//         }
+        if(cell) {
+            graph.fireEvent(
+                new mxEventObject(
+                    mxEvent.CLICK, 'event', {}, 'cell', cell
+                ),
+                cell
+            );
+        }
     }
 
     /********************************************

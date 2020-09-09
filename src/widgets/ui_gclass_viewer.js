@@ -318,6 +318,10 @@
                             webix.fullscreen.exit();
                         }
                         this.getParentView().getParentView().hide();
+
+                        /*----------------------------------------------*
+                         *  Inform of view viewed to "Container Panel"
+                         *----------------------------------------------*/
                         self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
                     }
                 }
