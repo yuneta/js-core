@@ -1210,6 +1210,9 @@
 
         var cell = graph.model.getCell(kw.id);
         if(cell) {
+            /*
+             *  Simula un click !!!
+             */
             graph.fireEvent(
                 new mxEventObject(
                     mxEvent.CLICK, 'event', {}, 'cell', cell

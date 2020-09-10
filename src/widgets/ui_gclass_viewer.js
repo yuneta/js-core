@@ -116,8 +116,16 @@
         with_resize_btn: false,
 
         view_handler: "view1", // "json", "view1",... TODO
+        mxnode_gclass: null,
 
         layout_options: [
+            {
+                id: "no_layout",
+                value: "No Layout",
+                layout: function(layout_option, graph) {
+                    return null;
+                }
+            },
             {
                 id: "tree_layout",
                 value: "Compact Tree Layout",
@@ -160,7 +168,7 @@
 
         ],
 
-        layout_selected: "tree_layout",
+        layout_selected: "no_layout",
 
         ui_properties: null,
         $ui: null,
@@ -244,6 +252,7 @@
                         } else if(self.config.$ui.resize) {
                             self.config.$ui.resize();
                         }
+                        self.gobj_send_event("EV_REPOSITION", {}, self);
                     }
                 },
                 {
@@ -262,6 +271,7 @@
                                 self.config.$ui.resize();
                             }
                         }
+                        self.gobj_send_event("EV_REPOSITION", {}, self);
                     }
                 },
                 {},
@@ -294,6 +304,7 @@
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
+                                                self.gobj_send_event("EV_REPOSITION", {}, self);
                                             }
                                         },
                                         {},
@@ -306,6 +317,7 @@
                                 }
                             }
                         );
+                        self.gobj_send_event("EV_REPOSITION", {}, self);
                     }
                 },
                 {
@@ -341,6 +353,7 @@
                     id: build_name(self, "layout_options"),
                     tooltip: t("Select layout"),
                     width: 180,
+                    hidden: true, // HACK own layout
                     options: self.config.layout_options,
                     value: self.config.layout_selected,
                     label: "",
@@ -434,6 +447,7 @@
          *---------------------------------------*/
         self.config.$ui = webix.ui({
             id: self.gobj_name(),
+            view: "layout",
             rows: [
                 top_toolbar,
                 {
@@ -450,6 +464,9 @@
             self.config.$ui.define(self.config.ui_properties);
             if(self.config.$ui.refresh) {
                 self.config.$ui.refresh();
+            }
+            if(self.config.$ui.resize) {
+                self.config.$ui.resize();
             }
         }
 
@@ -475,10 +492,12 @@
     /********************************************
      *  Execute layout
      ********************************************/
-    function execute_layout(self)
+    function execute_layout(self, group)
     {
         var graph = self.config._mxgraph;
-        var group = get_layer(self, "layer?");
+        if(group) {
+            group = get_layer(self, "layer?");
+        }
 
         var cur_layout = kwid_collect(
             self.config.layout_options,
@@ -489,10 +508,12 @@
             cur_layout = self.config.layout_options[0];
         }
 
-        if(cur_layout) {
+        if(cur_layout && cur_layout.exe) {
             graph.getModel().beginUpdate();
             try {
                 cur_layout.exe.execute(group);
+            } catch (e) {
+                log_error(JSON.stringify(e));
             } finally {
                 graph.getModel().endUpdate();
             }
@@ -530,6 +551,8 @@
         graph.getModel().beginUpdate();
         try {
             graph.getModel().setRoot(root);
+        } catch (e) {
+            log_error(JSON.stringify(e));
         } finally {
             graph.getModel().endUpdate();
         }
@@ -570,27 +593,37 @@
         // Enable/Disable cell handling
         graph.setEnabled(true);
 
-        graph.setConnectable(false); // Crear edges/links
-        graph.setCellsDisconnectable(false); // Modificar egdes/links
-        mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
-        graph.setCellsLocked(false);
-        graph.setPortsEnabled(true);
-        graph.setCellsEditable(false);
+        graph.setConnectable(false);    // (true) Crear edges/links, update mxConnectionHandler.enabled
+        graph.cellsDisconnectable = false;  // (true) Override by isCellDisconnectable()
+        graph.cellsLocked = false;      // (false)  Override by isCellsLocked()
+        graph.portsEnabled = true;      // (true)   Override by isPortsEnabled()
+        graph.cellsEditable = false;    // (true)   Override by isCellEditable()
+        graph.cellsResizable = false;   // (true)   Override by isCellResizable()
+        graph.setCellsMovable = true;   // (true)   Override by isCellMovable()
+        graph.disconnectOnMove = false; // (true)   Override by isDisconnectOnMove()
+        graph.constrainChildren = false;// (true)   Override by isConstrainChildren()
+        graph.extendParents = false;    // (true)   Override by isExtendParents()
+        graph.extendParentsOnAdd = false;// (true)  Override by isExtendParentsOnAdd()
+        graph.extendParentsOnMove = false; // (false) Override by isExtendParentsOnMove()
+        graph.foldingEnabled = false;   // (true) General para todos, sin Override
+        graph.dropEnabled = false;      // (false)  Override by isDropEnabled()
 
-        // TODO mira si sirve
-        // graph.disconnectOnMove = false;
-        // graph.foldingEnabled = false;
-        // graph.cellsResizable = false;
-        // graph.extendParents = false;
+        // HACK Por defecto si los hijos salen un overlap del 50% se quitan del padre y pasan al default
+        graph.graphHandler.setRemoveCellsFromParent(false); // HACK impide quitar hijos
 
-        // // Disables automatic handling of ports. This disables the reset of the
-        // // respective style in mxGraph.cellConnected. Note that this feature may
-        // // be useful if floating and fixed connections are combined.
-        // graph.setPortsEnabled(false);
+        graph.graphHandler.setCloneEnabled(false); // Ctrl+Drag will clone a cell
 
-        // Enable/Disable basic selection (selected = se activa marco de redimensionamiento)
-        graph.setCellsSelectable(true);
+        mxGraph.prototype.isAllowOverlapParent = function(cell) { return true;}
+        mxGraph.prototype.defaultOverlap = 1; // Permite a hijos irse tan lejos como quieran
 
+        /*
+         *  Enable/Disable basic selection (se activa marco de redimensionamiento o movible)
+         *  Si se cambia isCellSelectable() entonces es lo que prima.
+         *  Seleccionable, se puede activar:
+         *      - el marco de redimensionamiento (setCellsResizable a true)
+         *      - el marco de movimiento
+         */
+        graph.cellsSelectable = false; // Default: true, Override by isCellSelectable()
         mxGraph.prototype.isCellSelectable = function(cell) {
             if(cell.isVertex()) {
                 return true;
@@ -605,7 +638,7 @@
         style[mxConstants.STYLE_FILLCOLOR] = '#FBB5CA';
         style[mxConstants.STYLE_STROKECOLOR] = '#F8CECC';
 
-        style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+        style[mxConstants.STYLE_GRADIENTCOLOR] = '#FBD5E4';
         style[mxConstants.STYLE_SHADOW] = true;
         style[mxConstants.STYLE_ROUNDED] = true;
         style[mxConstants.STYLE_FONTFAMILY] = "Arial";
@@ -616,27 +649,22 @@
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
         style[mxConstants.STYLE_ROUNDED] = true;
 
-        // Handles clicks on cells
-        graph.addListener(mxEvent.CLICK, function(sender, evt) {
-            var cell = evt.getProperty('cell');
-            if (cell != null) {
-//                 var record = evt.properties.cell.value;
-//                 if(cell.isVertex()) {
-//                     self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
-//                 } else {
-//                     self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
-//                 }
-            }
-        });
-
         /*
          *  Own getLabel
          */
         graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
-            if (this.getModel().isVertex(cell)) {
-                return cell.value.id;
+            switch(cell.id) {
+                case 'class_attrs':
+                    return html(self, cell.value);
+                    break;
+                default:
+                    if(cell.value.label) {
+                        return cell.value.label;
+                    }
+                    break;
             }
+            return null;
         };
 
         /*
@@ -644,16 +672,16 @@
          */
         graph.setTooltips(true);
         graph.getTooltip = function(state) {
-            if(state.cell.value.shortname) {
-                return state.cell.value.id;
+            if(state.cell.value.tooltip) {
+                return state.cell.value.tooltip;
             }
-            return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
+            return null;
         };
 
         // Defines the condition for showing the folding icon
         graph.isCellFoldable = function(cell, collapse)
         {
-            return this.model.getOutgoingEdges(cell).length > 0;
+            return false;
         };
 
         graph.getCursorForCell = function(cell) {
@@ -664,72 +692,58 @@
             }
         };
 
-        // Defines the position of the folding icon
-        graph.cellRenderer.getControlBounds = function(state, w, h) {
-            if (state.control != null) {
-                var oldScale = state.control.scale;
-                var w = state.control.bounds.width / oldScale;
-                var h = state.control.bounds.height / oldScale;
-                var s = state.view.scale;
+        setup_events(self, graph);
+    }
 
-                // 0 = TreeNodeShape.prototype.segment * s
-                return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
-                    state.y + state.height + 10 - h / 2 * s,
-                    w * s, h * s
-                );
-            }
-
-            return null;
-        };
-
-        // Implements the click on a folding icon
-        graph.foldCells = function(collapse, recurse, cells) {
-            this.model.beginUpdate();
-            try {
-                toggleSubtree(this, cells[0], !collapse);
-                this.model.setCollapsed(cells[0], collapse);
-
-                // Executes the layout for the new graph since
-                // changes to visiblity and collapsed state do
-                // not trigger a layout in the current manager.
-
-                execute_layout(self);
-            } finally {
-                this.model.endUpdate();
-            }
-        };
-
-        // Updates the visible state of a given subtree taking into
-        // account the collapsed state of the traversed branches
-        function toggleSubtree(graph, cell, show) {
-            show = (show != null) ? show : true;
-            var cells = [];
-
-            graph.traverse(cell, true, function(vertex)
-            {
-                if (vertex != cell)
-                {
-                    cells.push(vertex);
-                }
-
-                // Stops recursion if a collapsed cell is seen
-                return vertex == cell || !graph.isCellCollapsed(vertex);
+    /************************************************************
+     *
+     ************************************************************/
+    function setup_events(self, graph)
+    {
+        var events = [
+            mxEvent.ROOT,
+            mxEvent.ALIGN_CELLS,
+            mxEvent.FLIP_EDGE,
+            mxEvent.ORDER_CELLS,
+            mxEvent.CELLS_ORDERED,
+            mxEvent.GROUP_CELLS,
+            mxEvent.UNGROUP_CELLS,
+            mxEvent.REMOVE_CELLS_FROM_PARENT,
+            mxEvent.ADD_CELLS,
+            mxEvent.CELLS_ADDED,
+            mxEvent.REMOVE_CELLS,
+            mxEvent.CELLS_REMOVED,
+            mxEvent.SPLIT_EDGE,
+            mxEvent.TOGGLE_CELLS,
+            mxEvent.FOLD_CELLS,
+            mxEvent.CELLS_FOLDED,
+            mxEvent.UPDATE_CELL_SIZE,
+            mxEvent.RESIZE_CELLS,
+            mxEvent.CELLS_RESIZED,
+            mxEvent.MOVE_CELLS,
+            mxEvent.CELLS_MOVED,
+            mxEvent.CONNECT_CELL,
+            mxEvent.CELL_CONNECTED,
+            mxEvent.REFRESH,
+            mxEvent.CLICK,
+            mxEvent.DOUBLE_CLICK,
+            mxEvent.GESTURE,
+            mxEvent.TAP_AND_HOLD,
+            //mxEvent.FIRE_MOUSE_EVENT, too much events
+            mxEvent.SIZE,
+            mxEvent.START_EDITING,
+            mxEvent.EDITING_STARTED,
+            mxEvent.EDITING_STOPPED,
+            mxEvent.LABEL_CHANGED,
+            mxEvent.ADD_OVERLAY,
+            mxEvent.REMOVE_OVERLAY
+        ];
+        for(var i=0; i<events.length; i++) {
+            var ev = events[i];
+            graph.addListener(ev, function(sender, evt) {
+                self.gobj_send_event("MX_" + evt.name, evt.properties, self);
             });
-
-            graph.toggleCells(show, cells, true);
-        };
-
-        /*
-         *  Add callback: Only cells selected have "class overlays"
-         */
-        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
-            /*
-             *  HACK "added" vs "removed"
-             *  The names are inverted due to historic reasons.  This cannot be changed.
-             *
-             *  HACK don't change the order, first removed, then added
-             */
-        });
+        }
     }
 
     /************************************************************
@@ -752,7 +766,9 @@
      ************************************************************/
     function load_gclass(self, data, layer)
     {
-        // HACK is already in a beginUpdate/endUpdate
+        /*
+         *  HACK is already in a beginUpdate/endUpdate
+         */
         var graph = self.config._mxgraph;
         var group = get_layer(self, layer);
 
@@ -763,21 +779,15 @@
                 break;
         }
 
-        /*---------------------------*
-         *      Execute layout
-         *---------------------------*/
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-        if(!cur_layout) {
-            cur_layout = self.config.layout_options[0];
-        }
+        execute_layout(self, group);
+    }
 
-        if(cur_layout) {
-            cur_layout.exe.execute(group);
-        }
+    /************************************************************
+     *
+     ************************************************************/
+    function html(self, record)
+    {
+        return JSON.stringify(record);
     }
 
     /************************************************************
@@ -785,26 +795,40 @@
      ************************************************************/
     function show_view1(self, graph, group, record)
     {
-        var x = 100;
-        var y = 100;
-        var cx = 200;
-        var cy = 200;
-        var sep = 20;
+        var win_cx = self.config.$ui.$width;
+        var win_cy = self.config.$ui.$height;
+        var margin = 10;
 
-        var child = graph.insertVertex(
+        var cx = 300;
+        var cy = 500;
+
+        var x = (win_cx > cx)? (win_cx - cx)/2 : margin;
+        var y = margin;
+
+        self.config.mxnode_gclass = graph.insertVertex(
             group,
             record.id,
             record,
-            x,
-            y,
-            cx, cy,
+            x, y, cx, cy,
             ""
         );
 
-//             "id": "IOGate",
-//             "base": "",
-//             "priv_size": 72,
-//             "instances": 2
+        var class_attrs = graph.insertVertex(
+            self.config.mxnode_gclass,
+            'class_attrs',
+            {
+                "name": record.id,
+                "base": record.base,
+                "priv_size": record.priv_size,
+                "instances": record.instances
+            },
+            20, 20, cx - cx/8, 50,
+            'shape=rectangle;fontSize=10;'+
+            'spacingLeft=12;fillColor=white;'+
+            'fontColor=black;strokeColor=black;',
+            false
+        );
+
 
     }
 
@@ -835,7 +859,8 @@
                     load_gclass(self, data, layer);
                     break;
             }
-
+        } catch (e) {
+            log_error(JSON.stringify(e));
         } finally {
             model.endUpdate();
         }
@@ -859,6 +884,46 @@
     }
 
     /********************************************
+     *  Re-Move interno, cuando fullscreen
+     ********************************************/
+    function ac_reposition(self, event, kw, src)
+    {
+        var margin = 10;
+        var graph = self.config._mxgraph;
+        var win_cx = self.config.$ui.$width;
+        var win_cy = self.config.$ui.$height;
+        var geo = graph.getCellGeometry(self.config.mxnode_gclass);
+        var new_x = geo.x;
+        var new_y = geo.y;
+        var cx = geo.width;
+        var cy = geo.height;
+
+        if(cx >= win_cx) {
+            new_x = margin;
+        } else {
+            new_x = (win_cx - cx)/2
+        }
+        if(cy >= win_cy) {
+            new_y = margin;
+        }
+
+        var dx = geo.x - new_x;
+        var dy = geo.y - new_y;
+
+        try {
+            var cells = [self.config.mxnode_gclass];
+            graph.moveCells(cells, -dx, -dy);
+            graph.refresh();
+        } catch (e) {
+            log_error(JSON.stringify(e));
+        } finally {
+            graph.getModel().endUpdate();
+        }
+
+        return 0;
+    }
+
+    /********************************************
      *
      ********************************************/
     function ac_refresh(self, event, kw, src)
@@ -872,6 +937,16 @@
      ********************************************/
     function ac_select(self, event, kw, src)
     {
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_mx_event(self, event, kw, src)
+    {
+        trace_msg("mx event: " + event );
+        trace_msg(kw);
         return 0;
     }
 
@@ -889,8 +964,45 @@
         "event_list": [
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
+            "EV_REPOSITION",
             "EV_REFRESH",
-            "EV_SELECT"
+            "EV_SELECT",
+            "MX_" + mxEvent.ROOT,
+            "MX_" + mxEvent.ALIGN_CELLS,
+            "MX_" + mxEvent.FLIP_EDGE,
+            "MX_" + mxEvent.ORDER_CELLS,
+            "MX_" + mxEvent.CELLS_ORDERED,
+            "MX_" + mxEvent.GROUP_CELLS,
+            "MX_" + mxEvent.UNGROUP_CELLS,
+            "MX_" + mxEvent.REMOVE_CELLS_FROM_PARENT,
+            "MX_" + mxEvent.ADD_CELLS,
+            "MX_" + mxEvent.CELLS_ADDED,
+            "MX_" + mxEvent.REMOVE_CELLS,
+            "MX_" + mxEvent.CELLS_REMOVED,
+            "MX_" + mxEvent.SPLIT_EDGE,
+            "MX_" + mxEvent.TOGGLE_CELLS,
+            "MX_" + mxEvent.FOLD_CELLS,
+            "MX_" + mxEvent.CELLS_FOLDED,
+            "MX_" + mxEvent.UPDATE_CELL_SIZE,
+            "MX_" + mxEvent.RESIZE_CELLS,
+            "MX_" + mxEvent.CELLS_RESIZED,
+            "MX_" + mxEvent.MOVE_CELLS,
+            "MX_" + mxEvent.CELLS_MOVED,
+            "MX_" + mxEvent.CONNECT_CELL,
+            "MX_" + mxEvent.CELL_CONNECTED,
+            "MX_" + mxEvent.REFRESH,
+            "MX_" + mxEvent.CLICK,
+            "MX_" + mxEvent.DOUBLE_CLICK,
+            "MX_" + mxEvent.GESTURE,
+            "MX_" + mxEvent.TAP_AND_HOLD,
+            "MX_" + mxEvent.FIRE_MOUSE_EVENT,
+            "MX_" + mxEvent.SIZE,
+            "MX_" + mxEvent.START_EDITING,
+            "MX_" + mxEvent.EDITING_STARTED,
+            "MX_" + mxEvent.EDITING_STOPPED,
+            "MX_" + mxEvent.LABEL_CHANGED,
+            "MX_" + mxEvent.ADD_OVERLAY,
+            "MX_" + mxEvent.REMOVE_OVERLAY
         ],
         "state_list": [
             "ST_IDLE"
@@ -900,8 +1012,45 @@
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
+                ["EV_REPOSITION",               ac_reposition,              undefined],
                 ["EV_REFRESH",                  ac_refresh,                 undefined],
-                ["EV_SELECT",                   ac_select,                  undefined]
+                ["EV_SELECT",                   ac_select,                  undefined],
+                ["MX_" + mxEvent.ROOT,          ac_mx_event,                undefined],
+                ["MX_" + mxEvent.ALIGN_CELLS,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.FLIP_EDGE,     ac_mx_event,                undefined],
+                ["MX_" + mxEvent.ORDER_CELLS,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_ORDERED, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.GROUP_CELLS,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.UNGROUP_CELLS, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.REMOVE_CELLS_FROM_PARENT, ac_mx_event,     undefined],
+                ["MX_" + mxEvent.ADD_CELLS,     ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_ADDED,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.REMOVE_CELLS,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_REMOVED, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.SPLIT_EDGE,    ac_mx_event,                undefined],
+                ["MX_" + mxEvent.TOGGLE_CELLS,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.FOLD_CELLS,    ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_FOLDED,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.UPDATE_CELL_SIZE, ac_mx_event,             undefined],
+                ["MX_" + mxEvent.RESIZE_CELLS,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_RESIZED, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.MOVE_CELLS,    ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELLS_MOVED,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CONNECT_CELL,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CELL_CONNECTED,ac_mx_event,                undefined],
+                ["MX_" + mxEvent.REFRESH,       ac_mx_event,                undefined],
+                ["MX_" + mxEvent.CLICK,         ac_mx_event,                undefined],
+                ["MX_" + mxEvent.DOUBLE_CLICK,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.GESTURE,       ac_mx_event,                undefined],
+                ["MX_" + mxEvent.TAP_AND_HOLD,  ac_mx_event,                undefined],
+                ["MX_" + mxEvent.FIRE_MOUSE_EVENT,ac_mx_event,              undefined],
+                ["MX_" + mxEvent.SIZE,          ac_mx_event,                undefined],
+                ["MX_" + mxEvent.START_EDITING, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.EDITING_STARTED,ac_mx_event,               undefined],
+                ["MX_" + mxEvent.EDITING_STOPPED,ac_mx_event,               undefined],
+                ["MX_" + mxEvent.LABEL_CHANGED, ac_mx_event,                undefined],
+                ["MX_" + mxEvent.ADD_OVERLAY,   ac_mx_event,                undefined],
+                ["MX_" + mxEvent.REMOVE_OVERLAY,ac_mx_event,                undefined]
             ]
         }
     };
