@@ -602,6 +602,8 @@
             graph.getModel().beginUpdate();
             try {
                 cur_layout.exe.execute(group);
+            } catch (e) {
+                log_error(e);
             } finally {
                 graph.getModel().endUpdate();
             }
@@ -639,6 +641,8 @@
         graph.getModel().beginUpdate();
         try {
             graph.getModel().setRoot(root);
+        } catch (e) {
+            log_error(e);
         } finally {
             graph.getModel().endUpdate();
         }
@@ -800,6 +804,8 @@
                 // not trigger a layout in the current manager.
 
                 execute_layout(self);
+            } catch (e) {
+                log_error(e);
             } finally {
                 this.model.endUpdate();
             }
@@ -957,6 +963,8 @@
                 self.parent.gobj_send_event("EV_MX_ROLE_INSTANCE_CLICKED", record, self);
             });
 
+        } catch (e) {
+            log_error(e);
         } finally {
             model.endUpdate();
         }
@@ -1105,6 +1113,8 @@
                     self.parent.gobj_send_event("EV_MX_TRACING_CLICKED", record, self);
                 });
             }
+        } catch (e) {
+            log_error(e);
         } finally {
             model.endUpdate();
         }
@@ -1255,6 +1265,8 @@
                     break;
             }
 
+        } catch (e) {
+            log_error(e);
         } finally {
             model.endUpdate();
         }

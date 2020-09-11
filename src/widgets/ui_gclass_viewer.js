@@ -514,7 +514,7 @@
             try {
                 cur_layout.exe.execute(group);
             } catch (e) {
-                log_error(JSON.stringify(e));
+                log_error(e);
             } finally {
                 graph.getModel().endUpdate();
             }
@@ -553,7 +553,7 @@
         try {
             graph.getModel().setRoot(root);
         } catch (e) {
-            log_error(JSON.stringify(e));
+            log_error(e);
         } finally {
             graph.getModel().endUpdate();
         }
@@ -606,7 +606,7 @@
         graph.extendParents = false;    // (true)   Override by isExtendParents()
         graph.extendParentsOnAdd = false;// (true)  Override by isExtendParentsOnAdd()
         graph.extendParentsOnMove = false; // (false) Override by isExtendParentsOnMove()
-        graph.foldingEnabled = false;   // (true) General para todos, sin Override
+        graph.foldingEnabled = true;    // (true) General para todos, sin Override
         graph.dropEnabled = false;      // (false)  Override by isDropEnabled()
 
         // HACK Por defecto si los hijos salen un overlap del 50% se quitan del padre y pasan al default
@@ -626,10 +626,7 @@
          */
         graph.cellsSelectable = false; // Default: true, Override by isCellSelectable()
         mxGraph.prototype.isCellSelectable = function(cell) {
-            if(cell.isVertex()) {
-                return true;
-            }
-            return false; // edges no selectable
+            return isCellSelectable(self, cell);
         };
 
         // Set stylesheet options
@@ -653,19 +650,9 @@
         /*
          *  Own getLabel
          */
-        graph.setHtmlLabels(true);
+        graph.setHtmlLabels(true); // See https://jgraph.github.io/mxgraph/docs/known-issues.html#19
         graph.getLabel = function(cell) {
-            switch(cell.id) {
-                case 'class_attrs':
-                    return html(self, cell.value);
-                    break;
-                default:
-                    if(cell.value.label) {
-                        return cell.value.label;
-                    }
-                    break;
-            }
-            return null;
+            return getLabel(self, cell);
         };
 
         /*
@@ -673,24 +660,27 @@
          */
         graph.setTooltips(true);
         graph.getTooltip = function(state) {
-            if(state.cell.value.tooltip) {
-                return state.cell.value.tooltip;
-            }
-            return null;
+            return getTooltip(self, state);
         };
 
-        // Defines the condition for showing the folding icon
+        /*
+         *  Defines the condition for showing the folding icon
+         */
         graph.isCellFoldable = function(cell, collapse)
         {
-            return false;
+            return isCellFoldable(self, cell, collapse);
         };
 
+        // Implements the click on a folding icon
+        graph.foldCells = function(collapse, recurse, cells) {
+            return foldCells(self, collapse, recurse, cells);
+        };
+
+        /*
+         *  Mouse Cursor
+         */
         graph.getCursorForCell = function(cell) {
-            if(this.model.isEdge(cell)) {
-                return 'default';
-            } else {
-                return 'default';
-            }
+            return getCursorForCell(self, cell);
         };
 
         setup_events(self, graph);
@@ -786,9 +776,108 @@
     /************************************************************
      *
      ************************************************************/
-    function html(self, record)
+    function getLabel(self, cell)
     {
-        return JSON.stringify(record);
+        if(is_string(cell.value)) {
+            return "<strong>" + cell.value + "</strong>";
+        } else if(is_string(cell.id)) {
+            return "<strong>" + cell.id + "</strong>";
+        } else if(is_object(cell.value) && cell.value.id) {
+            return "<strong>" + cell.value.id + "</strong>";
+        }
+        return "";
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function getTooltip(self, state)
+    {
+        if(state.cell.value.tooltip) {
+            return state.cell.value.tooltip;
+        }
+        return null;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function isCellSelectable(self, cell)
+    {
+        if(cell.isVertex()) {
+            return true;
+        }
+        return false; // edges no selectable
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function isCellFoldable(self, cell)
+    {
+        if(cell.value && cell.value.foldable) {
+            return true;
+        }
+        return false;
+    }
+
+    /************************************************************
+     *  Implements the click on a folding icon
+     ************************************************************/
+    function foldCells(self, collapse, recurse, cells)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+        model.beginUpdate();
+        try {
+            toggleSubtree(self, graph, cells[0], !collapse);
+            model.setCollapsed(cells[0], collapse);
+
+            // Executes the layout for the new graph since
+            // changes to visiblity and collapsed state do
+            // not trigger a layout in the current manager.
+
+            execute_layout(self);
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+    }
+
+    /************************************************************
+     *  Updates the visible state of a given subtree taking into
+     *  account the collapsed state of the traversed branches
+     ************************************************************/
+    function toggleSubtree(self, graph, cell, show)
+    {
+        show = (show != null) ? show : true;
+        var cells = [];
+
+        graph.traverse(cell, true, function(vertex)
+        {
+            if (vertex != cell)
+            {
+                cells.push(vertex);
+            }
+
+            // Stops recursion if a collapsed cell is seen
+            return vertex == cell || !graph.isCellCollapsed(vertex);
+        });
+
+        graph.toggleCells(show, cells, true);
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function getCursorForCell(self, cell)
+    {
+        if(cell.edge) {
+            return 'default';
+        } else {
+            return 'default';
+        }
     }
 
     /************************************************************
@@ -809,6 +898,7 @@
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
+        record.foldable = true;
         self.config.mxnode_gclass = graph.insertVertex(
             layer,          // parent
             record.id,      // id
@@ -823,9 +913,9 @@
          *-------------------------------*/
         var class_attrs = graph.insertVertex(
             self.config.mxnode_gclass,              // parent
-            'class_attrs',                          // id
+            'Class Attributes',                     // id
             {                                       // value
-                "name": record.id,
+                "id": record.id,
                 "base": record.base,
                 "priv_size": record.priv_size,
                 "instances": record.instances
@@ -837,7 +927,7 @@
             false
         );                                          // relative
 
-        graph.insertEdge(
+        var link = graph.insertEdge(
             null, //self.config.mxnode_gclass,  // parent
             null,                       // id
             '',                         // value
@@ -845,8 +935,6 @@
             class_attrs,                // target
             null                        // style
         );
-
-
     }
 
 
@@ -877,7 +965,7 @@
                     break;
             }
         } catch (e) {
-            log_error(JSON.stringify(e));
+            log_error(e);
         } finally {
             model.endUpdate();
         }
@@ -949,7 +1037,7 @@
             graph.moveCells(cells, -dx, -dy);
             graph.refresh();
         } catch (e) {
-            log_error(JSON.stringify(e));
+            log_error(e);
         } finally {
             graph.getModel().endUpdate();
         }
@@ -976,7 +1064,7 @@
         if(model.updateLevel < 0) {
             log_error("mxGraph beginUpdate/endUpdate NEGATIVE: " + model.updateLevel);
         }
-        //trace_msg("mx event: " + event + ", level: " + model.updateLevel);
+        //trace_msg("mx event");
         //trace_msg(kw);
 
         return 0;
