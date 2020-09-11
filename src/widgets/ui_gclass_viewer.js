@@ -253,7 +253,7 @@
                         } else if(self.config.$ui.resize) {
                             self.config.$ui.resize();
                         }
-                        self.gobj_send_event("EV_REPOSITION", {}, self);
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {
@@ -272,7 +272,7 @@
                                 self.config.$ui.resize();
                             }
                         }
-                        self.gobj_send_event("EV_REPOSITION", {}, self);
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {},
@@ -305,7 +305,7 @@
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
-                                                self.gobj_send_event("EV_REPOSITION", {}, self);
+                                                self.parent.gobj_send_event("EV_REFRESH", {}, self);
                                             }
                                         },
                                         {},
@@ -318,7 +318,7 @@
                                 }
                             }
                         );
-                        self.gobj_send_event("EV_REPOSITION", {}, self);
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {
@@ -885,10 +885,25 @@
     }
 
     /********************************************
-     *  Re-Move interno, cuando fullscreen
+     *
      ********************************************/
-    function ac_reposition(self, event, kw, src)
+    function ac_select(self, event, kw, src)
     {
+        return 0;
+    }
+
+    /*************************************************************
+     *  Refresh,
+     *  provocado por entry/exit de fullscreen
+     *  o por redimensionamiento del panel, propio o de hermanos
+     *
+     *  Centra mxnode_gclass
+     *************************************************************/
+    function ac_refresh(self, event, kw, src)
+    {
+        if(!self.config.mxnode_gclass) {
+            return 0;
+        }
         var margin = 10;
         var graph = self.config._mxgraph;
         var win_cx = self.config.$ui.$width;
@@ -925,22 +940,6 @@
     }
 
     /********************************************
-     *
-     ********************************************/
-    function ac_select(self, event, kw, src)
-    {
-        return 0;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function ac_refresh(self, event, kw, src)
-    {
-        return 0;
-    }
-
-    /********************************************
      *  "Container Panel"
      *  Order from container (parent): re-create
      ********************************************/
@@ -955,8 +954,8 @@
      ********************************************/
     function ac_mx_event(self, event, kw, src)
     {
-        trace_msg("mx event: " + event );
-        trace_msg(kw);
+        //trace_msg("mx event: " + event );
+        //trace_msg(kw);
         return 0;
     }
 
@@ -974,7 +973,6 @@
         "event_list": [
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
-            "EV_REPOSITION",
             "EV_SELECT",
             "EV_REFRESH",
             "EV_REBUILD_PANEL",
@@ -1023,7 +1021,6 @@
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
-                ["EV_REPOSITION",               ac_reposition,              undefined],
                 ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined],
                 ["EV_SELECT",                   ac_select,                  undefined],
                 ["EV_REFRESH",                  ac_refresh,                 undefined],

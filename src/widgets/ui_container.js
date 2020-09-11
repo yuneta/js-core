@@ -287,6 +287,7 @@
             var child = childs[i];
             if(child.config.$ui.isVisible()) {
                 self.config.views_opened[child.gobj_name()] = true;
+                child.gobj_send_event("EV_REFRESH", {}, self);
             }
         }
 
@@ -310,6 +311,14 @@
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
+        var childs = self.gobj_match_childs({});
+
+        for(var i=0; i<childs.length; i++) {
+            var child = childs[i];
+            if(child.config.$ui.isVisible()) {
+                child.gobj_send_event("EV_REFRESH", {}, self);
+            }
+        }
 
         return 0;
     }

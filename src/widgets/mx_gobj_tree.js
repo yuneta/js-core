@@ -310,6 +310,7 @@
                         } else if(self.config.$ui.resize) {
                             self.config.$ui.resize();
                         }
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {
@@ -328,6 +329,7 @@
                                 self.config.$ui.resize();
                             }
                         }
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {},
@@ -360,6 +362,7 @@
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
+                                                self.parent.gobj_send_event("EV_REFRESH", {}, self);
                                             }
                                         },
                                         {},
@@ -372,6 +375,7 @@
                                 }
                             }
                         );
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {
