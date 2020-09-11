@@ -2,6 +2,7 @@
  *          ui_container.js
  *
  *          Container of widgets
+ *          NOTE search "Container Panel" phrase to locate related code
  *
  *  Version
  *  -------
@@ -265,7 +266,7 @@
         var $container_parent = $$(build_name(self, "work_place"));
         for(var i=0; i < childs.length; i++) {
             var child = childs[i];
-            child.gobj_send_event("EV_REFRESH", {}, self); // Before this get new child $ui
+            child.gobj_send_event("EV_REBUILD_PANEL", {}, self); // Before this get new child $ui
             $container_parent.addView(child.config.$ui);
             child.config.$container_parent = $container_parent;
         }

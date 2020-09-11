@@ -3,6 +3,7 @@
  *
  *          Manage table and form
  *          Child Gadget gobj
+ *          "Container Panel"
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -1481,17 +1482,26 @@
     /********************************************
      *
      ********************************************/
-    function ac_refresh(self, event, kw, src)
+    function ac_select(self, event, kw, src)
     {
-        rebuild(self);
         return 0;
     }
 
     /********************************************
      *
      ********************************************/
-    function ac_select(self, event, kw, src)
+    function ac_refresh(self, event, kw, src)
     {
+        return 0;
+    }
+
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
+    {
+        rebuild(self);
         return 0;
     }
 
@@ -1528,8 +1538,9 @@
             "EV_RECORD_BY_ID",
             "EV_PAGE",
             "EV_REBUILD_TABLE",
+            "EV_SELECT",
             "EV_REFRESH",
-            "EV_SELECT"
+            "EV_REBUILD_PANEL"
         ],
         "state_list": [
             "ST_IDLE"
@@ -1558,8 +1569,9 @@
                 ["EV_RECORD_BY_ID",             ac_record_by_id,            undefined],
                 ["EV_PAGE",                     ac_page,                    undefined],
                 ["EV_REBUILD_TABLE",            ac_rebuild_table,           undefined],
+                ["EV_SELECT",                   ac_select,                  undefined],
                 ["EV_REFRESH",                  ac_refresh,                 undefined],
-                ["EV_SELECT",                   ac_select,                  undefined]
+                ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined]
             ]
         }
     };

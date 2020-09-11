@@ -2,6 +2,7 @@
  *          ui_gclass_viewer.js
  *
  *          GClass Viewer
+ *          "Container Panel"
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -926,17 +927,26 @@
     /********************************************
      *
      ********************************************/
-    function ac_refresh(self, event, kw, src)
+    function ac_select(self, event, kw, src)
     {
-        rebuild(self);
         return 0;
     }
 
     /********************************************
      *
      ********************************************/
-    function ac_select(self, event, kw, src)
+    function ac_refresh(self, event, kw, src)
     {
+        return 0;
+    }
+
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
+    {
+        rebuild(self);
         return 0;
     }
 
@@ -965,8 +975,9 @@
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
             "EV_REPOSITION",
-            "EV_REFRESH",
             "EV_SELECT",
+            "EV_REFRESH",
+            "EV_REBUILD_PANEL",
             "MX_" + mxEvent.ROOT,
             "MX_" + mxEvent.ALIGN_CELLS,
             "MX_" + mxEvent.FLIP_EDGE,
@@ -1013,8 +1024,9 @@
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_REPOSITION",               ac_reposition,              undefined],
-                ["EV_REFRESH",                  ac_refresh,                 undefined],
+                ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined],
                 ["EV_SELECT",                   ac_select,                  undefined],
+                ["EV_REFRESH",                  ac_refresh,                 undefined],
                 ["MX_" + mxEvent.ROOT,          ac_mx_event,                undefined],
                 ["MX_" + mxEvent.ALIGN_CELLS,   ac_mx_event,                undefined],
                 ["MX_" + mxEvent.FLIP_EDGE,     ac_mx_event,                undefined],

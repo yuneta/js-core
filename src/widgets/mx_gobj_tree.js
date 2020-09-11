@@ -2,7 +2,7 @@
  *          mx_gobj_tree.js
  *
  *          Yuneta GObj Tree with mxgrah
- *
+ *          "Container Panel"
  *
 
         Schema
@@ -1280,9 +1280,18 @@
     }
 
     /********************************************
-     *  Order from container (parent): re-create
+     *
      ********************************************/
     function ac_refresh(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
     {
         rebuild(self);
         return 0;
@@ -1305,7 +1314,8 @@
             "EV_CLEAR_DATA",
             "EV_CLICK_ITEM",
             "EV_SELECT",
-            "EV_REFRESH"
+            "EV_REFRESH",
+            "EV_REBUILD_PANEL"
         ],
         "state_list": [
             "ST_IDLE"
@@ -1318,7 +1328,8 @@
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
                 ["EV_CLICK_ITEM",           ac_click_item,      undefined],
                 ["EV_SELECT",               ac_select,          undefined],
-                ["EV_REFRESH",              ac_refresh,         undefined]
+                ["EV_REFRESH",              ac_refresh,         undefined],
+                ["EV_REBUILD_PANEL",        ac_rebuild_panel,   undefined]
             ]
         }
     };
