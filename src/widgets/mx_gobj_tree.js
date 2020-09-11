@@ -52,10 +52,10 @@
          *  Top Toolbar of "Container Panel"
          */
         title: "",
-        with_top_toolbar: false,
-        with_hidden_btn: false,
-        with_fullscreen_btn: false,
-        with_resize_btn: false,
+        with_panel_top_toolbar: false,
+        with_panel_hidden_btn: false,
+        with_panel_fullscreen_btn: false,
+        with_panel_resize_btn: false,
 
         layout_options: [
             {
@@ -292,13 +292,13 @@
         var top_toolbar = {
             view:"toolbar",
             id: build_name(self, "top_toolbar"),
-            hidden: self.config.with_top_toolbar?false:true,
+            hidden: self.config.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,
             cols: [
                 {
                     view:"icon",
-                    hidden: self.config.with_resize_btn?false:true,
+                    hidden: self.config.with_panel_resize_btn?false:true,
                     icon: "far fa-arrow-from-right",
                     tooltip: t("enlarge"),
                     click: function() {
@@ -315,7 +315,7 @@
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_resize_btn?false:true,
+                    hidden: self.config.with_panel_resize_btn?false:true,
                     icon: "far fa-arrow-from-left",
                     tooltip: t("narrow"),
                     click: function() {
@@ -343,7 +343,7 @@
                 {},
                 {
                     view:"icon",
-                    hidden: self.config.with_fullscreen_btn?false:true,
+                    hidden: self.config.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
                     tooltip: t("fullscreen"),
                     click: function() {
@@ -380,7 +380,7 @@
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_hidden_btn?false:true,
+                    hidden: self.config.with_panel_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
                     tooltip: t("minimize"),
                     click: function() {

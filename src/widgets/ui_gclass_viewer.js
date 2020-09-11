@@ -111,10 +111,10 @@
          *  Top Toolbar of "Container Panel"
          */
         title: "",
-        with_top_toolbar: false,
-        with_hidden_btn: false,
-        with_fullscreen_btn: false,
-        with_resize_btn: false,
+        with_panel_top_toolbar: false,
+        with_panel_hidden_btn: false,
+        with_panel_fullscreen_btn: false,
+        with_panel_resize_btn: false,
 
         view_handler: "view1", // "json", "view1",... TODO
         mxnode_gclass: null,
@@ -235,13 +235,13 @@
         var top_toolbar = {
             view:"toolbar",
             id: build_name(self, "top_toolbar"),
-            hidden: self.config.with_top_toolbar?false:true,
+            hidden: self.config.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,
             cols: [
                 {
                     view:"icon",
-                    hidden: self.config.with_resize_btn?false:true,
+                    hidden: self.config.with_panel_resize_btn?false:true,
                     icon: "far fa-arrow-from-right",
                     tooltip: t("enlarge"),
                     click: function() {
@@ -258,7 +258,7 @@
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_resize_btn?false:true,
+                    hidden: self.config.with_panel_resize_btn?false:true,
                     icon: "far fa-arrow-from-left",
                     tooltip: t("narrow"),
                     click: function() {
@@ -286,7 +286,7 @@
                 {},
                 {
                     view:"icon",
-                    hidden: self.config.with_fullscreen_btn?false:true,
+                    hidden: self.config.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
                     tooltip: t("fullscreen"),
                     click: function() {
@@ -323,7 +323,7 @@
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_hidden_btn?false:true,
+                    hidden: self.config.with_panel_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
                     tooltip: t("minimize"),
                     click: function() {
@@ -629,7 +629,9 @@
             return isCellSelectable(self, cell);
         };
 
-        // Set stylesheet options
+        /*
+         *  General Vertex Style
+         */
         var style = graph.getStylesheet().getDefaultVertexStyle();
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
 
@@ -642,7 +644,12 @@
         style[mxConstants.STYLE_FONTFAMILY] = "Arial";
         style[mxConstants.STYLE_FONTSTYLE] = '0';
         style[mxConstants.STYLE_FONTSIZE] = '12';
+        style[mxConstants.STYLE_VERTICAL_LABEL_POSITION] = mxConstants.ALIGN_TOP;
+        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_BOTTOM;
 
+        /*
+         *  General Edge Style
+         */
         style = graph.getStylesheet().getDefaultEdgeStyle();
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
         style[mxConstants.STYLE_ROUNDED] = true;
@@ -651,9 +658,15 @@
          *  Own getLabel
          */
         graph.setHtmlLabels(true); // See https://jgraph.github.io/mxgraph/docs/known-issues.html#19
-        graph.getLabel = function(cell) {
-            return getLabel(self, cell);
-        };
+//         graph.getLabel = function(cell) {
+//             return getLabel(self, cell);
+//         };
+
+        // Overrides method to provide a cell label in the display
+        graph.convertValueToString = function(cell) {
+            return convertValueToString(self, cell);
+        }
+
 
         /*
          *  Own getTooltip
@@ -683,6 +696,23 @@
             return getCursorForCell(self, cell);
         };
 
+        // Adds optional caching for the HTML label
+        var cached = true;
+        if (cached) {
+            // Ignores cached label in codec
+            mxCodecRegistry.getCodec(mxCell).exclude.push('div');
+
+            // Invalidates cached labels
+            graph.model.setValue = function(cell, value)
+            {
+                cell.div = null;
+                mxGraphModel.prototype.setValue.apply(this, arguments);
+            };
+        }
+
+        /*
+         *  Setup events
+         */
         setup_events(self, graph);
     }
 
@@ -773,11 +803,132 @@
         execute_layout(self, layer);
     }
 
+
+    /************************************************************
+     *  Create JSON viewer
+     ************************************************************/
+    function json_view(self, container, jn_msg)
+    {
+        return new JSONEditor(
+            container,
+            {
+                mode: "code",
+                //modes: ["form","view","tree","code","text","preview"],
+                indentation: 4,
+                mainMenuBar: false,
+                navigationBar: false,
+                statusBar:false,
+                timestampTag: function({field, value, path}) {
+                    if (field === '__t__' || field === '__tm__' || field === 'tm' ||
+                        field === 'from_t' || field === 'to_t' || field === 't' ||
+                        field === 'from_tm' || field === 'to_tm'
+                    ) {
+                        return true;
+                    }
+                    return false;
+                },
+                timestampFormat: function({field, value, path}) {
+                    if (field === '__t__' || field === '__tm__' || field === 'tm' ||
+                        field === 'from_t' || field === 'to_t' || field === 't' ||
+                        field === 'from_tm' || field === 'to_tm'
+                    ) {
+                        return new Date(value*1000).toISOString();
+                    }
+                    return null;
+                },
+                onEditable: function({path, field, value}) {
+                    return false;
+                }
+            },
+            jn_msg
+        );
+    }
+
     /************************************************************
      *
      ************************************************************/
     function getLabel(self, cell)
     {
+        var graph = self.config._mxgraph;
+
+        switch(cell.id) {
+            case "Class Attributes":
+                if(graph.isCellCollapsed(cell)) {
+                    return '<table style="overflow:hidden;" width="100%" height="100%" border="1" cellpadding="4" class="title" style="height:100%;">' +
+                        '<tr><th>Customers</th></tr>' +
+                        '</table>';
+                } else {
+                }
+
+                var state = graph.view.getState(cell);
+                var container = state.text.node;
+                var data = {
+                    "name": record.id,
+                    "base": record.base,
+                    "priv_size": record.priv_size,
+                    "instances": record.instances,
+                    "gclass_trace_level": record.gclass_trace_level,
+                    "gclass_no_trace_level": record.gclass_no_trace_level
+                };
+                return json_view(self, container, data);
+            default:
+                break;
+        }
+        if(is_string(cell.value)) {
+            return "<strong>" + cell.value + "</strong>";
+        } else if(is_string(cell.id)) {
+            return "<strong>" + cell.id + "</strong>";
+        } else if(is_object(cell.value) && cell.value.id) {
+            return "<strong>" + cell.value.id + "</strong>";
+        }
+        return "";
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function convertValueToString(self, cell)
+    {
+        var graph = self.config._mxgraph;
+
+        if(cell.div != null) {
+            // Uses cached label
+            return cell.div;
+        }
+
+        var msg = cell.value;
+
+        switch(cell.id) {
+            case "Class Attributes":
+                var div = document.createElement('div');
+                div.style.width = '300px';
+                div.style.height= '300px';
+                div.style.position = 'relative';
+                div.style.top = '300px';
+                div.style.left = '300px';
+                div.id = 'Mierdaaaaaaaaaaa';
+                div.style.border = "4px solid black";
+
+                // Caches label
+                cell.div = div;
+
+                var jn_msg = null;
+                try {
+                    if(is_string(msg)) {
+                        jn_msg = JSON.parse(msg);
+                    } else {
+                        jn_msg = msg;
+                    }
+                } catch (e) {
+                    jn_msg = {msg:String(msg)};
+                }
+
+                json_view(self, div, jn_msg);
+             return div;
+
+            default:
+                break;
+        }
         if(is_string(cell.value)) {
             return "<strong>" + cell.value + "</strong>";
         } else if(is_string(cell.id)) {
@@ -874,20 +1025,20 @@
     function getCursorForCell(self, cell)
     {
         if(cell.edge) {
-            return 'default';
+            return "default";
         } else {
-            return 'default';
+            return "default";
         }
     }
 
     /************************************************************
      *
      ************************************************************/
-    function show_view1(self, graph, layer, record)
+    function show_view1(self, graph, layer, gclass)
     {
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
-        var margin = 10;
+        var margin = 40;
 
         var cx = 300;
         var cy = 500;
@@ -898,11 +1049,12 @@
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
-        record.foldable = true;
+        gclass.foldable = true; // HACK usado por isCellFoldable()
+
         self.config.mxnode_gclass = graph.insertVertex(
             layer,          // parent
-            record.id,      // id
-            record,         // value
+            gclass.id,      // id
+            gclass,         // value
             x, y, cx, cy,   // x,y,width,height
             "",             // style
             false           // relative
@@ -913,28 +1065,137 @@
          *-------------------------------*/
         var class_attrs = graph.insertVertex(
             self.config.mxnode_gclass,              // parent
-            'Class Attributes',                     // id
+            "Class Attributes",                     // id
             {                                       // value
-                "id": record.id,
-                "base": record.base,
-                "priv_size": record.priv_size,
-                "instances": record.instances
+                "id": gclass.id,
+                "base": gclass.base,
+                "priv_size": gclass.priv_size,
+                "instances": gclass.instances,
+                "gclass_trace_level": gclass.gclass_trace_level,
+                "gclass_no_trace_level": gclass.gclass_no_trace_level
             },
             20, 20, cx - cx/8, 50,                  // x,y,width,height
-            'shape=rectangle;fontSize=10;'+         // style
-            'spacingLeft=12;fillColor=white;'+
-            'fontColor=black;strokeColor=black;',
+            "shape=rectangle;fontSize=10;"+         // style
+            "spacingLeft=12;fillColor=white;"+
+            "fontColor=black;strokeColor=black;",
             false
         );                                          // relative
 
-        var link = graph.insertEdge(
-            null, //self.config.mxnode_gclass,  // parent
-            null,                       // id
-            '',                         // value
-            self.config.mxnode_gclass,  // source
-            class_attrs,                // target
-            null                        // style
-        );
+//         var link = graph.insertEdge(
+//             null, //self.config.mxnode_gclass,  // parent
+//             null,                       // id
+//             '',                         // value
+//             self.config.mxnode_gclass,  // source
+//             class_attrs,                // target
+//             null                        // style
+//         );
+
+
+        /*-------------------------------*
+         *      Obj attrs
+         *-------------------------------*/
+//             "attrs": [
+//                 {
+//                     "id": "persistent_channels",
+//                     "type": "signed32",
+//                     "default_value": 0,
+//                     "description": "Set True to do channels persistent (in sqlite database).",
+//                     "flag": "SDF_RD"
+//                 },
+//                 ...
+//             ],
+        /*-------------------------------*
+         *      Commands
+         *-------------------------------*/
+//             "commands": [
+//                 {
+//                     "id": "help",
+//                     "alias": [
+//                         "h",
+//                         "?"
+//                     ],
+//                     "description": "Available commands or help about a command.",
+//                     "usage": "help  [cmd='?'] [level='?']",
+//                     "parameters": [
+//                         {
+//                             "id": "cmd",
+//                             "type": "string",
+//                             "default_value": "",
+//                             "description": "command about you want help.",
+//                             "flag": ""
+//                         },
+//                         ...
+//                     ]
+//                 },
+//             ],
+        /*-------------------------------*
+         *      Global Methods
+         *-------------------------------*/
+//             "global_methods": [
+//                 "mt_create",
+//                 ...
+//             ],
+        /*-------------------------------*
+         *      Local Methods
+         *-------------------------------*/
+//             "local_methods": [],
+        /*-------------------------------*
+         *      FSM
+         *-------------------------------*/
+//             "FSM": {
+//                 "input_events": [
+//                     {
+//                         "event": "EV_IEV_MESSAGE",
+//                         "permission": "",
+//                         "description": ""
+//                     },
+//                     ...
+//                 ],
+//                 "output_events": [
+//                     {
+//                         "event": "EV_ON_MESSAGE",
+//                         "permission": "",
+//                         "description": "Message received"
+//                     },
+//                     ...
+//                 ],
+//                 "states": {
+//                     "ST_IDLE": [
+//                         [
+//                             "EV_ON_MESSAGE",
+//                             "ac_action",
+//                             0
+//                         ],
+//                         ...
+//                     ],
+//                     ...
+//                 }
+//             },
+        /*-------------------------------*
+         *      ACL
+         *-------------------------------*/
+//             "ACL": [],
+        /*-------------------------------*
+         *      Info Global traces
+         *-------------------------------*/
+//             "info_global_trace": {
+//                 "machine": "Trace machine",
+//                 ...
+//             },
+        /*-------------------------------*
+         *      Info Class traces
+         *-------------------------------*/
+//             "info_gclass_trace": {
+//                 "connection": "Trace connections of iogates",
+//                 ...
+//             },
+        /*-------------------------------*
+         *      Current class traces
+         *-------------------------------*/
+//             "gclass_trace_level": [],
+//             "gclass_no_trace_level": [],
+
+
     }
 
 
