@@ -1120,6 +1120,7 @@
         var y = 0; // si meto separación aparece scrollbar al ajustar
         var sep = self.config.vertex_sep;
 
+        // HACK with layout this x,y,w,h are ignored
         // WARNING without a built-in layout, the graph is horrible.
         for(var i=0; i<data.length; i++) {
             var record = data[i];
@@ -1146,13 +1147,14 @@
             (x_acc[y])++;
 
             var child = graph.insertVertex(
-                group,
-                record.id,
-                record,
-                x,
+                group,          // parent
+                record.id,      // id
+                record,         // value
+                x,              // x,y,width,height
                 (y)*(cy+sep),
                 cx, cy,
-                ""
+                "",             // style
+                false           // relative
             );
 
             graph.removeCellOverlays(child); // Delete all previous overlays
@@ -1160,7 +1162,7 @@
 
             if(parent) {
                 graph.insertEdge(
-                    group,          // group
+                    group,          // parent
                     null,           // id
                     '',             // value
                     parent,         // source
@@ -1283,9 +1285,12 @@
         return 0;
     }
 
-    /********************************************
+    /*************************************************************
+     *  Refresh, order from container
+     *  provocado por entry/exit de fullscreen
+     *  o por redimensionamiento del panel, propio o de hermanos
      *
-     ********************************************/
+     *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
         return 0;

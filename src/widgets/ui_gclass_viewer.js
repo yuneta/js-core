@@ -771,16 +771,16 @@
          *  HACK is already in a beginUpdate/endUpdate
          */
         var graph = self.config._mxgraph;
-        var group = get_layer(self, layer);
+        var layer = get_layer(self, layer);
 
         switch(self.config.view_handler) {
             case "viewer1":
             default:
-                show_view1(self, graph, group, data);
+                show_view1(self, graph, layer, data);
                 break;
         }
 
-        execute_layout(self, group);
+        execute_layout(self, layer);
     }
 
     /************************************************************
@@ -794,7 +794,7 @@
     /************************************************************
      *
      ************************************************************/
-    function show_view1(self, graph, group, record)
+    function show_view1(self, graph, layer, record)
     {
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
@@ -806,28 +806,44 @@
         var x = (win_cx > cx)? (win_cx - cx)/2 : margin;
         var y = margin;
 
+        /*-------------------------------*
+         *      GClass container
+         *-------------------------------*/
         self.config.mxnode_gclass = graph.insertVertex(
-            group,
-            record.id,
-            record,
-            x, y, cx, cy,
-            ""
+            layer,          // parent
+            record.id,      // id
+            record,         // value
+            x, y, cx, cy,   // x,y,width,height
+            "",             // style
+            false           // relative
         );
 
+        /*-------------------------------*
+         *      Class attrs
+         *-------------------------------*/
         var class_attrs = graph.insertVertex(
-            self.config.mxnode_gclass,
-            'class_attrs',
-            {
+            self.config.mxnode_gclass,              // parent
+            'class_attrs',                          // id
+            {                                       // value
                 "name": record.id,
                 "base": record.base,
                 "priv_size": record.priv_size,
                 "instances": record.instances
             },
-            20, 20, cx - cx/8, 50,
-            'shape=rectangle;fontSize=10;'+
+            20, 20, cx - cx/8, 50,                  // x,y,width,height
+            'shape=rectangle;fontSize=10;'+         // style
             'spacingLeft=12;fillColor=white;'+
             'fontColor=black;strokeColor=black;',
             false
+        );                                          // relative
+
+        graph.insertEdge(
+            null, //self.config.mxnode_gclass,  // parent
+            null,                       // id
+            '',                         // value
+            self.config.mxnode_gclass,  // source
+            class_attrs,                // target
+            null                        // style
         );
 
 
@@ -893,7 +909,7 @@
     }
 
     /*************************************************************
-     *  Refresh,
+     *  Refresh, order from container
      *  provocado por entry/exit de fullscreen
      *  o por redimensionamiento del panel, propio o de hermanos
      *
@@ -904,6 +920,7 @@
         if(!self.config.mxnode_gclass) {
             return 0;
         }
+
         var margin = 10;
         var graph = self.config._mxgraph;
         var win_cx = self.config.$ui.$width;
@@ -926,6 +943,7 @@
         var dx = geo.x - new_x;
         var dy = geo.y - new_y;
 
+        graph.getModel().beginUpdate();
         try {
             var cells = [self.config.mxnode_gclass];
             graph.moveCells(cells, -dx, -dy);
@@ -954,8 +972,13 @@
      ********************************************/
     function ac_mx_event(self, event, kw, src)
     {
-        //trace_msg("mx event: " + event );
+        var model = self.config._mxgraph.getModel();
+        if(model.updateLevel < 0) {
+            log_error("mxGraph beginUpdate/endUpdate NEGATIVE: " + model.updateLevel);
+        }
+        //trace_msg("mx event: " + event + ", level: " + model.updateLevel);
         //trace_msg(kw);
+
         return 0;
     }
 

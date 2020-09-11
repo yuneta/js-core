@@ -1491,9 +1491,12 @@
         return 0;
     }
 
-    /********************************************
+    /*************************************************************
+     *  Refresh, order from container
+     *  provocado por entry/exit de fullscreen
+     *  o por redimensionamiento del panel, propio o de hermanos
      *
-     ********************************************/
+     *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
         return 0;
