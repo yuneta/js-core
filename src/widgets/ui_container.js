@@ -26,9 +26,12 @@
 
         views_opened: {
         },
+        views_gravity: {
+        },
 
         __writable_attrs__: [
-            "views_opened"
+            "views_opened",
+            "views_gravity",
         ]
     };
 
@@ -283,6 +286,9 @@
 
         var childs = self.gobj_match_childs({});
 
+        /*
+         *  Get visibility of childs to save persistent attrs
+         */
         for(var i=0; i<childs.length; i++) {
             var child = childs[i];
             if(child.config.$ui.isVisible()) {
@@ -291,6 +297,9 @@
             }
         }
 
+        /*
+         *  Save persistent attrs
+         */
         if(self.gobj_is_unique()) {
             self.gobj_save_persistent_attrs();
         }
@@ -320,6 +329,23 @@
             }
         }
 
+        /*
+         *  Get gravity of childs to save persistent attrs
+         */
+        self.config.views_gravity = {};
+
+        for(var i=0; i<childs.length; i++) {
+            var child = childs[i];
+            var gravity = child.config.$ui.config.gravity;
+            self.config.views_gravity[child.gobj_name()] = gravity;
+        }
+
+        /*
+         *  Save persistent attrs
+         */
+        if(self.gobj_is_unique()) {
+            self.gobj_save_persistent_attrs();
+        }
         return 0;
     }
 
@@ -439,6 +465,18 @@
         child.config.$container_parent = $container_parent;
 
         if(kw_has_key(self.config.views_opened, child.gobj_name())) {
+            child.config.$ui.show();
+        }
+        if(kw_has_key(self.config.views_gravity, child.gobj_name())) {
+            var gravity = self.config.views_gravity[child.gobj_name()];
+
+            child.config.$ui.define({gravity:gravity});
+//             if(child.config.$ui.refresh) { // TODO
+//                 child.config.$ui.refresh();
+//             }
+//             if(child.config.$ui.resize) {
+//                 child.config.$ui.resize();
+//             }
             child.config.$ui.show();
         }
     }
