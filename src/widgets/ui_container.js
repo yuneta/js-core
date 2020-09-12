@@ -282,13 +282,13 @@
      ********************************************/
     function ac_on_view_show(self, event, kw, src)
     {
-        self.config.views_opened = {};
-
         var childs = self.gobj_match_childs({});
 
         /*
          *  Get visibility of childs to save persistent attrs
          */
+        self.config.views_opened = {};
+
         for(var i=0; i<childs.length; i++) {
             var child = childs[i];
             if(child.config.$ui.isVisible()) {
@@ -464,9 +464,6 @@
         $container_parent.addView(child.config.$ui);
         child.config.$container_parent = $container_parent;
 
-        if(kw_has_key(self.config.views_opened, child.gobj_name())) {
-            child.config.$ui.show();
-        }
         if(kw_has_key(self.config.views_gravity, child.gobj_name())) {
             var gravity = self.config.views_gravity[child.gobj_name()];
 
@@ -477,6 +474,9 @@
 //             if(child.config.$ui.resize) {
 //                 child.config.$ui.resize();
 //             }
+        }
+
+        if(kw_has_key(self.config.views_opened, child.gobj_name())) {
             child.config.$ui.show();
         }
     }
@@ -493,10 +493,129 @@
         }
     }
 
+    //=======================================================================
+    //      Common code for container panels
+    //=======================================================================
+    function get_container_panel_top_toolbar(self)
+    {
+        /*------------------------------------------*
+         *      Top Toolbar of "Container Panel"
+         *------------------------------------------*/
+        var top_toolbar = {
+            view:"toolbar",
+            id: build_name(self, "top_toolbar"),
+            hidden: self.config.with_panel_top_toolbar?false:true,
+            css: "toolbar2color",
+            height: 30,
+            cols: [
+                {
+                    view:"icon",
+                    hidden: self.config.with_panel_resize_btn?false:true,
+                    icon: "far fa-arrow-from-right",
+                    tooltip: t("enlarge"),
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity++;
+                        self.config.$ui.define({gravity:gravity});
+                        if(self.config.$ui.refresh) {
+                            self.config.$ui.refresh();
+                        } else if(self.config.$ui.resize) {
+                            self.config.$ui.resize();
+                        }
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_panel_resize_btn?false:true,
+                    icon: "far fa-arrow-from-left",
+                    tooltip: t("narrow"),
+                    click: function() {
+                        var gravity = self.config.$ui.config.gravity;
+                        gravity--;
+                        if(gravity>0) {
+                            self.config.$ui.define({gravity:gravity});
+                            if(self.config.$ui.refresh) {
+                                self.config.$ui.refresh();
+                            } else if(self.config.$ui.resize) {
+                                self.config.$ui.resize();
+                            }
+                        }
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                    }
+                },
+                {},
+                {
+                    view: "label",
+                    id: build_name(self, "top_toolbar_title"),
+                    label: self.config.title,
+                    click: function() {
+                    }
+                },
+                {},
+                {
+                    view:"icon",
+                    hidden: self.config.with_panel_fullscreen_btn?false:true,
+                    icon: "fas fa-expand-wide",
+                    tooltip: t("fullscreen"),
+                    click: function() {
+                        $$(build_name(self, "top_toolbar")).hide();
+                        webix.fullscreen.set(
+                            self.config.$ui,
+                            {
+                                head: {
+                                    view:"toolbar",
+                                    height: 40,
+                                    elements: [
+                                        {
+                                            view: "icon",
+                                            icon: "fas fa-chevron-left",
+                                            tooltip: t("exit fullscreen"),
+                                            click: function() {
+                                                webix.fullscreen.exit();
+                                                $$(build_name(self, "top_toolbar")).show();
+                                                self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                                            }
+                                        },
+                                        {},
+                                        {
+                                            view: "label",
+                                            label: self.config.title,
+                                        },
+                                        {}
+                                    ]
+                                }
+                            }
+                        );
+                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                    }
+                },
+                {
+                    view:"icon",
+                    hidden: self.config.with_panel_hidden_btn?false:true,
+                    icon:"far fa-window-minimize",
+                    tooltip: t("minimize"),
+                    click: function() {
+                        if(this.getTopParentView().config.fullscreen) {
+                            webix.fullscreen.exit();
+                        }
+                        this.getParentView().getParentView().hide();
+
+                        /*----------------------------------------------*
+                         *  Inform of view viewed to "Container Panel"
+                         *----------------------------------------------*/
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+                    }
+                }
+            ]
+        };
+        return top_toolbar;
+    }
 
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
     exports.Ui_container = Ui_container;
+    exports.get_container_panel_top_toolbar = get_container_panel_top_toolbar;
 
 })(this);

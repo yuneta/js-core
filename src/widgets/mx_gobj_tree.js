@@ -286,118 +286,6 @@
             }
         });
 
-        /*------------------------------------------*
-         *      Top Toolbar of "Container Panel"
-         *------------------------------------------*/
-        var top_toolbar = {
-            view:"toolbar",
-            id: build_name(self, "top_toolbar"),
-            hidden: self.config.with_panel_top_toolbar?false:true,
-            css: "toolbar2color",
-            height: 30,
-            cols: [
-                {
-                    view:"icon",
-                    hidden: self.config.with_panel_resize_btn?false:true,
-                    icon: "far fa-arrow-from-right",
-                    tooltip: t("enlarge"),
-                    click: function() {
-                        var gravity = self.config.$ui.config.gravity;
-                        gravity++;
-                        self.config.$ui.define({gravity:gravity});
-                        if(self.config.$ui.refresh) {
-                            self.config.$ui.refresh();
-                        } else if(self.config.$ui.resize) {
-                            self.config.$ui.resize();
-                        }
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
-                    }
-                },
-                {
-                    view:"icon",
-                    hidden: self.config.with_panel_resize_btn?false:true,
-                    icon: "far fa-arrow-from-left",
-                    tooltip: t("narrow"),
-                    click: function() {
-                        var gravity = self.config.$ui.config.gravity;
-                        gravity--;
-                        if(gravity>0) {
-                            self.config.$ui.define({gravity:gravity});
-                            if(self.config.$ui.refresh) {
-                                self.config.$ui.refresh();
-                            } else if(self.config.$ui.resize) {
-                                self.config.$ui.resize();
-                            }
-                        }
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
-                    }
-                },
-                {},
-                {
-                    view: "label",
-                    id: build_name(self, "top_toolbar_title"),
-                    label: self.config.title,
-                    click: function() {
-                    }
-                },
-                {},
-                {
-                    view:"icon",
-                    hidden: self.config.with_panel_fullscreen_btn?false:true,
-                    icon: "fas fa-expand-wide",
-                    tooltip: t("fullscreen"),
-                    click: function() {
-                        $$(build_name(self, "top_toolbar")).hide();
-                        webix.fullscreen.set(
-                            self.config.$ui,
-                            {
-                                head: {
-                                    view:"toolbar",
-                                    height: 40,
-                                    elements: [
-                                        {
-                                            view: "icon",
-                                            icon: "fas fa-chevron-left",
-                                            tooltip: t("exit fullscreen"),
-                                            click: function() {
-                                                webix.fullscreen.exit();
-                                                $$(build_name(self, "top_toolbar")).show();
-                                                self.parent.gobj_send_event("EV_REFRESH", {}, self);
-                                            }
-                                        },
-                                        {},
-                                        {
-                                            view: "label",
-                                            label: self.config.title,
-                                        },
-                                        {}
-                                    ]
-                                }
-                            }
-                        );
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
-                    }
-                },
-                {
-                    view:"icon",
-                    hidden: self.config.with_panel_hidden_btn?false:true,
-                    icon:"far fa-window-minimize",
-                    tooltip: t("minimize"),
-                    click: function() {
-                        if(this.getTopParentView().config.fullscreen) {
-                            webix.fullscreen.exit();
-                        }
-                        this.getParentView().getParentView().hide();
-
-                        /*----------------------------------------------*
-                         *  Inform of view viewed to "Container Panel"
-                         *----------------------------------------------*/
-                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
-                    }
-                }
-            ]
-        };
-
         /*---------------------------------------*
          *      Bottom Toolbar
          *---------------------------------------*/
@@ -505,7 +393,7 @@
         self.config.$ui = webix.ui({
             id: self.gobj_name(),
             rows: [
-                top_toolbar,
+                get_container_panel_top_toolbar(self),
                 {
                     view: "mxgraph",
                     id: build_name(self, "mxgraph"),
@@ -1245,6 +1133,8 @@
     {
         var cell = self.config._mxgraph.model.getCell(kw.id);
         self.config._mxgraph.setSelectionCell(cell);
+
+        return 0;
     }
 
     /********************************************
