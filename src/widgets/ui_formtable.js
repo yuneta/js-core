@@ -30,6 +30,9 @@
         with_panel_hidden_btn: false,
         with_panel_fullscreen_btn: false,
         with_panel_resize_btn: false,
+        ui_properties: null,
+
+        $ui: null,
 
         schema: null,
         update_mode_enabled: false,
@@ -66,8 +69,6 @@
         record_idx: 0,      // current idx of selected record
         total: 0,           // total of record in datatable
 
-        ui_properties: null,
-        $ui: null,
         __writable_attrs__: [
             "page_size"
         ]

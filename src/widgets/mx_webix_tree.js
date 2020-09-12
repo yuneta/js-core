@@ -35,6 +35,9 @@
         with_panel_hidden_btn: false,
         with_panel_fullscreen_btn: false,
         with_panel_resize_btn: false,
+        ui_properties: null,    // creator can set webix properties
+
+        $ui: null,
 
         layers: [
             {
@@ -42,8 +45,6 @@
             }
         ],
         _mxgraph: null,
-        ui_properties: null,    // creator can set webix properties
-        $ui: null,
         __writable_attrs__: [
         ]
     };

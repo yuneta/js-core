@@ -56,6 +56,9 @@
         with_panel_hidden_btn: false,
         with_panel_fullscreen_btn: false,
         with_panel_resize_btn: false,
+        ui_properties: null,    // creator can set webix properties
+
+        $ui: null,
 
         layout_options: [
             {
@@ -120,9 +123,6 @@
         _mxgraph: null,
 
         layout_selected: "tree_layout",
-
-        ui_properties: null,    // creator can set webix properties
-        $ui: null,
 
         __writable_attrs__: [
             "layout_selected"

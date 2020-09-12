@@ -115,6 +115,9 @@
         with_panel_hidden_btn: false,
         with_panel_fullscreen_btn: false,
         with_panel_resize_btn: false,
+        ui_properties: null,
+
+        $ui: null,
 
         view_handler: "view1", // "json", "view1",... TODO
         mxnode_gclass: null,
@@ -170,9 +173,6 @@
         ],
 
         layout_selected: "no_layout",
-
-        ui_properties: null,
-        $ui: null,
 
         __writable_attrs__: [
             "layout_selected"
@@ -1150,7 +1150,9 @@
      *  provocado por entry/exit de fullscreen
      *  o por redimensionamiento del panel, propio o de hermanos
      *
-     *  Centra mxnode_gclass
+     *  Tasks:
+     *      - Centra mxnode_gclass
+     *
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {

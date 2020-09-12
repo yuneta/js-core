@@ -34,10 +34,11 @@
         with_panel_hidden_btn: false,
         with_panel_fullscreen_btn: false,
         with_panel_resize_btn: false,
+        ui_properties: null,
+
+        $ui: null,
 
         tree_item_selected_event_name: "EV_TREE_ITEM_SELECTED",
-        ui_properties: null,
-        $ui: null
     };
 
 

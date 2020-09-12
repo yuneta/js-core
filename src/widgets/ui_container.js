@@ -466,14 +466,8 @@
 
         if(kw_has_key(self.config.views_gravity, child.gobj_name())) {
             var gravity = self.config.views_gravity[child.gobj_name()];
-
+            child.config.ui_properties["gravity"] = gravity;
             child.config.$ui.define({gravity:gravity});
-//             if(child.config.$ui.refresh) { // TODO
-//                 child.config.$ui.refresh();
-//             }
-//             if(child.config.$ui.resize) {
-//                 child.config.$ui.resize();
-//             }
         }
 
         if(kw_has_key(self.config.views_opened, child.gobj_name())) {
@@ -516,6 +510,8 @@
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity++;
+                        self.config.ui_properties["gravity"] = gravity;
+
                         self.config.$ui.define({gravity:gravity});
                         if(self.config.$ui.refresh) {
                             self.config.$ui.refresh();
@@ -533,7 +529,9 @@
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
                         gravity--;
+
                         if(gravity>0) {
+                            self.config.ui_properties["gravity"] = gravity;
                             self.config.$ui.define({gravity:gravity});
                             if(self.config.$ui.refresh) {
                                 self.config.$ui.refresh();
