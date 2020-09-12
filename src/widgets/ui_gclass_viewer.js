@@ -107,14 +107,7 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        /*
-         *  Top Toolbar of "Container Panel"
-         */
-        title: "",
-        with_panel_top_toolbar: false,
-        with_panel_hidden_btn: false,
-        with_panel_fullscreen_btn: false,
-        with_panel_resize_btn: false,
+        panel_properties: {},   // creator can set Container Panel properties
         ui_properties: null,
 
         $ui: null,

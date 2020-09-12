@@ -282,20 +282,7 @@
      ********************************************/
     function ac_on_view_show(self, event, kw, src)
     {
-        var childs = self.gobj_match_childs({});
-
-        /*
-         *  Get visibility of childs to save persistent attrs
-         */
-        self.config.views_opened = {};
-
-        for(var i=0; i<childs.length; i++) {
-            var child = childs[i];
-            if(child.config.$ui.isVisible()) {
-                self.config.views_opened[child.gobj_name()] = true;
-                child.gobj_send_event("EV_REFRESH", {}, self);
-            }
-        }
+        self.config.views_opened[src.gobj_name()] = src.config.$ui.isVisible();
 
         /*
          *  Save persistent attrs
@@ -470,7 +457,7 @@
             child.config.$ui.define({gravity:gravity});
         }
 
-        if(kw_has_key(self.config.views_opened, child.gobj_name())) {
+        if(self.config.views_opened[child.gobj_name()]) {
             child.config.$ui.show();
         }
     }
@@ -498,14 +485,14 @@
         var top_toolbar = {
             view:"toolbar",
             id: build_name(self, "top_toolbar"),
-            hidden: self.config.with_panel_top_toolbar?false:true,
+            hidden: self.config.panel_properties.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,
             cols: [
                 {
                     view:"icon",
-                    hidden: self.config.with_panel_resize_btn?false:true,
-                    icon: "far fa-arrow-from-right",
+                    hidden: self.config.panel_properties.with_panel_resize_btn?false:true,
+                    icon: "far fa-expand-alt",
                     tooltip: t("enlarge"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
@@ -523,8 +510,8 @@
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_panel_resize_btn?false:true,
-                    icon: "far fa-arrow-from-left",
+                    hidden: self.config.panel_properties.with_panel_resize_btn?false:true,
+                    icon: "far fa-compress-alt",
                     tooltip: t("narrow"),
                     click: function() {
                         var gravity = self.config.$ui.config.gravity;
@@ -542,18 +529,20 @@
                         self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
-                {},
+                {gravity:1},
                 {
                     view: "label",
-                    id: build_name(self, "top_toolbar_title"),
-                    label: self.config.title,
+                    gravity: 10,
+                    hidden: self.config.panel_properties.with_panel_title?false:true,
+                    label: self.config.panel_properties.with_panel_title?
+                        self.config.panel_properties.with_panel_title:"",
                     click: function() {
                     }
                 },
-                {},
+                {gravity:1},
                 {
                     view:"icon",
-                    hidden: self.config.with_panel_fullscreen_btn?false:true,
+                    hidden: self.config.panel_properties.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
                     tooltip: t("fullscreen"),
                     click: function() {
@@ -572,7 +561,10 @@
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
-                                                self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                                                /*----------------------------------------------*
+                                                *  Inform of view state to "Container Panel"
+                                                *----------------------------------------------*/
+                                                self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
                                             }
                                         },
                                         {},
@@ -585,12 +577,16 @@
                                 }
                             }
                         );
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+
+                        /*----------------------------------------------*
+                         *  Inform of view state to "Container Panel"
+                         *----------------------------------------------*/
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
                     }
                 },
                 {
                     view:"icon",
-                    hidden: self.config.with_panel_hidden_btn?false:true,
+                    hidden: self.config.panel_properties.with_panel_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
                     tooltip: t("minimize"),
                     click: function() {
@@ -600,9 +596,9 @@
                         this.getParentView().getParentView().hide();
 
                         /*----------------------------------------------*
-                         *  Inform of view viewed to "Container Panel"
+                         *  Inform of view state to "Container Panel"
                          *----------------------------------------------*/
-                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
                     }
                 }
             ]
