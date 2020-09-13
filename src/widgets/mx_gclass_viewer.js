@@ -389,6 +389,7 @@
         if(!cur_layout) {
             cur_layout = self.config.layout_options[0];
         }
+        cur_layout = self.config.layout_options[0]; // HACK no layout please
 
         if(cur_layout && cur_layout.exe) {
             graph.getModel().beginUpdate();
@@ -462,16 +463,13 @@
         graph.setPanning(false);
 
         // Negative coordenates?
-        graph.allowNegativeCoordinates = false;
+        graph.allowNegativeCoordinates = true;
 
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(true);
 
         // Avoids overlap of edges and collapse icons
-        graph.keepEdgesInBackground = true;
-
-        // Enables automatic sizing for vertices after editing
-        graph.setAutoSizeCells(true);
+        graph.keepEdgesInBackground = false; // YES edges overlap vertex
 
         /*---------------------------*
          *      PERMISOS
@@ -484,7 +482,7 @@
         graph.cellsLocked = false;      // (false)  Override by isCellsLocked()
         graph.portsEnabled = true;      // (true)   Override by isPortsEnabled()
         graph.cellsEditable = false;    // (true)   Override by isCellEditable()
-        graph.cellsResizable = false;   // (true)   Override by isCellResizable()
+        graph.cellsResizable = true;    // (true)   Override by isCellResizable()
         graph.setCellsMovable = true;   // (true)   Override by isCellMovable()
         graph.disconnectOnMove = false; // (true)   Override by isDisconnectOnMove()
         graph.constrainChildren = false;// (true)   Override by isConstrainChildren()
@@ -536,6 +534,8 @@
         style = graph.getStylesheet().getDefaultEdgeStyle();
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
         style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_STROKEWIDTH] = '2';
+        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
 
         /*
          *  Set html labels
@@ -568,37 +568,11 @@
         };
 
         /*
-         *  Defines the condition for showing the folding icon
-         */
-        graph.isCellFoldable = function(cell, collapse) {
-            return isCellFoldable(self, cell, collapse);
-        };
-
-        // Implements the click on a folding icon
-//         graph.foldCells = function(collapse, recurse, cells) {
-//             return foldCells(self, collapse, recurse, cells);
-//         };
-
-        /*
          *  Mouse Cursor
          */
         graph.getCursorForCell = function(cell) {
             return getCursorForCell(self, cell);
         };
-
-        // Adds optional caching for the HTML label
-        var cached = true;
-        if (cached) {
-            // Ignores cached label in codec
-            mxCodecRegistry.getCodec(mxCell).exclude.push('div');
-
-            // Invalidates cached labels
-            graph.model.setValue = function(cell, value)
-            {
-                cell.div = null;
-                mxGraphModel.prototype.setValue.apply(this, arguments);
-            };
-        }
 
         /*
          *  Setup events
@@ -737,101 +711,43 @@
     /************************************************************
      *
      ************************************************************/
-    function getLabel(self, cell)
-    {
-        var graph = self.config._mxgraph;
-
-        switch(cell.id) {
-            case "Class Attributes":
-                if(graph.isCellCollapsed(cell)) {
-                    return '<table style="overflow:hidden;" width="100%" height="100%" border="1" cellpadding="4" class="title" style="height:100%;">' +
-                        '<tr><th>Customers</th></tr>' +
-                        '</table>';
-                } else {
-                }
-
-                var state = graph.view.getState(cell);
-                var container = state.text.node;
-                var data = {
-                    "name": record.id,
-                    "base": record.base,
-                    "priv_size": record.priv_size,
-                    "instances": record.instances,
-                    "gclass_trace_level": record.gclass_trace_level,
-                    "gclass_no_trace_level": record.gclass_no_trace_level
-                };
-                return json_view(self, container, data);
-            default:
-                break;
-        }
-        if(is_string(cell.value)) {
-            return "<strong>" + cell.value + "</strong>";
-        } else if(is_string(cell.id)) {
-            return "<strong>" + cell.id + "</strong>";
-        } else if(is_object(cell.value) && cell.value.id) {
-            return "<strong>" + cell.value.id + "</strong>";
-        }
-        return "";
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
     function convertValueToString(self, cell)
     {
         var graph = self.config._mxgraph;
 
-        if(cell.div != null) {
-            // Uses cached label
-            return cell.div;
-        }
+        var style = graph.getCurrentCellStyle(cell);
+        if(style.json) {
+            var div = document.createElement('div');
+            div.style.position = 'relative';
+            div.style.left = -5 + 'px';
+            div.style.top = 0 + 'px';
+            div.style.width = cell.geometry.width - 40 +  'px';
+            div.style.height= cell.geometry.height - 45 + 'px';
+            //div.id = cell.value.id;
+            //div.style.border = "1px solid black";
 
-        var msg = cell.value;
-
-        switch(cell.id) {
-            case "Class Attributes":
-                var div = document.createElement('div');
-//                 div.style.position = 'relative';
-//                 div.style.left = 0 + 'px';
-//                 div.style.top = cell.geometry.y *2 + 'px';
-//                 div.style.width = cell.geometry.width +  'px';
-//                 div.style.height= cell.geometry.height + 'px';
-//                 //div.style.overflow = 'scroll';
-//                 div.id = "Class Attributes";
-//                 div.style.border = "1px solid black";
-
-                var checkbox = document.createElement('input');
-                checkbox.setAttribute('type', 'checkbox');
-                div.appendChild(checkbox);
-                return div; // TODO
-
-                // Caches label
-                cell.div = div;
-
-                var jn_msg = null;
-                try {
-                    if(is_string(msg)) {
-                        jn_msg = JSON.parse(msg);
-                    } else {
-                        jn_msg = msg;
-                    }
-                } catch (e) {
-                    jn_msg = {msg:String(msg)};
+            var msg = cell.value;
+            var jn_msg = null;
+            try {
+                if(is_string(msg)) {
+                    jn_msg = JSON.parse(msg);
+                } else {
+                    jn_msg = msg;
                 }
+            } catch (e) {
+                jn_msg = {msg:String(msg)};
+            }
 
-                json_view(self, div, jn_msg);
-                return div;
-
-            default:
-                break;
+            json_view(self, div, jn_msg);
+            return div;
         }
 
         if(is_string(cell.value)) {
             return "<strong>" + cell.value + "</strong>";
-        } else if(is_string(cell.id)) {
-            return "<strong>" + cell.id + "</strong>";
         } else if(is_object(cell.value) && cell.value.id) {
             return "<strong>" + cell.value.id + "</strong>";
+        } else if(is_string(cell.id)) {
+            return "<strong>" + cell.id + "</strong>";
         }
         return "";
     }
@@ -865,65 +781,6 @@
     /************************************************************
      *
      ************************************************************/
-    function isCellFoldable(self, cell)
-    {
-        return true; // TODO
-        if(cell.value && cell.value.foldable) {
-            return true;
-        }
-        return false;
-    }
-
-    /************************************************************
-     *  Implements the click on a folding icon
-     ************************************************************/
-    function foldCells(self, collapse, recurse, cells)
-    {
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        model.beginUpdate();
-        try {
-            toggleSubtree(self, graph, cells[0], !collapse);
-            model.setCollapsed(cells[0], collapse);
-
-            // Executes the layout for the new graph since
-            // changes to visiblity and collapsed state do
-            // not trigger a layout in the current manager.
-
-            execute_layout(self);
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-    }
-
-    /************************************************************
-     *  Updates the visible state of a given subtree taking into
-     *  account the collapsed state of the traversed branches
-     ************************************************************/
-    function toggleSubtree(self, graph, cell, show)
-    {
-        show = (show != null) ? show : true;
-        var cells = [];
-
-        graph.traverse(cell, true, function(vertex)
-        {
-            if (vertex != cell)
-            {
-                cells.push(vertex);
-            }
-
-            // Stops recursion if a collapsed cell is seen
-            return vertex == cell || !graph.isCellCollapsed(vertex);
-        });
-
-        graph.toggleCells(show, cells, true);
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
     function getCursorForCell(self, cell)
     {
         if(cell.edge) {
@@ -940,39 +797,47 @@
     {
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
-        var margin = 40;
-
-        var cx = 300;
-        var cy = 500;
-
-        var x = margin; // (win_cx > cx)? (win_cx - cx)/2 : margin;
-        var y = margin;
+        var sep = 60;
 
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
-        //gclass.foldable = true; // HACK usado por isCellFoldable()
-
+        var cx_ct = 300;
+        var cy_ct = 500;
         self.config.mxnode_gclass = graph.insertVertex(
             layer,          // parent
             gclass.id,      // id
             gclass,         // value
-            x, y, cx, cy,   // x,y,width,height
-            "verticalLabelPosition=top;verticalAlign=bottom;foldable=0", // style
+            20, 140, cx_ct, cy_ct,   // x,y,width,height
+            "verticalLabelPosition=top;verticalAlign=bottom;"+ // style
+            "foldable=0;resizable=0;",
             false           // relative
         );
 
         /*-------------------------------*
          *      Class attrs
          *-------------------------------*/
-        x += cx + margin;
-        y = y;
-
-        cx = 200;
-        cy = 200;
-        var class_attrs = graph.insertVertex(
+        /*
+         *  Button, inside of container
+         */
+        var button_class_attrs = graph.insertVertex(
             self.config.mxnode_gclass,              // parent
-            "Class Attributes",                     // id
+            "Class Attributes Button",              // id
+            "Class Attributes",                     // value
+            20, 20, cx_ct - cx_ct/8, 50,                  // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "spacingLeft=12;fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Content
+         */
+        var content_class_attrs = graph.insertVertex(
+            button_class_attrs,                     // parent
+            "Class Attributes Content",             // id
             {                                       // value
                 "id": gclass.id,
                 "base": gclass.base,
@@ -981,22 +846,21 @@
                 "gclass_trace_level": gclass.gclass_trace_level,
                 "gclass_no_trace_level": gclass.gclass_no_trace_level
             },
-            x, y, cx, cy,                           // x,y,width,height
-            "shape=rectangle;fontSize=10;"+         // style
+            cx_ct+sep, -150, 400, 200,              // x,y,width,height
+            "shape=rectangle;"+                     // style
             "spacingLeft=12;fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "autosize=1;",
+            "rounded=0;json=1;resizable=1;foldable=1;",
             false
         );                                          // relative
 
-//         var link = graph.insertEdge(
-//             null, //self.config.mxnode_gclass,  // parent
-//             null,                       // id
-//             '',                         // value
-//             self.config.mxnode_gclass,  // source
-//             class_attrs,                // target
-//             null                        // style
-//         );
+        graph.insertEdge(
+            button_class_attrs,         // parent
+            null,                       // id
+            '',                         // value
+            button_class_attrs,         // source
+            content_class_attrs,        // target
+            null                        // style
+        );
 
 
         /*-------------------------------*
@@ -1179,6 +1043,7 @@
         if(!self.config.mxnode_gclass) {
             return 0;
         }
+        return 0; // No centres nada
 
         var margin = 10;
         var graph = self.config._mxgraph;
