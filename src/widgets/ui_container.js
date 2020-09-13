@@ -570,7 +570,8 @@
                                         {},
                                         {
                                             view: "label",
-                                            label: self.config.title,
+                                            label: self.config.panel_properties.with_panel_title?
+                                                self.config.panel_properties.with_panel_title:"",
                                         },
                                         {}
                                     ]

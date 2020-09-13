@@ -440,9 +440,13 @@
         }
     }
 
-    /********************************************
-     *
-     ********************************************/
+    /*********************************************************
+     *  HACK una cell está compuesta gráficamente de:
+     *      - Shape de la celda
+     *      - Label     (Contenido a pintar en la celda)
+     *      - Overlays  (Cells extras)
+     *      - Control   (folding icon)
+     *********************************************************/
     function initialize_mxgraph(self)
     {
         var graph = self.config._mxgraph;
@@ -525,8 +529,6 @@
         style[mxConstants.STYLE_FONTFAMILY] = "Arial";
         style[mxConstants.STYLE_FONTSTYLE] = '0';
         style[mxConstants.STYLE_FONTSIZE] = '12';
-        style[mxConstants.STYLE_VERTICAL_LABEL_POSITION] = mxConstants.ALIGN_TOP;
-        style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_BOTTOM;
 
         /*
          *  General Edge Style
@@ -536,39 +538,46 @@
         style[mxConstants.STYLE_ROUNDED] = true;
 
         /*
-         *  Own getLabel
+         *  Set html labels
          */
         graph.setHtmlLabels(true); // See https://jgraph.github.io/mxgraph/docs/known-issues.html#19
-//         graph.getLabel = function(cell) {
-//             return getLabel(self, cell);
-//         };
 
+        /*
+         *  Own convertValueToString()
+         *  No uses getLabel() para cambiar la label, es mejor convertValueToString().
+         *  La original simplemente returna un value.toString()
+         *  Used in:
+         *      - graph.getLabel() called if la cell es visible y no tiene style "noLabel"
+         *      - graph.getEditingValue()
+         *      - graph.getTooltipForCell() si getTooltip() es null
+         *      - graph.getEditingValue()
+         *      - editor.getTitle()
+         *      - editor.getRootTitle()
+         */
         // Overrides method to provide a cell label in the display
         graph.convertValueToString = function(cell) {
             return convertValueToString(self, cell);
         }
 
-
         /*
          *  Own getTooltip
          */
         graph.setTooltips(true);
-        graph.getTooltip = function(state) {
-            return getTooltip(self, state);
+        graph.getTooltipForCell = function(cell) {
+            return getTooltipForCell(self, cell);
         };
 
         /*
          *  Defines the condition for showing the folding icon
          */
-        graph.isCellFoldable = function(cell, collapse)
-        {
+        graph.isCellFoldable = function(cell, collapse) {
             return isCellFoldable(self, cell, collapse);
         };
 
         // Implements the click on a folding icon
-        graph.foldCells = function(collapse, recurse, cells) {
-            return foldCells(self, collapse, recurse, cells);
-        };
+//         graph.foldCells = function(collapse, recurse, cells) {
+//             return foldCells(self, collapse, recurse, cells);
+//         };
 
         /*
          *  Mouse Cursor
@@ -782,13 +791,19 @@
         switch(cell.id) {
             case "Class Attributes":
                 var div = document.createElement('div');
-                div.style.width = '300px';
-                div.style.height= '300px';
-                div.style.position = 'relative';
-                div.style.top = '300px';
-                div.style.left = '300px';
-                div.id = 'Mierdaaaaaaaaaaa';
-                div.style.border = "4px solid black";
+//                 div.style.position = 'relative';
+//                 div.style.left = 0 + 'px';
+//                 div.style.top = cell.geometry.y *2 + 'px';
+//                 div.style.width = cell.geometry.width +  'px';
+//                 div.style.height= cell.geometry.height + 'px';
+//                 //div.style.overflow = 'scroll';
+//                 div.id = "Class Attributes";
+//                 div.style.border = "1px solid black";
+
+                var checkbox = document.createElement('input');
+                checkbox.setAttribute('type', 'checkbox');
+                div.appendChild(checkbox);
+                return div; // TODO
 
                 // Caches label
                 cell.div = div;
@@ -805,11 +820,12 @@
                 }
 
                 json_view(self, div, jn_msg);
-             return div;
+                return div;
 
             default:
                 break;
         }
+
         if(is_string(cell.value)) {
             return "<strong>" + cell.value + "</strong>";
         } else if(is_string(cell.id)) {
@@ -823,12 +839,16 @@
     /************************************************************
      *
      ************************************************************/
-    function getTooltip(self, state)
+    function getTooltipForCell(self, cell)
     {
-        if(state.cell.value.tooltip) {
-            return state.cell.value.tooltip;
+        if(is_string(cell.value)) {
+            return "<strong>" + cell.value + "</strong>";
+        } else if(is_string(cell.id)) {
+            return "<strong>" + cell.id + "</strong>";
+        } else if(is_object(cell.value) && cell.value.id) {
+            return "<strong>" + cell.value.id + "</strong>";
         }
-        return null;
+        return "";
     }
 
     /************************************************************
@@ -847,6 +867,7 @@
      ************************************************************/
     function isCellFoldable(self, cell)
     {
+        return true; // TODO
         if(cell.value && cell.value.foldable) {
             return true;
         }
@@ -924,26 +945,31 @@
         var cx = 300;
         var cy = 500;
 
-        var x = (win_cx > cx)? (win_cx - cx)/2 : margin;
+        var x = margin; // (win_cx > cx)? (win_cx - cx)/2 : margin;
         var y = margin;
 
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
-        gclass.foldable = true; // HACK usado por isCellFoldable()
+        //gclass.foldable = true; // HACK usado por isCellFoldable()
 
         self.config.mxnode_gclass = graph.insertVertex(
             layer,          // parent
             gclass.id,      // id
             gclass,         // value
             x, y, cx, cy,   // x,y,width,height
-            "",             // style
+            "verticalLabelPosition=top;verticalAlign=bottom;foldable=0", // style
             false           // relative
         );
 
         /*-------------------------------*
          *      Class attrs
          *-------------------------------*/
+        x += cx + margin;
+        y = y;
+
+        cx = 200;
+        cy = 200;
         var class_attrs = graph.insertVertex(
             self.config.mxnode_gclass,              // parent
             "Class Attributes",                     // id
@@ -955,10 +981,11 @@
                 "gclass_trace_level": gclass.gclass_trace_level,
                 "gclass_no_trace_level": gclass.gclass_no_trace_level
             },
-            20, 20, cx - cx/8, 50,                  // x,y,width,height
+            x, y, cx, cy,                           // x,y,width,height
             "shape=rectangle;fontSize=10;"+         // style
             "spacingLeft=12;fillColor=white;"+
-            "fontColor=black;strokeColor=black;",
+            "fontColor=black;strokeColor=black;"+
+            "autosize=1;",
             false
         );                                          // relative
 

@@ -628,6 +628,7 @@
             if (this.getModel().isVertex(cell)) {
                 return br(cell.value.shortname);
             }
+            return "";
         };
 
         /*
