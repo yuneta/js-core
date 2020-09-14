@@ -446,7 +446,7 @@
      *      - Shape de la celda
      *      - Label     (Contenido a pintar en la celda)
      *      - Overlays  (Cells extras)
-     *      - Control   (folding icon)
+     *      - Control   (folding icon) + deleteControl?
      *********************************************************/
     function initialize_mxgraph(self)
     {
@@ -719,7 +719,7 @@
         if(style.json) {
             var div = document.createElement('div');
             div.style.position = 'relative';
-            div.style.left = -5 + 'px';
+            div.style.left = 0 + 'px';
             div.style.top = 0 + 'px';
             div.style.width = cell.geometry.width - 40 +  'px';
             div.style.height= cell.geometry.height - 45 + 'px';
@@ -799,16 +799,20 @@
         var win_cy = self.config.$ui.$height;
         var sep = 60;
 
+        var cx_ctr = 300;    // Container
+        var cy_ctr = 600;
+
+        var cx_box = 400;    // Content Box
+        var cy_box = 200;
+
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
-        var cx_ct = 300;
-        var cy_ct = 500;
         self.config.mxnode_gclass = graph.insertVertex(
             layer,          // parent
             gclass.id,      // id
             gclass,         // value
-            20, 140, cx_ct, cy_ct,   // x,y,width,height
+            20, 140, cx_ctr, cy_ctr,   // x,y,width,height
             "verticalLabelPosition=top;verticalAlign=bottom;"+ // style
             "foldable=0;resizable=0;",
             false           // relative
@@ -817,42 +821,47 @@
         /*-------------------------------*
          *      Class attrs
          *-------------------------------*/
+        var class_attrs = {
+            "id": gclass.id,
+            "base": gclass.base,
+            "priv_size": gclass.priv_size,
+            "instances": gclass.instances,
+            "gclass_trace_level": gclass.gclass_trace_level,
+            "gclass_no_trace_level": gclass.gclass_no_trace_level
+        }
+
         /*
-         *  Button, inside of container
+         *  Class attrs Button, inside of container
          */
         var button_class_attrs = graph.insertVertex(
             self.config.mxnode_gclass,              // parent
             "Class Attributes Button",              // id
             "Class Attributes",                     // value
-            20, 20, cx_ct - cx_ct/8, 50,                  // x,y,width,height
+            20, 20+60*0, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
             "shape=rectangle;"+                     // style
-            "spacingLeft=12;fillColor=white;"+
+            "fillColor=white;"+
             "fontColor=black;strokeColor=black;"+
             "foldable=1;resizable=0;",
             false
         );                                          // relative
 
         /*
-         *  Content
+         *  Class attrs Content
          */
         var content_class_attrs = graph.insertVertex(
             button_class_attrs,                     // parent
             "Class Attributes Content",             // id
-            {                                       // value
-                "id": gclass.id,
-                "base": gclass.base,
-                "priv_size": gclass.priv_size,
-                "instances": gclass.instances,
-                "gclass_trace_level": gclass.gclass_trace_level,
-                "gclass_no_trace_level": gclass.gclass_no_trace_level
-            },
-            cx_ct+sep, -150, 400, 200,              // x,y,width,height
+            class_attrs,                            // value
+            cx_ctr+sep, -150, cx_box, cy_box,       // x,y,width,height
             "shape=rectangle;"+                     // style
-            "spacingLeft=12;fillColor=white;"+
+            "fillColor=white;"+
             "rounded=0;json=1;resizable=1;foldable=1;",
             false
         );                                          // relative
 
+        /*
+         *  Link between "Class Attributes Button" y "Class Attributes Content"
+         */
         graph.insertEdge(
             button_class_attrs,         // parent
             null,                       // id
@@ -861,7 +870,6 @@
             content_class_attrs,        // target
             null                        // style
         );
-
 
         /*-------------------------------*
          *      Obj attrs
@@ -876,6 +884,49 @@
 //                 },
 //                 ...
 //             ],
+        var obj_attrs = gclass.attrs;
+
+        /*
+         *  Obj attrs Button, inside of container
+         */
+        var button_obj_attrs = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Object Attributes Button",             // id
+            "Object Attributes",                    // value
+            20, 20+60*1, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Obj attrs Content
+         */
+        var content_obj_attrs = graph.insertVertex(
+            button_obj_attrs,                       // parent
+            "Object Attributes Content",            // id
+            obj_attrs,                              // value
+            cx_ctr+sep+cx_box+20, -180, cx_box*2, cy_box,   // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "Object Attributes Button" y "Object Attributes Content"
+         */
+        graph.insertEdge(
+            button_obj_attrs,           // parent
+            null,                       // id
+            '',                         // value
+            button_obj_attrs,           // source
+            content_obj_attrs,          // target
+            null                        // style
+        );
+
         /*-------------------------------*
          *      Commands
          *-------------------------------*/
@@ -900,6 +951,49 @@
 //                     ]
 //                 },
 //             ],
+        var commands = gclass.commands;
+
+        /*
+         *  Commands Button, inside of container
+         */
+        var button_commands = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Commands Button",                      // id
+            "Commands",                             // value
+            20, 20+60*2, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Commands Content
+         */
+        var content_commands = graph.insertVertex(
+            button_commands,                        // parent
+            "Commands Content",                     // id
+            commands,                               // value
+            cx_ctr+sep, -20, cx_box*2, cy_box,      // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "Commands Button" y "Commands Content"
+         */
+        graph.insertEdge(
+            button_commands,            // parent
+            null,                       // id
+            '',                         // value
+            button_commands,            // source
+            content_commands,           // target
+            null                        // style
+        );
+
         /*-------------------------------*
          *      Global Methods
          *-------------------------------*/
@@ -907,10 +1001,70 @@
 //                 "mt_create",
 //                 ...
 //             ],
+        var global_methods = gclass.global_methods;
+
+        /*
+         *  Global Methods Button, inside of container
+         */
+        var button_global_methods = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Global Methods Button",                // id
+            "Global Methods",                       // value
+            20, 20+60*3, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Global Methods Content
+         */
+        var content_global_methods = graph.insertVertex(
+            button_global_methods,                  // parent
+            "Global Methods Content",               // id
+            global_methods,                         // value
+            cx_ctr+sep, 140, cx_box, cy_box,        // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "Global Methods Button" y "Global Methods Content"
+         */
+        graph.insertEdge(
+            button_global_methods,      // parent
+            null,                       // id
+            '',                         // value
+            button_global_methods,      // source
+            content_global_methods,     // target
+            null                        // style
+        );
+
         /*-------------------------------*
          *      Local Methods
          *-------------------------------*/
 //             "local_methods": [],
+        var local_methods = gclass.local_methods;
+
+        /*
+         *  Local Methods Button, inside of container
+         */
+        var button_local_methods = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Local Methods Button",                 // id
+            "Local Methods",                        // value
+            20, 20+60*4, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
         /*-------------------------------*
          *      FSM
          *-------------------------------*/
@@ -943,10 +1097,70 @@
 //                     ...
 //                 }
 //             },
+        var fsm = gclass.FSM;
+
+        /*
+         *  FSM Button, inside of container
+         */
+        var button_fsm = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "FSM Button",                           // id
+            "FSM",                                  // value
+            20, 20+60*5, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  FSM Content
+         */
+        var content_fsm = graph.insertVertex(
+            button_fsm,                             // parent
+            "FSM Content",                          // id
+            fsm,                                    // value
+            cx_ctr+sep+cx_box+20, 20, cx_box*2, cy_box,   // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "FSM Button" y "FSM Content"
+         */
+        graph.insertEdge(
+            button_fsm,                 // parent
+            null,                       // id
+            '',                         // value
+            button_fsm,                 // source
+            content_fsm,                // target
+            null                        // style
+        );
+
         /*-------------------------------*
          *      ACL
          *-------------------------------*/
 //             "ACL": [],
+        var acl = gclass.ACL;
+
+        /*
+         *  ACL Button, inside of container
+         */
+        var button_acl = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "ACL Button",                           // id
+            "ACL",                                  // value
+            20, 20+60*6, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
         /*-------------------------------*
          *      Info Global traces
          *-------------------------------*/
@@ -954,6 +1168,49 @@
 //                 "machine": "Trace machine",
 //                 ...
 //             },
+        var info_global_trace = gclass.info_global_trace;
+
+        /*
+         *  Info Global Trace Button, inside of container
+         */
+        var button_info_global_trace = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Info Global Trace Button",             // id
+            "Info Global Trace",                    // value
+            20, 20+60*7, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Info Global Trace Content
+         */
+        var content_info_global_trace = graph.insertVertex(
+            button_info_global_trace,               // parent
+            "Info Global Trace Content",            // id
+            info_global_trace,                      // value
+            cx_ctr+sep, 120, cx_box*2, cy_box,      // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "Info Global Trace Button" y "Info Global Trace Content"
+         */
+        graph.insertEdge(
+            button_info_global_trace,   // parent
+            null,                       // id
+            '',                         // value
+            button_info_global_trace,   // source
+            content_info_global_trace,  // target
+            null                        // style
+        );
+
         /*-------------------------------*
          *      Info Class traces
          *-------------------------------*/
@@ -961,12 +1218,48 @@
 //                 "connection": "Trace connections of iogates",
 //                 ...
 //             },
-        /*-------------------------------*
-         *      Current class traces
-         *-------------------------------*/
-//             "gclass_trace_level": [],
-//             "gclass_no_trace_level": [],
+        var info_gclass_trace = gclass.info_gclass_trace;
 
+        /*
+         *  Info GClass Trace Button, inside of container
+         */
+        var button_info_gclass_trace = graph.insertVertex(
+            self.config.mxnode_gclass,              // parent
+            "Info GClass Trace Button",             // id
+            "Info GClass Trace",                    // value
+            20, 20+60*8, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "fontColor=black;strokeColor=black;"+
+            "foldable=1;resizable=0;",
+            false
+        );                                          // relative
+
+        /*
+         *  Info GClass Trace Content
+         */
+        var content_info_gclass_trace = graph.insertVertex(
+            button_info_gclass_trace,               // parent
+            "Info GClass Trace Content",            // id
+            info_gclass_trace,                      // value
+            cx_ctr+sep, 280, cx_box*2, cy_box,      // x,y,width,height
+            "shape=rectangle;"+                     // style
+            "fillColor=white;"+
+            "rounded=0;json=1;resizable=1;foldable=1;",
+            false
+        );                                          // relative
+
+        /*
+         *  Link between "Info GClass Trace Button" y "Info GClass Trace Content"
+         */
+        graph.insertEdge(
+            button_info_gclass_trace,   // parent
+            null,                       // id
+            '',                         // value
+            button_info_gclass_trace,   // source
+            content_info_gclass_trace,  // target
+            null                        // style
+        );
 
     }
 
