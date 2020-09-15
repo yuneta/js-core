@@ -171,6 +171,18 @@ DEBUG: {
     function send_iev(self, iev)
     {
         var msg = JSON.stringify(iev);
+
+        if (self.yuno.config.trace_inter_event) {
+            var url = self.config.urls[self.config.idx_url];
+            var prefix = self.yuno.yuno_name + ' ==> ' + url;
+            if(self.yuno.config.trace_ievent_callback) {
+                var size = msg.length;
+                self.yuno.config.trace_ievent_callback(prefix, iev, 1, size);
+            } else {
+                trace_inter_event(self, prefix, iev);
+            }
+        }
+
         self.websocket.send(msg);
         return 0;
     }
@@ -184,16 +196,6 @@ DEBUG: {
             event,
             kw
         );
-
-        if (self.yuno.config.trace_inter_event) {
-            var url = self.config.urls[self.config.idx_url];
-            var prefix = self.yuno.yuno_name + ' ==> ' + url;
-            if(self.yuno.config.trace_ievent_callback) {
-                self.yuno.config.trace_ievent_callback(prefix, iev, 1);
-            } else {
-                trace_inter_event(self, prefix, iev);
-            }
-        }
 
         return send_iev(self, iev);
     }
@@ -518,6 +520,7 @@ DEBUG: {
         /*------------------------------------------*
          *  Create inter_event from received data
          *------------------------------------------*/
+        var size = kw.data.length;
         var iev_msg = iev_create_from_json(self, kw.data);
 
         /*---------------------------------------*
@@ -527,12 +530,11 @@ DEBUG: {
             var url = self.config.urls[self.config.idx_url];
             var prefix = self.yuno.yuno_name + ' <== ' + url;
             if(self.yuno.config.trace_ievent_callback) {
-                self.yuno.config.trace_ievent_callback(prefix, iev_msg, 2);
+                self.yuno.config.trace_ievent_callback(prefix, iev_msg, 2, size);
             } else {
                 trace_inter_event(self, prefix, iev_msg);
             }
         }
-
 
         /*----------------------------------------*
          *
