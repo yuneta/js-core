@@ -68,9 +68,14 @@
             kw,
             0
         );
-        this.yuno_name = yuno_name;
         this.yuno_role = yuno_role;
+        this.yuno_name = yuno_name;
         this.yuno_version = yuno_version;
+        this.config.yuno_role = yuno_role;
+        this.config.yuno_name = yuno_name;
+        this.config.yuno_version = yuno_version;
+        this.config.__service__ = false;
+        this.config.__unique__ = false;
         this.parent = null;
         this.yuno = this;
         this._inside = 0;
@@ -222,8 +227,6 @@
 
         var gobj = new gclass(name, kw);
         gobj.yuno = this;
-        gobj.config.__service__ = is_service;
-        gobj.config.__unique__ = is_unique;
 
         if(!gobj.gobj_load_persistent_attrs) {
             var msg = "Check GClass of '" + name + "': don't look a GClass";
@@ -242,11 +245,17 @@
             if(!this._register_unique_gobj(gobj)) {
                return null;
             }
+            gobj.config.__unique__ = true;
+        } else {
+            gobj.config.__unique__ = false;
         }
         if(is_service) {
             if(!this._register_service_gobj(gobj)) {
                return null;
             }
+            gobj.config.__service__ = true;
+        } else {
+            gobj.config.__service__ = false;
         }
         if(is_service || is_unique) {
             gobj.gobj_load_persistent_attrs();
@@ -380,8 +389,8 @@
             log_error(msg);
             return false;
         }
+
         self._unique_gobjs[gobj.name] = gobj;
-        self.config.is_unique = true;
         return true;
     };
 
@@ -395,7 +404,6 @@
             delete self._unique_gobjs[gobj.name];
             return true
         }
-        self.config.is_unique = false;
         return false;
     };
 
@@ -422,7 +430,6 @@
             return false;
         }
         self._service_gobjs[gobj.name] = gobj;
-        self.config.is_service = true;
         return true;
     };
 
@@ -436,7 +443,6 @@
             delete self._service_gobjs[gobj.name];
             return true;
         }
-        self.config.is_service = false;
         return false;
     };
 
@@ -631,6 +637,15 @@
             description: '',
             stats: 0,
             value: gobj.gobj_current_state()
+        });
+        id++;
+        data.push({
+            id: id,
+            name: '__running__',
+            type: 'boolean',
+            description: '',
+            stats: 0,
+            value: gobj.gobj_is_running()
         });
 
         return data;

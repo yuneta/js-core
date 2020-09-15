@@ -1333,10 +1333,9 @@
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
-        if(!self.config.mxnode_gclass) {
-            return 0;
+        if(1 || !self.config.mxnode_gclass) {
+            return 0; // No centres nada
         }
-        return 0; // No centres nada
 
         var margin = 10;
         var graph = self.config._mxgraph;
