@@ -2,6 +2,7 @@
  *          ui_view_gobj_tree.js
  *
  *          View of Gobj Tree
+ *          Igual que ui_gobj_tree_c.js pero como solución global
  *
  *          Copyright (c) 2020 Niyamaka
  *          All Rights Reserved.
