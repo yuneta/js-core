@@ -1011,12 +1011,22 @@
         var x = 0;
         var y = 0; // si meto separación aparece scrollbar al ajustar
         var sep = self.config.vertex_sep;
+        var model = graph.getModel();
 
         // HACK with layout this x,y,w,h are ignored
         // WARNING without a built-in layout, the graph is horrible.
         for(var i=0; i<data.length; i++) {
             var record = data[i];
-            var parent = record.parent_id?graph.model.getCell(record.parent_id):null;
+            var parent = record.parent_id?model.getCell(record.parent_id):null;
+
+            // HACK protege contra demasiados nodos
+            if(i > 0) {
+                var x = model.isVertex(parent);
+                var y = graph.getConnections(parent).length;
+                if(!parent || x && y > 10) {
+                    continue;
+                }
+            }
 
             var cx = self.config.vertex_cx;
             var cy = self.config.vertex_cy;
