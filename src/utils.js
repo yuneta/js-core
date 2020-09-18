@@ -1598,22 +1598,31 @@
 
     function log_error(msg)
     {
+        if(is_object(msg)) {
+            msg = JSON.stringify(msg)
+        }
         console.log("%c ERROR: " + String(msg), "color:yellow");
         if(f_error) {
-            f_error(String(msg));
+            f_error("ERROR: " + String(msg));
         }
     }
 
     function log_warning(msg)
     {
-        console.log("%c ERROR: " + String(msg), "color:yellow");
+        if(is_object(msg)) {
+            msg = JSON.stringify(msg)
+        }
+        console.log("%c WARNING: " + String(msg), "color:cyan");
         if(f_warning) {
-            f_warning(String(msg));
+            f_warning("WARNING: " + String(msg));
         }
     }
 
     function log_info(msg)
     {
+        if(is_object(msg)) {
+            msg = JSON.stringify(msg)
+        }
         if(!empty_string(msg)) {
             console.log(String(msg));
         }
@@ -1624,6 +1633,9 @@
 
     function log_debug(msg)
     {
+        if(is_object(msg)) {
+            msg = JSON.stringify(msg)
+        }
         if(!empty_string(msg)) {
             console.log(String(msg));
         }

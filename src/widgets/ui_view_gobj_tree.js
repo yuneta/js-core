@@ -252,11 +252,14 @@
 
         self.config.info_wait();
 
-        self.config.__remote_service__.gobj_command(
+        var ret = self.config.remote_service.gobj_command(
             command,
             kw_req,
             self
         );
+        if(ret) {
+            log_error(ret);
+        }
     }
 
     /********************************************
@@ -521,6 +524,7 @@
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
+        refresh_view_gobj_tree(self);
         return 0;
     }
 
@@ -731,8 +735,6 @@
     proto.mt_start = function(kw)
     {
         var self = this;
-
-        refresh_view_gobj_tree(self);
     }
 
     /************************************************

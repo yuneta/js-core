@@ -1040,7 +1040,7 @@ __inside_event_loop__ = 0;
             //if(!(ev->flag & EVF_NO_WARN_SUBS)) { TODO
             if(!this._destroyed) {
                 log_warning(
-                    "publishing event WITHOUT subscribers: " +
+                    "Publish event WITHOUT subscribers: " +
                     this.gobj_short_name() + ", " + event
                 );
             }
@@ -1501,7 +1501,7 @@ __inside_event_loop__ = 0;
 
     proto.get_output_event_list = function()
     {
-        return this.fsm.output_set || [];
+        return this.fsm.output_events || [];
     };
 
     /************************************************************

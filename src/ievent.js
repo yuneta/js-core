@@ -8,7 +8,7 @@ DEBUG: {
     "yuno_alias": "",
     "yuno_version": "1.0.0",
     "yuno_release": "1.0.0",
-    "yuneta_version": "4.2.12",
+    "yuneta_version": "4.2.13",
     "playing": false,
     "pid": 0,
     "jwt": "",
@@ -57,6 +57,8 @@ DEBUG: {
     };
 
     var IEVENT_MESSAGE_AREA_ID = "ievent_gate_stack";
+
+
 
 
             /***************************
@@ -249,7 +251,7 @@ DEBUG: {
             "yuno_alias": "",
             "yuno_version": self.yuno.yuno_version,
             "yuno_release": self.yuno.yuno_version,
-            "yuneta_version": "4.2.12",
+            "yuneta_version": "4.2.13",
             "playing": false,
             "pid": 0,
             "jwt": self.config.jwt,
@@ -920,6 +922,8 @@ DEBUG: {
      ************************************************/
     proto.mt_subscription_added = function(subs)
     {
+        // TODO y si quiero subscribirme a los eventos internos de ievent?
+
         if(!this.gobj_in_this_state("ST_SESSION")) {
             // on_open will send all subscriptions
             return;
