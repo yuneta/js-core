@@ -32,13 +32,61 @@
 
         $ui: null,
 
+        layout_options: [
+            {
+                id: "tree_layout",
+                value: "Compact Tree Layout",
+                layout: function(layout_option, graph) {
+                    // Enables automatic layout on the graph and installs
+                    // a tree layout for all groups who's children are
+                    // being changed, added or removed.
+                    var layout = new mxCompactTreeLayout(graph, false);
+                    layout.useBoundingBox = false;
+                    layout.edgeRouting = false;
+                    layout.levelDistance = 30;
+                    layout.nodeDistance = 10;
+                    return layout;
+                }
+            },
+            {
+                id: "herarchical_layout",
+                value: "Herarchical Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxHierarchicalLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "fastorganic_layout",
+                value: "FastOrganic Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxFastOrganicLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "circle_layout",
+                value: "Circle Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxCircleLayout(graph);
+                    return layout;
+                }
+            }
+
+        ],
+
         layers: [
             {
                 id: "__mx_default_layer__"
             }
         ],
+
         _mxgraph: null,
+
+        layout_selected: "tree_layout",
+
         __writable_attrs__: [
+            "layout_selected"
         ]
     };
 
@@ -84,6 +132,7 @@
         build_webix(self);
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
         initialize_mxgraph(self);
+        rebuild_layouts(self);
     }
 
     /************************************************************
@@ -96,6 +145,34 @@
             height: 30,
             css: "toolbar2color",
             cols:[
+                {
+                    view: "richselect",
+                    id: build_name(self, "layout_options"),
+                    tooltip: t("Select layout"),
+                    width: 180,
+                    options: self.config.layout_options,
+                    value: self.config.layout_selected,
+                    label: "",
+                    on: {
+                        onChange(newVal, oldVal) {
+                            var cur_layout = kwid_collect(
+                                self.config.layout_options,
+                                newVal,
+                                null, null
+                            )[0];
+                            if(!cur_layout) {
+                                cur_layout = self.config.layout_options[0];
+                            }
+                            self.config.layout_selected = cur_layout.id;
+
+                            execute_layout(self);
+
+                            if(self.gobj_is_unique()) {
+                                self.gobj_save_persistent_attrs();
+                            }
+                        }
+                    }
+                },
                 {
                     view:"button",
                     type: "icon",
@@ -176,6 +253,46 @@
         self.config.$ui.attachEvent("onViewShow", function() {
             self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
         });
+    }
+
+    /********************************************
+     *  Rebuild layouts
+     ********************************************/
+    function rebuild_layouts(self)
+    {
+        for(var i=0; i<self.config.layout_options.length; i++) {
+            var layout = self.config.layout_options[i];
+            layout.exe = layout.layout(layout, self.config._mxgraph);
+        }
+    }
+
+    /********************************************
+     *  Execute layout
+     ********************************************/
+    function execute_layout(self)
+    {
+        var graph = self.config._mxgraph;
+        var group = get_layer(self, "layer?");
+
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+
+        if(cur_layout) {
+            graph.getModel().beginUpdate();
+            try {
+                cur_layout.exe.execute(group);
+            } catch (e) {
+                log_error(e);
+            } finally {
+                graph.getModel().endUpdate();
+            }
+        }
     }
 
     /********************************************
@@ -275,21 +392,21 @@
         // Enables automatic layout on the graph and installs
         // a tree layout for all groups who's children are
         // being changed, added or removed.
-        var layout = new mxCompactTreeLayout(graph, false);
-        layout.useBoundingBox = false;
-        layout.edgeRouting = false;
-        layout.levelDistance = 30;
-        layout.nodeDistance = 10;
-
-        var layoutMgr = new mxLayoutManager(graph);
-
-        layoutMgr.getLayout = function(cell)
-        {
-            if (cell.getChildCount() > 0)
-            {
-                return layout;
-            }
-        };
+//         var layout = new mxCompactTreeLayout(graph, false);
+//         layout.useBoundingBox = false;
+//         layout.edgeRouting = false;
+//         layout.levelDistance = 30;
+//         layout.nodeDistance = 10;
+//
+//         var layoutMgr = new mxLayoutManager(graph);
+//
+//         layoutMgr.getLayout = function(cell)
+//         {
+//             if (cell.getChildCount() > 0)
+//             {
+//                 return layout;
+//             }
+//         };
 
         // Handles clicks on cells
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
@@ -383,6 +500,19 @@
         var x=0;
         var y=0; // si meto separación aparece scrollbar al ajustar
         _load_webix_tree(self, group, x, y, 0, data);
+
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+
+        if(cur_layout) {
+            cur_layout.exe.execute(group);
+        }
     }
 
 
@@ -542,7 +672,20 @@
     {
         var self = this;
 
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+        self.config.layout_selected = cur_layout.id;
+
         rebuild(self);
+
+        $$(build_name(self, "layout_options")).define("options", self.config.layout_options);
+        $$(build_name(self, "layout_options")).setValue(cur_layout.id);
     }
 
     /************************************************

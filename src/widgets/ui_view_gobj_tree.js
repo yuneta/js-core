@@ -3,6 +3,7 @@
  *
  *          View of Gobj Tree
  *          Igual que ui_gobj_tree_c.js pero como solución global
+ *          El enlace al menú principal se hace externamente.
  *
  *          Copyright (c) 2020 Niyamaka
  *          All Rights Reserved.
