@@ -19,12 +19,13 @@ webix.protoUI({
 
     $init: function() {
         this.$view.innerHTML =
-            "<div id='xxx' class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:scroll;background:" + this.config.background_color + ";'></div>";
+            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:scroll;background:" + this.config.background_color + ";'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);
+
         // do not call Webix Touch handlers
-        webix.event(this.$view, "touchstart", function(e){
+        webix.event(this.$view, "touchstart", function(e) {
             e.cancelBubble = true;
         });
 
