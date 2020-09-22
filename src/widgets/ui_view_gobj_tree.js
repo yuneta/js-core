@@ -20,8 +20,6 @@
          */
         info_wait: function() {},
         info_no_wait: function() {},
-        info_warning: function(comment) {},
-        info_error: function(comment) {},
 
         /*
          *  Servicio remoto al que pedir los datos
@@ -238,7 +236,7 @@
     function send_command_to_remote_service(self, service, command, kw)
     {
         if(!self.config.remote_service) {
-            self.config.info_error(self.gobj_short_name() + ": No remote_service defined");
+            log_error(self.gobj_short_name() + ": No remote_service defined");
             return;
         }
 
@@ -422,10 +420,10 @@
             return;
         }
         if(result < 0) {
-            self.config.info_error(comment);
+            log_error(comment);
         } else {
             if(comment) {
-                self.config.info_warning(comment);
+                log_warning(comment);
             }
         }
 
@@ -443,7 +441,9 @@
                 break;
 
             default:
-                self.config.info_error("Command unknown: " + __md_iev__.__command__);
+                log_error(
+                    self.gobj_short_name() + " Command unknown: " + __md_iev__.__command__
+                );
                 break;
         }
 

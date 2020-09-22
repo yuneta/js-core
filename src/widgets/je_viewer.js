@@ -137,22 +137,21 @@
 
 
     /********************************************
-     *  Simula un click !!!
+     *  Return true if field is editable
+     *  kw: {path, field, value}
      ********************************************/
-    function ac_click_item(self, event, kw, src)
+    function ac_je_is_field_editable(self, event, kw, src)
     {
-        var jsoneditor = self.config._jsoneditor;
-
+        return false;
     }
 
     /********************************************
-     *
+     *  kw: {path, field, value, event}
+     *  value undefined when is over key
      ********************************************/
-    function ac_select_item(self, event, kw, src)
+    function ac_je_click(self, event, kw, src)
     {
-//         var cell = self.config._jsoneditor.model.getCell(kw.id);
-//         self.config._jsoneditor.setSelectionCell(cell);
-
+        trace_msg(kw);
         return 0;
     }
 
@@ -161,6 +160,8 @@
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
+        self.config._jsoneditor.set(kw.data);
+
         return 0;
     }
 
@@ -220,10 +221,10 @@
 
     var FSM = {
         "event_list": [
-            "EV_SELECT_ITEM",
+            "JE_IS_FIELD_EDITABLE",
+            "JE_CLICK",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
-            "EV_CLICK_ITEM",
             "EV_SELECT",
             "EV_REFRESH",
             "EV_REBUILD_PANEL"
@@ -234,13 +235,13 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_SELECT_ITEM",          ac_select_item,     undefined],
-                ["EV_LOAD_DATA",            ac_load_data,       undefined],
-                ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
-                ["EV_CLICK_ITEM",           ac_click_item,      undefined],
-                ["EV_SELECT",               ac_select,          undefined],
-                ["EV_REFRESH",              ac_refresh,         undefined],
-                ["EV_REBUILD_PANEL",        ac_rebuild_panel,   undefined]
+                ["JE_IS_FIELD_EDITABLE",    ac_je_is_field_editable,    undefined],
+                ["JE_CLICK",                ac_je_click,                undefined],
+                ["EV_LOAD_DATA",            ac_load_data,               undefined],
+                ["EV_CLEAR_DATA",           ac_clear_data,              undefined],
+                ["EV_SELECT",               ac_select,                  undefined],
+                ["EV_REFRESH",              ac_refresh,                 undefined],
+                ["EV_REBUILD_PANEL",        ac_rebuild_panel,           undefined]
             ]
         }
     };
