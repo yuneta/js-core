@@ -90,6 +90,7 @@ webix.protoUI({
                         );
                     }
                 }
+                // onClassName: WARNING no lo uses, demasiados eventos
             }
         );
     },

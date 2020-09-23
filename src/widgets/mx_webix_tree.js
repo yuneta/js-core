@@ -567,6 +567,9 @@
     {
         // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
         var idx = self.config.$container_parent.index(self.config.$ui);
+        if(idx < 0) {
+            return -1;
+        }
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);

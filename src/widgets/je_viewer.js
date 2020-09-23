@@ -137,11 +137,15 @@
 
 
     /********************************************
+     *  WARNING return boolean!
      *  Return true if field is editable
      *  kw: {path, field, value}
      ********************************************/
     function ac_je_is_field_editable(self, event, kw, src)
     {
+//         var path = kw.path?kw.path.join("`"):kw.field;
+//         trace_msg("is_editable: " + path);
+//         //trace_msg(kw);
         return false;
     }
 
@@ -151,7 +155,10 @@
      ********************************************/
     function ac_je_click(self, event, kw, src)
     {
-        trace_msg(kw);
+//         var path = kw.path?kw.path.join("`"):kw.field;
+//         trace_msg("click: " + path);
+//         //trace_msg(kw);
+
         return 0;
     }
 
@@ -172,6 +179,9 @@
     {
         // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
         var idx = self.config.$container_parent.index(self.config.$ui);
+        if(idx < 0) {
+            return -1;
+        }
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
