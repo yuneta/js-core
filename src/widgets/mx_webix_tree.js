@@ -48,6 +48,57 @@
                     return layout;
                 }
             },
+
+            {
+                id: "edgeLabel_layout",
+                value: "EdgeLabel Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxEdgeLabelLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "parallelEdge_layout",
+                value: "ParallelEdge Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxParallelEdgeLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "partition_layout",
+                value: "Partition Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxPartitionLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "radial_layout",
+                value: "Radial Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxRadialTreeLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "stack_layout",
+                value: "Stack Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new  mxStackLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "swimlane_layout",
+                value: "Swimlane Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxSwimlaneLayout(graph);
+                    return layout;
+                }
+            },
+
+
             {
                 id: "herarchical_layout",
                 value: "Herarchical Layout",

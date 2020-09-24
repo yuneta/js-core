@@ -51,6 +51,7 @@ webix.protoUI({
                 timestampTag: function({field, value, path}) {
                     if (field === '__t__' || field === '__tm__' || field === 'tm' ||
                         field === 'from_t' || field === 'to_t' || field === 't' ||
+                        field === 't_input' || field === 't_output' ||
                         field === 'from_tm' || field === 'to_tm'
                     ) {
                         return true;
@@ -60,6 +61,7 @@ webix.protoUI({
                 timestampFormat: function({field, value, path}) {
                     if (field === '__t__' || field === '__tm__' || field === 'tm' ||
                         field === 'from_t' || field === 'to_t' || field === 't' ||
+                        field === 't_input' || field === 't_output' ||
                         field === 'from_tm' || field === 'to_tm'
                     ) {
                         return new Date(value*1000).toISOString();
@@ -90,7 +92,7 @@ webix.protoUI({
                         );
                     }
                 }
-                // onClassName: WARNING no lo uses, demasiados eventos
+                // onClassName: WARNING no lo uses, demasiados eventos si es un json grande
             }
         );
     },
