@@ -166,7 +166,9 @@
                     maxWidth: 120,
                     label: t("reset view"),
                     click: function() {
-                        self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
+                        var graph = self.config._mxgraph;
+                        graph.view.scaleAndTranslate(1, graph.border/2, graph.border/2);
+                        //graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
                     }
                 },
                 {
@@ -177,7 +179,8 @@
                     maxWidth: 120,
                     label: t("fit"),
                     click: function() {
-                        self.config._mxgraph.fit();
+                        var graph = self.config._mxgraph;
+                        graph.fit();
                     }
                 },
                 {
@@ -188,8 +191,9 @@
                     maxWidth: 120,
                     label: t("zoom in"),
                     click: function() {
-                        self.config._mxgraph.zoomIn();
-                        self.config._mxgraph.view.setTranslate(0, 0);
+                        var graph = self.config._mxgraph;
+                        graph.zoomIn();
+                        graph.view.setTranslate(0, 0);
                     }
                 },
                 {
@@ -200,8 +204,9 @@
                     maxWidth: 120,
                     label: t("zoom out"),
                     click: function() {
-                        self.config._mxgraph.zoomOut();
-                        self.config._mxgraph.view.setTranslate(0, 0);
+                        var graph = self.config._mxgraph;
+                        graph.zoomOut();
+                        graph.view.setTranslate(0, 0);
                     }
                 },
                 { view:"label", label: ""},
@@ -374,7 +379,7 @@
                     model.setGeometry(cell, geo);
                     x += cx;
                 }
-                graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
+                graph.view.setTranslate(graph.border/2, graph.border/2);
 
             } catch (e) {
                 log_error(e);
@@ -408,7 +413,7 @@
         mxEvent.disableContextMenu(graph.container);
 
         graph.border = 40;
-        graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
+        graph.view.setTranslate(graph.border/2, graph.border/2);
 
         graph.setPanning(true);
         graph.panningHandler.useLeftButtonForPanning = true;
