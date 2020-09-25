@@ -282,7 +282,11 @@
      ********************************************/
     function ac_on_view_show(self, event, kw, src)
     {
-        self.config.views_opened[src.gobj_name()] = src.config.$ui.isVisible();
+        var visible = src.config.$ui.isVisible();
+        if(1 || self.is_tracing()) { // TODO TEST
+            log_warning("on_view_show: " + src.gobj_short_name() + " " + visible);
+        }
+        self.config.views_opened[src.gobj_name()] = visible;
 
         /*
          *  Save persistent attrs
@@ -458,7 +462,11 @@
         }
 
         if(self.config.views_opened[child.gobj_name()]) {
+            log_warning("mt_child_added: " + child.gobj_short_name() + " show"); // TODO TEST
             child.config.$ui.show();
+        } else {
+            log_warning("mt_child_added: " + child.gobj_short_name() + " nothing"); // TODO TEST
+            child.config.$ui.hide();
         }
     }
 
@@ -477,6 +485,25 @@
     //=======================================================================
     //      Common code for container panels
     //=======================================================================
+    function toggle_container_panel(gobj_panel)
+    {
+        var $ui = gobj_panel.config.$ui;
+        if(!$ui) {
+            log_error(gobj_panel.gobj_short_name() + ": toggle_container_panel() $ui NULL");
+            return;
+        }
+        if($ui.isVisible()) {
+            $ui.hide();
+        } else {
+            $ui.show();
+        }
+
+        /*----------------------------------------------*
+         *  Inform of view state to "Container Panel"
+         *----------------------------------------------*/
+        gobj_panel.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, gobj_panel);
+    }
+
     function get_container_panel_top_toolbar(self)
     {
         /*------------------------------------------*
@@ -561,10 +588,6 @@
                                             click: function() {
                                                 webix.fullscreen.exit();
                                                 $$(build_name(self, "top_toolbar")).show();
-                                                /*----------------------------------------------*
-                                                *  Inform of view state to "Container Panel"
-                                                *----------------------------------------------*/
-                                                self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
                                             }
                                         },
                                         {},
@@ -578,11 +601,6 @@
                                 }
                             }
                         );
-
-                        /*----------------------------------------------*
-                         *  Inform of view state to "Container Panel"
-                         *----------------------------------------------*/
-                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
                     }
                 },
                 {
@@ -612,5 +630,6 @@
     //=======================================================================
     exports.Ui_container = Ui_container;
     exports.get_container_panel_top_toolbar = get_container_panel_top_toolbar;
+    exports.toggle_container_panel = toggle_container_panel;
 
 })(this);

@@ -224,7 +224,6 @@ __inside_event_loop__ = 0;
                 return this.yuno.__global_load_persistent_attrs_fn__(this);
             }
         }
-        log_error("gobj_load_persistent_attrs() failed");
         return -1;
     };
 
@@ -238,7 +237,6 @@ __inside_event_loop__ = 0;
                 return this.yuno.__global_save_persistent_attrs_fn__(this);
             }
         }
-        log_error("gobj_save_persistent_attrs() failed");
         return -1;
     };
 

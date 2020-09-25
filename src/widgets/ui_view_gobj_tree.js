@@ -172,12 +172,10 @@
                 tooltip: t("Yuno"),
                 label: t("Yuno"),
                 click: function() {
-                    var $widget = self.config.gobj_mx_gobj_tree.gobj_read_attr("$ui");
-                    if($widget.isVisible()) {
-                        $widget.hide();
-                    } else {
-                        $widget.show();
-                    }
+                    /*-----------------------------------------*
+                     *  Toggle panel view, "Container Panel"
+                     *-----------------------------------------*/
+                    toggle_container_panel(self.config.gobj_mx_gobj_tree);
                 }
             },
             {
@@ -189,12 +187,10 @@
                 tooltip: t("GClass"),
                 label: t("GClass"),
                 click: function() {
-                    var $widget = self.config.gobj_gclass_viewer.gobj_read_attr("$ui");
-                    if($widget.isVisible()) {
-                        $widget.hide();
-                    } else {
-                        $widget.show();
-                    }
+                    /*-----------------------------------------*
+                     *  Toggle panel view, "Container Panel"
+                     *-----------------------------------------*/
+                    toggle_container_panel(self.config.gobj_gclass_viewer);
                 }
             },
             {
@@ -206,12 +202,10 @@
                 tooltip: t("attributes"),
                 label: t("attributes"),
                 click: function() {
-                    var $widget = self.config.gobj_gobj_viewer.gobj_read_attr("$ui");
-                    if($widget.isVisible()) {
-                        $widget.hide();
-                    } else {
-                        $widget.show();
-                    }
+                    /*-----------------------------------------*
+                     *  Toggle panel view, "Container Panel"
+                     *-----------------------------------------*/
+                    toggle_container_panel(self.config.gobj_gobj_viewer);
                 }
             }
         ];

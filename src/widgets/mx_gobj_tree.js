@@ -405,7 +405,7 @@
         }
 
         /*----------------------------------------------*
-         *  Inform of view viewed to "Container Panel"
+         *  Inform of panel viewed to "Container Panel"
          *----------------------------------------------*/
         self.config.$ui.attachEvent("onViewShow", function() {
             self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
@@ -1181,6 +1181,7 @@
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
+        self.config.$ui.show();
 
         return 0;
     }
