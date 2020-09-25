@@ -283,9 +283,6 @@
     function ac_on_view_show(self, event, kw, src)
     {
         var visible = src.config.$ui.isVisible();
-        if(1 || self.is_tracing()) { // TODO TEST
-            log_warning("on_view_show: " + src.gobj_short_name() + " " + visible);
-        }
         self.config.views_opened[src.gobj_name()] = visible;
 
         /*
@@ -462,10 +459,8 @@
         }
 
         if(self.config.views_opened[child.gobj_name()]) {
-            log_warning("mt_child_added: " + child.gobj_short_name() + " show"); // TODO TEST
             child.config.$ui.show();
         } else {
-            log_warning("mt_child_added: " + child.gobj_short_name() + " nothing"); // TODO TEST
             child.config.$ui.hide();
         }
     }
