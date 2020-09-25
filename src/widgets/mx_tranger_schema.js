@@ -19,100 +19,6 @@
 
         $ui: null,
 
-        layout_options: [
-            {
-                id: "tree_layout",
-                value: "Compact Tree Layout",
-                layout: function(layout_option, graph) {
-                    // Enables automatic layout on the graph and installs
-                    // a tree layout for all groups who's children are
-                    // being changed, added or removed.
-                    var layout = new mxCompactTreeLayout(graph, false);
-                    layout.useBoundingBox = false;
-                    layout.edgeRouting = false;
-                    layout.levelDistance = 30;
-                    layout.nodeDistance = 10;
-                    return layout;
-                }
-            },
-
-            {
-                id: "edgeLabel_layout",
-                value: "EdgeLabel Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxEdgeLabelLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "parallelEdge_layout",
-                value: "ParallelEdge Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxParallelEdgeLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "partition_layout",
-                value: "Partition Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxPartitionLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "radial_layout",
-                value: "Radial Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxRadialTreeLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "stack_layout",
-                value: "Stack Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new  mxStackLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "swimlane_layout",
-                value: "Swimlane Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxSwimlaneLayout(graph);
-                    return layout;
-                }
-            },
-
-
-            {
-                id: "herarchical_layout",
-                value: "Herarchical Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxHierarchicalLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "fastorganic_layout",
-                value: "FastOrganic Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxFastOrganicLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "circle_layout",
-                value: "Circle Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxCircleLayout(graph);
-                    return layout;
-                }
-            }
-
-        ],
-
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
         image_running: null,
@@ -126,15 +32,21 @@
 
         layers: [
             {
-                id: "__mx_default_layer__"
+                id: "__raw_topics__",
+                value: "Raw Topics"
+            },
+            {
+                id: "__msg2db_topics__",
+                value: "Msg2Db Topics"
+            },
+            {
+                id: "__treedb_topics__",
+                value: "TreeDb Topics"
             }
         ],
         _mxgraph: null,
 
-        layout_selected: "herarchical_layout",
-
         __writable_attrs__: [
-            "layout_selected"
         ]
     };
 
@@ -171,31 +83,6 @@
         /*
          *  Load control button images
          */
-        self.config.image_role_class = new mxImage('/static/app/images/yuneta/circle_red.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
-        self.config.image_role_instance =new mxImage('/static/app/images/yuneta/circle_yellow.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
-
-        self.config.image_running = new mxImage('/static/app/images/yuneta/instance_running.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_stopped = new mxImage('/static/app/images/yuneta/instance_stopped.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_playing = new mxImage('/static/app/images/yuneta/instance_playing.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_service = new mxImage('/static/app/images/yuneta/instance_service.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_unique = new mxImage('/static/app/images/yuneta/instance_unique.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
-        self.config.image_disabled = new mxImage('/static/app/images/yuneta/instance_disabled.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
-        );
         self.config.image_tracing = new mxImage('/static/app/images/yuneta/instance_tracing.svg',
             self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
         );
@@ -219,7 +106,7 @@
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
 
         initialize_mxgraph(self);
-        rebuild_layouts(self);
+        create_root_and_layers(self);
     }
 
     /************************************************************
@@ -256,38 +143,6 @@
                 template: '<div style="cursor:default;display:table;height:40px;"><img src="#url#" alt="#help#" width="24" height="24"><span style="display:table-cell;vertical-align:middle;padding-left:10px;width:100%;">#help#</span></div>',
                 data: [
                     {
-                        url:'/static/app/images/yuneta/circle_red.svg',
-                        help: "Open GClass (Role, Class) window"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/circle_yellow.svg',
-                        help: "Open GObj (instance, object) window"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_running.svg',
-                        help: "gobj is running"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_stopped.svg',
-                        help: "gobj is stopped"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_playing.svg',
-                        help: "gobj is playing"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_service.svg',
-                        help: "gobj is service (public service)"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_unique.svg',
-                        help: "gobj is unique (internal service)"
-                    },
-                    {
-                        url:'/static/app/images/yuneta/instance_disabled.svg',
-                        help: "gobj is disabled"
-                    },
-                    {
                         url:'/static/app/images/yuneta/instance_tracing.svg',
                         help: "gobj is tracing"
                     }
@@ -303,34 +158,6 @@
             height: 30,
             css: "toolbar2color",
             cols:[
-                {
-                    view: "richselect",
-                    id: build_name(self, "layout_options"),
-                    tooltip: t("Select layout"),
-                    width: 180,
-                    options: self.config.layout_options,
-                    value: self.config.layout_selected,
-                    label: "",
-                    on: {
-                        onChange(newVal, oldVal) {
-                            var cur_layout = kwid_collect(
-                                self.config.layout_options,
-                                newVal,
-                                null, null
-                            )[0];
-                            if(!cur_layout) {
-                                cur_layout = self.config.layout_options[0];
-                            }
-                            self.config.layout_selected = cur_layout.id;
-
-                            execute_layout(self);
-
-                            if(self.gobj_is_unique()) {
-                                self.gobj_save_persistent_attrs();
-                            }
-                        }
-                    }
-                },
                 {
                     view:"button",
                     type: "icon",
@@ -468,52 +295,19 @@
     }
 
     /********************************************
-     *  Rebuild layouts
-     ********************************************/
-    function rebuild_layouts(self)
-    {
-        for(var i=0; i<self.config.layout_options.length; i++) {
-            var layout = self.config.layout_options[i];
-            layout.exe = layout.layout(layout, self.config._mxgraph);
-        }
-    }
-
-    /********************************************
-     *  Execute layout
-     ********************************************/
-    function execute_layout(self)
-    {
-        var graph = self.config._mxgraph;
-        var group = get_layer(self, "layer?");
-
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-        if(!cur_layout) {
-            cur_layout = self.config.layout_options[0];
-        }
-
-        if(cur_layout) {
-            graph.getModel().beginUpdate();
-            try {
-                cur_layout.exe.execute(group);
-            } catch (e) {
-                log_error(e);
-            } finally {
-                graph.getModel().endUpdate();
-            }
-        }
-    }
-
-    /********************************************
      *  Create root and layers
      ********************************************/
-    function create_root_and_layers(graph, layers)
+    function create_root_and_layers(self)
     {
+        var graph = self.config._mxgraph;
+        var layers = self.config.layers;
+        var width = self.config.$ui.$width;
         var root = null;
-        if(layers && layers.length) { // TODO
+
+        if(layers && layers.length) {
+            var x = 0;
+            var cx = width/(layers.length+1);
+
             root = new mxCell();
             root.setId("__mx_root__");
 
@@ -521,7 +315,15 @@
                 var layer = layers[i];
 
                 // Create the layer
-                var __mx_cell__ = root.insert(new mxCell());
+
+                var __mx_cell__ = new mxCell(
+                    kw_get_str(layer, "value", null, false),
+                    new mxGeometry(x, 0, cx, 100),
+                    ""
+                );
+                x += cx;
+
+                root.insert(__mx_cell__);
 
                 // Set reference
                 layer["__mx_cell__"] = __mx_cell__;
@@ -545,6 +347,57 @@
         }
     }
 
+    /************************************************************
+     *
+     ************************************************************/
+    function resize_layers(self)
+    {
+        var width = self.config.$ui.$width;
+        var height = self.config.$ui.$height;
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+        var layers = self.config.layers;
+
+        if(layers && layers.length) {
+            var x = 0;
+            var cx = width/(layers.length+1);
+
+            model.beginUpdate();
+            try {
+                for(var i=0; i<layers.length; i++) {
+                    var layer = layers[i];
+                    var cell = layer["__mx_cell__"];
+
+                    var geo = graph.getCellGeometry(cell).clone();
+                    geo.x = x;
+                    geo.width = cx;
+                    model.setGeometry(cell, geo);
+                    x += cx;
+                }
+                graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
+
+            } catch (e) {
+                log_error(e);
+            } finally {
+                model.endUpdate();
+            }
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_layer(self, layer)
+    {
+        var layers = self.config.layers;
+        for(var i=0; i<layers.length; i++) {
+            if(layers[i].id == layer) {
+                return layers[i].__mx_cell__;
+            }
+        }
+        return self.config._mxgraph.getDefaultParent();
+    }
+
     /********************************************
      *
      ********************************************/
@@ -554,9 +407,9 @@
 
         mxEvent.disableContextMenu(graph.container);
 
-        create_root_and_layers(graph, self.config.layers);
+        graph.border = 40;
+        graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
 
-        // Panning? HACK if panning is set then rubberband selection will not work
         graph.setPanning(true);
         graph.panningHandler.useLeftButtonForPanning = true;
 
@@ -568,9 +421,6 @@
 
         // Avoids overlap of edges and collapse icons
         graph.keepEdgesInBackground = true;
-
-        // Enables automatic sizing for vertices after editing
-        graph.setAutoSizeCells(true);
 
         /*---------------------------*
          *      PERMISOS
@@ -657,349 +507,50 @@
                 return 'default';
             }
         };
-
-        // Defines the position of the folding icon
-        graph.cellRenderer.getControlBounds = function(state, w, h) {
-            if (state.control != null) {
-                var oldScale = state.control.scale;
-                var w = state.control.bounds.width / oldScale;
-                var h = state.control.bounds.height / oldScale;
-                var s = state.view.scale;
-
-                // 0 = TreeNodeShape.prototype.segment * s
-                return new mxRectangle(state.x + state.width / 2 - w / 2 * s,
-                    state.y + state.height + 10 - h / 2 * s,
-                    w * s, h * s
-                );
-            }
-
-            return null;
-        };
-
-        // Implements the click on a folding icon
-        graph.foldCells = function(collapse, recurse, cells) {
-            this.model.beginUpdate();
-            try {
-                toggleSubtree(this, cells[0], !collapse);
-                this.model.setCollapsed(cells[0], collapse);
-
-                // Executes the layout for the new graph since
-                // changes to visiblity and collapsed state do
-                // not trigger a layout in the current manager.
-
-                execute_layout(self);
-            } catch (e) {
-                log_error(e);
-            } finally {
-                this.model.endUpdate();
-            }
-        };
-
-        // Updates the visible state of a given subtree taking into
-        // account the collapsed state of the traversed branches
-        function toggleSubtree(graph, cell, show) {
-            show = (show != null) ? show : true;
-            var cells = [];
-
-            graph.traverse(cell, true, function(vertex)
-            {
-                if (vertex != cell)
-                {
-                    cells.push(vertex);
-                }
-
-                // Stops recursion if a collapsed cell is seen
-                return vertex == cell || !graph.isCellCollapsed(vertex);
-            });
-
-            graph.toggleCells(show, cells, true);
-        };
-
-        /*
-         *  Add callback: Only cells selected have "class overlays"
-         */
-        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
-            /*
-             *  HACK "added" vs "removed"
-             *  The names are inverted due to historic reasons.  This cannot be changed.
-             *
-             *  HACK don't change the order, first removed, then added
-             */
-            try {
-                var cells_removed = evt.getProperty('added');
-                if(cells_removed) {
-                    for (var i = 0; i < cells_removed.length; i++) {
-                        var cell = cells_removed[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_state_overlays(self, graph, cell, cell.value);
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-
-            try {
-                var cells_added = evt.getProperty('removed');
-                if(cells_added) {
-                    for (var i = 0; i < cells_added.length; i++) {
-                        var cell = cells_added[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_state_overlays(self, graph, cell, cell.value);
-                        add_class_overlays(self, graph, cell, cell.value);
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-        });
-
-        if(0) {
-            /*
-             *  Sample of Context Menu
-             */
-            // Configures automatic expand on mouseover
-            graph.popupMenuHandler.autoExpand = true;
-
-            // Installs context menu
-            graph.popupMenuHandler.factoryMethod = function(menu, cell, evt)
-            {
-                menu.addItem('Item 1', null, function()
-                {
-                    alert('Item 1');
-                });
-
-                menu.addItem('Item 2', null, function()
-                {
-                    alert('Item 2');
-                });
-
-                menu.addSeparator();
-            };
-        }
     }
 
     /************************************************************
      *
      ************************************************************/
-    function get_layer(self, layer)
-    {
-// TODO        var layers = self.config.layers;
-//         for(var i=0; i<layers.length; i++) {
-//             if(layers[i].id == layer) {
-//                 return layers[i].__mx_cell__;
-//             }
-//         }
-//         var x = self.config._mxgraph.getModel().getCell(layer);
-        return self.config._mxgraph.getDefaultParent();
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function add_class_overlays(self, graph, cell, record)
-    {
-        var model = graph.getModel();
-        model.beginUpdate();
-        try {
-            var offs = self.config.top_overlay_icon_size/2;
-
-            var overlay_role = new mxCellOverlay(
-                self.config.image_role_class,
-                "Role Class",               // tooltip
-                mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                new mxPoint(offs, offs),    // offset
-                "pointer"                   // cursor
-            );
-            graph.addCellOverlay(cell, overlay_role);
-
-            // Installs a handler for clicks on the overlay
-            overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
-                var record = evt2.getProperty('cell').value;
-                self.parent.gobj_send_event("EV_MX_ROLE_CLASS_CLICKED", record, self);
-            });
-
-            var overlay_instance = new mxCellOverlay(
-                self.config.image_role_instance,
-                "Role Instance",            // tooltip
-                mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                new mxPoint(-offs, offs),   // offset
-                "pointer"                   // cursor
-            );
-            graph.addCellOverlay(cell, overlay_instance);
-
-            // Installs a handler for clicks on the overlay
-            overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                var record = evt2.getProperty('cell').value;
-                self.parent.gobj_send_event("EV_MX_ROLE_INSTANCE_CLICKED", record, self);
-            });
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function add_state_overlays(self, graph, cell, record)
-    {
-        var model = graph.getModel();
-        model.beginUpdate();
-        try {
-            var bottom_overlay_icon_size = self.config.bottom_overlay_icon_size;
-            var x = 10;
-            var y = -10;
-            var i = 0;
-
-            if(record.running) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_running,
-                    "object running",           // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_RUNNING_CLICKED", record, self);
-                });
-            } else {
-                var overlay = new mxCellOverlay(
-                    self.config.image_stopped,
-                    "object stopped",           // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_STOPPED_CLICKED", record, self);
-                });
-            }
-
-            if(record.playing) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_playing,
-                    "object playing",           // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_PLAYING_CLICKED", record, self);
-                });
-            }
-
-            if(record.service) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_service,
-                    "object service",           // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_SERVICE_CLICKED", record, self);
-                });
-            }
-
-            if(record.unique) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_unique,
-                    "object unique",            // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_UNIQUE_CLICKED", record, self);
-                });
-            }
-
-            if(record.disabled) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_disabled,
-                    "object disabled",          // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_DISABLED_CLICKED", record, self);
-                });
-            }
-
-            if(record.gobj_trace_level) {
-                var overlay = new mxCellOverlay(
-                    self.config.image_tracing,
-                    "object tracing",           // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_BOTTOM,   // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(x + bottom_overlay_icon_size*i, y),   // offset
-                    "default"                           // cursor
-                );
-                graph.addCellOverlay(cell, overlay);
-                i++;
-
-                // Installs a handler for clicks on the overlay
-                overlay.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var record = evt2.properties.cell.value;
-                    self.parent.gobj_send_event("EV_MX_TRACING_CLICKED", record, self);
-                });
-            }
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function load_topics(self, graph, group, name, topics)
+    function load_topics(self, graph, tranger_name, topics)
     {
         var model = graph.getModel();
         var cx = self.config.vertex_cx;
         var cy = self.config.vertex_cy;
+
+        var group = "__raw_topics__";
+        graph.insertVertex(
+            get_layer(self, group), // group
+            group,                  // id
+            group,                  // value
+            0, 0,                   // x,y
+            cx, cy,                 // width,height
+            "",                     // style
+            false                   // relative
+        );
+
+        group = "__msg2db_topics__";
+        graph.insertVertex(
+            get_layer(self, group), // group
+            group,                  // id
+            group,                  // value
+            0, 0,                   // x,y
+            cx, cy,                 // width,height
+            "",                     // style
+            false                   // relative
+        );
+
+        group = "__treedb_topics__";
+        graph.insertVertex(
+            get_layer(self, group), // group
+            group,                  // id
+            group,                  // value
+            0, 0,                   // x,y
+            cx, cy,                 // width,height
+            "",                     // style
+            false                   // relative
+        );
+
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
@@ -1007,15 +558,15 @@
             }
             var topic = topics[topic_name];
 
-            var topic_node = graph.insertVertex(
-                group,          // group
-                topic_name,     // id
-                topic,          // value
-                0, 0,           // x,y (controlled by layout)
-                cx, cy,         // width,height
-                "",             // style
-                false           // relative
-            );
+//             var topic_node = graph.insertVertex(
+//                 group,          // group
+//                 topic_name,     // id
+//                 topic,          // value
+//                 0, 0,           // x,y
+//                 cx, cy,         // width,height
+//                 "",             // style
+//                 false           // relative
+//             );
 
         }
     }
@@ -1023,27 +574,13 @@
     /************************************************************
      *
      ************************************************************/
-    function load_tranger(self, name, data, layer)
+    function load_tranger(self, tranger_name, data, layer)
     {
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
-        var group = get_layer(self, layer);
 
         var topics = data.topics;
-        load_topics(self, graph, group, name, topics);
-
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-        if(!cur_layout) {
-            cur_layout = self.config.layout_options[0];
-        }
-
-        if(cur_layout) {
-            cur_layout.exe.execute(group);
-        }
+        load_topics(self, graph, tranger_name, topics);
     }
 
 
@@ -1127,6 +664,7 @@
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
         self.config.$ui.show();
+        resize_layers(self)
 
         return 0;
     }
@@ -1148,6 +686,7 @@
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
+        resize_layers(self);
         return 0;
     }
 
@@ -1233,20 +772,7 @@
 
         load_icons(self);
 
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-        if(!cur_layout) {
-            cur_layout = self.config.layout_options[0];
-        }
-        self.config.layout_selected = cur_layout.id;
-
         rebuild(self);
-
-        $$(build_name(self, "layout_options")).define("options", self.config.layout_options);
-        $$(build_name(self, "layout_options")).setValue(cur_layout.id);
     }
 
     /************************************************
