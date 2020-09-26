@@ -85,6 +85,14 @@
     {
         /*
          *  Load control button images
+         *  buttes=
+         *  datos historicos, datos en disco,
+         *  datos en memoria, datos en tiempo real
+         *
+         *  diskette: datos en disco (diskette refleja fragilidad, necesidad de mantener copias)
+         *  pull_down: datos en memoria (snap, flash) Organización jerárquica en memoria
+         *             los de arriba empujan, organizan, controlan, monitorizan, a los de abajo.
+         *  audio_volume_bars,bacteria datos en movimiento (realtime)
          */
         self.config.image_topic_schema = new mxImage(
             '/static/app/images/yuneta/topic_schema.svg',
@@ -454,7 +462,11 @@
                 // Installs a handler for clicks on the overlay
                 overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
                     var topic = evt2.getProperty('cell').value;
-                    self.parent.gobj_send_event("EV_MX_TOPIC_SCHEMA_CLICKED", topic.cols, self);
+                    self.parent.gobj_send_event(
+                        "EV_MX_TOPIC_SCHEMA_CLICKED",
+                        topic,
+                        self
+                    );
                 });
             }
 
@@ -471,7 +483,11 @@
             // Installs a handler for clicks on the overlay
             overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
                 var topic = evt2.getProperty('cell').value;
-                self.parent.gobj_send_event("EV_MX_TOPIC_VIEW_CLICKED", topic.topic_name, self);
+                self.parent.gobj_send_event(
+                    "EV_MX_TOPIC_VIEW_CLICKED",
+                    topic,
+                    self
+                );
             });
 
         } catch (e) {
@@ -814,10 +830,16 @@
         if(idx < 0) {
             return -1;
         }
+        var visible = self.parent.config.views_opened?
+            self.parent.config.views_opened[self.name]:true;
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
-        self.config.$ui.show();
+        if(visible) {
+            self.config.$ui.show();
+        } else {
+            self.config.$ui.hide();
+        }
 
         return 0;
     }

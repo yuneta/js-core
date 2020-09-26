@@ -182,10 +182,16 @@
         if(idx < 0) {
             return -1;
         }
+        var visible = self.parent.config.views_opened?
+            self.parent.config.views_opened[self.name]:true;
         self.config.$container_parent.removeView(self.config.$ui);
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
-        self.config.$ui.show();
+        if(visible) {
+            self.config.$ui.show();
+        } else {
+            self.config.$ui.hide();
+        }
 
         return 0;
     }
