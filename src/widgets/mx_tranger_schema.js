@@ -21,27 +21,30 @@
 
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
-        image_running: null,
-        image_playing: null,
-        image_service: null,
-        image_unique: null,
-        image_disabled: null,
 
+        image_topic_schema: null,
+        image_topic_view: null,
+
+        layer_title_height: 30,
         vertex_cx: 160,
-        vertex_cy: 60,
+        vertex_cy: 90,
+        vertex_cy_sep: 40,
 
         layers: [
             {
                 id: "raw_topic",
-                value: "Raw Topics"
+                title: "Raw Topics",
+                width: 250
             },
             {
                 id: "msg2db_topic",
-                value: "Msg2Db Topics"
+                title: "Msg2Db Topics",
+                width: 250
             },
             {
                 id: "treedb_topic",
-                value: "TreeDb Topics"
+                title: "TreeDb Topics",
+                width: 400
             }
         ],
         _mxgraph: null,
@@ -83,8 +86,13 @@
         /*
          *  Load control button images
          */
-        self.config.image_tracing = new mxImage('/static/app/images/yuneta/instance_tracing.svg',
-            self.config.bottom_overlay_icon_size, self.config.bottom_overlay_icon_size
+        self.config.image_topic_schema = new mxImage(
+            '/static/app/images/yuneta/topic_schema.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_topic_view = new mxImage(
+            '/static/app/images/yuneta/topic_view.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
     }
 
@@ -143,8 +151,12 @@
                 template: '<div style="cursor:default;display:table;height:40px;"><img src="#url#" alt="#help#" width="24" height="24"><span style="display:table-cell;vertical-align:middle;padding-left:10px;width:100%;">#help#</span></div>',
                 data: [
                     {
-                        url:'/static/app/images/yuneta/instance_tracing.svg',
-                        help: "gobj is tracing"
+                        url:'/static/app/images/yuneta/topic_schema.svg',
+                        help: "Show topic schema"
+                    },
+                    {
+                        url:'/static/app/images/yuneta/topic_view.svg',
+                        help: "View topic data"
                     }
                 ]
             }
@@ -306,13 +318,11 @@
     {
         var graph = self.config._mxgraph;
         var layers = self.config.layers;
-        var width = self.config.$ui.$width;
         var root = null;
 
         if(layers && layers.length) {
             var x = 0;
-            var cx = width/(layers.length+1);
-
+            var cx = 0;
             root = new mxCell();
             root.setId("__mx_root__");
 
@@ -320,23 +330,34 @@
                 var layer = layers[i];
 
                 // Create the layer
-
-                var __mx_cell__ = new mxCell(
-                    kw_get_str(layer, "value", null, false),
+                cx = kw_get_int(layer, "width", 200, false);
+                var __layer__ = new mxCell(
+                    kw_get_str(layer, "value", "", false),
                     new mxGeometry(x, 0, cx, 100),
                     ""
                 );
                 x += cx;
 
-                root.insert(__mx_cell__);
+                root.insert(__layer__);
 
                 // Set reference
-                layer["__mx_cell__"] = __mx_cell__;
+                layer["__layer__"] = __layer__;
 
-                var id = kw_get_str(layer, "id", null, false);
+                var id = kw_get_str(layer, "id", "", false);
                 if(id) {
-                    __mx_cell__.setId(id);
+                    __layer__.setId(id);
                 }
+
+                // Set Title
+                graph.insertVertex(
+                    __layer__,                              // group
+                    kw_get_str(layer, "title", "", false),  // id
+                    kw_get_str(layer, "title", "", false),  // value
+                    0, 0,                                   // x,y
+                    cx-20, self.config.layer_title_height,  // width,height
+                    "title",                                // style
+                    false                                   // relative
+                );
             }
         } else {
             root = graph.getModel().createRoot()
@@ -355,49 +376,12 @@
     /************************************************************
      *
      ************************************************************/
-    function resize_layers(self)
-    {
-        var width = self.config.$ui.$width;
-        var height = self.config.$ui.$height;
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        var layers = self.config.layers;
-
-        if(layers && layers.length) {
-            var x = 0;
-            var cx = width/(layers.length+1);
-
-            model.beginUpdate();
-            try {
-                for(var i=0; i<layers.length; i++) {
-                    var layer = layers[i];
-                    var cell = layer["__mx_cell__"];
-
-                    var geo = graph.getCellGeometry(cell).clone();
-                    geo.x = x;
-                    geo.width = cx;
-                    model.setGeometry(cell, geo);
-                    x += cx;
-                }
-                graph.view.setTranslate(graph.border/2, graph.border/2);
-
-            } catch (e) {
-                log_error(e);
-            } finally {
-                model.endUpdate();
-            }
-        }
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
     function get_layer(self, layer)
     {
         var layers = self.config.layers;
         for(var i=0; i<layers.length; i++) {
             if(layers[i].id == layer) {
-                return layers[i].__mx_cell__;
+                return layers[i].__layer__;
             }
         }
         return self.config._mxgraph.getDefaultParent();
@@ -446,6 +430,57 @@
         return "raw_topic";
     }
 
+    /************************************************************
+     *
+     ************************************************************/
+    function add_tranger_overlays(self, graph, cell)
+    {
+        var model = graph.getModel();
+        model.beginUpdate();
+        try {
+            var offs = self.config.top_overlay_icon_size/2;
+
+            if(cell.value && cell.value.cols &&  Object.keys(cell.value.cols).length > 0) {
+                var overlay_role = new mxCellOverlay(
+                    self.config.image_topic_schema,
+                    "Schema",               // tooltip
+                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                    new mxPoint(offs, -offs),    // offset
+                    "pointer"                   // cursor
+                );
+                graph.addCellOverlay(cell, overlay_role);
+
+                // Installs a handler for clicks on the overlay
+                overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
+                    var topic = evt2.getProperty('cell').value;
+                    self.parent.gobj_send_event("EV_MX_TOPIC_SCHEMA_CLICKED", topic.cols, self);
+                });
+            }
+
+            var overlay_instance = new mxCellOverlay(
+                self.config.image_topic_view,
+                "View",            // tooltip
+                mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                new mxPoint(-offs, -offs),   // offset
+                "pointer"                   // cursor
+            );
+            graph.addCellOverlay(cell, overlay_instance);
+
+            // Installs a handler for clicks on the overlay
+            overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+                var topic = evt2.getProperty('cell').value;
+                self.parent.gobj_send_event("EV_MX_TOPIC_VIEW_CLICKED", topic.topic_name, self);
+            });
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+    }
+
     /********************************************
      *
      ********************************************/
@@ -487,21 +522,28 @@
             return true;
         };
 
-        // Set stylesheet options
+        /*
+         *  Set stylesheet options
+         */
         create_graph_style(
             graph,
             "raw_topic",
-            "text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+            "text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
         );
         create_graph_style(
             graph,
             "msg2db_topic",
-            "text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+            "text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
         );
         create_graph_style(
             graph,
             "treedb_topic",
-            "text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+            "text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
+        );
+        create_graph_style(
+            graph,
+            "title",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;shadow=1;glass=0;sketch=0;fontSize=16;fontColor=#095C86;spacingLeft=10;spacingTop=5;fontStyle=1;"
         );
 
         // Handles clicks on cells
@@ -523,7 +565,40 @@
         graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
-                return cell.id;
+                var t = "<b>" + cell.id + "</b><br/>";
+                if(is_object(cell.value)) {
+                    if(!empty_string(cell.value.pkey)) {
+                        t += "pkey: <pre style='display:inline'><i>" +
+                            cell.value.pkey +
+                            "</i></pre><br/>";
+                    }
+                    if(!empty_string(cell.value.pkey2)) {
+                        t += "pkey2: <pre style='display:inline'><i>" +
+                            cell.value.pkey2 +
+                            "</i></pre><br/>";
+                    }
+                    if(!empty_string(cell.value.tkey)) {
+                        t += "tkey: <pre style='display:inline'><i>" +
+                            cell.value.tkey +
+                            "</i></pre><br/>";
+                    }
+                    if(kw_has_key(cell.value, "__last_rowid__")) {
+                        t += "size: <pre style='display:inline'>" +
+                            cell.value.__last_rowid__ +
+                            "</pre><br/>";
+                    }
+                }
+                switch(cell.style) {
+                    case "raw_topic":
+                        break;
+                    case "msg2db_topic":
+                        break;
+                    case "treedb_topic":
+                        break;
+                    default:
+                        break;
+                }
+                return t;
             }
             return "";
         };
@@ -539,12 +614,6 @@
             return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
         };
 
-        // Defines the condition for showing the folding icon
-        graph.isCellFoldable = function(cell, collapse)
-        {
-            return this.model.getOutgoingEdges(cell).length > 0;
-        };
-
         graph.getCursorForCell = function(cell) {
             if(this.model.isEdge(cell)) {
                 return 'default';
@@ -552,6 +621,42 @@
                 return 'default';
             }
         };
+
+        /*
+         *  Add callback: Only cells selected have "class overlays"
+         */
+        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
+            /*
+             *  HACK "added" vs "removed"
+             *  The names are inverted due to historic reasons.  This cannot be changed.
+             *
+             *  HACK don't change the order, first removed, then added
+             */
+            try {
+                var cells_removed = evt.getProperty('added');
+                if(cells_removed) {
+                    for (var i = 0; i < cells_removed.length; i++) {
+                        var cell = cells_removed[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+
+            try {
+                var cells_added = evt.getProperty('removed');
+                if(cells_added) {
+                    for (var i = 0; i < cells_added.length; i++) {
+                        var cell = cells_added[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                        add_tranger_overlays(self, graph, cell);
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+        });
     }
 
     /************************************************************
@@ -562,10 +667,10 @@
         var model = graph.getModel();
         var cx = self.config.vertex_cx;
         var cy = self.config.vertex_cy;
-        var raw_y = 0;
-        var treedb_y = 0;
-        var msg2db_y = 0;
-        var cy_sep = 40;
+        var vertex_cy_sep = self.config.vertex_cy_sep;
+        var raw_y = self.config.layer_title_height + vertex_cy_sep/2;
+        var treedb_y = self.config.layer_title_height + vertex_cy_sep/2;
+        var msg2db_y = self.config.layer_title_height + vertex_cy_sep/2;
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
@@ -580,11 +685,11 @@
                         topic.topic_name,       // id
                         topic,                  // value
                         0, treedb_y,            // x,y
-                        cx, cy,                 // width,height
+                        cx + cx/2, cy,          // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    treedb_y += cy + cy_sep;
+                    treedb_y += cy + vertex_cy_sep;
                     break;
 
                 case "msg2db_topic":
@@ -597,7 +702,7 @@
                         topic_type,             // style
                         false                   // relative
                     );
-                    msg2db_y += cy + cy_sep;
+                    msg2db_y += cy + vertex_cy_sep;
                     break;
 
                 case "raw_topic":
@@ -611,7 +716,7 @@
                         topic_type,             // style
                         false                   // relative
                     );
-                    raw_y += cy + cy_sep;
+                    raw_y += cy + vertex_cy_sep;
                     break;
             }
         }
@@ -629,6 +734,7 @@
 
         var topics = data.topics;
         load_topics(self, graph, tranger_name, topics);
+        graph.view.setTranslate(graph.border/2, graph.border/2);
     }
 
 
@@ -712,7 +818,6 @@
         rebuild(self);
         self.config.$container_parent.addView(self.config.$ui, idx);
         self.config.$ui.show();
-        resize_layers(self)
 
         return 0;
     }
@@ -734,7 +839,6 @@
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
-        resize_layers(self);
         return 0;
     }
 
