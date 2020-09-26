@@ -85,14 +85,18 @@
     {
         /*
          *  Load control button images
-         *  buttes=
+         *
          *  datos historicos, datos en disco,
          *  datos en memoria, datos en tiempo real
          *
          *  diskette: datos en disco (diskette refleja fragilidad, necesidad de mantener copias)
          *  pull_down: datos en memoria (snap, flash) Organización jerárquica en memoria
          *             los de arriba empujan, organizan, controlan, monitorizan, a los de abajo.
-         *  audio_volume_bars,bacteria datos en movimiento (realtime)
+         *             Imagen, instantanea del momento en el que se recoge.
+         *  bacteria: datos en movimiento (realtime), los datos estaticos, para que valen?
+         *            los datos están para moverse. O para estar quietos en paz?
+         *            los datos moviéndose y reproduciéndose
+         *                  acaso no es eso una bacteria, un virus?
          */
         self.config.image_topic_schema = new mxImage(
             '/static/app/images/yuneta/topic_schema.svg',
