@@ -26,7 +26,7 @@
         image_topic_view: null,
 
         layer_title_height: 30,
-        vertex_cx: 160,
+        vertex_cx: 200,
         vertex_cy: 90,
         vertex_cy_sep: 40,
 

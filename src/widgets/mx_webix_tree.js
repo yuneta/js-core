@@ -397,7 +397,8 @@
         new mxRubberband(graph);
 
         // Panning? HACK if panning is setted then rubberband selection will not work
-        graph.setPanning(false);
+        graph.setPanning(true);
+        graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;
@@ -406,7 +407,8 @@
         graph.setMultigraph(false);
 
         // Enable/Disable basic selection and cell handling
-        graph.setEnabled(false);
+        graph.setEnabled(true);
+        graph.setCellsDisconnectable(false); // Modificar egdes/links
 
         // Enable/Disable tooltips
         graph.setTooltips(true);
