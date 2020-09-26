@@ -27,20 +27,20 @@
         image_unique: null,
         image_disabled: null,
 
-        vertex_cx: 140,
-        vertex_cy: 100,
+        vertex_cx: 160,
+        vertex_cy: 60,
 
         layers: [
             {
-                id: "__raw_topics__",
+                id: "raw_topic",
                 value: "Raw Topics"
             },
             {
-                id: "__msg2db_topics__",
+                id: "msg2db_topic",
                 value: "Msg2Db Topics"
             },
             {
-                id: "__treedb_topics__",
+                id: "treedb_topic",
                 value: "TreeDb Topics"
             }
         ],
@@ -406,6 +406,49 @@
     /********************************************
      *
      ********************************************/
+    function create_graph_style(graph, name, s)
+    {
+        var style = {};
+        var list = s.split(";");
+        for(var i=0; i<list.length; i++) {
+            var sty = list[i];
+            if(empty_string(sty)) {
+                continue;
+            }
+            var key_value = sty.split("=");
+            if(key_value.length==1) {
+                // Without = must be the shape
+                style["shape"] = key_value[0];
+            } else if(key_value.length==2) {
+                style[key_value[0]] = key_value[1];
+            } else {
+                log_error("create_graph_style() bad style: " + sty);
+            }
+        }
+        graph.getStylesheet().putCellStyle(name, style);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_topic_type(topic)
+    {
+        var lists = kw_get_dict_value(topic, "lists", [], 0);
+        for(var i=0; i<lists.length; i++) {
+            if(kw_has_key(lists[0], "treedb_name")) {
+                return "treedb_topic";
+            }
+            if(kw_has_key(lists[0], "msg2db_name")) {
+                return "msg2db_topic";
+            }
+        }
+
+        return "raw_topic";
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function initialize_mxgraph(self)
     {
         var graph = self.config._mxgraph;
@@ -436,33 +479,30 @@
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
         mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
-        graph.setCellsLocked(false);
+        graph.setCellsLocked(true);
         graph.setPortsEnabled(true);
         graph.setCellsEditable(false);
 
         mxGraph.prototype.isCellSelectable = function(cell) {
-            if(cell.isVertex()) {
-                return true;
-            }
-            return false; // edges no selectable
+            return true;
         };
 
         // Set stylesheet options
-        var style = graph.getStylesheet().getDefaultVertexStyle();
-        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-        style[mxConstants.STYLE_FILLCOLOR] = '#FFF2CC';
-
-        style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
-
-        style[mxConstants.STYLE_SHADOW] = true;
-        style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_FONTFAMILY] = "Arial";
-        style[mxConstants.STYLE_FONTSTYLE] = '0';
-        style[mxConstants.STYLE_FONTSIZE] = '12';
-
-        style = graph.getStylesheet().getDefaultEdgeStyle();
-        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
-        style[mxConstants.STYLE_ROUNDED] = true;
+        create_graph_style(
+            graph,
+            "raw_topic",
+            "text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+        );
+        create_graph_style(
+            graph,
+            "msg2db_topic",
+            "text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+        );
+        create_graph_style(
+            graph,
+            "treedb_topic",
+            "text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;fontSize=13;"
+        );
 
         // Handles clicks on cells
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
@@ -522,58 +562,61 @@
         var model = graph.getModel();
         var cx = self.config.vertex_cx;
         var cy = self.config.vertex_cy;
-
-        var group = "__raw_topics__";
-        graph.insertVertex(
-            get_layer(self, group), // group
-            group,                  // id
-            group,                  // value
-            0, 0,                   // x,y
-            cx, cy,                 // width,height
-            "",                     // style
-            false                   // relative
-        );
-
-        group = "__msg2db_topics__";
-        graph.insertVertex(
-            get_layer(self, group), // group
-            group,                  // id
-            group,                  // value
-            0, 0,                   // x,y
-            cx, cy,                 // width,height
-            "",                     // style
-            false                   // relative
-        );
-
-        group = "__treedb_topics__";
-        graph.insertVertex(
-            get_layer(self, group), // group
-            group,                  // id
-            group,                  // value
-            0, 0,                   // x,y
-            cx, cy,                 // width,height
-            "",                     // style
-            false                   // relative
-        );
-
+        var raw_y = 0;
+        var treedb_y = 0;
+        var msg2db_y = 0;
+        var cy_sep = 40;
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
                 continue;
             }
             var topic = topics[topic_name];
+            var topic_type = get_topic_type(topic);
+            switch(topic_type) {
+                case "treedb_topic":
+                    graph.insertVertex(
+                        get_layer(self, topic_type),    // group
+                        topic.topic_name,       // id
+                        topic,                  // value
+                        0, treedb_y,            // x,y
+                        cx, cy,                 // width,height
+                        topic_type,             // style
+                        false                   // relative
+                    );
+                    treedb_y += cy + cy_sep;
+                    break;
 
-//             var topic_node = graph.insertVertex(
-//                 group,          // group
-//                 topic_name,     // id
-//                 topic,          // value
-//                 0, 0,           // x,y
-//                 cx, cy,         // width,height
-//                 "",             // style
-//                 false           // relative
-//             );
+                case "msg2db_topic":
+                    graph.insertVertex(
+                        get_layer(self, topic_type),    // group
+                        topic.topic_name,       // id
+                        topic,                  // value
+                        0, msg2db_y,            // x,y
+                        cx, cy,                 // width,height
+                        topic_type,             // style
+                        false                   // relative
+                    );
+                    msg2db_y += cy + cy_sep;
+                    break;
 
+                case "raw_topic":
+                default:
+                    graph.insertVertex(
+                        get_layer(self, topic_type),    // group
+                        topic.topic_name,       // id
+                        topic,                  // value
+                        0, raw_y,               // x,y
+                        cx, cy,                 // width,height
+                        topic_type,             // style
+                        false                   // relative
+                    );
+                    raw_y += cy + cy_sep;
+                    break;
+            }
         }
+
+
     }
 
     /************************************************************
