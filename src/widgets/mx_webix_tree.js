@@ -86,6 +86,11 @@
                 value: "Stack Layout",
                 layout: function(layout_option, graph) {
                     var layout = new  mxStackLayout(graph);
+
+                    layout.resizeParent = true;
+                    layout.horizontal = false;
+                    layout.spacing = 10;
+
                     return layout;
                 }
             },
@@ -94,6 +99,7 @@
                 value: "Swimlane Layout",
                 layout: function(layout_option, graph) {
                     var layout = new mxSwimlaneLayout(graph);
+                    layout.orientation = "east";
                     return layout;
                 }
             },

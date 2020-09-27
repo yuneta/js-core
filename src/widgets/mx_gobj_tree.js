@@ -635,9 +635,9 @@
          *  Own getTooltip
          */
         graph.setTooltips(true);
-        graph.getTooltip = function(state) {
-            if(state.cell.value.shortname) {
-                return br(state.cell.value.shortname);
+        graph.getTooltipForCell = function(cell) {
+            if(cell.value.shortname) {
+                return br(cell.value.shortname);
             }
             return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
         };
