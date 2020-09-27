@@ -18,7 +18,10 @@
 
         $ui: null,
         $ui_fullscreen: null,
+
         window_title: "",       // Used by pinhold_panel_top_toolbar
+        width: 600,
+        height: 500,
 
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
@@ -28,6 +31,50 @@
         vertex_cx: 200,
         vertex_cy: 90,
         vertex_cy_sep: 40,
+
+        layout_options: [
+            {
+                id: "tree_layout",
+                value: "Compact Tree Layout",
+                layout: function(layout_option, graph) {
+                    // Enables automatic layout on the graph and installs
+                    // a tree layout for all groups who's children are
+                    // being changed, added or removed.
+                    var layout = new mxCompactTreeLayout(graph, false);
+                    layout.useBoundingBox = false;
+                    layout.edgeRouting = false;
+                    layout.levelDistance = 30;
+                    layout.nodeDistance = 10;
+                    return layout;
+                }
+            },
+            {
+                id: "herarchical_layout",
+                value: "Herarchical Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxHierarchicalLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "fastorganic_layout",
+                value: "FastOrganic Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxFastOrganicLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "circle_layout",
+                value: "Circle Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxCircleLayout(graph);
+                    return layout;
+                }
+            }
+        ],
+
+        layout_selected: "tree_layout",
 
         _mxgraph: null,
 
@@ -93,6 +140,7 @@
 
         initialize_mxgraph(self);
         create_root_and_layers(self);
+        rebuild_layouts(self);
     }
 
     /************************************************************
@@ -108,6 +156,34 @@
             height: 30,
             css: "toolbar2color",
             cols:[
+                {
+                    view: "richselect",
+                    id: build_name(self, "layout_options"),
+                    tooltip: t("Select layout"),
+                    width: 180,
+                    options: self.config.layout_options,
+                    value: self.config.layout_selected,
+                    label: "",
+                    on: {
+                        onChange(newVal, oldVal) {
+                            var cur_layout = kwid_collect(
+                                self.config.layout_options,
+                                newVal,
+                                null, null
+                            )[0];
+                            if(!cur_layout) {
+                                cur_layout = self.config.layout_options[0];
+                            }
+                            self.config.layout_selected = cur_layout.id;
+
+                            execute_layout(self);
+
+                            if(self.gobj_is_unique()) {
+                                self.gobj_save_persistent_attrs();
+                            }
+                        }
+                    }
+                },
                 {
                     view:"button",
                     type: "icon",
@@ -168,8 +244,8 @@
         self.config.$ui = webix.ui({
             view: "window",
             id: self.gobj_escaped_short_name(),
-            width: 500,
-            height: 400,
+            width: self.config.width,
+            height: self.config.height,
             move: true,
             resize: true,
             position: "center",
@@ -195,6 +271,7 @@
                 self.config.$ui.refresh();
             }
         }
+        automatic_resizing_cb();
         self.config.$ui.show();
 
         /*---------------------------------------*
@@ -229,12 +306,52 @@
 
         function automatic_resizing_cb()
         {
-            var window_width = window.innerWidth;
-            var window_height = window.innerHeight;
+            var window_width = window.innerWidth-8;
+            var window_height = window.innerHeight-8;
             automatic_resizing(self.gobj_escaped_short_name(), window_width, window_height);
         }
 
-        webix.event(window, "resize", automatic_resizing_cb);
+        // webix.event(window, "resize", automatic_resizing_cb); // Don't use, the win will died
+    }
+
+    /********************************************
+     *  Rebuild layouts
+     ********************************************/
+    function rebuild_layouts(self)
+    {
+        for(var i=0; i<self.config.layout_options.length; i++) {
+            var layout = self.config.layout_options[i];
+            layout.exe = layout.layout(layout, self.config._mxgraph);
+        }
+    }
+
+    /********************************************
+     *  Execute layout
+     ********************************************/
+    function execute_layout(self)
+    {
+        var graph = self.config._mxgraph;
+        var group = get_layer(self, "layer?");
+
+        var cur_layout = kwid_collect(
+            self.config.layout_options,
+            self.config.layout_selected,
+            null, null
+        )[0];
+        if(!cur_layout) {
+            cur_layout = self.config.layout_options[0];
+        }
+
+        if(cur_layout) {
+            graph.getModel().beginUpdate();
+            try {
+                cur_layout.exe.execute(group);
+            } catch (e) {
+                log_error(e);
+            } finally {
+                graph.getModel().endUpdate();
+            }
+        }
     }
 
     /********************************************
@@ -266,12 +383,6 @@
      ************************************************************/
     function get_layer(self, layer)
     {
-        var layers = self.config.layers;
-        for(var i=0; i<layers.length; i++) {
-            if(layers[i].id == layer) {
-                return layers[i].__layer__;
-            }
-        }
         return self.config._mxgraph.getDefaultParent();
     }
 
@@ -635,6 +746,7 @@
         var topics = data.topics;
         load_topics(self, graph, tranger_name, topics);
         graph.view.setTranslate(graph.border/2, graph.border/2);
+        execute_layout(self);
     }
 
 

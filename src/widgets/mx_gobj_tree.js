@@ -93,7 +93,6 @@
                     return layout;
                 }
             }
-
         ],
 
         top_overlay_icon_size: 24,
@@ -203,6 +202,7 @@
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
 
         initialize_mxgraph(self);
+        create_root_and_layers(self);
         rebuild_layouts(self);
     }
 
@@ -494,30 +494,16 @@
     /********************************************
      *  Create root and layers
      ********************************************/
-    function create_root_and_layers(graph, layers)
+    function create_root_and_layers(self)
     {
+        var graph = self.config._mxgraph;
         var root = null;
-        if(layers && layers.length) { // TODO
-            root = new mxCell();
-            root.setId("__mx_root__");
 
-            for(var i=0; i<layers.length; i++) {
-                var layer = layers[i];
+        root = new mxCell();
+        root.setId("__mx_root__");
 
-                // Create the layer
-                var __mx_cell__ = root.insert(new mxCell());
-
-                // Set reference
-                layer["__mx_cell__"] = __mx_cell__;
-
-                var id = kw_get_str(layer, "id", null, false);
-                if(id) {
-                    __mx_cell__.setId(id);
-                }
-            }
-        } else {
-            root = graph.getModel().createRoot()
-        }
+        // Create the layer
+        var __mx_cell__ = root.insert(new mxCell());
 
         graph.getModel().beginUpdate();
         try {
@@ -537,8 +523,6 @@
         var graph = self.config._mxgraph;
 
         mxEvent.disableContextMenu(graph.container);
-
-        create_root_and_layers(graph, self.config.layers);
 
         // Enables rubberband selection
         new mxRubberband(graph);
@@ -793,13 +777,6 @@
      ************************************************************/
     function get_layer(self, layer)
     {
-// TODO        var layers = self.config.layers;
-//         for(var i=0; i<layers.length; i++) {
-//             if(layers[i].id == layer) {
-//                 return layers[i].__mx_cell__;
-//             }
-//         }
-//         var x = self.config._mxgraph.getModel().getCell(layer);
         return self.config._mxgraph.getDefaultParent();
     }
 
@@ -1085,18 +1062,7 @@
         var group = get_layer(self, layer);
         _load_gobj_treedb(self, graph, group, data);
 
-        var cur_layout = kwid_collect(
-            self.config.layout_options,
-            self.config.layout_selected,
-            null, null
-        )[0];
-        if(!cur_layout) {
-            cur_layout = self.config.layout_options[0];
-        }
-
-        if(cur_layout) {
-            cur_layout.exe.execute(group);
-        }
+        execute_layout(self);
     }
 
 
