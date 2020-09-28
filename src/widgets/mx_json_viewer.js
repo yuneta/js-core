@@ -4,6 +4,8 @@
  *          Json with mxgrah
  *          "Pinhold Window"
  *
+ *          HACK the parent MUST be a pinhold handler
+ *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
@@ -17,9 +19,13 @@
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
-        $ui_fullscreen: null,
+        $ui_fullscreen: null,   // What part of window will be fullscreened
+
+        pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window" HACK
 
         window_title: "",       // Used by pinhold_panel_top_toolbar
+        left: 0,
+        top: 0,
         width: 600,
         height: 500,
 
@@ -79,6 +85,12 @@
         _mxgraph: null,
 
         __writable_attrs__: [
+            "window_title",
+            "left",
+            "top",
+            "width",
+            "height",
+            "layout_selected"
         ]
     };
 
@@ -175,12 +187,7 @@
                                 cur_layout = self.config.layout_options[0];
                             }
                             self.config.layout_selected = cur_layout.id;
-
                             execute_layout(self);
-
-                            if(self.gobj_is_unique()) {
-                                self.gobj_save_persistent_attrs();
-                            }
                         }
                     }
                 },
@@ -194,7 +201,6 @@
                     click: function() {
                         var graph = self.config._mxgraph;
                         graph.view.scaleAndTranslate(1, graph.border/2, graph.border/2);
-                        //graph.getView().translate = new mxPoint(graph.border/2, graph.border/2);
                     }
                 },
                 {
@@ -244,11 +250,14 @@
         self.config.$ui = webix.ui({
             view: "window",
             id: self.gobj_escaped_short_name(),
+            top: self.config.top,
+            left: self.config.left,
             width: self.config.width,
             height: self.config.height,
+            hidden: self.config.pinpushed?true:false,
             move: true,
             resize: true,
-            position: "center",
+            position: (self.config.left==0 && self.config.top==0)?"center":null,
             head: get_pinhold_panel_top_toolbar(self),
             body: {
                 id: build_name(self, "fullscreen"),
@@ -260,8 +269,25 @@
                     },
                     bottom_toolbar
                 ]
+            },
+            on: {
+                "onViewResize": function() {
+                    self.config.left = this.gobj.config.$ui.config.left;
+                    self.config.top = this.gobj.config.$ui.config.top;
+                    self.config.width = this.gobj.config.$ui.config.width;
+                    self.config.height = this.gobj.config.$ui.config.height;
+                    self.gobj_save_persistent_attrs();
+                },
+                "onViewMoveEnd": function() {
+                    self.config.left = this.gobj.config.$ui.config.left;
+                    self.config.top = this.gobj.config.$ui.config.top;
+                    self.config.width = this.gobj.config.$ui.config.width;
+                    self.config.height = this.gobj.config.$ui.config.height;
+                    self.gobj_save_persistent_attrs();
+                }
             }
         });
+
         self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
 
         self.config.$ui.gobj = self;
@@ -271,8 +297,8 @@
                 self.config.$ui.refresh();
             }
         }
-        automatic_resizing_cb();
-        self.config.$ui.show();
+
+        automatic_resizing_cb(); // Adapt window size to device
 
         /*---------------------------------------*
          *      Automatic Resizing
@@ -454,79 +480,14 @@
                 // Installs a handler for clicks on the overlay
                 overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
                     var topic = evt2.getProperty('cell').value;
-                    self.parent.gobj_send_event(
-                        "EV_MX_SHOW_TOPIC_SCHEMA",
-                        topic,
-                        self
-                    );
+// TODO                    self.parent.gobj_send_event(
+//                         "EV_MX_SHOW_TOPIC_SCHEMA",
+//                         topic,
+//                         self
+//                     );
                 });
             }
 
-            if(1) {
-                var overlay_instance = new mxCellOverlay(
-                    self.config.image_data_in_disk,
-                    "View data in disk (historic)",        // tooltip
-                    mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(-offsx*3 + offsy, -offsy),   // offset
-                    "pointer"                   // cursor
-                );
-                graph.addCellOverlay(cell, overlay_instance);
-
-                // Installs a handler for clicks on the overlay
-                overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var topic = evt2.getProperty('cell').value;
-                    self.parent.gobj_send_event(
-                        "EV_MX_VIEW_DATA_IN_DISK",
-                        topic,
-                        self
-                    );
-                });
-            }
-
-            if(1) {
-                var overlay_instance = new mxCellOverlay(
-                    self.config.image_data_in_memory,
-                    "View data in memory (snap)",        // tooltip
-                    mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(-offsx*2 + offsy, -offsy),   // offset
-                    "pointer"                   // cursor
-                );
-                graph.addCellOverlay(cell, overlay_instance);
-
-                // Installs a handler for clicks on the overlay
-                overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var topic = evt2.getProperty('cell').value;
-                    self.parent.gobj_send_event(
-                        "EV_MX_VIEW_DATA_IN_MEMORY",
-                        topic,
-                        self
-                    );
-                });
-            }
-
-            if(1) {
-                var overlay_instance = new mxCellOverlay(
-                    self.config.image_data_on_moving,
-                    "View data on moving (realtime)",        // tooltip
-                    mxConstants.ALIGN_RIGH,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(-offsx*1 + offsy, -offsy),   // offset
-                    "pointer"                   // cursor
-                );
-                graph.addCellOverlay(cell, overlay_instance);
-
-                // Installs a handler for clicks on the overlay
-                overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var topic = evt2.getProperty('cell').value;
-                    self.parent.gobj_send_event(
-                        "EV_MX_VIEW_DATA_ON_MOVING",
-                        topic,
-                        self
-                    );
-                });
-            }
 
         } catch (e) {
             log_error(e);
@@ -605,11 +566,11 @@
             var cell = evt.getProperty('cell');
             if (cell != null) {
                 var record = evt.properties.cell.value;
-                if(cell.isVertex()) {
-                    self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
-                } else {
-                    self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
-                }
+//   TODO              if(cell.isVertex()) {
+//                     self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
+//                 } else {
+//                     self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
+//                 }
             }
         });
 
@@ -797,22 +758,6 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
-        var idx = self.config.$container_parent.index(self.config.$ui);
-        if(idx < 0) {
-            return -1;
-        }
-        var visible = self.parent.config.views_opened?
-            self.parent.config.views_opened[self.name]:true;
-        self.config.$container_parent.removeView(self.config.$ui);
-        rebuild(self);
-        self.config.$container_parent.addView(self.config.$ui, idx);
-        if(visible) {
-            self.config.$ui.show();
-        } else {
-            self.config.$ui.hide();
-        }
-
         return 0;
     }
 

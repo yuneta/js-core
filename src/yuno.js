@@ -615,32 +615,26 @@
         if(!gobj || !gobj.config) {
             return data;
         }
-        var id = 1;
         for (var attr in gobj.config) {
             if (gobj.config.hasOwnProperty(attr)) {
                 data.push({
-                    id: id,
                     name: attr,
                     type: typeof(gobj.config[attr]),
                     description: '',
                     stats: 0,
                     value: gobj.config[attr]
                 });
-                id++;
             }
         }
 
         data.push({
-            id: id,
             name: '__state__',
             type: 'string',
             description: '',
             stats: 0,
             value: gobj.gobj_current_state()
         });
-        id++;
         data.push({
-            id: id,
             name: '__running__',
             type: 'boolean',
             description: '',
