@@ -620,10 +620,15 @@
          */
         graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
-            if(cell.value.shortname) {
-                return br(cell.value.shortname);
+            var tip = null;
+            if (cell != null && cell.getTooltip != null) {
+                tip = cell.getTooltip();
+            } else {
+                if(cell.value.shortname) {
+                    return br(cell.value.shortname);
+                }
             }
-            return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
+            return tip;
         };
 
         // Defines the condition for showing the folding icon

@@ -564,7 +564,13 @@
          */
         graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
-            return getTooltipForCell(self, cell);
+            var tip = null;
+            if (cell != null && cell.getTooltip != null) {
+                tip = cell.getTooltip();
+            } else {
+                return getTooltipForCell(self, cell);
+            }
+            return tip;
         };
 
         /*

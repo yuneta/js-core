@@ -689,16 +689,24 @@
         };
 
         /*
-         *  Own getTooltip
+         *  Tooltip
          */
         graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
-            if(cell.value.topic_name) {
-                return cell.value.topic_name;
+            var tip = null;
+            if (cell != null && cell.getTooltip != null) {
+                tip = cell.getTooltip();
+            } else {
+                if(cell.value.topic_name) {
+                    return cell.value.topic_name;
+                }
             }
-            return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
+            return tip;
         };
 
+        /*
+         *  Cursor pointer
+         */
         graph.getCursorForCell = function(cell) {
             if(this.model.isEdge(cell)) {
                 return 'default';

@@ -658,16 +658,13 @@
         };
 
         /*
-         *  Own getTooltip
+         *  Tooltip
          */
         graph.setTooltips(true);
-        graph.getTooltipForCell = function(cell) {
-            if(cell.value.topic_name) {
-                return cell.value.topic_name;
-            }
-            return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
-        };
 
+        /*
+         *  Cursor pointer
+         */
         graph.getCursorForCell = function(cell) {
             if(this.model.isEdge(cell)) {
                 return 'default';
