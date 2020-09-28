@@ -764,6 +764,18 @@
     /********************************************
      *
      ********************************************/
+    function ac_toggle(self, event, kw, src)
+    {
+        if(self.config.$ui.isVisible()) {
+            self.config.$ui.hide();
+        } else {
+            self.config.$ui.show();
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_show(self, event, kw, src)
     {
         self.config.$ui.show();
@@ -792,6 +804,7 @@
             "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
+            "EV_TOGGLE",
             "EV_SHOW",
             "EV_HIDE"
         ],
@@ -804,6 +817,7 @@
                 ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_LOAD_DATA",            ac_load_data,       undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
+                ["EV_TOGGLE",               ac_toggle,          undefined],
                 ["EV_SHOW",                 ac_show,            undefined],
                 ["EV_HIDE",                 ac_hide,            undefined]
             ]
