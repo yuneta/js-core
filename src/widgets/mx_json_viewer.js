@@ -22,8 +22,9 @@
         $ui_fullscreen: null,   // What part of window will be fullscreened
 
         pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window" HACK
+        window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
+        window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
 
-        window_title: "",       // Used by pinhold_panel_top_toolbar
         left: 0,
         top: 0,
         width: 600,
@@ -86,6 +87,7 @@
 
         __writable_attrs__: [
             "window_title",
+            "window_image",
             "left",
             "top",
             "width",

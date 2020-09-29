@@ -14,7 +14,7 @@
 webix.protoUI({
     name: "jsoneditor",
     defaults: {
-        background_color: "#FFFFFF",
+        gobj: null,
         mode: "view",
         modes: ["form","view","tree","code","text","preview"],
         indentation: 4,
@@ -25,7 +25,7 @@ webix.protoUI({
 
     $init: function() {
         this.$view.innerHTML =
-            "<div class='webix_jsoneditor_content' style='width:100%;height:100%;background:" + this.config.background_color + ";'></div>";
+            "<div class='webix_jsoneditor_content' style='width:100%;height:100%;'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);

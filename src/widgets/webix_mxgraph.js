@@ -14,12 +14,12 @@
 webix.protoUI({
     name: "mxgraph",
     defaults: {
-        background_color: "#FFFFFF"
+        gobj: null
     },
 
     $init: function() {
         this.$view.innerHTML =
-            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:scroll;background:" + this.config.background_color + ";'></div>";
+            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:auto;'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);

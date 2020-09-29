@@ -1,7 +1,7 @@
 /***********************************************************************
- *          mx_tranger_schema.js
+ *          mx_tranger_viewer.js
  *
- *          TimeRanger Schema with mxgrah
+ *          TimeRanger Viewer with mxgrah
  *          "Container Panel"
  *
  *          Copyright (c) 2020 Niyamaka.
@@ -487,7 +487,11 @@
                     var topic = evt2.getProperty('cell').value;
                     self.parent.gobj_send_event(
                         "EV_MX_SHOW_TOPIC_SCHEMA",
-                        topic,
+                        {
+                            id: topic.topic_name,
+                            image: self.config.image_topic_schema.src,
+                            value: topic
+                        },
                         self
                     );
                 });
@@ -988,21 +992,21 @@
         }
     };
 
-    var Mx_tranger_schema = GObj.__makeSubclass__();
-    var proto = Mx_tranger_schema.prototype; // Easy access to the prototype
+    var Mx_tranger_viewer = GObj.__makeSubclass__();
+    var proto = Mx_tranger_viewer.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Mx_tranger_schema",
+            "Mx_tranger_viewer",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Mx_tranger_schema, "Mx_tranger_schema");
+    gobj_register_gclass(Mx_tranger_viewer, "Mx_tranger_viewer");
 
 
 
@@ -1067,6 +1071,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Mx_tranger_schema = Mx_tranger_schema;
+    exports.Mx_tranger_viewer = Mx_tranger_viewer;
 
 })(this);

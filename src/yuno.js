@@ -155,7 +155,7 @@
             var gclass = _gclass_register[gclass_name];
         } catch (e) {
             if(verbose) {
-                this.logger("ERROR Yuno.gobj_find_gclass(): '" + gclass_name + "' gclass not found");
+                log_error("Yuno.gobj_find_gclass(): '" + gclass_name + "' gclass not found");
             }
             return null;
         }
@@ -449,13 +449,16 @@
     /************************************************************
      *        find a unique gobj
      ************************************************************/
-    proto.gobj_find_unique_gobj = function (gobj_name)
+    proto.gobj_find_unique_gobj = function (gobj_name, verbose)
     {
         try {
             var named_gobj = this._unique_gobjs[gobj_name];
         } catch (e) {
-            this.logger("ERROR '" + gobj_name + "' named-gobj not found");
+            log_warning("gobj unique not found: '" + gobj_name + "'" );
             return null;
+        }
+        if(!named_gobj && verbose) {
+            log_warning("gobj unique not found: '" + gobj_name + "'" );
         }
         return named_gobj;
     };
@@ -463,13 +466,16 @@
     /************************************************************
      *        find a service
      ************************************************************/
-    proto.gobj_find_service = function (service_name)
+    proto.gobj_find_service = function (service_name, verbose)
     {
         try {
             var service_gobj = this._service_gobjs[service_name];
         } catch (e) {
-            this.logger("ERROR '" + service_name + "' service not found");
+            log_warning("gobj service not found: '" + service_name + "'" );
             return null;
+        }
+        if(!service_gobj && verbose) {
+            log_warning("gobj service not found: '" + service_name + "'" );
         }
         return service_gobj;
     };

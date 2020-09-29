@@ -648,7 +648,7 @@
                 panel_properties: {
                     with_panel_top_toolbar: true,
                     with_panel_title: t("GObj Tree"),
-                    with_panel_hidden_btn: true,
+                    with_panel_hidden_btn: false,
                     with_panel_fullscreen_btn: true
                 }
             },

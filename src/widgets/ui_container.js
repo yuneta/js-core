@@ -458,10 +458,21 @@
             child.config.$ui.define({gravity:gravity});
         }
 
-        if(self.config.views_opened[child.gobj_name()]) {
-            child.config.$ui.show();
-        } else {
+        if(!child.config.panel_properties.with_panel_hidden_btn ) {
+            self.config.views_opened[child.gobj_name()] = true;
             child.config.$ui.hide();
+            child.config.$ui.show();
+        } else if(!kw_has_key(self.config.views_opened, child.gobj_name())) {
+            //self.config.views_opened[child.gobj_name()] = true;
+            child.config.$ui.show();
+            child.config.$ui.hide();
+
+        } else {
+            if(self.config.views_opened[child.gobj_name()]) {
+                child.config.$ui.show();
+            } else {
+                child.config.$ui.hide();
+            }
         }
     }
 
