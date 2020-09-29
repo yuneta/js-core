@@ -14,7 +14,7 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        panel_properties: {},   // creator can set Container Panel properties
+        panel_properties: {},   // creator can set "Container Panel" properties
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
@@ -465,6 +465,10 @@
      ************************************************************/
     function add_tranger_overlays(self, graph, cell)
     {
+        if(cell.style == "title") {
+            return;
+        }
+
         var model = graph.getModel();
         model.beginUpdate();
         try {

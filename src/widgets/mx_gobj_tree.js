@@ -48,7 +48,7 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        panel_properties: {},   // creator can set Container Panel properties
+        panel_properties: {},   // creator can set "Container Panel" properties
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
