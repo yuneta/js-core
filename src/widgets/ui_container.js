@@ -278,7 +278,7 @@
     }
 
     /********************************************
-     *
+     *  Panel View is showing, save their state
      ********************************************/
     function ac_on_view_show(self, event, kw, src)
     {
@@ -577,7 +577,8 @@
                     view:"icon",
                     hidden: self.config.panel_properties.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
-                    tooltip: t("fullscreen"),
+                    tooltip: t("fullscreen"), // TODO fullscreen a evento, y guarda el estado
+                                                // para que se pueda ir directamente, estilo "presentación" (con el select?)
                     click: function() {
                         $$(build_name(self, "top_toolbar")).hide();
                         webix.fullscreen.set(
@@ -589,7 +590,7 @@
                                     elements: [
                                         {
                                             view: "icon",
-                                            icon: "fas fa-chevron-left",
+                                            icon: "fas fa-chevron-left", // TODO opcional, que no se vea en presentaciones fullscreen
                                             tooltip: t("exit fullscreen"),
                                             click: function() {
                                                 webix.fullscreen.exit();
