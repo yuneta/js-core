@@ -216,12 +216,7 @@
      ********************************************/
     function ac_set_fullscreen(self, event, kw, src)
     {
-        if(self.config.gobj_name_in_fullscreen) {
-            log_warning("Already in fullscreen: " + self.config.gobj_name_in_fullscreen);
-            return -1;
-        }
-
-        var with_panel_title = kw_get_str(kw, "with_panel_title", "", 0);
+        var title = kw_get_str(kw, "title", "", 0);
 
         // Save the gobj name in fullscreen
         self.config.gobj_name_in_fullscreen = src.gobj_name();
@@ -247,7 +242,7 @@
                         {},
                         {
                             view: "label",
-                            label: with_panel_title,
+                            label: title,
                         },
                         {}
                     ]
@@ -402,7 +397,6 @@
      ********************************************/
     function ac_select(self, event, kw, src)
     {
-
         return 0;
     }
 
@@ -625,7 +619,7 @@
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
-            id: build_name(self, "ct_panel_top_toolbar"), // HACK this build is from here
+            id: build_name(self, "ct_panel_top_toolbar"), // HACK build_name() es el de aquí
             hidden: self.config.panel_properties.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,
@@ -690,7 +684,7 @@
                         self.parent.gobj_send_event(
                             "EV_SET_FULLSCREEN",
                             {
-                                with_panel_title: self.config.panel_properties.with_panel_title
+                                title: self.config.panel_properties.with_panel_title
                             },
                             self
                         );
