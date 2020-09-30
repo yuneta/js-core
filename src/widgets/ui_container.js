@@ -373,7 +373,11 @@
         }
 
         // HACK Dynamic UI Modifications: replace "work_place"
-        webix.ui(work_place, $$(build_name(self, "scrollview")), $$(build_name(self, "work_place")));
+        webix.ui(
+            work_place,
+            $$(build_name(self, "scrollview")),
+            $$(build_name(self, "work_place"))
+        );
 
         var $container_parent = $$(build_name(self, "work_place"));
         for(var i=0; i < childs.length; i++) {
