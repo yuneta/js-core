@@ -21,7 +21,10 @@
         toolbar_size: 40,
         mode: "horizontal",     // "horizontal" or "vertical"
 
-        gobj_name_in_fullscreen: null,
+        gobj_name_in_fullscreen: "",
+
+        // HACK set this variable in panels to hide fullscreen exit button
+        hide_exit_fullscreen_button: false,
 
         ui_properties: null,
         $ui: null,
@@ -70,8 +73,8 @@
                 margin: 5,
                 rows: [
                     {
-                        template: "top_toolbar",
-                        id: build_name(self, "top_toolbar"),
+                        template: "container_top_toolbar",
+                        id: build_name(self, "container_top_toolbar"),
                         height: self.config.toolbar_size,
                         hidden: true
                     },
@@ -82,8 +85,8 @@
                         margin: 5,
                         cols: [
                             {
-                                template: "left_toolbar",
-                                id: build_name(self, "left_toolbar"),
+                                template: "container_left_toolbar",
+                                id: build_name(self, "container_left_toolbar"),
                                 width: self.config.toolbar_size,
                                 hidden: true
                             },
@@ -100,16 +103,16 @@
                                 }
                             },
                             {
-                                template: "right_toolbar",
-                                id: build_name(self, "right_toolbar"),
+                                template: "container_right_toolbar",
+                                id: build_name(self, "container_right_toolbar"),
                                 width: self.config.toolbar_size,
                                 hidden: true
                             }
                         ]
                     },
                     {
-                        template: "bottom_toolbar",
-                        id: build_name(self, "bottom_toolbar"),
+                        template: "container_bottom_toolbar",
+                        id: build_name(self, "container_bottom_toolbar"),
                         height: self.config.toolbar_size,
                         hidden: true
                     }
@@ -124,8 +127,8 @@
                 margin: 5,
                 rows: [
                     {
-                        template: "top_toolbar",
-                        id: build_name(self, "top_toolbar"),
+                        template: "container_top_toolbar",
+                        id: build_name(self, "container_top_toolbar"),
                         height: self.config.toolbar_size,
                         hidden: true
                     },
@@ -136,8 +139,8 @@
                         margin: 5,
                         cols: [
                             {
-                                template: "left_toolbar",
-                                id: build_name(self, "left_toolbar"),
+                                template: "container_left_toolbar",
+                                id: build_name(self, "container_left_toolbar"),
                                 width: self.config.toolbar_size,
                                 hidden: true
                             },
@@ -154,16 +157,16 @@
                                 }
                             },
                             {
-                                template: "right_toolbar",
-                                id: build_name(self, "right_toolbar"),
+                                template: "container_right_toolbar",
+                                id: build_name(self, "container_right_toolbar"),
                                 width: self.config.toolbar_size,
                                 hidden: true
                             }
                         ]
                     },
                     {
-                        template: "bottom_toolbar",
-                        id: build_name(self, "bottom_toolbar"),
+                        template: "container_bottom_toolbar",
+                        id: build_name(self, "container_bottom_toolbar"),
                         height: self.config.toolbar_size,
                         hidden: true
                     }
@@ -213,14 +216,18 @@
      ********************************************/
     function ac_set_fullscreen(self, event, kw, src)
     {
-//         var visible = src.config.$ui.isVisible();
-//         self.config.views_opened[src.gobj_name()] = visible; // TODO salva el fullscreen
         if(self.config.gobj_name_in_fullscreen) {
             log_warning("Already in fullscreen: " + self.config.gobj_name_in_fullscreen);
             return -1;
         }
 
-        $$(build_name(src, "top_toolbar")).hide();
+        var with_panel_title = kw_get_str(kw, "with_panel_title", "", 0);
+
+        // Save the gobj name in fullscreen
+        self.config.gobj_name_in_fullscreen = src.gobj_name();
+
+        $$(build_name(src, "ct_panel_top_toolbar")).hide();
+
         webix.fullscreen.set(
             src.config.$ui,
             {
@@ -230,18 +237,17 @@
                     elements: [
                         {
                             view: "icon",
-                             // TODO opcional, que no se vea en presentaciones fullscreen
-                            icon: "fas fa-chevron-left",
+                            icon: src.config.hide_exit_fullscreen_button?
+                                "":"fas fa-chevron-left",
                             tooltip: t("exit fullscreen"),
                             click: function() {
-                                webix.fullscreen.exit();
-                                $$(build_name(src, "top_toolbar")).show(); // TODO guarda el gobj en full screen, solo puede haber uno
+                                self.gobj_send_event("EV_EXIT_FULLSCREEN", {}, self);
                             }
                         },
                         {},
                         {
                             view: "label",
-                            label: kw.with_panel_title? kw.with_panel_title:"",
+                            label: with_panel_title,
                         },
                         {}
                     ]
@@ -252,9 +258,10 @@
         /*
          *  Save persistent attrs
          */
-//         if(self.gobj_is_unique()) {
-//             self.gobj_save_persistent_attrs();
-//         }
+        if(self.gobj_is_unique()) {
+            self.gobj_save_persistent_attrs();
+        }
+
         return 0;
     }
 
@@ -263,52 +270,56 @@
      ********************************************/
     function ac_exit_fullscreen(self, event, kw, src)
     {
+        if(!self.config.gobj_name_in_fullscreen) {
+            log_warning("Nobody in fullscreen");
+            return -1;
+        }
+        var gobj = self.yuno.gobj_find_unique_gobj(self.config.gobj_name_in_fullscreen, true);
 
-                      if(this.getTopParentView().config.fullscreen) {
-                            webix.fullscreen.exit();
-                        }
+        webix.fullscreen.exit();
 
-//         var visible = src.config.$ui.isVisible(); // TODO save not fullscreen
-//         self.config.views_opened[src.gobj_name()] = visible;
-//
-//         /*
-//          *  Save persistent attrs
-//          */
-//         if(self.gobj_is_unique()) {
-//             self.gobj_save_persistent_attrs();
-//         }
+        $$(build_name(gobj, "ct_panel_top_toolbar")).show();
+
+        self.config.gobj_name_in_fullscreen = "";
+
+        /*
+         *  Save persistent attrs
+         */
+        if(self.gobj_is_unique()) {
+            self.gobj_save_persistent_attrs();
+        }
         return 0;
     }
 
     /********************************************
-     *  type: ["top_toolbar",
-     *          "bottom_toolbar",
-     *          "left_toolbar",
-     *          "right_toolbar"
+     *  type: ["container_top_toolbar",
+     *          "container_bottom_toolbar",
+     *          "container_left_toolbar",
+     *          "container_right_toolbar"
      *      ]
      *  toolbar: webix ui
      ********************************************/
     function ac_add_toolbar(self, event, kw, src)
     {
         var type = kw.type;
-        if(!elm_in_list(type, [
-                "top_toolbar",
-                "bottom_toolbar",
-                "left_toolbar",
-                "right_toolbar"])) {
-            log_error("bad toolbar type: " + toolbar);
-            return -1;
-        }
         var toolbar = kw.toolbar;
         if(!toolbar) {
             log_error("no toolbar def");
             return -1;
         }
+        if(!elm_in_list(type, [
+                "container_top_toolbar",
+                "container_bottom_toolbar",
+                "container_left_toolbar",
+                "container_right_toolbar"])) {
+            log_error("bad toolbar type: '" + type + "'");
+            return -1;
+        }
         toolbar = __duplicate__(toolbar);
 
         if(elm_in_list(type, [
-                "top_toolbar",
-                "bottom_toolbar"])) {
+                "container_top_toolbar",
+                "container_bottom_toolbar"])) {
             if(!kw_has_key(toolbar, "height")) {
                 toolbar["height"] = self.config.toolbar_size;
             }
@@ -603,7 +614,7 @@
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
-            id: build_name(self, "top_toolbar"),
+            id: build_name(self, "ct_panel_top_toolbar"), // HACK this build is from here
             hidden: self.config.panel_properties.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,

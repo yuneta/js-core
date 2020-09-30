@@ -626,7 +626,7 @@
         self.config.gobj_container.gobj_send_event(
             "EV_ADD_TOOLBAR",
             {
-                type: "right_toolbar",
+                type: "container_right_toolbar",
                 toolbar: build_toolbar(self, "vertical")
             },
             self
