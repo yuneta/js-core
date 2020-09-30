@@ -379,6 +379,13 @@
         for(var i=0; i < childs.length; i++) {
             var child = childs[i];
             child.gobj_send_event("EV_REBUILD_PANEL", {}, self); // Before this get new child $ui
+
+            if(self.config.views_opened[child.gobj_name()]) {
+                child.config.$ui.show();
+            } else {
+                child.config.$ui.hide();
+            }
+
             $container_parent.addView(child.config.$ui);
             child.config.$container_parent = $container_parent;
         }
