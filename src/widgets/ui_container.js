@@ -21,6 +21,8 @@
         toolbar_size: 40,
         mode: "horizontal",     // "horizontal" or "vertical"
 
+        gobj_name_in_fullscreen: null,
+
         ui_properties: null,
         $ui: null,
 
@@ -30,6 +32,7 @@
         },
 
         __writable_attrs__: [
+            "gobj_name_in_fullscreen",
             "views_opened",
             "views_gravity",
         ]
@@ -189,6 +192,95 @@
 
 
     /********************************************
+     *  Panel View is showing, save their state
+     ********************************************/
+    function ac_on_view_show(self, event, kw, src)
+    {
+        var visible = src.config.$ui.isVisible();
+        self.config.views_opened[src.gobj_name()] = visible;
+
+        /*
+         *  Save persistent attrs
+         */
+        if(self.gobj_is_unique()) {
+            self.gobj_save_persistent_attrs();
+        }
+        return 0;
+    }
+
+    /********************************************
+     *  Panel View enter in fullscreen
+     ********************************************/
+    function ac_set_fullscreen(self, event, kw, src)
+    {
+//         var visible = src.config.$ui.isVisible();
+//         self.config.views_opened[src.gobj_name()] = visible; // TODO salva el fullscreen
+        if(self.config.gobj_name_in_fullscreen) {
+            log_warning("Already in fullscreen: " + self.config.gobj_name_in_fullscreen);
+            return -1;
+        }
+
+        $$(build_name(src, "top_toolbar")).hide();
+        webix.fullscreen.set(
+            src.config.$ui,
+            {
+                head: {
+                    view:"toolbar",
+                    height: 40,
+                    elements: [
+                        {
+                            view: "icon",
+                             // TODO opcional, que no se vea en presentaciones fullscreen
+                            icon: "fas fa-chevron-left",
+                            tooltip: t("exit fullscreen"),
+                            click: function() {
+                                webix.fullscreen.exit();
+                                $$(build_name(src, "top_toolbar")).show(); // TODO guarda el gobj en full screen, solo puede haber uno
+                            }
+                        },
+                        {},
+                        {
+                            view: "label",
+                            label: kw.with_panel_title? kw.with_panel_title:"",
+                        },
+                        {}
+                    ]
+                }
+            }
+        );
+
+        /*
+         *  Save persistent attrs
+         */
+//         if(self.gobj_is_unique()) {
+//             self.gobj_save_persistent_attrs();
+//         }
+        return 0;
+    }
+
+    /********************************************
+     *  Panel View exit of fullscreen
+     ********************************************/
+    function ac_exit_fullscreen(self, event, kw, src)
+    {
+
+                      if(this.getTopParentView().config.fullscreen) {
+                            webix.fullscreen.exit();
+                        }
+
+//         var visible = src.config.$ui.isVisible(); // TODO save not fullscreen
+//         self.config.views_opened[src.gobj_name()] = visible;
+//
+//         /*
+//          *  Save persistent attrs
+//          */
+//         if(self.gobj_is_unique()) {
+//             self.gobj_save_persistent_attrs();
+//         }
+        return 0;
+    }
+
+    /********************************************
      *  type: ["top_toolbar",
      *          "bottom_toolbar",
      *          "left_toolbar",
@@ -199,7 +291,11 @@
     function ac_add_toolbar(self, event, kw, src)
     {
         var type = kw.type;
-        if(!elm_in_list(type, ["top_toolbar", "bottom_toolbar", "left_toolbar", "right_toolbar"])) {
+        if(!elm_in_list(type, [
+                "top_toolbar",
+                "bottom_toolbar",
+                "left_toolbar",
+                "right_toolbar"])) {
             log_error("bad toolbar type: " + toolbar);
             return -1;
         }
@@ -210,7 +306,9 @@
         }
         toolbar = __duplicate__(toolbar);
 
-        if(elm_in_list(type, ["top_toolbar", "bottom_toolbar"])) {
+        if(elm_in_list(type, [
+                "top_toolbar",
+                "bottom_toolbar"])) {
             if(!kw_has_key(toolbar, "height")) {
                 toolbar["height"] = self.config.toolbar_size;
             }
@@ -278,23 +376,6 @@
     }
 
     /********************************************
-     *  Panel View is showing, save their state
-     ********************************************/
-    function ac_on_view_show(self, event, kw, src)
-    {
-        var visible = src.config.$ui.isVisible();
-        self.config.views_opened[src.gobj_name()] = visible;
-
-        /*
-         *  Save persistent attrs
-         */
-        if(self.gobj_is_unique()) {
-            self.gobj_save_persistent_attrs();
-        }
-        return 0;
-    }
-
-    /********************************************
      *
      ********************************************/
     function ac_select(self, event, kw, src)
@@ -304,7 +385,8 @@
     }
 
     /********************************************
-     *
+     *  Some gravity or other has changed,
+     *  refresh all container's pannel
      ********************************************/
     function ac_refresh(self, event, kw, src)
     {
@@ -350,6 +432,8 @@
     var FSM = {
         "event_list": [
             "EV_ON_VIEW_SHOW",
+            "EV_SET_FULLSCREEN",
+            "EV_EXIT_FULLSCREEN",
             "EV_CHANGE_MODE",
             "EV_ADD_TOOLBAR",
             "EV_SELECT",
@@ -361,11 +445,13 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_ON_VIEW_SHOW",         ac_on_view_show,    undefined],
-                ["EV_CHANGE_MODE",          ac_change_mode,     undefined],
-                ["EV_ADD_TOOLBAR",          ac_add_toolbar,     undefined],
-                ["EV_SELECT",               ac_select,          undefined],
-                ["EV_REFRESH",              ac_refresh,         undefined]
+                ["EV_ON_VIEW_SHOW",         ac_on_view_show,        undefined],
+                ["EV_SET_FULLSCREEN",       ac_set_fullscreen,      undefined],
+                ["EV_EXIT_FULLSCREEN",      ac_exit_fullscreen,     undefined],
+                ["EV_CHANGE_MODE",          ac_change_mode,         undefined],
+                ["EV_ADD_TOOLBAR",          ac_add_toolbar,         undefined],
+                ["EV_SELECT",               ac_select,              undefined],
+                ["EV_REFRESH",              ac_refresh,             undefined]
             ]
         }
     };
@@ -577,41 +663,15 @@
                     view:"icon",
                     hidden: self.config.panel_properties.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
-                    tooltip: t("fullscreen"), // TODO fullscreen a evento, y guarda el estado
-                                                // para que se pueda ir directamente, estilo "presentación" (con el select?)
+                    tooltip: t("fullscreen"),
                     click: function() {
-                        $$(build_name(self, "top_toolbar")).hide();
-                        webix.fullscreen.set(
-                            self.config.$ui,
+                        self.parent.gobj_send_event(
+                            "EV_SET_FULLSCREEN",
                             {
-                                head: {
-                                    view:"toolbar",
-                                    height: 40,
-                                    elements: [
-                                        {
-                                            view: "icon",
-                                            icon: "fas fa-chevron-left", // TODO opcional, que no se vea en presentaciones fullscreen
-                                            tooltip: t("exit fullscreen"),
-                                            click: function() {
-                                                webix.fullscreen.exit();
-                                                $$(build_name(self, "top_toolbar")).show();
-                                                self.parent.gobj_send_event(
-                                                    "EV_REFRESH", {}, self
-                                                );
-                                            }
-                                        },
-                                        {},
-                                        {
-                                            view: "label",
-                                            label: self.config.panel_properties.with_panel_title?
-                                                self.config.panel_properties.with_panel_title:"",
-                                        },
-                                        {}
-                                    ]
-                                }
-                            }
+                                with_panel_title: self.config.panel_properties.with_panel_title
+                            },
+                            self
                         );
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
                     }
                 },
                 {
@@ -620,9 +680,9 @@
                     icon:"far fa-window-minimize",
                     tooltip: t("minimize"),
                     click: function() {
-                        if(this.getTopParentView().config.fullscreen) {
-                            webix.fullscreen.exit();
-                        }
+                        /*----------------------------*
+                         *  Minimize, hide the panel
+                         *----------------------------*/
                         this.getParentView().getParentView().hide();
 
                         /*----------------------------------------------*
