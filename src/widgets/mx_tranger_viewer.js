@@ -586,8 +586,11 @@
         graph.border = 40;
         graph.view.setTranslate(graph.border/2, graph.border/2);
 
+        // Enables rubberband selection
+        new mxRubberband(graph);
+
         graph.setPanning(true);
-        graph.panningHandler.useLeftButtonForPanning = true;
+        graph.panningHandler.useLeftButtonForPanning = false;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;
