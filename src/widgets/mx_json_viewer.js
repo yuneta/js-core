@@ -19,7 +19,7 @@
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
-        $ui_fullscreen: null,   // What part of window will be fullscreened
+        $ui_fullscreen: null,   // What part of window will be fullscreened "Pinhold Window" HACK
 
         pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window" HACK
         window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
@@ -40,6 +40,13 @@
         vertex_cy_sep: 40,
 
         layout_options: [
+            {
+                id: "no_layout",
+                value: "No Layout",
+                layout: function(layout_option, graph) {
+                    return null;
+                }
+            },
             {
                 id: "tree_layout",
                 value: "Compact Tree Layout",
@@ -81,7 +88,7 @@
             }
         ],
 
-        layout_selected: "tree_layout",
+        layout_selected: "no_layout",
 
         _mxgraph: null,
 
@@ -370,7 +377,7 @@
             cur_layout = self.config.layout_options[0];
         }
 
-        if(cur_layout) {
+        if(cur_layout && cur_layout.exe) {
             graph.getModel().beginUpdate();
             try {
                 cur_layout.exe.execute(group);
