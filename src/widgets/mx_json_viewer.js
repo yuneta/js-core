@@ -622,7 +622,7 @@
                 // #475ED0 azul null
                 var color = "black";
                 var value = cell.value;
-                var prefix = "•";
+                var prefix = "";
                 switch(cell.style) {
                     case "string":
                         color = "#006000";
@@ -648,12 +648,27 @@
                         value = "{" + json_object_size(cell.value) + "}";
                         break;
                     default:
+                        color = "black";
                         break;
                 }
-                var t = "<span style='display:inline;color:#1A1A1A'>" + prefix + " " +
-                    cell.id + ": </span>" +
-                    "<span style='display:inline;color:" + color + "'>" +
-                    value + "</span>";
+                var t = "";
+                if(cell.id) {
+                    if(cell.value) {
+                        prefix = "•";
+                    }
+                    t += "<span style='display:inline;color:#1A1A1A'>" +
+                    prefix + " " + cell.id +
+                    ": </span>";
+                    if(cell.value) {
+                        t += "<span style='display:inline;color:" +
+                        color + "'>" + cell.value +
+                        "</span>";
+                    }
+                } else if(cell.value) {
+                    t += "<span style='display:inline;color:" +
+                    color + "'>" + cell.value +
+                    "</span>";
+                }
                 return t;
             }
             return "";
@@ -728,13 +743,19 @@
 
         var cells = [];
 
-        /*-------------------------------*
+        /*------------------------------------------------------------*
+         *      First Step: all keys (simple an complex) in a group
+         *------------------------------------------------------------*/
+
+        /*-----------------------------------------------*
          *      Firstly simple data
-         *-------------------------------*/
+         *  HACK initially all cells belongs to layer,
+         *  when grouping will belong to the group
+         *-----------------------------------------------*/
         if(is_object(kw)) {
             for(var k in kw) {
                 var v = kw[k];
-                if(is_object(v) || is_array(v)) {
+                if(is_object(v) || is_array(v) || v["__mx_cell__"]) {
                     continue;
                 }
 
@@ -763,7 +784,7 @@
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
                 var v = kw[i];
-                if(is_object(v) || is_array(v)) {
+                if(is_object(v) || is_array(v) || v["__mx_cell__"]) {
                     continue;
                 }
 
@@ -792,12 +813,13 @@
         }
 
         /*-------------------------------*
+         *      First step
          *      Secondly complex data
          *-------------------------------*/
         if(is_object(kw)) {
             for(var k in kw) {
                 var v = kw[k];
-                if(!(is_object(v) || is_array(v))) {
+                if(!(is_object(v) || is_array(v)) || v["__mx_cell__"]) {
                     continue;
                 }
                 var cell = graph.insertVertex(
@@ -812,11 +834,16 @@
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
                 cells.push(cell);
+
+                // Aki debe ir, pero no tengo el grupo todavia! TODO
+                // TODO y el group?
+                _load_json(self, x, y+group.geometry.height, v, cell)
+
             }
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
                 var v = kw[i];
-                if(!(is_object(v) || is_array(v))) {
+                if(!(is_object(v) || is_array(v)) || v["__mx_cell__"]) {
                     continue;
                 }
                 var cell = graph.insertVertex(
@@ -831,20 +858,50 @@
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
                 cells.push(cell);
+
+                // Aki debe ir, pero no tengo el grupo todavia! TODO
+                // TODO y el group?
+                _load_json(self, x, y+group.geometry.height, v, cell)
             }
         }
 
-        /*-------------------------------*
-         *      Create a group
-         *-------------------------------*/
+        /*--------------------------------------------------------------*
+         *      Create the group for all fields, simples and complexes
+         *--------------------------------------------------------------*/
         var group = new mxCell("Yy", new mxGeometry(), // HACK no uses create_graph_style(), falla
             "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=left;verticalAlign=bottom;spacingTop=0;strokeWidth=1;"
         );
-        group.setId("Xx");
+        group.setId("");
         group.setVertex(true);
         group.setConnectable(false);
-
         graph.groupCells(group, 15, cells);
+
+        /*------------------------------------------------------------*
+         *      Second Step: create the link of group (complex json)
+         *      with our parent
+         *------------------------------------------------------------*/
+        /*------------------------------------------------------------*
+         *      Third Step: recursive over complex data
+         *------------------------------------------------------------*/
+        if(is_object(kw)) {
+            for(var k in kw) {
+                var v = kw[k];
+                if(!(is_object(v) || is_array(v))) {
+                    continue;
+                }
+                // TODO y la cell?
+                _load_json(self, x, y+group.geometry.height, v, cell)
+            }
+        } else if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var v = kw[i];
+                if(!(is_object(v) || is_array(v))) {
+                    continue;
+                }
+                // TODO y la cell?
+                _load_json(self, x, y+group.geometry.height, v, cell)
+            }
+        }
     }
 
 
@@ -853,7 +910,7 @@
      ************************************************************/
     function load_json(self)
     {
-        var json = self.config.json_data
+        var json = __duplicate__(self.config.json_data);
         if(!json) {
             return;
         }
