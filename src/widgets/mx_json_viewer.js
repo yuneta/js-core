@@ -837,7 +837,14 @@
         /*-------------------------------*
          *      Create a group
          *-------------------------------*/
-        var group = graph.groupCells(null, 15, cells);
+        var group = new mxCell("Yy", new mxGeometry(), // HACK no uses create_graph_style(), falla
+            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=left;verticalAlign=bottom;spacingTop=0;strokeWidth=1;"
+        );
+        group.setId("Xx");
+        group.setVertex(true);
+        group.setConnectable(false);
+
+        graph.groupCells(group, 15, cells);
     }
 
 
