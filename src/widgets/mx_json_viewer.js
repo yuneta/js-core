@@ -741,7 +741,8 @@
         var cy = 16; // 14 fontSize
         var cy_sep = 4;
 
-        var cells = [];
+        var cells = []; // Cells of this new group
+        var pending_complex_fields = [];
 
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
@@ -835,11 +836,14 @@
                 graph.autoSizeCell(cell);
                 cells.push(cell);
 
-                // Aki debe ir, pero no tengo el grupo todavia! TODO
-                // TODO y el group?
-                _load_json(self, x, y+group.geometry.height, v, cell)
-
+                // Guarda para luego
+                var pending = {
+                    kw: v,
+                    cell: cell
+                }
+                pending_complex_fields.push(pending);
             }
+
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
                 var v = kw[i];
@@ -859,9 +863,12 @@
                 graph.autoSizeCell(cell);
                 cells.push(cell);
 
-                // Aki debe ir, pero no tengo el grupo todavia! TODO
-                // TODO y el group?
-                _load_json(self, x, y+group.geometry.height, v, cell)
+                // Guarda para luego
+                var pending = {
+                    kw: v,
+                    cell: cell
+                }
+                pending_complex_fields.push(pending);
             }
         }
 
@@ -875,33 +882,27 @@
         group.setVertex(true);
         group.setConnectable(false);
         graph.groupCells(group, 15, cells);
+        y += group.geometry.height;
 
         /*------------------------------------------------------------*
          *      Second Step: create the link of group (complex json)
-         *      with our parent
+         *      with his parent
          *------------------------------------------------------------*/
-        /*------------------------------------------------------------*
-         *      Third Step: recursive over complex data
-         *------------------------------------------------------------*/
-        if(is_object(kw)) {
-            for(var k in kw) {
-                var v = kw[k];
-                if(!(is_object(v) || is_array(v))) {
-                    continue;
-                }
-                // TODO y la cell?
-                _load_json(self, x, y+group.geometry.height, v, cell)
-            }
-        } else if(is_array(kw)) {
-            for(var i=0; i<kw.length; i++) {
-                var v = kw[i];
-                if(!(is_object(v) || is_array(v))) {
-                    continue;
-                }
-                // TODO y la cell?
-                _load_json(self, x, y+group.geometry.height, v, cell)
-            }
+        for(var i=0; i<pending_complex_fields.length; i++) {
+            var pending = pending_complex_fields[i];
+
+            graph.insertEdge(
+                layer,          // parent
+                null,           // id
+                '',             // value
+                parent,         // source
+                group,          // target
+                null            // style
+            );
+
+            _load_json(self, x, y, pending.kw, pending.cell);
         }
+        return group;
     }
 
 
