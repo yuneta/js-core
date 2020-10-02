@@ -422,6 +422,14 @@
     /************************************************************
      *
      ************************************************************/
+    // Return if a value is a null
+    function is_null(value) {
+        return value === null || value === undefined;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function empty_string(s)
     {
         'use strict';
@@ -1726,6 +1734,7 @@
     exports.is_string = is_string;
     exports.is_number = is_number;
     exports.is_boolean = is_boolean;
+    exports.is_null = is_null;
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
     exports.strcmp = strcmp;

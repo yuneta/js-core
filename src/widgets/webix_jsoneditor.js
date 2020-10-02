@@ -24,8 +24,10 @@ webix.protoUI({
     },
 
     $init: function() {
+        var background_color = "#F6F6EF";
+        background_color = "#FFFFFF";
         this.$view.innerHTML =
-            "<div class='webix_jsoneditor_content' style='width:100%;height:100%;'></div>";
+            "<div class='webix_jsoneditor_content' style='background-color:" + background_color + ";width:100%;height:100%;'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);

@@ -25,19 +25,20 @@
         window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
         window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
 
+        json_data: null,
+
         left: 0,
         top: 0,
         width: 600,
         height: 500,
 
         top_overlay_icon_size: 24,
-        bottom_overlay_icon_size: 16,
-
         image_topic_schema: null,
 
-        vertex_cx: 200,
-        vertex_cy: 90,
-        vertex_cy_sep: 40,
+        vertex_cx: 60,
+        vertex_cy: 60,
+        vertex_cx_sep: 40,
+        vertex_cy_sep: 10,
 
         layout_options: [
             {
@@ -99,7 +100,8 @@
             "top",
             "width",
             "height",
-            "layout_selected"
+            "layout_selected",
+            "json_data"
         ]
     };
 
@@ -180,6 +182,7 @@
                 {
                     view: "richselect",
                     id: build_name(self, "layout_options"),
+                    hidden: true,
                     tooltip: t("Select layout"),
                     width: 180,
                     options: self.config.layout_options,
@@ -446,24 +449,6 @@
         graph.getStylesheet().putCellStyle(name, style);
     }
 
-    /********************************************
-     *
-     ********************************************/
-    function get_topic_type(topic)
-    {
-        var lists = kw_get_dict_value(topic, "lists", [], 0);
-        for(var i=0; i<lists.length; i++) {
-            if(kw_has_key(lists[0], "treedb_name")) {
-                return "treedb_topic";
-            }
-            if(kw_has_key(lists[0], "msg2db_name")) {
-                return "msg2db_topic";
-            }
-        }
-
-        return "raw_topic";
-    }
-
     /************************************************************
      *
      ************************************************************/
@@ -517,8 +502,11 @@
         graph.border = 40;
         graph.view.setTranslate(graph.border/2, graph.border/2);
 
+        // Enables rubberband selection
+        new mxRubberband(graph);
+
         graph.setPanning(true);
-        graph.panningHandler.useLeftButtonForPanning = true;
+        //graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;
@@ -528,6 +516,8 @@
 
         // Avoids overlap of edges and collapse icons
         graph.keepEdgesInBackground = true;
+
+        graph.setAutoSizeCells(true);
 
         /*---------------------------*
          *      PERMISOS
@@ -549,25 +539,41 @@
         /*
          *  Set stylesheet options
          */
+        // Set stylesheet options
+        var style = graph.getStylesheet().getDefaultVertexStyle();
+        style[mxConstants.STYLE_FONTFAMILY] = 'monospace, "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", sans-serif, "courier new", courier';
+        style[mxConstants.STYLE_FONTSIZE] = '16';
+        style[mxConstants.STYLE_FONTSTYLE] = '0';
+
         create_graph_style(
             graph,
-            "raw_topic",
-            "text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
+            "string",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
         );
         create_graph_style(
             graph,
-            "msg2db_topic",
-            "text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
+            "number",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
         );
         create_graph_style(
             graph,
-            "treedb_topic",
-            "text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
+            "boolean",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
         );
         create_graph_style(
             graph,
-            "title",
-            "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;shadow=1;glass=0;sketch=0;fontSize=16;fontColor=#095C86;spacingLeft=10;spacingTop=5;fontStyle=1;"
+            "null",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
+        );
+        create_graph_style(
+            graph,
+            "list",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
+        );
+        create_graph_style(
+            graph,
+            "dict",
+            "text;html=1;strokeColor=none;fillColor=none;align=left;whiteSpace=nowrap;rounded=0;shadow=1;glass=0;sketch=0;fontColor=#1A1A1A;"
         );
 
         // Handles clicks on cells
@@ -589,39 +595,44 @@
         graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
-                var t = "<b>" + cell.id + "</b><br/>";
-                if(is_object(cell.value)) {
-                    if(!empty_string(cell.value.pkey)) {
-                        t += "pkey: <pre style='display:inline'><i>" +
-                            cell.value.pkey +
-                            "</i></pre><br/>";
-                    }
-                    if(!empty_string(cell.value.pkey2)) {
-                        t += "pkey2: <pre style='display:inline'><i>" +
-                            cell.value.pkey2 +
-                            "</i></pre><br/>";
-                    }
-                    if(!empty_string(cell.value.tkey)) {
-                        t += "tkey: <pre style='display:inline'><i>" +
-                            cell.value.tkey +
-                            "</i></pre><br/>";
-                    }
-                    if(kw_has_key(cell.value, "__last_rowid__")) {
-                        t += "size: <pre style='display:inline'>" +
-                            cell.value.__last_rowid__ +
-                            "</pre><br/>";
-                    }
-                }
+                // #006000 verde string
+                // #EE422E rojo number
+                // #FF8C00 naranja boolean
+                // #475ED0 azul null
+                var color = "black";
+                var value = cell.value;
+                var prefix = "•";
                 switch(cell.style) {
-                    case "raw_topic":
+                    case "string":
+                        color = "#006000";
+                        value = '"' + cell.value + '"';
                         break;
-                    case "msg2db_topic":
+                    case "number":
+                        color = "#EE422E";
                         break;
-                    case "treedb_topic":
+                    case "boolean":
+                        color = "#FF8C00";
+                        value = cell.value?"true":"false";
+                        break;
+                    case "null":
+                        color = "#475ED0";
+                        value = "null";
+                        break;
+                    case "list":
+                        color = "#475ED0";
+                        value = "[" + cell.value.length+ "]";
+                        break;
+                    case "dict":
+                        color = "#475ED0";
+                        value = "{" + json_object_size(cell.value) + "}";
                         break;
                     default:
                         break;
                 }
+                var t = "<span style='display:inline;color:#1A1A1A'>" + prefix + " " +
+                    cell.id + ": </span>" +
+                    "<span style='display:inline;color:" + color + "'>" +
+                    value + "</span>";
                 return t;
             }
             return "";
@@ -683,35 +694,139 @@
     /************************************************************
      *
      ************************************************************/
-    function load_topics(self, graph, tranger_name, topics)
+    function _load_json(self, x, y, kw)
     {
-        var cx = self.config.vertex_cx;
-        var cy = self.config.vertex_cy;
-        var vertex_cy_sep = self.config.vertex_cy_sep;
-
+        // HACK is already in a beginUpdate/endUpdate
+        var graph = self.config._mxgraph;
         var model = graph.getModel();
-// TODO        graph.insertVertex(
-//             get_layer(self, topic_type),    // group
-//             topic.topic_name,       // id
-//             topic,                  // value
-//             0, 0,            // x,y
-//             cx + cx/2, cy,          // width,height
-//             topic_type,             // style
-//             false                   // relative
-//         );
 
+        var cx = 100;
+        var cy = 16; // 14 fontSize
+        var cy_sep = 4;
+
+        /*-------------------------------*
+         *      Firstly simple data
+         *-------------------------------*/
+        if(is_object(kw)) {
+            for(var k in kw) {
+                var v = kw[k];
+                if(is_object(v) || is_array(v)) {
+                    continue;
+                }
+
+                var style = "string";
+                if(is_null(v)) {
+                    style = "null";
+                } else if(is_number(v)) {
+                    style = "number";
+                } else if(is_boolean(v)) {
+                    style = "boolean";
+                }
+
+                var cell = graph.insertVertex(
+                    get_layer(self),    // group
+                    k,                  // id
+                    v,                  // value
+                    x, y,               // x,y
+                    cx, cy,             // width,height
+                    style,              // style
+                    false               // relative
+                );
+                y += cy + cy_sep;
+                graph.autoSizeCell(cell);
+
+            }
+        } else if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var v = kw[i];
+                if(is_object(v) || is_array(v)) {
+                    continue;
+                }
+
+                var style = "string";
+                if(is_null(v)) {
+                    style = "null";
+                } else if(is_number(v)) {
+                    style = "number";
+                } else if(is_boolean(v)) {
+                    style = "boolean";
+                }
+
+                var cell = graph.insertVertex(
+                    get_layer(self),    // group
+                    k,                  // id
+                    v,                  // value
+                    x, y,               // x,y
+                    cx, cy,             // width,height
+                    style,              // style
+                    false               // relative
+                );
+                y += cy + cy_sep;
+            }
+        }
+
+        /*-------------------------------*
+         *      Secondly complex data
+         *-------------------------------*/
+        if(is_object(kw)) {
+            for(var k in kw) {
+                var v = kw[k];
+                if(!(is_object(v) || is_array(v))) {
+                    continue;
+                }
+                graph.insertVertex(
+                    get_layer(self),    // group
+                    k,                  // id
+                    v,                  // value
+                    x, y,               // x,y
+                    cx, cy,             // width,height
+                    "dict",             // style
+                    false               // relative
+                );
+                y += cy + cy_sep;
+            }
+        } else if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var v = kw[i];
+                if(!(is_object(v) || is_array(v))) {
+                    continue;
+                }
+                graph.insertVertex(
+                    get_layer(self),    // group
+                    k,                  // id
+                    v,                  // value
+                    x, y,               // x,y
+                    cx, cy,             // width,height
+                    "list",             // style
+                    false               // relative
+                );
+                y += cy + cy_sep;
+            }
+        }
     }
 
     /************************************************************
      *
      ************************************************************/
-    function load_tranger(self, tranger_name, data, layer)
+    function load_json(self)
     {
-        // HACK is already in a beginUpdate/endUpdate
-        var graph = self.config._mxgraph;
+        var json = self.config.json_data
+        if(!json) {
+            return;
+        }
 
-        var topics = data.topics;
-        load_topics(self, graph, tranger_name, topics);
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+//         model.beginUpdate(); //TODO TEST para que pinte inmediatamente en debug
+//         try {
+            _load_json(self, 0, 0, json);
+
+//         } catch (e) {
+//             log_error(e);
+//         } finally {
+//             model.endUpdate();
+//         }
+//
         graph.view.setTranslate(graph.border/2, graph.border/2);
         execute_layout(self);
     }
@@ -742,22 +857,8 @@
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
-        var layer = undefined;
-        var model = self.config._mxgraph.getModel();
-        model.beginUpdate();
-        try {
-            switch(kw.type) {
-                case "tranger":
-                default:
-                    load_tranger(self, kw.name, kw.data, layer);
-                    break;
-            }
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
+        self.config.json_data = kw;
+        load_json(self);
 
         return 0;
     }
@@ -898,6 +999,7 @@
         mxEvent.disableContextMenu(
             $$(build_name(self, "mxgraph")).getNode()
         );
+        load_json(self);
     }
 
     /************************************************

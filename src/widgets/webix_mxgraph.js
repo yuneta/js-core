@@ -18,8 +18,10 @@ webix.protoUI({
     },
 
     $init: function() {
+        var background_color = "#F6F6EF";
+        background_color = "#FFFFFF";
         this.$view.innerHTML =
-            "<div class='webix_mxgraph_content' style='position:relative;width:100%;height:100%;overflow:auto;'></div>";
+            "<div class='webix_mxgraph_content' style='background-color:" + background_color + ";position:relative;width:100%;height:100%;overflow:auto;'></div>";
         this._contentobj = this.$view.firstChild;
 
         this.$ready.push(this.render);

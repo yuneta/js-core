@@ -527,7 +527,7 @@
         // Enables rubberband selection
         new mxRubberband(graph);
 
-        // Panning? HACK if panning is set then rubberband selection will not work
+        // Panning, by default working with right button, left button for selection
         graph.setPanning(false);
 
         // Negative coordenates?
