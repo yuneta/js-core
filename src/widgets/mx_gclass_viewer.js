@@ -492,11 +492,13 @@
         graph.foldingEnabled = true;    // (true) General para todos, sin Override
         graph.dropEnabled = false;      // (false)  Override by isDropEnabled()
 
-        // HACK Por defecto si los hijos salen un overlap del 50% se quitan del padre y pasan al default
-        graph.graphHandler.setRemoveCellsFromParent(false); // HACK impide quitar hijos
-
         graph.graphHandler.setCloneEnabled(false); // Ctrl+Drag will clone a cell
 
+        /*
+         *  HACK Por defecto si los hijos salen un overlap del 50%
+         *  se quitan del padre y pasan al default
+         */
+        graph.graphHandler.setRemoveCellsFromParent(false); // HACK impide quitar hijos
         mxGraph.prototype.isAllowOverlapParent = function(cell) { return true;}
         mxGraph.prototype.defaultOverlap = 1; // Permite a hijos irse tan lejos como quieran
 

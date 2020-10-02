@@ -78,14 +78,6 @@
                     var layout = new mxFastOrganicLayout(graph);
                     return layout;
                 }
-            },
-            {
-                id: "circle_layout",
-                value: "Circle Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxCircleLayout(graph);
-                    return layout;
-                }
             }
         ],
 
@@ -182,9 +174,9 @@
                 {
                     view: "richselect",
                     id: build_name(self, "layout_options"),
-                    hidden: true,
+                    hidden: false,
                     tooltip: t("Select layout"),
-                    width: 180,
+                    minWidth: 180,
                     options: self.config.layout_options,
                     value: self.config.layout_selected,
                     label: "",
@@ -208,7 +200,7 @@
                     type: "icon",
                     icon: "fad fa-compress-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
-                    maxWidth: 120,
+                    autosize: true,
                     label: t("reset view"),
                     click: function() {
                         var graph = self.config._mxgraph;
@@ -220,7 +212,7 @@
                     type: "icon",
                     icon: "fad fa-expand-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
-                    maxWidth: 120,
+                    autosize: true,
                     label: t("fit"),
                     click: function() {
                         var graph = self.config._mxgraph;
@@ -232,7 +224,7 @@
                     type: "icon",
                     icon: "far fa-search-plus",
                     css: "webix_transparent btn_icon_toolbar_16",
-                    maxWidth: 120,
+                    autosize: true,
                     label: t("zoom in"),
                     click: function() {
                         var graph = self.config._mxgraph;
@@ -245,12 +237,33 @@
                     type: "icon",
                     icon: "far fa-search-minus",
                     css: "webix_transparent icon_toolbar_16",
-                    maxWidth: 120,
+                    autosize: true,
                     label: t("zoom out"),
                     click: function() {
                         var graph = self.config._mxgraph;
                         graph.zoomOut();
                         graph.view.setTranslate(0, 0);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-lock-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: t("unlock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            graph.setCellsLocked(false);
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            graph.setCellsLocked(true);
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
                     }
                 }
             ]
@@ -537,12 +550,20 @@
         };
 
         /*
+         *  HACK Por defecto si los hijos salen un overlap del 50%
+         *  se quitan del padre y pasan al default
+         */
+        graph.graphHandler.setRemoveCellsFromParent(false); // HACK impide quitar hijos
+        mxGraph.prototype.isAllowOverlapParent = function(cell) { return true;}
+        mxGraph.prototype.defaultOverlap = 1; // Permite a hijos irse tan lejos como quieran
+
+        /*
          *  Set stylesheet options
          */
         // Set stylesheet options
         var style = graph.getStylesheet().getDefaultVertexStyle();
         style[mxConstants.STYLE_FONTFAMILY] = 'monospace, "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", sans-serif, "courier new", courier';
-        style[mxConstants.STYLE_FONTSIZE] = '16';
+        style[mxConstants.STYLE_FONTSIZE] = '14';
         style[mxConstants.STYLE_FONTSTYLE] = '0';
 
         create_graph_style(
@@ -694,15 +715,18 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_json(self, x, y, kw)
+    function _load_json(self, x, y, kw, parent)
     {
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
         var model = graph.getModel();
+        var layer = get_layer(self);
 
         var cx = 100;
         var cy = 16; // 14 fontSize
         var cy_sep = 4;
+
+        var cells = [];
 
         /*-------------------------------*
          *      Firstly simple data
@@ -724,7 +748,7 @@
                 }
 
                 var cell = graph.insertVertex(
-                    get_layer(self),    // group
+                    layer,              // group
                     k,                  // id
                     v,                  // value
                     x, y,               // x,y
@@ -734,7 +758,7 @@
                 );
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
-
+                cells.push(cell);
             }
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
@@ -753,7 +777,7 @@
                 }
 
                 var cell = graph.insertVertex(
-                    get_layer(self),    // group
+                    layer,              // group
                     k,                  // id
                     v,                  // value
                     x, y,               // x,y
@@ -762,6 +786,8 @@
                     false               // relative
                 );
                 y += cy + cy_sep;
+                graph.autoSizeCell(cell);
+                cells.push(cell);
             }
         }
 
@@ -774,8 +800,8 @@
                 if(!(is_object(v) || is_array(v))) {
                     continue;
                 }
-                graph.insertVertex(
-                    get_layer(self),    // group
+                var cell = graph.insertVertex(
+                    layer,              // group
                     k,                  // id
                     v,                  // value
                     x, y,               // x,y
@@ -784,6 +810,8 @@
                     false               // relative
                 );
                 y += cy + cy_sep;
+                graph.autoSizeCell(cell);
+                cells.push(cell);
             }
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
@@ -791,8 +819,8 @@
                 if(!(is_object(v) || is_array(v))) {
                     continue;
                 }
-                graph.insertVertex(
-                    get_layer(self),    // group
+                var cell = graph.insertVertex(
+                    layer,              // group
                     k,                  // id
                     v,                  // value
                     x, y,               // x,y
@@ -801,9 +829,17 @@
                     false               // relative
                 );
                 y += cy + cy_sep;
+                graph.autoSizeCell(cell);
+                cells.push(cell);
             }
         }
+
+        /*-------------------------------*
+         *      Create a group
+         *-------------------------------*/
+        var group = graph.groupCells(null, 15, cells);
     }
+
 
     /************************************************************
      *
@@ -819,7 +855,7 @@
         var model = graph.getModel();
 //         model.beginUpdate(); //TODO TEST para que pinte inmediatamente en debug
 //         try {
-            _load_json(self, 0, 0, json);
+            _load_json(self, 0, 0, json, get_layer(self));
 
 //         } catch (e) {
 //             log_error(e);
