@@ -31,6 +31,7 @@
         top: 0,
         width: 600,
         height: 500,
+        locked: true,
 
         top_overlay_icon_size: 24,
         image_topic_schema: null,
@@ -76,6 +77,14 @@
                 value: "FastOrganic Layout",
                 layout: function(layout_option, graph) {
                     var layout = new mxFastOrganicLayout(graph);
+                    return layout;
+                }
+            },
+            {
+                id: "circle_layout",
+                value: "Circle Layout",
+                layout: function(layout_option, graph) {
+                    var layout = new mxCircleLayout(graph);
                     return layout;
                 }
             }
@@ -248,7 +257,7 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "far fa-lock-alt",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
                     css: "webix_transparent icon_toolbar_16",
                     autosize: true,
                     label: t("unlock vertices"),
@@ -256,14 +265,28 @@
                         var graph = self.config._mxgraph;
                         if(graph.isCellsLocked()) {
                             graph.setCellsLocked(false);
+                            self.config.locked = false;
                             this.define("icon", "far fa-lock-open-alt");
                             this.define("label", t("lock vertices"));
                         } else {
                             graph.setCellsLocked(true);
+                            self.config.locked = true;
                             this.define("icon", "far fa-lock-alt");
                             this.define("label", t("unlock vertices"));
                         }
                         this.refresh();
+                    }
+                },
+                {
+                    view: "button",
+                    type: "icon",
+                    icon: "fas fa-sync",
+                    autosize: true,
+                    css: "webix_transparent btn_icon_toolbar_18",
+                    tooltip: t("refresh"),
+                    label: t("refresh"),
+                    click: function() {
+                        self.gobj_send_event("EV_CLEAR_DATA", {}, self);
                     }
                 }
             ]
@@ -393,6 +416,11 @@
             cur_layout = self.config.layout_options[0];
         }
 
+        var locked = graph.isCellsLocked();
+        if(locked) {
+            graph.setCellsLocked(false);
+        }
+
         if(cur_layout && cur_layout.exe) {
             graph.getModel().beginUpdate();
             try {
@@ -402,6 +430,10 @@
             } finally {
                 graph.getModel().endUpdate();
             }
+        }
+
+        if(locked) {
+            graph.setCellsLocked(true);
         }
     }
 
@@ -541,7 +573,7 @@
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
         mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
-        graph.setCellsLocked(true);
+        graph.setCellsLocked(self.config.locked);
         graph.setPortsEnabled(true);
         graph.setCellsEditable(false);
 
@@ -558,13 +590,27 @@
         mxGraph.prototype.defaultOverlap = 1; // Permite a hijos irse tan lejos como quieran
 
         /*
-         *  Set stylesheet options
+         *  General Vertex Style
          */
-        // Set stylesheet options
         var style = graph.getStylesheet().getDefaultVertexStyle();
         style[mxConstants.STYLE_FONTFAMILY] = 'monospace, "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", sans-serif, "courier new", courier';
         style[mxConstants.STYLE_FONTSIZE] = '14';
         style[mxConstants.STYLE_FONTSTYLE] = '0';
+
+        /*
+         *  General Edge Style
+         */
+        style = graph.getStylesheet().getDefaultEdgeStyle();
+        style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_STROKEWIDTH] = '2';
+
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.Loop;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SideToSide;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.OrthConnector;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SegmentConnector;
 
         create_graph_style(
             graph,
@@ -616,6 +662,9 @@
         graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
+                if(!cell.id && !cell.value) {
+                    return "";
+                }
                 // #006000 verde string
                 // #EE422E rojo number
                 // #FF8C00 naranja boolean
@@ -626,26 +675,21 @@
                 switch(cell.style) {
                     case "string":
                         color = "#006000";
-                        value = '"' + cell.value + '"';
                         break;
                     case "number":
                         color = "#EE422E";
                         break;
                     case "boolean":
                         color = "#FF8C00";
-                        value = cell.value?"true":"false";
                         break;
                     case "null":
                         color = "#475ED0";
-                        value = "null";
                         break;
                     case "list":
                         color = "#475ED0";
-                        value = "[" + cell.value.length+ "]";
                         break;
                     case "dict":
                         color = "#475ED0";
-                        value = "{" + json_object_size(cell.value) + "}";
                         break;
                     default:
                         color = "black";
@@ -653,9 +697,7 @@
                 }
                 var t = "";
                 if(cell.id) {
-                    if(cell.value) {
-                        prefix = "•";
-                    }
+                    prefix = "•";
                     t += "<span style='display:inline;color:#1A1A1A'>" +
                     prefix + " " + cell.id +
                     ": </span>";
@@ -730,7 +772,7 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_json(self, x, y, kw, parent)
+    function _load_json(self, global_x, global_y, kw, parent_port, parent_group, level)
     {
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
@@ -744,6 +786,8 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
+if(level >= 3) return; // TODO TEST
+
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
          *------------------------------------------------------------*/
@@ -753,26 +797,41 @@
          *  HACK initially all cells belongs to layer,
          *  when grouping will belong to the group
          *-----------------------------------------------*/
+        var x = 0;
+        var y = 0;
         if(is_object(kw)) {
             for(var k in kw) {
                 var v = kw[k];
-                if(is_object(v) || is_array(v) || v["__mx_cell__"]) {
-                    continue;
-                }
 
-                var style = "string";
-                if(is_null(v)) {
+                var style = "";
+                var value = null;
+                if(is_string(v)) {
+                    style = "string";
+                    value = '"' + v + '"';
+                } else if(is_null(v)) {
                     style = "null";
+                    value = "null";
                 } else if(is_number(v)) {
                     style = "number";
+                    value = v;
                 } else if(is_boolean(v)) {
                     style = "boolean";
+                    value = v?"true":"false";
+                } else if(is_object(v)) {
+                    style = "dict";
+                    value = "{" + json_object_size(v) + "}";
+                } else if(is_array(v)) {
+                    style = "list";
+                    value = "[" + v.length+ "]";
+                } else {
+                    log_error("What fack is this?");
+                    log_error(v);
                 }
 
                 var cell = graph.insertVertex(
                     layer,              // group
                     k,                  // id
-                    v,                  // value
+                    value,              // value
                     x, y,               // x,y
                     cx, cy,             // width,height
                     style,              // style
@@ -781,27 +840,50 @@
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
                 cells.push(cell);
+
+                if((is_array(v) && v.length>0) || (is_object(v) && json_object_size(v)>0)) {
+                    // Guarda para desplegar luego
+                    var pending = {
+                        kw: v,
+                        cell: cell
+                    }
+                    pending_complex_fields.push(pending);
+                }
             }
+
         } else if(is_array(kw)) {
             for(var i=0; i<kw.length; i++) {
                 var v = kw[i];
-                if(is_object(v) || is_array(v) || v["__mx_cell__"]) {
-                    continue;
-                }
 
-                var style = "string";
-                if(is_null(v)) {
+                var style = "";
+                var value = null;
+                if(is_string(v)) {
+                    style = "string";
+                    value = '"' + v + '"';
+                } else if(is_null(v)) {
                     style = "null";
+                    value = "null";
                 } else if(is_number(v)) {
                     style = "number";
+                    value = v;
                 } else if(is_boolean(v)) {
                     style = "boolean";
+                    value = v?"true":"false";
+                } else if(is_object(v)) {
+                    style = "dict";
+                    value = "{" + json_object_size(v) + "}";
+                } else if(is_array(v)) {
+                    style = "list";
+                    value = "[" + v.length+ "]";
+                } else {
+                    log_error("What fack is this?");
+                    log_error(v);
                 }
 
                 var cell = graph.insertVertex(
                     layer,              // group
                     k,                  // id
-                    v,                  // value
+                    value,              // value
                     x, y,               // x,y
                     cx, cy,             // width,height
                     style,              // style
@@ -810,98 +892,99 @@
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
                 cells.push(cell);
-            }
-        }
 
-        /*-------------------------------*
-         *      First step
-         *      Secondly complex data
-         *-------------------------------*/
-        if(is_object(kw)) {
-            for(var k in kw) {
-                var v = kw[k];
-                if(!(is_object(v) || is_array(v)) || v["__mx_cell__"]) {
-                    continue;
+                if((is_array(v) && v.length>0) || (is_object(v) && json_object_size(v)>0)) {
+                    // Guarda para desplegar luego
+                    var pending = {
+                        kw: v,
+                        cell: cell
+                    }
+                    pending_complex_fields.push(pending);
                 }
-                var cell = graph.insertVertex(
-                    layer,              // group
-                    k,                  // id
-                    v,                  // value
-                    x, y,               // x,y
-                    cx, cy,             // width,height
-                    "dict",             // style
-                    false               // relative
-                );
-                y += cy + cy_sep;
-                graph.autoSizeCell(cell);
-                cells.push(cell);
-
-                // Guarda para luego
-                var pending = {
-                    kw: v,
-                    cell: cell
-                }
-                pending_complex_fields.push(pending);
-            }
-
-        } else if(is_array(kw)) {
-            for(var i=0; i<kw.length; i++) {
-                var v = kw[i];
-                if(!(is_object(v) || is_array(v)) || v["__mx_cell__"]) {
-                    continue;
-                }
-                var cell = graph.insertVertex(
-                    layer,              // group
-                    k,                  // id
-                    v,                  // value
-                    x, y,               // x,y
-                    cx, cy,             // width,height
-                    "list",             // style
-                    false               // relative
-                );
-                y += cy + cy_sep;
-                graph.autoSizeCell(cell);
-                cells.push(cell);
-
-                // Guarda para luego
-                var pending = {
-                    kw: v,
-                    cell: cell
-                }
-                pending_complex_fields.push(pending);
             }
         }
 
         /*--------------------------------------------------------------*
          *      Create the group for all fields, simples and complexes
          *--------------------------------------------------------------*/
-        var group = new mxCell("Yy", new mxGeometry(), // HACK no uses create_graph_style(), falla
-            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=left;verticalAlign=bottom;spacingTop=0;strokeWidth=1;"
+        var group = new mxCell(
+            "",
+            new mxGeometry(),
+            // HACK no uses style con create_graph_style(), falla
+            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=left;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;"
         );
-        group.setId("");
         group.setVertex(true);
-        group.setConnectable(false);
-        graph.groupCells(group, 15, cells);
-        y += group.geometry.height;
+        group.setConnectable(true);
+        graph.groupCells(
+            group,
+            15, // border between the child area and the group bounds
+            cells
+        );
+        group.setId(""); // HACK siempre después de groupCells() porque le pone un id
+
+        /*
+         *  Set position
+         */
+        if(parent_group) {
+            global_y += parent_group.geometry.height + 40; // sep  TODO
+            var geo = graph.getCellGeometry(group).clone();
+            geo.x = global_x;
+            geo.y = global_y;
+            model.setGeometry(group, geo);
+            graph.refresh(); // update the graph
+        }
+
+        /*
+         *  Create the group port
+         */
+        var port = graph.insertVertex(
+            group,              // group
+            null,               // id
+            null,               // value
+            0, 0.5,               // x,y
+            10, 10,             // width,height
+            "",                 // style
+            true                // relative
+        );
 
         /*------------------------------------------------------------*
          *      Second Step: create the link of group (complex json)
-         *      with his parent
+         *      with his parent_port
          *------------------------------------------------------------*/
-        for(var i=0; i<pending_complex_fields.length; i++) {
-            var pending = pending_complex_fields[i];
-
+        if(parent_port) {
             graph.insertEdge(
                 layer,          // parent
                 null,           // id
                 '',             // value
-                parent,         // source
-                group,          // target
+                parent_port,    // source
+                port,           // target
                 null            // style
             );
-
-            _load_json(self, x, y, pending.kw, pending.cell);
         }
+
+        /*------------------------------------------------------------*
+         *      Third Step: recursive with complex values
+         *------------------------------------------------------------*/
+        level ++;
+        for(var i=pending_complex_fields.length; i>0; i--) {
+            var pending = pending_complex_fields[i-1];
+            if(i==pending_complex_fields.length) {
+                global_x = pending.cell.geometry.width;
+            }
+            var child_group = _load_json(
+                self,
+                global_x,
+                global_y,
+                pending.kw,
+                pending.cell,
+                group,
+                level
+            );
+            if(child_group) {
+                global_x += child_group.geometry.width + 40; // TODO SEP
+            }
+        }
+
         return group;
     }
 
@@ -920,7 +1003,7 @@
         var model = graph.getModel();
 //         model.beginUpdate(); //TODO TEST para que pinte inmediatamente en debug
 //         try {
-            _load_json(self, 0, 0, json, get_layer(self));
+            _load_json(self, 0, 0, json, null, null, 0);
 
 //         } catch (e) {
 //             log_error(e);
@@ -969,6 +1052,9 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
+        rebuild(self);
+        load_json(self);
+        self.config.$ui.show();
         return 0;
     }
 
