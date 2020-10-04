@@ -786,7 +786,7 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
-if(level >= 3) return; // TODO TEST
+// if(level >= 3) return; // TODO TEST
 
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
