@@ -559,7 +559,7 @@
         graph.setMultigraph(true);
 
         // Avoids overlap of edges and collapse icons
-        graph.keepEdgesInBackground = true;
+        graph.keepEdgesInBackground = false;
 
         graph.setAutoSizeCells(true);
 
@@ -859,12 +859,12 @@
         if(is_object(kw)) {
             // Style dict group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#FBFBFB;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
             group_value = get_two_last_segment(path);
         } else {
             // Style list group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#fffbd1;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
             group_value = get_two_last_segment(path);
         }
 
@@ -881,34 +881,21 @@
             15, // border between the child area and the group bounds
             cells
         );
-//         graph.autoSizeCell(group);
         group.setId(path); // HACK siempre después de groupCells() porque le pone un id
+        group.pending_complex_fields = pending_complex_fields;
+        group.parent_group = parent_group;
+        group.parent_port = parent_port;
 
-        /*
-         *  Set position
-         */
-        if(parent_group) {
-            if(levels[level] === undefined) {
-                levels[level] = {
-                    x: parent_group.geometry.x + parent_port.geometry.width +
-                        self.config.group_cx_sep,
-                    y: parent_group.geometry.y +
-                        parent_group.geometry.height +
-                        self.config.group_cy_sep,
-                    width: 0,
-                    height: 0
-                };
+        if(levels[level] === undefined) {
+            levels[level] = {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                groups: []
             }
-
-            var geo = graph.getCellGeometry(group).clone();
-            geo.x = levels[level].x;
-            geo.y = levels[level].y;
-
-            model.setGeometry(group, geo);
-
-            levels[level].x += group.geometry.width + self.config.group_cx_sep;
-
         }
+        levels[level].groups.push(group);
 
         /*------------------------------------------------------------*
          *      Second Step: create the link of group (complex json)
@@ -944,6 +931,7 @@
          *      Third Step: recursive with complex values
          *------------------------------------------------------------*/
         level ++;
+
         for(var i=pending_complex_fields.length; i>0; i--) {
             var pending = pending_complex_fields[i-1];
 
@@ -956,7 +944,7 @@
                 levels,         // levels
                 level           // current level
             );
-
+            levels[level].groups.push(child_group);
         }
 
         return group;
@@ -1068,6 +1056,64 @@
     /************************************************************
      *
      ************************************************************/
+    function set_positions(self, graph, model, levels)
+    {
+        for(var i=0; i<levels.length; i++) {
+            var level = levels[i];
+
+            // Set the level cx/cy with the bigger group
+            for(var j=0; j<level.groups.length; j++) {
+                var group = level.groups[j];
+                level.width = Math.max(level.width, group.geometry.width);
+                level.height = Math.max(level.height, group.geometry.height);
+            }
+            if(i==0) {
+                level.y = 0;
+            } else {
+                level.y = levels[i-1].y + levels[i-1].height + self.config.group_cy_sep;
+            }
+            for(var j=0; j<level.groups.length; j++) {
+                var group = level.groups[j];
+                if(j==0) {
+                    level.x = group.parent_group?group.parent_group.geometry.x:0 +
+                        group.parent_port?group.parent_port.geometry.width:0;
+                } else {
+                    level.x += level.groups[j-1].geometry.width + self.config.group_cx_sep;
+                }
+                var geo = graph.getCellGeometry(group).clone();
+                geo.x = level.x;
+                geo.y = level.y;
+                model.setGeometry(group, geo);
+            }
+        }
+//         if(parent_group) {
+//             if(levels[level] === undefined) {
+//                 levels[level] = {
+//                     x: parent_group.geometry.x + parent_port.geometry.width +
+//                         self.config.group_cx_sep,
+//                     y: parent_group.geometry.y +
+//                         parent_group.geometry.height +
+//                         self.config.group_cy_sep,
+//                     width: 0,
+//                     height: 0,
+//                     groups: []
+//                 };
+//             }
+//
+//             var geo = graph.getCellGeometry(group).clone();
+//             geo.x = levels[level].x;
+//             geo.y = levels[level].y;
+//
+//             model.setGeometry(group, geo);
+//
+//             levels[level].x += group.geometry.width + self.config.group_cx_sep;
+//         }
+
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function load_json(self)
     {
         var json = __duplicate__(self.config.json_data);
@@ -1085,7 +1131,8 @@
                     x: 0,
                     y: 0,
                     width: 0,
-                    height: 0
+                    height: 0,
+                    groups: []
                 }
             ];
 
@@ -1098,6 +1145,7 @@
                 levels,     // levels
                 0           // current level
             );
+            set_positions(self, graph, model, levels);
 
 //         } catch (e) {
 //             log_error(e);
