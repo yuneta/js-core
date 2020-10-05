@@ -37,10 +37,8 @@
         top_overlay_icon_size: 24,
         image_topic_schema: null,
 
-        vertex_cx: 60,
-        vertex_cy: 60,
-        vertex_cx_sep: 40,
-        vertex_cy_sep: 10,
+        group_cx_sep: 40,
+        group_cy_sep: 40,
 
         layout_options: [
             {
@@ -743,7 +741,7 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
-if(level >= 2) return; // TODO TEST
+if(level >= 3) return; // TODO TEST
 
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
@@ -826,7 +824,7 @@ if(level >= 2) return; // TODO TEST
                     log_error(v);
                 }
 
-                var value = build_cell_value(self, type, k, v);
+                var value = build_cell_value(self, type, i, v);
 
                 var cell = graph.insertVertex(
                     layer,                  // group
@@ -862,12 +860,12 @@ if(level >= 2) return; // TODO TEST
             // Style dict group
             group_style =
             "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
-            group_value = get_last_segment(path) + "{" + json_object_size(kw) + "}";
+            group_value = get_two_last_segment(path);
         } else {
             // Style list group
             group_style =
             "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
-            group_value = get_last_segment(path) + "[" + kw.length+ "]";
+            group_value = get_two_last_segment(path);
         }
 
         var group = new mxCell(
@@ -876,7 +874,7 @@ if(level >= 2) return; // TODO TEST
             group_style // HACK no uses style con create_graph_style(), falla
         );
         group.setVertex(true);
-        group.setConnectable(true); // TODO Podría crear un port para el group
+        group.setConnectable(false);
 
         graph.groupCells(
             group,
@@ -892,13 +890,14 @@ if(level >= 2) return; // TODO TEST
         if(parent_group) {
             if(levels[level] === undefined) {
                 levels[level] = {
-                    x: parent_port.geometry.width+ 40, // sep  TODO
-                    y: parent_group.geometry.height + 40, // sep  TODO
+                    x: parent_port.geometry.width + self.config.group_cx_sep,
+                    y: parent_group.geometry.y +
+                        parent_group.geometry.height + self.config.group_cy_sep,
                     width: 0,
                     height: 0
                 };
             } else {
-                levels[level].x += group.geometry.width+ 40; // sep  TODO;
+                levels[level].x += group.geometry.width+ self.config.group_cx_sep;
             }
 
             var geo = graph.getCellGeometry(group).clone();
@@ -944,9 +943,6 @@ if(level >= 2) return; // TODO TEST
         level ++;
         for(var i=pending_complex_fields.length; i>0; i--) {
             var pending = pending_complex_fields[i-1];
-//             if(i==pending_complex_fields.length) {
-//                 global_x = pending.cell.geometry.width;
-//             }
 
             var child_group = _load_json(
                 self,
@@ -1037,6 +1033,18 @@ if(level >= 2) return; // TODO TEST
         var segment = path.split("`");
         if(segment.length > 0) {
             return segment[segment.length-1];
+        }
+        return "";
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_two_last_segment(path)
+    {
+        var segment = path.split("`");
+        if(segment.length >=2) {
+            return segment[segment.length-2] + "`" + segment[segment.length-1];
         }
         return "";
     }
