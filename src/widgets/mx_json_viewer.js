@@ -37,7 +37,7 @@
         top_overlay_icon_size: 24,
         image_topic_schema: null,
 
-        group_cx_sep: 40,
+        group_cx_sep: 80,
         group_cy_sep: 40,
 
         layout_options: [
@@ -101,6 +101,7 @@
             "width",
             "height",
             "layout_selected",
+            "path",
             "json_data"
         ]
     };
@@ -753,7 +754,7 @@
          *  when grouping will belong to the group
          *-----------------------------------------------*/
         var x = 0;
-        var y = 0;
+        var y = cy + cy_sep; // creo que no hace nada, al agrupar las celdas se pierde
         if(is_object(kw)) {
             for(var k in kw) {
                 var v = kw[k];
@@ -859,12 +860,12 @@
         if(is_object(kw)) {
             // Style dict group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=#FBFBFB;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#FBFBFB;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;";
             group_value = get_two_last_segment(path);
         } else {
             // Style list group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=#fffbd1;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#fffbd1;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;";
             group_value = get_two_last_segment(path);
         }
 
@@ -910,8 +911,8 @@
                 group,              // group
                 null,               // id
                 null,               // value
-                -port_size,         // x
-                group.geometry.height/2 - port_size/2,  // y
+                group.geometry.width/2 -port_size/2,         // x
+                -port_size,  // y
                 port_size, port_size,                   // width,height
                 "",                 // style // TODO registra style para los ports
                 false               // relative
@@ -935,7 +936,7 @@
         for(var i=pending_complex_fields.length; i>0; i--) {
             var pending = pending_complex_fields[i-1];
 
-            var child_group = _load_json(
+            _load_json(
                 self,
                 add_segment(path, pending.segment),   // path
                 pending.kw,     // kw
@@ -944,7 +945,6 @@
                 levels,         // levels
                 level           // current level
             );
-            levels[level].groups.push(child_group);
         }
 
         return group;
@@ -1075,10 +1075,14 @@
             for(var j=0; j<level.groups.length; j++) {
                 var group = level.groups[j];
                 if(j==0) {
-                    level.x = group.parent_group?group.parent_group.geometry.x:0 +
-                        group.parent_port?group.parent_port.geometry.width:0;
+                    level.x = (group.parent_group)?group.parent_group.geometry.x:0;
+                    level.x += (group.parent_port)?group.parent_port.geometry.width:0;
+                    if(i>0) {
+                        level.x += self.config.group_cy_sep*2;
+                    }
                 } else {
-                    level.x += level.groups[j-1].geometry.width + self.config.group_cx_sep;
+                    level.x += level.groups[j-1].geometry.width;
+                    level.x += self.config.group_cx_sep;
                 }
                 var geo = graph.getCellGeometry(group).clone();
                 geo.x = level.x;
@@ -1120,7 +1124,7 @@
         if(!json) {
             return;
         }
-        var path = self.config.path;
+        var path = kw_get_str(self.config, "path", "", false);
 
         var graph = self.config._mxgraph;
         var model = graph.getModel();
