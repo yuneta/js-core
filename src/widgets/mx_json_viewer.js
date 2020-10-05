@@ -25,6 +25,7 @@
         window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
         window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
 
+        path: null,
         json_data: null,
 
         left: 0,
@@ -213,7 +214,7 @@
                     label: t("reset view"),
                     click: function() {
                         var graph = self.config._mxgraph;
-                        graph.view.scaleAndTranslate(1, graph.border/2, graph.border/2);
+                        graph.view.scaleAndTranslate(1, graph.border, graph.border);
                     }
                 },
                 {
@@ -385,7 +386,7 @@
             automatic_resizing(self.gobj_escaped_short_name(), window_width, window_height);
         }
 
-        // webix.event(window, "resize", automatic_resizing_cb); // Don't use, the win will died
+        webix.event(window, "resize", automatic_resizing_cb); // Don't use, the win will died
     }
 
     /********************************************
@@ -544,8 +545,8 @@
 
         mxEvent.disableContextMenu(graph.container);
 
-        graph.border = 40;
-        graph.view.setTranslate(graph.border/2, graph.border/2);
+        graph.border = 30;
+        graph.view.setTranslate(graph.border, graph.border);
 
         // Enables rubberband selection
         new mxRubberband(graph);
@@ -602,7 +603,7 @@
          */
         style = graph.getStylesheet().getDefaultEdgeStyle();
         style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_STROKEWIDTH] = '2';
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
 
 //         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
@@ -660,66 +661,22 @@
          *  Own getLabel
          */
         graph.setHtmlLabels(true);
-        graph.getLabel = function(cell) {
-            if (this.getModel().isVertex(cell)) {
-                if(!cell.id && !cell.value) {
-                    return "";
-                }
-                // #006000 verde string
-                // #EE422E rojo number
-                // #FF8C00 naranja boolean
-                // #475ED0 azul null
-                var color = "black";
-                var value = cell.value;
-                var prefix = "";
-                switch(cell.style) {
-                    case "string":
-                        color = "#006000";
-                        break;
-                    case "number":
-                        color = "#EE422E";
-                        break;
-                    case "boolean":
-                        color = "#FF8C00";
-                        break;
-                    case "null":
-                        color = "#475ED0";
-                        break;
-                    case "list":
-                        color = "#475ED0";
-                        break;
-                    case "dict":
-                        color = "#475ED0";
-                        break;
-                    default:
-                        color = "black";
-                        break;
-                }
-                var t = "";
-                if(cell.id) {
-                    prefix = "•";
-                    t += "<span style='display:inline;color:#1A1A1A'>" +
-                    prefix + " " + cell.id +
-                    ": </span>";
-                    if(cell.value) {
-                        t += "<span style='display:inline;color:" +
-                        color + "'>" + cell.value +
-                        "</span>";
-                    }
-                } else if(cell.value) {
-                    t += "<span style='display:inline;color:" +
-                    color + "'>" + cell.value +
-                    "</span>";
-                }
-                return t;
-            }
-            return "";
-        };
 
         /*
          *  Tooltip
          */
         graph.setTooltips(true);
+        graph.getTooltipForCell = function(cell) {
+            var tip = null;
+            if (cell != null && cell.getTooltip != null) {
+                tip = cell.getTooltip();
+            } else {
+                if(cell.id) {
+                    return cell.id;
+                }
+            }
+            return tip;
+        };
 
         /*
          *  Cursor pointer
@@ -772,7 +729,7 @@
     /************************************************************
      *
      ************************************************************/
-    function _load_json(self, global_x, global_y, kw, parent_port, parent_group, level)
+    function _load_json(self, path, kw, parent_group, parent_port, levels, level)
     {
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
@@ -786,7 +743,7 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
-// if(level >= 3) return; // TODO TEST
+if(level >= 2) return; // TODO TEST
 
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
@@ -803,39 +760,34 @@
             for(var k in kw) {
                 var v = kw[k];
 
-                var style = "";
-                var value = null;
+                var type = "";
                 if(is_string(v)) {
-                    style = "string";
-                    value = '"' + v + '"';
+                    type = "string";
                 } else if(is_null(v)) {
-                    style = "null";
-                    value = "null";
+                    type = "null";
                 } else if(is_number(v)) {
-                    style = "number";
-                    value = v;
+                    type = "number";
                 } else if(is_boolean(v)) {
-                    style = "boolean";
-                    value = v?"true":"false";
+                    type = "boolean";
                 } else if(is_object(v)) {
-                    style = "dict";
-                    value = "{" + json_object_size(v) + "}";
+                    type = "dict";
                 } else if(is_array(v)) {
-                    style = "list";
-                    value = "[" + v.length+ "]";
+                    type = "list";
                 } else {
                     log_error("What fack is this?");
                     log_error(v);
                 }
 
+                var value = build_cell_value(self, type, k, v);
+
                 var cell = graph.insertVertex(
-                    layer,              // group
-                    k,                  // id
-                    value,              // value
-                    x, y,               // x,y
-                    cx, cy,             // width,height
-                    style,              // style
-                    false               // relative
+                    layer,                  // group
+                    add_segment(path, k),   // id
+                    value,                  // value
+                    x, y,                   // x,y
+                    cx, cy,                 // width,height
+                    type,                   // style
+                    false                   // relative
                 );
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
@@ -845,7 +797,8 @@
                     // Guarda para desplegar luego
                     var pending = {
                         kw: v,
-                        cell: cell
+                        cell: cell,
+                        segment: k
                     }
                     pending_complex_fields.push(pending);
                 }
@@ -855,39 +808,34 @@
             for(var i=0; i<kw.length; i++) {
                 var v = kw[i];
 
-                var style = "";
-                var value = null;
+                var type = "";
                 if(is_string(v)) {
-                    style = "string";
-                    value = '"' + v + '"';
+                    type = "string";
                 } else if(is_null(v)) {
-                    style = "null";
-                    value = "null";
+                    type = "null";
                 } else if(is_number(v)) {
-                    style = "number";
-                    value = v;
+                    type = "number";
                 } else if(is_boolean(v)) {
-                    style = "boolean";
-                    value = v?"true":"false";
+                    type = "boolean";
                 } else if(is_object(v)) {
-                    style = "dict";
-                    value = "{" + json_object_size(v) + "}";
+                    type = "dict";
                 } else if(is_array(v)) {
-                    style = "list";
-                    value = "[" + v.length+ "]";
+                    type = "list";
                 } else {
                     log_error("What fack is this?");
                     log_error(v);
                 }
 
+                var value = build_cell_value(self, type, k, v);
+
                 var cell = graph.insertVertex(
-                    layer,              // group
-                    k,                  // id
-                    value,              // value
-                    x, y,               // x,y
-                    cx, cy,             // width,height
-                    style,              // style
-                    false               // relative
+                    layer,                  // group
+                    add_segment(path, i),   // id
+                    value,                  // value
+                    x, y,                   // x,y
+                    cx, cy,                 // width,height
+                    type,                   // style
+                    false                   // relative
                 );
                 y += cy + cy_sep;
                 graph.autoSizeCell(cell);
@@ -897,7 +845,8 @@
                     // Guarda para desplegar luego
                     var pending = {
                         kw: v,
-                        cell: cell
+                        cell: cell,
+                        segment: i
                     }
                     pending_complex_fields.push(pending);
                 }
@@ -907,51 +856,78 @@
         /*--------------------------------------------------------------*
          *      Create the group for all fields, simples and complexes
          *--------------------------------------------------------------*/
+        var group_style = "";
+        var group_value = "";
+        if(is_object(kw)) {
+            // Style dict group
+            group_style =
+            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            group_value = get_last_segment(path) + "{" + json_object_size(kw) + "}";
+        } else {
+            // Style list group
+            group_style =
+            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;";
+            group_value = get_last_segment(path) + "[" + kw.length+ "]";
+        }
+
         var group = new mxCell(
-            "",
+            group_value, // value
             new mxGeometry(),
-            // HACK no uses style con create_graph_style(), falla
-            "whiteSpace=nowrap;html=1;fillColor=none;strokeColor=#006658;fontColor=#5C5C5C;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=top;align=left;verticalAlign=bottom;spacingTop=0;strokeWidth=1;foldable=0;"
+            group_style // HACK no uses style con create_graph_style(), falla
         );
         group.setVertex(true);
-        group.setConnectable(true);
+        group.setConnectable(true); // TODO Podría crear un port para el group
+
         graph.groupCells(
             group,
             15, // border between the child area and the group bounds
             cells
         );
-        group.setId(""); // HACK siempre después de groupCells() porque le pone un id
+//         graph.autoSizeCell(group);
+        group.setId(path); // HACK siempre después de groupCells() porque le pone un id
 
         /*
          *  Set position
          */
         if(parent_group) {
-            global_y += parent_group.geometry.height + 40; // sep  TODO
-            var geo = graph.getCellGeometry(group).clone();
-            geo.x = global_x;
-            geo.y = global_y;
-            model.setGeometry(group, geo);
-            graph.refresh(); // update the graph
-        }
+            if(levels[level] === undefined) {
+                levels[level] = {
+                    x: parent_port.geometry.width+ 40, // sep  TODO
+                    y: parent_group.geometry.height + 40, // sep  TODO
+                    width: 0,
+                    height: 0
+                };
+            } else {
+                levels[level].x += group.geometry.width+ 40; // sep  TODO;
+            }
 
-        /*
-         *  Create the group port
-         */
-        var port = graph.insertVertex(
-            group,              // group
-            null,               // id
-            null,               // value
-            0, 0.5,               // x,y
-            10, 10,             // width,height
-            "",                 // style
-            true                // relative
-        );
+            var geo = graph.getCellGeometry(group).clone();
+            geo.x = levels[level].x;
+            geo.y = levels[level].y;
+
+            model.setGeometry(group, geo);
+        }
 
         /*------------------------------------------------------------*
          *      Second Step: create the link of group (complex json)
          *      with his parent_port
          *------------------------------------------------------------*/
         if(parent_port) {
+            /*
+             *  Create the group port
+             */
+            var port_size = 10;
+            var port = graph.insertVertex(
+                group,              // group
+                null,               // id
+                null,               // value
+                -port_size,         // x
+                group.geometry.height/2 - port_size/2,  // y
+                port_size, port_size,                   // width,height
+                "",                 // style // TODO registra style para los ports
+                false               // relative
+            );
+
             graph.insertEdge(
                 layer,          // parent
                 null,           // id
@@ -968,26 +944,115 @@
         level ++;
         for(var i=pending_complex_fields.length; i>0; i--) {
             var pending = pending_complex_fields[i-1];
-            if(i==pending_complex_fields.length) {
-                global_x = pending.cell.geometry.width;
-            }
+//             if(i==pending_complex_fields.length) {
+//                 global_x = pending.cell.geometry.width;
+//             }
+
             var child_group = _load_json(
                 self,
-                global_x,
-                global_y,
-                pending.kw,
-                pending.cell,
-                group,
-                level
+                add_segment(path, pending.segment),   // path
+                pending.kw,     // kw
+                group,          // parent_group
+                pending.cell,   // parent_port
+                levels,         // levels
+                level           // current level
             );
-            if(child_group) {
-                global_x += child_group.geometry.width + 40; // TODO SEP
-            }
+
         }
 
         return group;
     }
 
+    /************************************************************
+     *  Build value of a cell
+     ************************************************************/
+    function build_cell_value(self, type, key, v)
+    {
+        // #006000 verde string
+        // #EE422E rojo number
+        // #FF8C00 naranja boolean
+        // #475ED0 azul null
+        var color = "black";
+        var prefix = "";
+
+        var value = "";
+        switch(type) {
+            case "string":
+                color = "#006000";
+                prefix = "•";
+                value = '"' + v + '"';
+                break;
+            case "number":
+                color = "#EE422E";
+                prefix = "•";
+                value = v;
+                break;
+            case "boolean":
+                color = "#FF8C00";
+                prefix = "•";
+                value = v?"true":"false";
+                break;
+            case "null":
+                color = "#475ED0";
+                prefix = "•";
+                value = "null";
+                break;
+            case "list":
+                color = "black";
+                prefix = "•";
+                value = "[" + v.length+ "]";
+                break;
+            case "dict":
+                color = "black";
+                prefix = "•";
+                value = "{" + json_object_size(v) + "}";
+                break;
+            case "container_dict":
+                color = "black";
+                value = "";
+                break;
+            case "container_list":
+                color = "black";
+                value = "";
+                break;
+            default:
+                color = "black";
+                break;
+        }
+        var t = "";
+        t += "<span style='display:inline;color:#1A1A1A'>" +
+            prefix + " " + key +
+            ": </span>";
+        t += "<span style='display:inline;color:" +
+            color + "'>" + value +
+            "</span>";
+        return t;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_last_segment(path)
+    {
+        var segment = path.split("`");
+        if(segment.length > 0) {
+            return segment[segment.length-1];
+        }
+        return "";
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function add_segment(path, segment)
+    {
+        var new_path = path;
+        if(path.length) {
+            new_path += "`";
+        }
+        new_path += segment;
+        return new_path;
+    }
 
     /************************************************************
      *
@@ -998,12 +1063,30 @@
         if(!json) {
             return;
         }
+        var path = self.config.path;
 
         var graph = self.config._mxgraph;
         var model = graph.getModel();
 //         model.beginUpdate(); //TODO TEST para que pinte inmediatamente en debug
 //         try {
-            _load_json(self, 0, 0, json, null, null, 0);
+            var levels = [
+                { // level 0
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 0
+                }
+            ];
+
+            _load_json(
+                self,
+                path,       // path
+                json,       // kw
+                null,       // parent_group,
+                null,       // parent_port,
+                levels,     // levels
+                0           // current level
+            );
 
 //         } catch (e) {
 //             log_error(e);
@@ -1011,7 +1094,8 @@
 //             model.endUpdate();
 //         }
 //
-        graph.view.setTranslate(graph.border/2, graph.border/2);
+        graph.refresh(); // TODO
+        graph.view.setTranslate(graph.border, graph.border);
         execute_layout(self);
     }
 
@@ -1041,7 +1125,8 @@
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
-        self.config.json_data = kw;
+        self.config.path = kw.path;
+        self.config.json_data = kw.data;
         load_json(self);
 
         return 0;

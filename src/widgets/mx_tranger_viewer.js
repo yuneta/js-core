@@ -492,9 +492,9 @@
                     self.parent.gobj_send_event(
                         "EV_MX_SHOW_TOPIC_SCHEMA",
                         {
-                            id: topic.topic_name,
+                            topic_name: topic.topic_name,
                             image: self.config.image_topic_schema.src,
-                            value: topic
+                            topic: topic
                         },
                         self
                     );
