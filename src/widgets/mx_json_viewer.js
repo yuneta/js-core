@@ -741,7 +741,7 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
-if(level >= 3) return; // TODO TEST
+//if(level >= 3) return; // TODO TEST
 
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
@@ -890,14 +890,14 @@ if(level >= 3) return; // TODO TEST
         if(parent_group) {
             if(levels[level] === undefined) {
                 levels[level] = {
-                    x: parent_port.geometry.width + self.config.group_cx_sep,
+                    x: parent_group.geometry.x + parent_port.geometry.width +
+                        self.config.group_cx_sep,
                     y: parent_group.geometry.y +
-                        parent_group.geometry.height + self.config.group_cy_sep,
+                        parent_group.geometry.height +
+                        self.config.group_cy_sep,
                     width: 0,
                     height: 0
                 };
-            } else {
-                levels[level].x += group.geometry.width+ self.config.group_cx_sep;
             }
 
             var geo = graph.getCellGeometry(group).clone();
@@ -905,6 +905,9 @@ if(level >= 3) return; // TODO TEST
             geo.y = levels[level].y;
 
             model.setGeometry(group, geo);
+
+            levels[level].x += group.geometry.width + self.config.group_cx_sep;
+
         }
 
         /*------------------------------------------------------------*
@@ -1102,7 +1105,6 @@ if(level >= 3) return; // TODO TEST
 //             model.endUpdate();
 //         }
 //
-        graph.refresh(); // TODO
         graph.view.setTranslate(graph.border, graph.border);
         execute_layout(self);
     }
