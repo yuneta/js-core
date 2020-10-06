@@ -55,6 +55,82 @@
         ]
     };
 
+    /************************************************************
+     *   Schema
+     ************************************************************/
+    var attrs_cols = [
+        {
+            "id": "id",
+            "header": "Id",
+            "type": [
+                "string",
+                "integer"
+            ],
+            "flag": [
+                "required"
+            ]
+        },
+        {
+            "id": "header",
+            "header": "Header",
+            "type": "string",
+            "flag": []
+        },
+        {
+            "id": "type",
+            "header": "Type",
+            "type": "enum",
+            "enum": [
+                "string",
+                "integer",
+                "object",
+                "dict",
+                "array",
+                "list",
+                "real",
+                "boolean",
+                "enum",
+                "blob"
+            ],
+            "flag": [
+                "required",
+                "notnull"
+            ]
+        },
+        {
+            "id": "flag",
+            "header": "Flag",
+            "type": "enum",
+            "enum": [
+                "",
+                "persistent",
+                "required",
+                "fkey",
+                "hook",
+                "uuid",
+                "notnull",
+                "wild",
+                "rowid",
+                "inherit",
+                "readable",
+                "writable",
+                "stats",
+                "rstats",
+                "pstats",
+                "password",
+                "email",
+                "url"
+            ],
+            "flag": []
+        },
+        {
+            "id": "default",
+            "header": "Default",
+            "type": "blob",
+            "flag": []
+        }
+    ];
+
 
 
 
@@ -603,6 +679,7 @@
                     minWidth: 360,
                     minHeight: 500
                 },
+                schema: attrs_cols,
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
