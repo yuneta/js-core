@@ -62,6 +62,7 @@
         {
             "id": "id",
             "header": "Id",
+            "fillspace": 10,
             "type": [
                 "string",
                 "integer"
@@ -73,12 +74,21 @@
         {
             "id": "header",
             "header": "Header",
+            "fillspace": 10,
             "type": "string",
+            "flag": []
+        },
+        {
+            "id": "fillspace",
+            "header": "Fillspace",
+            "fillspace": 4,
+            "type": "integer",
             "flag": []
         },
         {
             "id": "type",
             "header": "Type",
+            "fillspace": 10,
             "type": "enum",
             "enum": [
                 "string",
@@ -100,6 +110,7 @@
         {
             "id": "flag",
             "header": "Flag",
+            "fillspace": 10,
             "type": "enum",
             "enum": [
                 "",
@@ -126,6 +137,7 @@
         {
             "id": "default",
             "header": "Default",
+            "fillspace": 10,
             "type": "blob",
             "flag": []
         }
