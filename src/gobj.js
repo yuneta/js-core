@@ -948,6 +948,39 @@ __inside_event_loop__ = 0;
             }
         }
 
+        var tracing = this.is_tracing(event);
+        if (tracing) {
+            var hora = get_current_datetime();
+            var fsm = this.fsm;
+            var event_id = fsm.event_index[event] || 0;
+            try {
+                var msg = hora + this._tab() + '**> mach: ' +
+                    this.gclass_name + '^' + this.name +
+                    ', st: ' + fsm.state_list[fsm.current_state-1] +
+                    ', ev: ' + fsm.event_list[event_id - 1];
+                if(tracing > 1) {
+                    try {
+                        var kw_ = JSON.stringify(kw, replacer);
+                    } catch (e) {
+                        kw_ = kw;
+                    }
+                    msg += ', kw: ' + kw_;
+                } else {
+                    msg += ', kw: ' + kw;
+                }
+
+            } catch (e) {
+                log_error("tracing: " + e);
+
+                var msg = hora + this._tab() + '-> mach: ' +
+                    this.gclass_name + '^' + this.name +
+                    ', st: ' + fsm.state_list[fsm.current_state-1] +
+                    ', ev: ' + fsm.event_list[event_id - 1] +
+                    ', kw: ' + kw;
+            }
+            log_debug(msg);
+        }
+
         /*---------------------------*
          *  Own publication method
          *---------------------------*/
@@ -1035,12 +1068,15 @@ __inside_event_loop__ = 0;
         }
 
         if(!sent_count) {
-            //if(!(ev->flag & EVF_NO_WARN_SUBS)) { TODO
-            if(!this._destroyed) {
-                log_warning(
-                    "Publish event WITHOUT subscribers: " +
-                    this.gobj_short_name() + ", " + event
-                );
+            var event_id = this.fsm.event_index[event] || 0;
+            var attrs = this.fsm.event_attrs[event_id-1];
+            if(!elm_in_list("no_warn_subs", attrs)) {
+                if(!this._destroyed) {
+                    log_warning(
+                        "Publish event WITHOUT subscribers: " +
+                        this.gobj_short_name() + ", " + event
+                    );
+                }
             }
         }
         return ret_sum;
@@ -1130,33 +1166,33 @@ __inside_event_loop__ = 0;
         var event_attrs = [];
         for (var i=0; i<self.event_list.length; i++) {
             var ev = self.event_list[i];
-            var name = ev.split(':');
+            var name = ev.split(":");
             var ev_name = name[0];
             ev_name = __strip__(ev_name);
             event_list.push(ev_name);
 
             var ev_attrs = name[1];
             ev_attrs = __strip__(ev_attrs);
-            var attrs_list = ev_attrs.split(' ');
+            var attrs_list = ev_attrs.split(" "); // TODO
             event_attrs.push(attrs_list);
         }
         self.event_list = event_list;
         self.event_attrs = event_attrs;
 
-        // build _output_set from event attributes
-        var output_set = []; //__set__()
+        // build _output_events from event attributes
+        var output_events = []; //__set__()
         for(var idx=0; idx < self.event_list.length; idx++) {
             var ev_name = self.event_list[idx];
             var attrs = self.event_attrs[idx];
-            if (elm_in_list('output', attrs)) {
-                output_set.push(ev_name);
+            if (elm_in_list("output", attrs)) {
+                output_events.push(ev_name);
             }
         }
-        self.output_set = __set__(output_set);
+        self.output_events = __set__(output_events);
 
         // check event names
         var event_names = __duplicate__(self.event_list);
-        var set_event_names = __duplicate__(self.output_set);  // start with output_set!
+        var set_event_names = __duplicate__(self.output_events);  // start with output_events!
         for (var st in fsm_desc.machine) {
             if (fsm_desc.machine.hasOwnProperty(st)) {
                 var st_desc = fsm_desc.machine[st];
@@ -1542,6 +1578,7 @@ __inside_event_loop__ = 0;
 
     var gcflag_manual_start = 0x0001;   // gobj_start_tree() don't start gobjs of this gclass.
     var gcflag_no_check_ouput_events = 0x0002;   // When publishing don't check events in output_event_list.
+
 
     //=======================================================================
     //      Expose the class via the global object

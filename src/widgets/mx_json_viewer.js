@@ -34,9 +34,6 @@
         height: 500,
         locked: true,
 
-        top_overlay_icon_size: 24,
-        image_topic_schema: null,
-
         group_cx_sep: 80,
         group_cy_sep: 40,
 
@@ -89,20 +86,6 @@
             return self._uuid_name + "-" + name;
         }
         return self.gobj_escaped_short_name() + "-"+ name;
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function load_icons(self)
-    {
-        /*
-         *  Load control button images
-         */
-        self.config.image_topic_schema = new mxImage(
-            '/static/app/images/yuneta/topic_schema.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
     }
 
     /************************************************************
@@ -457,47 +440,6 @@
         graph.getStylesheet().putCellStyle(name, style);
     }
 
-    /************************************************************
-     *
-     ************************************************************/
-    function add_tranger_overlays(self, graph, cell)
-    {
-        var model = graph.getModel();
-        model.beginUpdate();
-        try {
-            var offsy = self.config.top_overlay_icon_size/2;
-            var offsx = self.config.top_overlay_icon_size + 5;
-
-            if(cell.value && cell.value.cols &&  Object.keys(cell.value.cols).length > 0) {
-                var overlay_role = new mxCellOverlay(
-                    self.config.image_topic_schema,
-                    "Show Topic Schema",        // tooltip
-                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(offsy, -offsy),    // offset
-                    "pointer"                   // cursor
-                );
-                graph.addCellOverlay(cell, overlay_role);
-
-                // Installs a handler for clicks on the overlay
-                overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
-                    var topic = evt2.getProperty('cell').value;
-// TODO                    self.parent.gobj_send_event(
-//                         "EV_MX_SHOW_TOPIC_SCHEMA",
-//                         topic,
-//                         self
-//                     );
-                });
-            }
-
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-    }
-
     /********************************************
      *
      ********************************************/
@@ -610,12 +552,10 @@
         graph.addListener(mxEvent.CLICK, function(sender, evt) {
             var cell = evt.getProperty('cell');
             if (cell != null) {
-                var record = evt.properties.cell.value;
-//   TODO              if(cell.isVertex()) {
-//                     self.parent.gobj_send_event("EV_MX_VERTEX_CLICKED", record, self);
-//                 } else {
-//                     self.parent.gobj_send_event("EV_MX_EDGE_CLICKED", record, self);
-//                 }
+                var id = evt.properties.cell.id;
+                if(cell.isVertex()) {
+                    self.gobj_publish_event("EV_MX_JSON_ITEM_CLICKED", {id:id});
+                }
             }
         });
 
@@ -650,42 +590,6 @@
                 return 'default';
             }
         };
-
-        /*
-         *  Add callback: Only cells selected have "class overlays"
-         */
-        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
-            /*
-             *  HACK "added" vs "removed"
-             *  The names are inverted due to historic reasons.  This cannot be changed.
-             *
-             *  HACK don't change the order, first removed, then added
-             */
-            try {
-                var cells_removed = evt.getProperty('added');
-                if(cells_removed) {
-                    for (var i = 0; i < cells_removed.length; i++) {
-                        var cell = cells_removed[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-
-            try {
-                var cells_added = evt.getProperty('removed');
-                if(cells_added) {
-                    for (var i = 0; i < cells_added.length; i++) {
-                        var cell = cells_added[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_tranger_overlays(self, graph, cell);
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-        });
     }
 
     /************************************************************
@@ -884,9 +788,9 @@
                 null,               // id
                 null,               // value
                 group.geometry.width/2 -port_size/2,         // x
-                -port_size,  // y
-                port_size, port_size,                   // width,height
-                "", // style // TODO registra style para los ports
+                -port_size,             // y
+                port_size, port_size,   // width,height
+                "",                 // style
                 false               // relative
             );
 
@@ -1193,6 +1097,7 @@
 
     var FSM = {
         "event_list": [
+            "EV_MX_JSON_ITEM_CLICKED: output no_warn_subs",
             "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
@@ -1248,8 +1153,6 @@
     proto.mt_create = function(kw)
     {
         var self = this;
-
-        load_icons(self);
 
         rebuild(self);
     }
