@@ -47,45 +47,6 @@
                 layout: function(layout_option, graph) {
                     return null;
                 }
-            },
-            {
-                id: "tree_layout",
-                value: "Compact Tree Layout",
-                layout: function(layout_option, graph) {
-                    // Enables automatic layout on the graph and installs
-                    // a tree layout for all groups who's children are
-                    // being changed, added or removed.
-                    var layout = new mxCompactTreeLayout(graph, false);
-                    layout.useBoundingBox = false;
-                    layout.edgeRouting = false;
-                    layout.levelDistance = 30;
-                    layout.nodeDistance = 10;
-                    return layout;
-                }
-            },
-            {
-                id: "herarchical_layout",
-                value: "Herarchical Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxHierarchicalLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "fastorganic_layout",
-                value: "FastOrganic Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxFastOrganicLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "circle_layout",
-                value: "Circle Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxCircleLayout(graph);
-                    return layout;
-                }
             }
         ],
 
@@ -100,7 +61,6 @@
             "top",
             "width",
             "height",
-            "layout_selected",
             "path",
             "json_data"
         ]
@@ -183,7 +143,7 @@
                 {
                     view: "richselect",
                     id: build_name(self, "layout_options"),
-                    hidden: false,
+                    hidden: true,
                     tooltip: t("Select layout"),
                     minWidth: 180,
                     options: self.config.layout_options,
@@ -286,7 +246,10 @@
                     tooltip: t("refresh"),
                     label: t("refresh"),
                     click: function() {
-                        self.gobj_send_event("EV_CLEAR_DATA", {}, self);
+                        if(!this.getTopParentView().config.fullscreen) {
+                            // En fullscreen es un desastre si reconstruimos webix
+                            self.gobj_send_event("EV_CLEAR_DATA", {}, self);
+                        }
                     }
                 }
             ]
@@ -605,7 +568,7 @@
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
 
 //         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
-        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
 //         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.Loop;
 //         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SideToSide;
 //         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
@@ -742,8 +705,6 @@
         var cells = []; // Cells of this new group
         var pending_complex_fields = [];
 
-//if(level >= 3) return; // TODO TEST
-
         /*------------------------------------------------------------*
          *      First Step: all keys (simple an complex) in a group
          *------------------------------------------------------------*/
@@ -860,12 +821,12 @@
         if(is_object(kw)) {
             // Style dict group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=#FBFBFB;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#FBFBFB;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=1;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;opacity=60;";
             group_value = get_two_last_segment(path);
         } else {
             // Style list group
             group_style =
-            "whiteSpace=nowrap;html=1;fillColor=#fffbd1;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;";
+            "whiteSpace=nowrap;html=1;fillColor=#fffbd1;strokeColor=#006658;fontColor=#4C0099;dashed=1;rounded=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=top;spacingTop=0;strokeWidth=1;fontStyle=1;foldable=0;opacity=60;";
             group_value = get_two_last_segment(path);
         }
 
@@ -879,9 +840,20 @@
 
         graph.groupCells(
             group,
-            15, // border between the child area and the group bounds
+            0, // border between the child area and the group bounds
             cells
         );
+
+        graph.updateGroupBounds(
+            [group],    // cells
+            15,         // border
+            false,      // moveGroup
+            10,         // topBorder
+            0,          // rightBorder
+            0,          // bottomBorder
+            0           // leftBorder
+        );
+
         group.setId(path); // HACK siempre después de groupCells() porque le pone un id
         group.pending_complex_fields = pending_complex_fields;
         group.parent_group = parent_group;
@@ -914,7 +886,7 @@
                 group.geometry.width/2 -port_size/2,         // x
                 -port_size,  // y
                 port_size, port_size,                   // width,height
-                "",                 // style // TODO registra style para los ports
+                "", // style // TODO registra style para los ports
                 false               // relative
             );
 
@@ -924,7 +896,7 @@
                 '',             // value
                 parent_port,    // source
                 port,           // target
-                null            // style
+                "edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;html=1;curved=1;"
             );
         }
 
@@ -1090,29 +1062,6 @@
                 model.setGeometry(group, geo);
             }
         }
-//         if(parent_group) {
-//             if(levels[level] === undefined) {
-//                 levels[level] = {
-//                     x: parent_group.geometry.x + parent_port.geometry.width +
-//                         self.config.group_cx_sep,
-//                     y: parent_group.geometry.y +
-//                         parent_group.geometry.height +
-//                         self.config.group_cy_sep,
-//                     width: 0,
-//                     height: 0,
-//                     groups: []
-//                 };
-//             }
-//
-//             var geo = graph.getCellGeometry(group).clone();
-//             geo.x = levels[level].x;
-//             geo.y = levels[level].y;
-//
-//             model.setGeometry(group, geo);
-//
-//             levels[level].x += group.geometry.width + self.config.group_cx_sep;
-//         }
-
     }
 
     /************************************************************
@@ -1124,12 +1073,11 @@
         if(!json) {
             return;
         }
-        var path = kw_get_str(self.config, "path", "", false);
-
+        var path = kw_get_str(self.config, "path", "`", false);
         var graph = self.config._mxgraph;
         var model = graph.getModel();
-//         model.beginUpdate(); //TODO TEST para que pinte inmediatamente en debug
-//         try {
+        model.beginUpdate();
+        try {
             var levels = [
                 { // level 0
                     x: 0,
@@ -1151,14 +1099,14 @@
             );
             set_positions(self, graph, model, levels);
 
-//         } catch (e) {
-//             log_error(e);
-//         } finally {
-//             model.endUpdate();
-//         }
-//
-        graph.view.setTranslate(graph.border, graph.border);
-        execute_layout(self);
+            graph.view.setTranslate(graph.border, graph.border);
+            execute_layout(self);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
     }
 
 
