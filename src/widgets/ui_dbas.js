@@ -63,10 +63,7 @@
             "id": "id",
             "header": "Id",
             "fillspace": 10,
-            "type": [
-                "string",
-                "integer"
-            ],
+            "type": "string",
             "flag": [
                 "required"
             ]
@@ -403,25 +400,19 @@
      ********************************************/
     function ac_mx_vertex_clicked(self, event, kw, src)
     {
-        var id = kw.id;
-        var value = kw.value;
-        self.config.gobj_tranger_viewer.gobj_send_event(
-            "EV_SELECT_ITEM",
-            {id:id},
+        var schema = kwid_collect(kw.cols, null, null, null);
+
+        self.config.gobj_formtable.gobj_send_event(
+            "EV_CLEAR_DATA",
+            {
+            },
             self
         );
-/*
-        if(self.config.gobj_gclass_viewer.gobj_read_attr("$ui").isVisible()) {
-            self.config.last_id_selected = id;
-            if(self.gobj_is_unique()) {
-                self.gobj_save_persistent_attrs();
-            }
-            get_gobj_gclass_viewer(self, kw);
-        }
-        if(self.config.gobj_gobj_viewer.gobj_read_attr("$ui").isVisible()) {
-            get_gobj_gobj_viewer(self, kw);
-        }*/
-
+        self.config.gobj_formtable.gobj_send_event(
+            "EV_LOAD_DATA",
+            schema,
+            self
+        );
         return 0;
     }
 
