@@ -757,7 +757,9 @@
             0,          // bottomBorder
             0           // leftBorder
         );
-
+        if(group.geometry.width < 200) {
+            group.geometry.width = 200;
+        }
         group.setId(path); // HACK siempre después de groupCells() porque le pone un id
         group.pending_complex_fields = pending_complex_fields;
         group.parent_group = parent_group;
