@@ -509,6 +509,7 @@
          *---------------------------------------*/
         self.config.$ui = webix.ui({
             rows: [
+                // HACK "Container Panel" toolbar suministrada por ui_container
                 get_container_panel_top_toolbar(self),
                 {
                     animate: false,

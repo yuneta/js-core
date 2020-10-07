@@ -20,6 +20,7 @@
 
         $ui: null,
         $ui_fullscreen: null,   // What part of window will be fullscreened "Pinhold Window" HACK
+        resizing_event_id: null,
 
         pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window" HACK
         window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
@@ -331,7 +332,11 @@
             automatic_resizing(self.gobj_escaped_short_name(), window_width, window_height);
         }
 
-        webix.event(window, "resize", automatic_resizing_cb); // Don't use, the win will died
+        if(self.config.resizing_event_id) {
+            webix.eventRemove(self.config.resizing_event_id);
+            self.config.resizing_event_id = 0;
+        }
+        self.config.resizing_event_id = webix.event(window, "resize", automatic_resizing_cb);
     }
 
     /********************************************
@@ -1174,6 +1179,10 @@
         if(self.config.$ui) {
             self.config.$ui.destructor();
             self.config.$ui = 0;
+        }
+        if(self.config.resizing_event_id) {
+            webix.eventRemove(self.config.resizing_event_id);
+            self.config.resizing_event_id = 0;
         }
     }
 
