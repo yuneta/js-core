@@ -635,35 +635,37 @@ __inside_event_loop__ = 0;
         this.__global__ = null;
         this.__filter__ = null;
 
-        var __global__ = kw["__global__"];
-        var __config__ = kw["__config__"];
-        var __filter__ = kw["__filter__"];
+        if(kw) {
+            var __global__ = kw["__global__"];
+            var __config__ = kw["__config__"];
+            var __filter__ = kw["__filter__"];
 
-        if(__global__) {
-            this.__global__ = __duplicate__(__global__);
-        }
-        if(__config__) {
-            this.__config__ = __duplicate__(__config__);
-            if(kw_has_key(this.__config__, "__rename_event_name__")) {
-                var renamed_event = kw_get_str(this.__config__, "__rename_event_name__", 0);
-                this.renamed_event = renamed_event;
-                delete this.__config__["__rename_event_name__"];
+            if(__global__) {
+                this.__global__ = __duplicate__(__global__);
+            }
+            if(__config__) {
+                this.__config__ = __duplicate__(__config__);
+                if(kw_has_key(this.__config__, "__rename_event_name__")) {
+                    var renamed_event = kw_get_str(this.__config__, "__rename_event_name__", 0);
+                    this.renamed_event = renamed_event;
+                    delete this.__config__["__rename_event_name__"];
 
-                // Get/Create __global__
-                var kw_global = this.__global__;
-                if(!kw_global) {
-                    kw_global = {};
-                    this.__global__ = kw_global;
+                    // Get/Create __global__
+                    var kw_global = this.__global__;
+                    if(!kw_global) {
+                        kw_global = {};
+                        this.__global__ = kw_global;
+                    }
+                    kw_global["__original_event_name__"] = event;
                 }
-                kw_global["__original_event_name__"] = event;
+                if(kw_has_key(this.__config__, "__hard_subscription__")) {
+                    this.hard_subscription = kw_get_bool(this.__config__, "__hard_subscription__", 0);
+                    delete this.__config__["__hard_subscription__"];
+                }
             }
-            if(kw_has_key(this.__config__, "__hard_subscription__")) {
-                this.hard_subscription = kw_get_bool(this.__config__, "__hard_subscription__", 0);
-                delete this.__config__["__hard_subscription__"];
+            if(__filter__) {
+                this.__filter__ = __duplicate__(__filter__);
             }
-        }
-        if(__filter__) {
-            this.__filter__ = __duplicate__(__filter__);
         }
     };
 
