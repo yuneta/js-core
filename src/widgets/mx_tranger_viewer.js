@@ -22,7 +22,8 @@
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
 
-        image_topic_schema: null,
+        image_topic_json_graph: null,
+        image_formtable: null,
         image_data_in_disk: null,
         image_data_in_memory: null,
         image_data_on_moving: null,
@@ -100,8 +101,13 @@
          *            los datos moviéndose y reproduciéndose
          *                  acaso no es eso una bacteria, un virus?
          */
-        self.config.image_topic_schema = new mxImage(
-            '/static/app/images/yuneta/topic_schema.svg',
+
+        self.config.image_topic_json_graph = new mxImage(
+            '/static/app/images/yuneta/json_graph.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_formtable = new mxImage(
+            '/static/app/images/yuneta/formtable.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
         self.config.image_data_in_disk = new mxImage(
@@ -477,11 +483,11 @@
 
             if(cell.value && cell.value.cols &&  Object.keys(cell.value.cols).length > 0) {
                 var overlay_role = new mxCellOverlay(
-                    self.config.image_topic_schema,
-                    "Show Topic Schema",        // tooltip
+                    self.config.image_topic_json_graph,
+                    "Show Topic Schema Json Graph",        // tooltip
                     mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
                     mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                    new mxPoint(offsy, -offsy),    // offset
+                    new mxPoint(1*offsx - offsy, -offsy),    // offset
                     "pointer"                   // cursor
                 );
                 graph.addCellOverlay(cell, overlay_role);
@@ -490,10 +496,34 @@
                 overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
                     var topic = evt2.getProperty('cell').value;
                     self.parent.gobj_send_event(
-                        "EV_MX_SHOW_TOPIC_SCHEMA",
+                        "EV_MX_SHOW_TOPIC_JSON_GRAPH",
                         {
                             topic_name: topic.topic_name,
-                            image: self.config.image_topic_schema.src,
+                            image: self.config.image_topic_json_graph.src,
+                            topic: topic
+                        },
+                        self
+                    );
+                });
+
+                var overlay_role = new mxCellOverlay(
+                    self.config.image_formtable,
+                    "Show Topic Schema FormTable",    // tooltip
+                    mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                    mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                    new mxPoint(2*offsx - offsy, -offsy),   // offset
+                    "pointer"                   // cursor
+                );
+                graph.addCellOverlay(cell, overlay_role);
+
+                // Installs a handler for clicks on the overlay
+                overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
+                    var topic = evt2.getProperty('cell').value;
+                    self.parent.gobj_send_event(
+                        "EV_MX_SHOW_TOPIC_SCHEMA_FORM",
+                        {
+                            topic_name: topic.topic_name,
+                            image: self.config.image_formtable.src,
                             topic: topic
                         },
                         self

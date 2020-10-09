@@ -419,7 +419,43 @@
     /********************************************
      *
      ********************************************/
-    function ac_mx_show_topic_schema(self, event, kw, src)
+    function ac_mx_show_topic_json_graph(self, event, kw, src)
+    {
+        var name = src.gobj_escaped_short_name() + "-" + kw.topic_name;
+
+        var gobj_schema_viewer = self.yuno.gobj_find_unique_gobj(name);
+        if(gobj_schema_viewer) {
+            gobj_schema_viewer.gobj_send_event("EV_TOGGLE", {}, self);
+            return 0;
+        }
+        gobj_schema_viewer = self.yuno.gobj_create_unique(
+            name,
+            Mx_json_viewer,
+            {
+                window_title: "Schema " + kw.topic_name,
+                window_image: kw.image,
+                width: 800,
+                height: 600
+            },
+            __yuno__.__pinhold__
+        );
+        gobj_schema_viewer.gobj_send_event(
+            "EV_LOAD_DATA",
+            {
+                path: "topics`" + kw.topic_name, // HACK path hardcoded
+                data: kw.topic
+            },
+            self
+        );
+
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_mx_show_topic_schema_form(self, event, kw, src)
     {
         var name = src.gobj_escaped_short_name() + "-" + kw.topic_name;
 
@@ -535,7 +571,8 @@
         "event_list": [
             "EV_MT_COMMAND_ANSWER",
             "EV_MX_VERTEX_CLICKED",
-            "EV_MX_SHOW_TOPIC_SCHEMA",
+            "EV_MX_SHOW_TOPIC_JSON_GRAPH",
+            "EV_MX_SHOW_TOPIC_SCHEMA_FORM",
             "EV_MX_VIEW_DATA_IN_DISK",
             "EV_MX_VIEW_DATA_IN_MEMORY",
             "EV_MX_VIEW_DATA_ON_MOVING",
@@ -550,16 +587,17 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_MT_COMMAND_ANSWER",        ac_mt_command_answer,       undefined],
-                ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,       undefined],
-                ["EV_MX_SHOW_TOPIC_SCHEMA",     ac_mx_show_topic_schema,    undefined],
-                ["EV_MX_VIEW_DATA_IN_DISK",     ac_mx_view_data_in_disk,    undefined],
-                ["EV_MX_VIEW_DATA_IN_MEMORY",   ac_mx_view_data_in_memory,  undefined],
-                ["EV_MX_VIEW_DATA_ON_MOVING",   ac_mx_view_data_on_moving,  undefined],
-                ["EV_ON_OPEN",                  ac_on_open,                 undefined],
-                ["EV_ON_CLOSE",                 ac_on_close,                undefined],
-                ["EV_SELECT",                   ac_select,                  undefined],
-                ["EV_REFRESH",                  ac_refresh,                 undefined]
+                ["EV_MT_COMMAND_ANSWER",            ac_mt_command_answer,           undefined],
+                ["EV_MX_VERTEX_CLICKED",            ac_mx_vertex_clicked,           undefined],
+                ["EV_MX_SHOW_TOPIC_JSON_GRAPH",     ac_mx_show_topic_json_graph,    undefined],
+                ["EV_MX_SHOW_TOPIC_SCHEMA_FORM",    ac_mx_show_topic_schema_form,   undefined],
+                ["EV_MX_VIEW_DATA_IN_DISK",         ac_mx_view_data_in_disk,        undefined],
+                ["EV_MX_VIEW_DATA_IN_MEMORY",       ac_mx_view_data_in_memory,      undefined],
+                ["EV_MX_VIEW_DATA_ON_MOVING",       ac_mx_view_data_on_moving,      undefined],
+                ["EV_ON_OPEN",                      ac_on_open,                     undefined],
+                ["EV_ON_CLOSE",                     ac_on_close,                    undefined],
+                ["EV_SELECT",                       ac_select,                      undefined],
+                ["EV_REFRESH",                      ac_refresh,                     undefined]
             ]
         }
     };

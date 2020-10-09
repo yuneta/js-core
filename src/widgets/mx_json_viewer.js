@@ -259,6 +259,7 @@
                 rows: [
                     {
                         view: "mxgraph",
+                        background_color: "#fefffe",
                         id: build_name(self, "mxgraph"),
                         gobj: self
                     },

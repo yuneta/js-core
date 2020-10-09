@@ -17,9 +17,11 @@ webix.protoUI({
         gobj: null
     },
 
-    $init: function() {
-        var background_color = "#F6F6EF";
-        background_color = "#FFFFFF";
+    $init: function(config) {
+        var background_color = "#FFFFFF";
+        if(config.background_color) {
+            background_color = config.background_color;
+        }
         this.$view.innerHTML =
             "<div class='webix_mxgraph_content' style='background-color:" + background_color + ";position:relative;width:100%;height:100%;overflow:auto;'></div>";
         this._contentobj = this.$view.firstChild;
@@ -30,22 +32,6 @@ webix.protoUI({
         webix.event(this.$view, "touchstart", function(e) {
             e.cancelBubble = true;
         });
-
-// TODO scrollbar dentro de otra scrollbar, no consigo que sean independientes
-//         webix.event(this._contentobj, "mousewheel", function(e) {
-//             // stop propagation
-//                 e.cancelBubble = true;
-//                 e.defaultPrevented = true;
-//                 e.originalEvent.preventDefault();
-//                 e.originalEvent.stopPropagation();
-//         });
-//         webix.event(this._contentobj, "scroll", function(e) {
-//             // stop propagation
-//             e.stopPropagation();
-//             e.preventDefault();
-//             e.returnValue = false;
-//             return false;
-//         });
     },
 
     render: function() {

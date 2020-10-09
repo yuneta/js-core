@@ -19,7 +19,7 @@ webix.protoUI({
         cytoscape_options: {}
     },
 
-    $init: function() {
+    $init: function(config) {
         this.$view.innerHTML =
             "<div class='webix_cytoscape_content' style='background-color:#FFFFFF;width:100%;height:100%;z-index:0'></div>";
         this._contentobj = this.$view.firstChild;

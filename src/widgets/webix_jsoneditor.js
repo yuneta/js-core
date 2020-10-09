@@ -23,7 +23,7 @@ webix.protoUI({
         statusBar: true,
     },
 
-    $init: function() {
+    $init: function(config) {
         var background_color = "#F6F6EF";
         background_color = "#FFFFFF";
         this.$view.innerHTML =
