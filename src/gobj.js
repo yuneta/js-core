@@ -587,10 +587,13 @@ __inside_event_loop__ = 0;
                 var tracing = this.is_tracing();
                 if(tracing) {
                     var hora = get_current_datetime();
-                    try {
-                        var kw_ = JSON.stringify(kw);
-                    } catch (e) {
-                        kw_ = kw;
+                    var kw_ = kw;
+                    if(tracing > 1) {
+                        try {
+                            var kw_ = JSON.stringify(kw);
+                        } catch (e) {
+                            kw_ = kw;
+                        }
                     }
                     var msg = hora + '+> mach: ' +
                         this.gclass_name + '^' + this.name +
