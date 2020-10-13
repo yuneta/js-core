@@ -432,7 +432,7 @@
             name,
             Mx_json_viewer,
             {
-                window_title: "Schema " + kw.topic_name,
+                window_title: "Json View of " + kw.topic_name,
                 window_image: kw.image,
                 width: 800,
                 height: 600
@@ -468,7 +468,7 @@
             name,
             Mx_json_viewer,
             {
-                window_title: "Schema " + kw.topic_name,
+                window_title: "FormTable of " + kw.topic_name,
                 window_image: kw.image,
                 width: 800,
                 height: 600
