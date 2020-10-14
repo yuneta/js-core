@@ -421,7 +421,7 @@
      ********************************************/
     function ac_mx_show_topic_json_graph(self, event, kw, src)
     {
-        var name = src.gobj_escaped_short_name() + "-" + kw.topic_name;
+        var name = src.gobj_escaped_short_name() + "-json-" + kw.topic_name;
 
         var gobj_schema_viewer = self.yuno.gobj_find_unique_gobj(name);
         if(gobj_schema_viewer) {
@@ -457,7 +457,7 @@
      ********************************************/
     function ac_mx_show_topic_schema_form(self, event, kw, src)
     {
-        var name = src.gobj_escaped_short_name() + "-" + kw.topic_name;
+        var name = src.gobj_escaped_short_name() + "-formtable-" + kw.topic_name;
 
         var gobj_schema_viewer = self.yuno.gobj_find_unique_gobj(name);
         if(gobj_schema_viewer) {
@@ -466,8 +466,23 @@
         }
         gobj_schema_viewer = self.yuno.gobj_create_unique(
             name,
-            Mx_json_viewer,
+            Ui_formtable,
             {
+                ui_properties: {
+                    gravity: 3,
+                    minWidth: 360,
+                    minHeight: 500
+                },
+                schema: attrs_cols,
+
+                panel_properties: {
+                    with_panel_top_toolbar: true,
+                    with_panel_title: "FormTable " + kw.topic_name, //self.name,
+                    with_panel_hidden_btn: true,
+                    with_panel_fullscreen_btn: true,
+                    with_panel_resize_btn: true
+                },
+                is_pinhold_window: true,
                 window_title: "FormTable of " + kw.topic_name,
                 window_image: kw.image,
                 width: 800,
@@ -475,12 +490,18 @@
             },
             __yuno__.__pinhold__
         );
+
+        var schema = kwid_collect(kw.topic.cols, null, null, null);
+
+        gobj_schema_viewer.gobj_send_event(
+            "EV_CLEAR_DATA",
+            {
+            },
+            self
+        );
         gobj_schema_viewer.gobj_send_event(
             "EV_LOAD_DATA",
-            {
-                path: "topics`" + kw.topic_name, // HACK path hardcoded
-                data: kw.topic
-            },
+            {data:schema},
             self
         );
 
