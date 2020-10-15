@@ -479,7 +479,7 @@
 
                 topic_name: kw.topic_name,
                 schema: attrs_cols,
-                with_checkbox: true,
+                with_checkbox: false,
                 with_textfilter: true,
                 with_sort: true,
                 with_top_title: true,

@@ -588,7 +588,7 @@
             if (cell != null && cell.getTooltip != null) {
                 tip = cell.getTooltip();
             } else {
-                if(cell.id) {
+                if(cell.id && cell.isVertex()) {
                     return cell.id;
                 }
             }

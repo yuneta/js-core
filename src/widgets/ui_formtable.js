@@ -353,7 +353,7 @@
                             $table.clearAll();
 
                             self.gobj_send_event("EV_UNDO_RECORD", {}, self);
-                            self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
+                            self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
 
                             self.gobj_publish_event(
                                 "EV_REFRESH_TABLE",
@@ -422,12 +422,24 @@
                 },
                 {
                     view: "icon",
-                    id: build_name(self, "cancel_record"),
-                    icon: "fal fa-trash-alt",
+                    id: build_name(self, "discard_record"),
+                    icon: "far fa-rectangle-landscape",
                     css: "webix_transparent icon_toolbar_24",
-                    tooltip: t("cancel"),
+                    tooltip: t("discard record"),
                     click: function() {
-                        self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
+                        var $new = $$(build_name(self, "create_form"));
+                        var changed = $new.isDirty();
+                        if(changed) {
+                            webix.confirm(
+                                {
+                                    title: t("discard record"),
+                                    text: t("are you sure"),
+                                    type:"confirm-warning"
+                                }).then(function(result) {
+                                    self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
+                                }
+                            );
+                        }
                     }
                 }
             ]
@@ -482,7 +494,6 @@
                         view: "form",
                         id: build_name(self, "update_form"),
                         scroll:true,
-//                         minWidth: 400,
                         elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
@@ -516,7 +527,6 @@
                         view: "form",
                         id: build_name(self, "create_form"),
                         scroll:true,
-//                         minWidth: 400,
                         elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
@@ -528,7 +538,7 @@
                                 if(changed) {
                                     var btn = $$(build_name(self, "create_record"));
                                     webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                                    btn = $$(build_name(self, "cancel_record"));
+                                    btn = $$(build_name(self, "discard_record"));
                                     webix.html.addCss(btn.getNode(), "icon_color_cancel");
                                 }
                             }
@@ -1226,7 +1236,7 @@
             //$form.save(); update asynchronously by backend
         } else {
             update_check_invalid_fields = true;
-            log_warning(t("check invalid fields"));
+            info_user(t("check invalid fields"));
         }
         return 0;
     }
@@ -1285,7 +1295,7 @@
 
             var btn = $$(build_name(self, "create_record"));
             webix.html.removeCss(btn.getNode(), "icon_color_submmit");
-            btn = $$(build_name(self, "cancel_record"));
+            btn = $$(build_name(self, "discard_record"));
             webix.html.removeCss(btn.getNode(), "icon_color_cancel");
             $form.clearValidation();
             $form.clear();
@@ -1293,7 +1303,7 @@
             //$form.save(); new asynchronously by backend
         } else {
             create_check_invalid_fields = true;
-            log_warning(t("check invalid fields"));
+            info_user(t("check invalid fields"));
         }
         return 0;
     }
@@ -1301,7 +1311,7 @@
     /********************************************
      *
      ********************************************/
-    function ac_cancel_record(self, event, kw, src)
+    function ac_discard_record(self, event, kw, src)
     {
         var $form = $$(build_name(self, "create_form"));
         if(create_check_invalid_fields) {
@@ -1314,7 +1324,7 @@
 
         var btn = $$(build_name(self, "create_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_submmit");
-        btn = $$(build_name(self, "cancel_record"));
+        btn = $$(build_name(self, "discard_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_cancel");
 
         // TODO refresh
@@ -1523,7 +1533,7 @@
         }
 
         self.gobj_send_event("EV_UNDO_RECORD", {}, self);
-        self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
+        self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
 
         return 0;
     }
@@ -1608,7 +1618,7 @@
             "EV_ROW_CHECKED: output",
 
             "EV_UNDO_RECORD",
-            "EV_CANCEL_RECORD",
+            "EV_DISCARD_RECORD",
             "EV_LIST_MODE",
             "EV_UPDATE_MODE",
             "EV_CREATE_MODE",
@@ -1642,7 +1652,7 @@
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
-                ["EV_CANCEL_RECORD",            ac_cancel_record,           undefined],
+                ["EV_DISCARD_RECORD",           ac_discard_record,          undefined],
                 ["EV_LIST_MODE",                ac_list_mode,               undefined],
                 ["EV_UPDATE_MODE",              ac_update_mode,             undefined],
                 ["EV_CREATE_MODE",              ac_create_mode,             undefined],
