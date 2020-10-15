@@ -742,11 +742,11 @@
                 fillspace: tranger_col.fillspace
             }
             if(self.config.with_footer) {
-                if(webix_schema.length==0) {
+                if(i==0) {
                     webix_col.footer = {
                         content: "countColumn"
                     };
-                } else if(webix_schema.length==1) {
+                } else if(i==1) {
                     webix_col.footer = {
                         text: t("records")
                     };

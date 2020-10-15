@@ -476,7 +476,7 @@
                 },
 
                 schema: attrs_cols,
-                with_checkbox: false,
+                with_checkbox: true,
                 with_textfilter: true,
                 with_sort: true,
                 with_top_title: true,
