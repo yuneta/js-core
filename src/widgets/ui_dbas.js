@@ -473,7 +473,17 @@
                     minWidth: 360,
                     minHeight: 500
                 },
+
                 schema: attrs_cols,
+                with_checkbox: false,
+                with_textfilter: true,
+                with_sort: true,
+                with_top_title: true,
+                with_footer: true,
+                with_navigation_toolbar: true,
+                update_mode_enabled: true,
+                create_mode_enabled: true,
+                delete_mode_enabled: true,
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
@@ -501,7 +511,7 @@
         );
         gobj_schema_viewer.gobj_send_event(
             "EV_LOAD_DATA",
-            {data:schema},
+            schema,
             self
         );
 

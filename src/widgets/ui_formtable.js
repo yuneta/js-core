@@ -177,7 +177,7 @@
 
         var navigation_toolbar = {
             view: "scrollview",
-            height: 70,
+            height: 65,
             scroll: "auto",
             hidden: self.config.with_navigation_toolbar?false:true,
             body: {
@@ -252,6 +252,7 @@
                         type: "icon",
                         icon: "far fa-angle-double-right",
                         css: "webix_transparent btn_icon_toolbar_16",
+                        tooltip: t("next_page"),
                         width: 50,
                         click: function() {
                             self.gobj_send_event("EV_NEXT_PAGE", {}, self);
@@ -277,6 +278,7 @@
                         tooltip: t("record_idx"),
                         value: self.config.record_idx,
                         labelPosition: "top",
+                        css: "small_input small_label",
                         on: {
                             onChange(newVal, oldVal) {
                                 newVal = Number(newVal);
@@ -297,6 +299,7 @@
                         tooltip: t("page"),
                         value: self.config.page,
                         labelPosition: "top",
+                        css: "small_input small_label",
                         on: {
                             onChange(newVal, oldVal) {
                                 newVal = Number(newVal);
@@ -315,7 +318,8 @@
                         readonly: true,
                         tooltip: t("total"),
                         value: self.config.total,
-                        labelPosition: "top"
+                        labelPosition: "top",
+                        css: "small_input small_label"
                     },
                     {
                         view: "text",
@@ -326,6 +330,7 @@
                         tooltip: t("page_size"),
                         value: self.config.page_size,
                         labelPosition: "top",
+                        css: "small_input small_label",
                         on: {
                             onChange(newVal, oldVal) {
                                 newVal = Number(newVal);
@@ -1123,6 +1128,10 @@
     function ac_load_data(self, event, kw, src)
     {
         var data = kw;
+        if(!is_array(data)) {
+            log_error("FormTable, data MUST be an array");
+            return -1;
+        }
 
         var $table = $$(build_name(self, "list_table"));
 
@@ -1435,6 +1444,7 @@
         if(idx >= 0 && idx < self.config.total) {
             var id = $widget.getIdByIndex(idx);
             $widget.select(id);
+            $widget.showItem(id);
         } else {
             var id = $widget.getSelectedId();
             $widget.unselectAll();
@@ -1468,6 +1478,7 @@
             var id = $widget.getIdByIndex(idx);
             self.config.page = page;
             $widget.select(id);
+            $widget.showItem(id);
         } else {
             var id = $widget.getSelectedId();
             $widget.unselectAll();
