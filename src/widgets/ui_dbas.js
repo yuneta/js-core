@@ -469,12 +469,15 @@
             name,
             Ui_formtable,
             {
+                subscriber: self,  // HACK get all output events
+
                 ui_properties: {
                     gravity: 3,
                     minWidth: 360,
                     minHeight: 500
                 },
 
+                topic_name: kw.topic_name,
                 schema: attrs_cols,
                 with_checkbox: true,
                 with_textfilter: true,
@@ -608,6 +611,7 @@
             "EV_MX_VIEW_DATA_IN_DISK",
             "EV_MX_VIEW_DATA_IN_MEMORY",
             "EV_MX_VIEW_DATA_ON_MOVING",
+            "EV_ROW_CHECKED",
             "EV_ON_OPEN",
             "EV_ON_CLOSE",
             "EV_SELECT",
@@ -626,6 +630,7 @@
                 ["EV_MX_VIEW_DATA_IN_DISK",         ac_mx_view_data_in_disk,        undefined],
                 ["EV_MX_VIEW_DATA_IN_MEMORY",       ac_mx_view_data_in_memory,      undefined],
                 ["EV_MX_VIEW_DATA_ON_MOVING",       ac_mx_view_data_on_moving,      undefined],
+                ["EV_ROW_CHECKED",                  undefined,                      undefined],
                 ["EV_ON_OPEN",                      ac_on_open,                     undefined],
                 ["EV_ON_CLOSE",                     ac_on_close,                    undefined],
                 ["EV_SELECT",                       ac_select,                      undefined],
@@ -752,11 +757,12 @@
                     minWidth: 360,
                     minHeight: 500
                 },
+                topic_name: self.name,
                 schema: attrs_cols,
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: "Schema of " + self.name,
+                    with_panel_title: "Schema",
                     with_panel_hidden_btn: true,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: true

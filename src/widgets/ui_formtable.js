@@ -42,15 +42,12 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
+        topic_name: null,
         schema: null,
         update_mode_enabled: false,
         create_mode_enabled: false,
         delete_mode_enabled: false,
-        update_record_event_name: "EV_UPDATE_RECORD",
-        create_record_event_name: "EV_CREATE_RECORD",
-        delete_record_event_name: "EV_DELETE_RECORD",
-        refresh_data_event_name: "EV_REFRESH",
-        row_checked_event_name: "EV_ROW_CHECKED",
+        delete_record_event_name: "EV_DELETE_RECORD", // TODO
         fields_enabled: null,
         with_drag: false,
         with_checkbox: false,
@@ -358,10 +355,11 @@
                             self.gobj_send_event("EV_UNDO_RECORD", {}, self);
                             self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
 
-                            self.parent.gobj_send_event(
-                                self.config.refresh_data_event_name,
-                                {},
-                                self
+                            self.gobj_publish_event(
+                                "EV_REFRESH_TABLE",
+                                {
+                                    topic_name: self.config.topic_name,
+                                }
                             );
                         }
                     }
@@ -452,13 +450,13 @@
                 onCheck: function(rowId, colId, state){
                     var $table = $$(build_name(self, "list_table"));
                     var record = $table.getItem(rowId);
-                    self.parent.gobj_send_event(
-                        self.config.row_checked_event_name,
+                    self.gobj_publish_event(
+                        "EV_ROW_CHECKED",
                         {
+                            topic_name: self.config.topic_name,
                             record: record,
                             checked: state
-                        },
-                        self
+                        }
                     );
                 },
                 onItemDblClick: function(id) {
@@ -1218,10 +1216,12 @@
                 new_kw["id"] = kw["id_"];
                 delete new_kw["id_"];
             }
-            self.parent.gobj_send_event(
-                self.config.update_record_event_name,
-                new_kw,
-                self
+            self.gobj_publish_event(
+                "EV_UPDATE_RECORD",
+                {
+                    topic_name: self.config.topic_name,
+                    record: new_kw
+                }
             );
             //$form.save(); update asynchronously by backend
         } else {
@@ -1275,10 +1275,12 @@
                 new_kw["id"] = kw["id_"];
                 delete new_kw["id_"];
             }
-            self.parent.gobj_send_event(
-                self.config.create_record_event_name,
-                new_kw,
-                self
+            self.gobj_publish_event(
+                "EV_CREATE_RECORD",
+                {
+                    topic_name: self.config.topic_name,
+                    record: new_kw
+                }
             );
 
             var btn = $$(build_name(self, "create_record"));
@@ -1596,11 +1598,16 @@
         "event_list": [
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
-            "EV_UPDATE_RECORD",
-            "EV_UNDO_RECORD",
             "EV_GET_DATA",
             "EV_GET_CHECKED_DATA",
-            "EV_CREATE_RECORD",
+
+            "EV_UPDATE_RECORD: output",
+            "EV_CREATE_RECORD: output",
+            "EV_DELETE_RECORD: output",
+            "EV_REFRESH_TABLE: output",
+            "EV_ROW_CHECKED: output",
+
+            "EV_UNDO_RECORD",
             "EV_CANCEL_RECORD",
             "EV_LIST_MODE",
             "EV_UPDATE_MODE",
@@ -1630,11 +1637,11 @@
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
-                ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
-                ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
                 ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
+                ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
+                ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
                 ["EV_CANCEL_RECORD",            ac_cancel_record,           undefined],
                 ["EV_LIST_MODE",                ac_list_mode,               undefined],
                 ["EV_UPDATE_MODE",              ac_update_mode,             undefined],
