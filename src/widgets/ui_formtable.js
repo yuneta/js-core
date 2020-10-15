@@ -370,14 +370,14 @@
         var update_toolbar = {
             view:"toolbar",
             id: build_name(self, "update_toolbar"),
-            width: 60,
+            width: 50,
             css: "toolbar2color",
             rows: [
                 {
                     view: "icon",
                     id: build_name(self, "update_record"),
                     icon: "far fa-save",
-                    css: "webix_transparent icon_toolbar_34",
+                    css: "webix_transparent icon_toolbar_24",
                     tooltip: t("update record"),
                     click: function() {
                         var $form = $$(build_name(self, "update_form"));
@@ -391,7 +391,7 @@
                     view: "icon",
                     id: build_name(self, "undo_record"),
                     icon: "far fa-undo",
-                    css: "webix_transparent icon_toolbar_34",
+                    css: "webix_transparent icon_toolbar_24",
                     tooltip: t("undo"),
                     click: function() {
                         self.gobj_send_event("EV_UNDO_RECORD", {}, self);
@@ -403,14 +403,14 @@
         var create_toolbar = {
             view:"toolbar",
             id: build_name(self, "create_toolbar"),
-            width: 60,
+            width: 50,
             css: "toolbar2color",
             rows: [
                 {
                     view: "icon",
                     id: build_name(self, "create_record"),
                     icon: "far fa-save",
-                    css: "webix_transparent icon_toolbar_34",
+                    css: "webix_transparent icon_toolbar_24",
                     tooltip: t("save record"),
                     click: function() {
                         var $new = $$(build_name(self, "create_form"));
@@ -424,7 +424,7 @@
                     view: "icon",
                     id: build_name(self, "cancel_record"),
                     icon: "fal fa-trash-alt",
-                    css: "webix_transparent icon_toolbar_34",
+                    css: "webix_transparent icon_toolbar_24",
                     tooltip: t("cancel"),
                     click: function() {
                         self.gobj_send_event("EV_CANCEL_RECORD", {}, self);
