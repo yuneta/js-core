@@ -401,18 +401,19 @@
     function ac_mx_vertex_clicked(self, event, kw, src)
     {
         var schema = kwid_collect(kw.cols, null, null, null);
-
-        self.config.gobj_formtable.gobj_send_event(
-            "EV_CLEAR_DATA",
-            {
-            },
-            self
-        );
-        self.config.gobj_formtable.gobj_send_event(
-            "EV_LOAD_DATA",
-            schema,
-            self
-        );
+        if(schema) {
+            self.config.gobj_formtable.gobj_send_event(
+                "EV_CLEAR_DATA",
+                {
+                },
+                self
+            );
+            self.config.gobj_formtable.gobj_send_event(
+                "EV_LOAD_DATA",
+                schema,
+                self
+            );
+        }
         return 0;
     }
 
@@ -487,13 +488,13 @@
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: "FormTable " + kw.topic_name, //self.name,
+                    with_panel_title: "Schema of " + kw.topic_name, //self.name,
                     with_panel_hidden_btn: true,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: true
                 },
                 is_pinhold_window: true,
-                window_title: "FormTable of " + kw.topic_name,
+                window_title: "Schema of " + kw.topic_name,
                 window_image: kw.image,
                 width: 800,
                 height: 600
@@ -755,7 +756,7 @@
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: "FormTable " + self.name,
+                    with_panel_title: "Schema of " + self.name,
                     with_panel_hidden_btn: true,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: true

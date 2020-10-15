@@ -209,11 +209,19 @@
                         var graph = self.config._mxgraph;
                         if(graph.isCellsLocked()) {
                             graph.setCellsLocked(false);
+
+                            graph.rubberband.setEnabled(true);
+                            graph.panningHandler.useLeftButtonForPanning = false;
+
                             self.config.locked = false;
                             this.define("icon", "far fa-lock-open-alt");
                             this.define("label", t("lock vertices"));
                         } else {
                             graph.setCellsLocked(true);
+
+                            graph.rubberband.setEnabled(false);
+                            graph.panningHandler.useLeftButtonForPanning = true;
+
                             self.config.locked = true;
                             this.define("icon", "far fa-lock-alt");
                             this.define("label", t("unlock vertices"));
@@ -459,10 +467,11 @@
         graph.view.setTranslate(graph.border, graph.border);
 
         // Enables rubberband selection
-        new mxRubberband(graph);
+        graph.rubberband = new mxRubberband(graph);
+        graph.rubberband.setEnabled(false);
 
         graph.setPanning(true);
-        //graph.panningHandler.useLeftButtonForPanning = true;
+        graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;

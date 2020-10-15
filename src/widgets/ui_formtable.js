@@ -177,12 +177,15 @@
 
         var navigation_toolbar = {
             view: "scrollview",
-            height: 65,
+            height: 50,
             scroll: "auto",
             hidden: self.config.with_navigation_toolbar?false:true,
             body: {
                 view:"toolbar",
                 css: "toolbar2color",
+                elementsConfig: {
+                    height: 45
+                },
                 cols: [
                     {
                         view: "segmented",
@@ -293,7 +296,7 @@
                     {
                         view: "text",
                         id: build_name(self, "page"),
-                        minWidth: 100,
+                        minWidth: 70,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("page"),
                         tooltip: t("page"),
@@ -324,7 +327,7 @@
                     {
                         view: "text",
                         id: build_name(self, "page_size"),
-                        minWidth: 100,
+                        minWidth: 70,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("page_size"),
                         tooltip: t("page_size"),
@@ -481,7 +484,7 @@
                         view: "form",
                         id: build_name(self, "update_form"),
                         scroll:true,
-                        minWidth: 400,
+//                         minWidth: 400,
                         elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
@@ -515,7 +518,7 @@
                         view: "form",
                         id: build_name(self, "create_form"),
                         scroll:true,
-                        minWidth: 400,
+//                         minWidth: 400,
                         elementsConfig: {
                             labelAlign:"left",
                             labelWidth: 160
@@ -1143,6 +1146,8 @@
             }
         }
         $table.parse(data);
+        self.config.total = $table.count();
+        $$(build_name(self, "total")).setValue(self.config.total);
 
         if(data.length == 1) {
             if(!self.config.with_webix_id) {

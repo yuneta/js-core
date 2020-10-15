@@ -33,6 +33,8 @@
         vertex_cy: 90,
         vertex_cy_sep: 40,
 
+        locked: true,
+
         layers: [
             {
                 id: "raw_topic",
@@ -255,6 +257,37 @@
                         var graph = self.config._mxgraph;
                         graph.zoomOut();
                         graph.view.setTranslate(0, 0);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: t("unlock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            graph.setCellsLocked(false);
+
+                            graph.rubberband.setEnabled(true);
+                            graph.panningHandler.useLeftButtonForPanning = false;
+
+                            self.config.locked = false;
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            graph.setCellsLocked(true);
+
+                            graph.rubberband.setEnabled(false);
+                            graph.panningHandler.useLeftButtonForPanning = true;
+
+                            self.config.locked = true;
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
                     }
                 },
                 { view:"label", label: ""},
@@ -484,7 +517,7 @@
             if(cell.value && cell.value.cols &&  Object.keys(cell.value.cols).length > 0) {
                 var overlay_role = new mxCellOverlay(
                     self.config.image_topic_json_graph,
-                    "Show Topic Schema Json Graph",        // tooltip
+                    "Show Topic Json Graph",        // tooltip
                     mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
                     mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
                     new mxPoint(1*offsx - offsy, -offsy),    // offset
@@ -617,10 +650,11 @@
         graph.view.setTranslate(graph.border/2, graph.border/2);
 
         // Enables rubberband selection
-        new mxRubberband(graph);
+        graph.rubberband = new mxRubberband(graph);
+        graph.rubberband.setEnabled(false);
 
         graph.setPanning(true);
-        graph.panningHandler.useLeftButtonForPanning = false;
+        graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;
