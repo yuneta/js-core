@@ -820,17 +820,24 @@
     {
         var _writable_fields = [];
         var webix_rules = {};
-        var webix_elements = [
-            {
+        var webix_elements = [];
+
+        var system_topic = false;
+        var topic_name = self.config.topic_name;
+        if(empty_string(topic_name) || topic_name.substring(0, 2) == "__") {
+            system_topic = true;
+        }
+
+        if(self.config.with_webix_id) {
+            webix_elements.push({
                 view:"text",
                 name: "id",
-                hidden: self.config.with_webix_id?false:true,
                 label: "Webix Id",
                 css: "input_font_fijo",
                 readonly: true,
                 type: "string"
-            }
-        ];
+            });
+        }
 
         for(var i=0; schema && i<schema.length; i++) {
             var webix_element = null;
@@ -850,10 +857,11 @@
             var is_email = elm_in_list("email", flag);
             var is_url = elm_in_list("url", flag);
             var is_writable = elm_in_list("writable", flag);
+            var is_notnull = elm_in_list("notnull", flag);
 
             switch(mode) {
                 case "create":
-                    if(is_required || is_persistent || is_writable) {
+                    if(!system_topic && (is_required || is_persistent || is_writable)) {
                         is_writable = true;
                         _writable_fields.push(id);
 
@@ -863,11 +871,13 @@
                         if(is_email) {
                             webix_rules[id] = webix.rules.isEmail;
                         }
+                    } else {
+                        is_writable = false;
                     }
                     break;
                 case "update":
                 default:
-                    if(is_writable) {
+                    if(!system_topic && (is_writable)) {
                         _writable_fields.push(id);
 
                         if(is_required) {
@@ -876,6 +886,8 @@
                         if(is_email) {
                             webix_rules[id] = webix.rules.isEmail;
                         }
+                    } else {
+                        is_writable = false;
                     }
                     break;
             }

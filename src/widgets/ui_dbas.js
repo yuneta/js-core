@@ -65,7 +65,8 @@
             "fillspace": 10,
             "type": "string",
             "flag": [
-                "required"
+                "required",
+                "persistent"
             ]
         },
         {
@@ -73,14 +74,21 @@
             "header": "Header",
             "fillspace": 10,
             "type": "string",
-            "flag": []
+            "flag": [
+                "required",
+                "persistent",
+                "writable"
+            ]
         },
         {
             "id": "fillspace",
             "header": "Fillspace",
             "fillspace": 4,
             "type": "integer",
-            "flag": []
+            "flag": [
+                "persistent",
+                "writable"
+            ]
         },
         {
             "id": "type",
@@ -101,7 +109,9 @@
             ],
             "flag": [
                 "required",
-                "notnull"
+                "persistent",
+                "notnull",
+                "writable"
             ]
         },
         {
@@ -129,14 +139,21 @@
                 "email",
                 "url"
             ],
-            "flag": []
+            "flag": [
+                "required",
+                "persistent",
+                "writable"
+            ]
         },
         {
             "id": "default",
             "header": "Default",
             "fillspace": 10,
             "type": "blob",
-            "flag": []
+            "flag": [
+                "persistent",
+                "writable"
+            ]
         }
     ];
 
@@ -757,7 +774,7 @@
                     minWidth: 360,
                     minHeight: 500
                 },
-                topic_name: self.name,
+                topic_name: "",
                 schema: attrs_cols,
 
                 panel_properties: {
