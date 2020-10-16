@@ -178,7 +178,7 @@
             scroll: "auto",
             hidden: self.config.with_navigation_toolbar?false:true,
             body: {
-                view:"toolbar",
+                view: "toolbar",
                 css: "toolbar2color",
                 elementsConfig: {
                     height: 45
@@ -368,7 +368,7 @@
         };
 
         var update_toolbar = {
-            view:"toolbar",
+            view: "toolbar",
             id: build_name(self, "update_toolbar"),
             width: 50,
             css: "toolbar2color",
@@ -401,7 +401,7 @@
         };
 
         var create_toolbar = {
-            view:"toolbar",
+            view: "toolbar",
             id: build_name(self, "create_toolbar"),
             width: 50,
             css: "toolbar2color",
@@ -830,7 +830,7 @@
 
         if(self.config.with_webix_id) {
             webix_elements.push({
-                view:"text",
+                view: "text",
                 name: "id",
                 label: "Webix Id",
                 css: "input_font_fijo",
@@ -908,7 +908,7 @@
                         type = "password";
                     }
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -918,7 +918,7 @@
                     break;
                 case "integer":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -931,7 +931,7 @@
                     break;
                 case "object":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -941,7 +941,7 @@
                     break;
                 case "dict":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -951,7 +951,7 @@
                     break;
                 case "array":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -961,7 +961,7 @@
                     break;
                 case "list":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -971,7 +971,7 @@
                     break;
                 case "real":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -984,7 +984,7 @@
                     break;
                 case "boolean":
                     webix_element = {
-                        view:"checkbox",
+                        view: "checkbox",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -993,7 +993,7 @@
                     break;
                 case "enum":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
@@ -1003,7 +1003,7 @@
                     break;
                 case "blob":
                     webix_element = {
-                        view:"text",
+                        view: "text",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",

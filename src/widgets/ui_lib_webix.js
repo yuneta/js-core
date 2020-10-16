@@ -20,7 +20,7 @@
     {
         /*
          *  Multicombo propio
-         *  HACK recuerda pasar tb options como options_
+         *  HACK recuerda pasar también options como options_
          */
         webix.protoUI({
             name: "multicombo2",
@@ -53,7 +53,7 @@
 
         /*
          *  Combo propio
-         *  HACK recuerda pasar tb options como options_
+         *  HACK recuerda pasar también options como options_
          */
         webix.protoUI({
             name: "combo2",
