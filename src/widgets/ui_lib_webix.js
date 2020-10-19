@@ -33,7 +33,7 @@
                 if(webix.isArray(value)) {
                     var temp = [];
                     for (var i = 0; i < value.length; i++) {
-                        if(value[i].id) {
+                        if(is_object(value[i])) {
                             temp.push(value[i].id);
                         } else {
                             temp.push(value[i]);
