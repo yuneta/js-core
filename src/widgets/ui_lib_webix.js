@@ -24,6 +24,11 @@
          */
         webix.protoUI({
             name: "multicombo2",
+            $init:function(config) {
+                if(!config.options_) {
+                    config.options_ = __duplicate__(config.options);
+                }
+            },
             setValue: function(value) {
                 if(webix.isArray(value)) {
                     var temp = [];
@@ -57,6 +62,11 @@
          */
         webix.protoUI({
             name: "combo2",
+            $init:function(config) {
+                if(!config.options_) {
+                    config.options_ = __duplicate__(config.options);
+                }
+            },
             setValue: function(value) {
                 if(is_object(value)) {
                     value = value.id;

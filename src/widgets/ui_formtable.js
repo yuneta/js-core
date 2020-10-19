@@ -816,6 +816,21 @@
     /********************************************
      *
      ********************************************/
+    function enum2options(enum_)
+    {
+        var options = [];
+        for(var i=0; i<enum_.length; i++) {
+            options.push({
+                id: enum_[i],
+                value: enum_[i]
+            });
+        }
+        return options;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function cols2webix_form_elements(self, schema, mode)
     {
         var _writable_fields = [];
@@ -993,12 +1008,12 @@
                     break;
                 case "enum":
                     webix_element = {
-                        view: "text",
+                        view: "multicombo2",
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
                         readonly: is_writable?false:true,
-                        type: "text"
+                        options: enum2options(tranger_col.enum)
                     };
                     break;
                 case "blob":
