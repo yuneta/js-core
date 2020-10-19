@@ -34,6 +34,7 @@
         expanded: true,
         lists_limit: 50,
         dicts_limit: 50,
+        system_topic_schema: null,
 
         /*
          *  ui_properties to container
@@ -54,108 +55,6 @@
             "last_id_selected"
         ]
     };
-
-    /************************************************************
-     *   Schema
-     ************************************************************/
-    var attrs_cols = [
-        {
-            "id": "id",
-            "header": "Id",
-            "fillspace": 10,
-            "type": "string",
-            "flag": [
-                "required",
-                "persistent"
-            ]
-        },
-        {
-            "id": "header",
-            "header": "Header",
-            "fillspace": 10,
-            "type": "string",
-            "flag": [
-                "required",
-                "persistent",
-                "writable"
-            ]
-        },
-        {
-            "id": "fillspace",
-            "header": "Fillspace",
-            "fillspace": 4,
-            "type": "integer",
-            "flag": [
-                "persistent",
-                "writable"
-            ]
-        },
-        {
-            "id": "type",
-            "header": "Type",
-            "fillspace": 10,
-            "type": "enum",
-            "enum": [
-                "string",
-                "integer",
-                "object",
-                "dict",
-                "array",
-                "list",
-                "real",
-                "boolean",
-                "enum",
-                "blob"
-            ],
-            "flag": [
-                "required",
-                "persistent",
-                "notnull",
-                "writable"
-            ]
-        },
-        {
-            "id": "flag",
-            "header": "Flag",
-            "fillspace": 10,
-            "type": "enum",
-            "enum": [
-                "",
-                "persistent",
-                "required",
-                "fkey",
-                "hook",
-                "uuid",
-                "notnull",
-                "wild",
-                "rowid",
-                "inherit",
-                "readable",
-                "writable",
-                "stats",
-                "rstats",
-                "pstats",
-                "password",
-                "email",
-                "url"
-            ],
-            "flag": [
-                "required",
-                "persistent",
-                "writable"
-            ]
-        },
-        {
-            "id": "default",
-            "header": "Default",
-            "fillspace": 10,
-            "type": "blob",
-            "flag": [
-                "persistent",
-                "writable"
-            ]
-        }
-    ];
 
 
 
@@ -326,6 +225,13 @@
         send_command_to_remote_service(
             self,
             "__root__",
+            "system-topic-schema",
+            {
+            }
+        );
+        send_command_to_remote_service(
+            self,
+            "__root__",
             "get-2key-value",
             {
                 key1: "tranger",
@@ -401,8 +307,16 @@
                 process_get_2key_value(self, data);
                 break;
 
+            case "system-topic-schema":
+                self.config.system_topic_schema = data;
+                self.config.gobj_formtable.gobj_write_attr(
+                    "schema", self.config.system_topic_schema
+                );
+                self.config.gobj_formtable.gobj_send_event("EV_REBUILD_TABLE", {}, self);
+                break;
+
             case "get-2key-subvalue":
-//                 process_get_2key_subvalue(self, data);
+//  TODO               process_get_2key_subvalue(self, data);
 //                 break;
 
             default:
@@ -495,7 +409,7 @@
                 },
 
                 topic_name: kw.topic_name,
-                schema: attrs_cols,
+                schema: self.config.system_topic_schema,
                 with_checkbox: false,
                 with_textfilter: true,
                 with_sort: true,
@@ -775,7 +689,7 @@
                     minHeight: 500
                 },
                 topic_name: "",
-                schema: attrs_cols,
+                schema: self.config.system_topic_schema,
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
