@@ -864,8 +864,6 @@
             var id = self.config.with_webix_id?
                     (tranger_col.id==="id"?"id_":tranger_col.id):tranger_col.id;
             var flag = tranger_col.flag;
-            var is_hook = elm_in_list("hook", flag);
-            var is_fkey = elm_in_list("fkey", flag);
             var is_required = elm_in_list("required", flag);
             var is_persistent = elm_in_list("persistent", flag);
             var is_password = elm_in_list("password", flag);
@@ -873,6 +871,9 @@
             var is_url = elm_in_list("url", flag);
             var is_writable = elm_in_list("writable", flag);
             var is_notnull = elm_in_list("notnull", flag);
+            var is_hook = elm_in_list("hook", flag);
+            var is_fkey = elm_in_list("fkey", flag);
+            var is_enum = elm_in_list("enum", flag);
 
             switch(mode) {
                 case "create":
@@ -907,7 +908,16 @@
                     break;
             }
 
-            switch(tranger_col.type) {
+            var type = tranger_col.type; // By default is basic type
+            if(is_enum) {
+                type = "enum";
+            } else if(is_hook) {
+                type = "hook";
+            } else if(is_fkey) {
+                type = "fkey";
+            }
+
+            switch(type) {
                 case "string":
                     var type = "text";
                     if(tranger_col.id.indexOf("email")>=0) {
@@ -945,15 +955,6 @@
                     }
                     break;
                 case "object":
-                    webix_element = {
-                        view: "text",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        type: "text"
-                    };
-                    break;
                 case "dict":
                     webix_element = {
                         view: "text",
@@ -965,15 +966,6 @@
                     };
                     break;
                 case "array":
-                    webix_element = {
-                        view: "text",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        type: "text"
-                    };
-                    break;
                 case "list":
                     webix_element = {
                         view: "text",
@@ -1006,16 +998,6 @@
                         readonly: is_writable?false:true
                     };
                     break;
-                case "enum":
-                    webix_element = {
-                        view: "multicombo2",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        options: enum2options(tranger_col.enum)
-                    };
-                    break;
                 case "blob":
                     webix_element = {
                         view: "text",
@@ -1026,8 +1008,40 @@
                         type: "text"
                     };
                     break;
+                case "enum":
+                    var real_type = tranger_col.type;
+                    var enum_list = tranger_col.enum;
+                    switch(real_type) {
+                        case "string":
+                            webix_element = {
+                                view: "combo2",
+                                name: id,
+                                label: t(tranger_col.header),
+                                css: "input_font_fijo",
+                                readonly: is_writable?false:true,
+                                options: enum2options(enum_list)
+                            };
+                            break;
+                        case "object":
+                        case "dict":
+                        case "array":
+                        case "list":
+                            webix_element = {
+                                view: "multicombo2",
+                                name: id,
+                                label: t(tranger_col.header),
+                                css: "input_font_fijo",
+                                readonly: is_writable?false:true,
+                                options: enum2options(enum_list)
+                            };
+                            break;
+                        default:
+                            log_error("enum type invalid: " + real_type);
+                            break;
+                    }
+                    break;
                 default:
-                    log_error("col type unknown:" + tranger_col.type);
+                    log_error("col type unknown: " + tranger_col.type);
                     break;
             }
             if(webix_element) {
@@ -1325,7 +1339,7 @@
             btn = $$(build_name(self, "discard_record"));
             webix.html.removeCss(btn.getNode(), "icon_color_cancel");
             $form.clearValidation();
-            $form.clear();
+            //$form.clear(); // Don't clear the form, user can use it to create new record
 
             //$form.save(); new asynchronously by backend
         } else {
