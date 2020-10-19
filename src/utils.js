@@ -783,7 +783,7 @@
      */
     function kwid_match_id(ids, id)
     {
-        if(!ids || !id) {
+        if(is_null(ids) || !id) {
             // Si no hay filtro pasan todos.
             return true;
         }
