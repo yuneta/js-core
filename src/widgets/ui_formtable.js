@@ -452,6 +452,7 @@
             footer: self.config.with_footer,
             select: self.config.with_select,
             multiselect: self.config.with_multiselect,
+            editable: false, // TODO
             navigation: self.config.with_keyboard_navigation,
             resizeColumn: self.config.with_resizeColumn,
             resizeRow: self.config.with_resizeRow,
@@ -761,30 +762,75 @@
                 }
             }
 
-            switch(tranger_col.type) {
+            var flag = tranger_col.flag;
+            var is_hook = elm_in_list("hook", flag);
+            var is_fkey = elm_in_list("fkey", flag);
+            var is_enum = elm_in_list("enum", flag);
+
+            var type = tranger_col.type; // By default is basic type
+            if(is_enum) {
+                type = "enum";
+            } else if(is_hook) {
+                type = "hook";
+            } else if(is_fkey) {
+                type = "fkey";
+            }
+
+            switch(type) {
                 case "string":
+                    webix_col["editor"] = "text";
                     break;
                 case "integer":
+                    webix_col["editor"] = "text";
                     break;
                 case "object":
-                    break;
                 case "dict":
+                    webix_col["editor"] = "text";
                     break;
                 case "array":
-                    break;
                 case "list":
+                    webix_col["editor"] = "text";
                     break;
                 case "real":
+                    webix_col["editor"] = "text";
                     break;
                 case "boolean":
                     webix_col["template"] = "{common.checkbox()}";
                     break;
-                case "enum":
-                    break;
                 case "blob":
+                    webix_col["editor"] = "text";
                     break;
+
+                case "enum":
+                    var real_type = tranger_col.type;
+                    var enum_list = tranger_col.enum;
+                    switch(real_type) {
+                        case "string":
+                            webix_col["editor"] = "combo";
+//                             webix_col["optionslist"] = true;
+                            webix_col["options"] = enum2options(enum_list);
+                            break;
+                        case "object":
+                        case "dict":
+                        case "array":
+                        case "list":
+                            webix_col["optionslist"] = true;
+                            webix_col["options"] = enum2options(enum_list);
+                            webix_col["editor"] = "multiselect";
+                            webix_col["suggest"] = {
+                               view:"checksuggest"
+                            };
+                            break;
+                        default:
+                            log_error("enum type invalid: " + real_type);
+                            break;
+                    }
+                    break;
+                case "hook":
+                case "fkey":
+                    // TODO
                 default:
-                    log_error("col type unknown:" + tranger_col.type);
+                    log_error("col type unknown:" + type);
                     break;
             }
             if(tranger_col.template) {
@@ -1040,8 +1086,11 @@
                             break;
                     }
                     break;
+                case "hook":
+                case "fkey":
+                    // TODO
                 default:
-                    log_error("col type unknown: " + tranger_col.type);
+                    log_error("col type unknown: " + type);
                     break;
             }
             if(webix_element) {
@@ -1137,6 +1186,8 @@
          *  Bind form to table
          */
         $update.bind($table);
+//         $update.attachEvent("onBindRequest", function() {
+//         });
 
         /*
          *  Form create

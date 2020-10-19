@@ -35,6 +35,8 @@
                     for (var i = 0; i < value.length; i++) {
                         if(value[i].id) {
                             temp.push(value[i].id);
+                        } else {
+                            temp.push(value[i]);
                         }
                     }
                     value = temp;
