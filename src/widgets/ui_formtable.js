@@ -822,7 +822,16 @@
                             };
                             break;
                         default:
-                            log_error("enum type invalid: " + real_type);
+                            log_error("table '" + self.config.topic_name +
+                                "' enum type of '" + tranger_col.id +
+                                "' is invalid: " + real_type
+                            );
+                            webix_col["optionslist"] = true;
+                            webix_col["options"] = enum2options(enum_list);
+                            webix_col["editor"] = "multiselect";
+                            webix_col["suggest"] = {
+                               view:"checksuggest"
+                            };
                             break;
                     }
                     break;
@@ -1082,7 +1091,18 @@
                             };
                             break;
                         default:
-                            log_error("enum type invalid: " + real_type);
+                            log_error("form '" + self.config.topic_name +
+                                "' enum type of '" + tranger_col.id +
+                                "' is invalid: " + real_type
+                            );
+                            webix_element = {
+                                view: "multicombo2",
+                                name: id,
+                                label: t(tranger_col.header),
+                                css: "input_font_fijo",
+                                readonly: is_writable?false:true,
+                                options: enum2options(enum_list)
+                            };
                             break;
                     }
                     break;

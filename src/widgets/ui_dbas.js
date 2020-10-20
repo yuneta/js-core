@@ -491,6 +491,30 @@
     /********************************************
      *
      ********************************************/
+    function ac_create_record(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        trace_msg("create record " + topic_name);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_update_record(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        trace_msg("update record " + topic_name);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_on_open(self, event, kw, src)
     {
         refresh_tranger(self);
@@ -543,6 +567,8 @@
             "EV_MX_VIEW_DATA_IN_MEMORY",
             "EV_MX_VIEW_DATA_ON_MOVING",
             "EV_ROW_CHECKED",
+            "EV_CREATE_RECORD",
+            "EV_UPDATE_RECORD",
             "EV_ON_OPEN",
             "EV_ON_CLOSE",
             "EV_SELECT",
@@ -562,6 +588,8 @@
                 ["EV_MX_VIEW_DATA_IN_MEMORY",       ac_mx_view_data_in_memory,      undefined],
                 ["EV_MX_VIEW_DATA_ON_MOVING",       ac_mx_view_data_on_moving,      undefined],
                 ["EV_ROW_CHECKED",                  undefined,                      undefined],
+                ["EV_CREATE_RECORD",                ac_create_record,               undefined],
+                ["EV_UPDATE_RECORD",                ac_update_record,               undefined],
                 ["EV_ON_OPEN",                      ac_on_open,                     undefined],
                 ["EV_ON_CLOSE",                     ac_on_close,                    undefined],
                 ["EV_SELECT",                       ac_select,                      undefined],
