@@ -44,6 +44,7 @@
         //////////////// Particular Attributes //////////////////
         topic_name: null,
         schema: null,
+        is_topic_schema: false, // will be added to published events
         update_mode_enabled: false,
         create_mode_enabled: false,
         delete_mode_enabled: false,
@@ -359,6 +360,7 @@
                                 "EV_REFRESH_TABLE",
                                 {
                                     topic_name: self.config.topic_name,
+                                    is_topic_schema: self.config.is_topic_schema
                                 }
                             );
                         }
@@ -467,6 +469,7 @@
                         "EV_ROW_CHECKED",
                         {
                             topic_name: self.config.topic_name,
+                            is_topic_schema: self.config.is_topic_schema,
                             record: record,
                             checked: state
                         }
@@ -1342,6 +1345,7 @@
                 "EV_UPDATE_RECORD",
                 {
                     topic_name: self.config.topic_name,
+                    is_topic_schema: self.config.is_topic_schema,
                     record: new_kw
                 }
             );
@@ -1401,6 +1405,7 @@
                 "EV_CREATE_RECORD",
                 {
                     topic_name: self.config.topic_name,
+                    is_topic_schema: self.config.is_topic_schema,
                     record: new_kw
                 }
             );

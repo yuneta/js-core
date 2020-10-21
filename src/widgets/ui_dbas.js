@@ -30,11 +30,12 @@
          *
          */
         remote_service: null, // Servicio remoto al que pedir los datos
-        tranger: null,
+        tranger_name: null,
         expanded: true,
-        lists_limit: 50,
-        dicts_limit: 50,
+        lists_limit: 100,
+        dicts_limit: 100,
         system_topic_schema: null,
+        tranger: null,
 
         /*
          *  ui_properties to container
@@ -45,7 +46,7 @@
         gobj_je_tranger: null,
         gobj_tranger_viewer: null,
         gobj_mx_example: null,
-        gobj_formtable: null,
+        gobj_formtable_schema: null,
 
         $ui: null,              // $ui from container
 
@@ -150,7 +151,7 @@
                     /*-----------------------------------------*
                      *  Toggle panel view, "Container Panel"
                      *-----------------------------------------*/
-                    toggle_container_panel(self.config.gobj_formtable);
+                    toggle_container_panel(self.config.gobj_formtable_schema);
                 }
             }
         ];
@@ -215,7 +216,7 @@
             },
             self
         );
-        self.config.gobj_formtable.gobj_send_event(
+        self.config.gobj_formtable_schema.gobj_send_event(
             "EV_CLEAR_DATA",
             {
             },
@@ -235,7 +236,7 @@
             "get-2key-value",
             {
                 key1: "tranger",
-                key2: self.config.tranger,
+                key2: self.config.tranger_name,
                 expanded: self.config.expanded,
                 lists_limit: self.config.lists_limit,
                 dicts_limit: self.config.dicts_limit
@@ -248,6 +249,8 @@
      ********************************************/
     function process_get_2key_value(self, data, clear)
     {
+        self.config.tranger = data;
+
         self.config.gobj_je_tranger.gobj_send_event(
             "EV_LOAD_DATA",
             {
@@ -309,10 +312,10 @@
 
             case "system-topic-schema":
                 self.config.system_topic_schema = data;
-                self.config.gobj_formtable.gobj_write_attr(
+                self.config.gobj_formtable_schema.gobj_write_attr(
                     "schema", self.config.system_topic_schema
                 );
-                self.config.gobj_formtable.gobj_send_event("EV_REBUILD_TABLE", {}, self);
+                self.config.gobj_formtable_schema.gobj_send_event("EV_REBUILD_TABLE", {}, self);
                 break;
 
             case "get-2key-subvalue":
@@ -333,13 +336,13 @@
     {
         var schema = kwid_collect(kw.cols, null, null, null);
         if(schema) {
-            self.config.gobj_formtable.gobj_send_event(
+            self.config.gobj_formtable_schema.gobj_send_event(
                 "EV_CLEAR_DATA",
                 {
                 },
                 self
             );
-            self.config.gobj_formtable.gobj_send_event(
+            self.config.gobj_formtable_schema.gobj_send_event(
                 "EV_LOAD_DATA",
                 schema,
                 self
@@ -410,6 +413,7 @@
 
                 topic_name: kw.topic_name,
                 schema: self.config.system_topic_schema,
+                is_topic_schema: true,
                 with_checkbox: false,
                 with_textfilter: true,
                 with_sort: true,
@@ -491,11 +495,48 @@
     /********************************************
      *
      ********************************************/
+    function ac_row_checked(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
+        var record = kw.record;
+        var checked = kw.checked;
+        trace_msg("row checked " + topic_name + ", is schema: " + is_topic_schema);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_create_record(self, event, kw, src)
     {
         var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
         var record = kw.record;
-        trace_msg("create record " + topic_name);
+
+        if(is_topic_schema) {
+            var topic = self.config.tranger.topics[topic_name];
+            topic.cols[record.id] = record;
+            var schema = kwid_collect(topic.cols, null, null, null);
+            src.gobj_send_event(
+                "EV_LOAD_DATA",
+                schema,
+                self
+            );
+            src.gobj_send_event("EV_RECORD_BY_ID", {id: record.id}, self);
+
+            self.config.gobj_je_tranger.gobj_send_event(
+                "EV_UPDATE_DATA",
+                {
+                    data: self.config.tranger
+                },
+                self
+            );
+
+        } else {
+            // TODO
+        }
 
         return 0;
     }
@@ -506,8 +547,53 @@
     function ac_update_record(self, event, kw, src)
     {
         var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
         var record = kw.record;
-        trace_msg("update record " + topic_name);
+
+        if(is_topic_schema) {
+            var topic = self.config.tranger.topics[topic_name];
+        } else {
+            // TODO
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_delete_record(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
+        var record = kw.record;
+        trace_msg("delete record " + topic_name + ", is schema: " + is_topic_schema);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_link_records(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
+        var record = kw.record;
+        trace_msg("link record " + topic_name + ", is schema: " + is_topic_schema);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_unlink_records(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var is_topic_schema = kw.is_topic_schema;
+        var record = kw.record;
+        trace_msg("unlink record " + topic_name + ", is schema: " + is_topic_schema);
 
         return 0;
     }
@@ -569,6 +655,9 @@
             "EV_ROW_CHECKED",
             "EV_CREATE_RECORD",
             "EV_UPDATE_RECORD",
+            "EV_DELETE_RECORD",
+            "EV_LINK_RECORDS",
+            "EV_UNLINK_RECORDS",
             "EV_ON_OPEN",
             "EV_ON_CLOSE",
             "EV_SELECT",
@@ -587,9 +676,14 @@
                 ["EV_MX_VIEW_DATA_IN_DISK",         ac_mx_view_data_in_disk,        undefined],
                 ["EV_MX_VIEW_DATA_IN_MEMORY",       ac_mx_view_data_in_memory,      undefined],
                 ["EV_MX_VIEW_DATA_ON_MOVING",       ac_mx_view_data_on_moving,      undefined],
-                ["EV_ROW_CHECKED",                  undefined,                      undefined],
+
+                ["EV_ROW_CHECKED",                  ac_row_checked,                 undefined],
                 ["EV_CREATE_RECORD",                ac_create_record,               undefined],
                 ["EV_UPDATE_RECORD",                ac_update_record,               undefined],
+                ["EV_DELETE_RECORD",                ac_delete_record,               undefined],
+                ["EV_LINK_RECORDS",                 ac_link_records,                undefined],
+                ["EV_UNLINK_RECORDS",               ac_unlink_records,              undefined],
+
                 ["EV_ON_OPEN",                      ac_on_open,                     undefined],
                 ["EV_ON_CLOSE",                     ac_on_close,                    undefined],
                 ["EV_SELECT",                       ac_select,                      undefined],
@@ -705,9 +799,9 @@
         );
 
         /*
-         *  Create FormTable
+         *  Create FormTable Schema
          */
-        self.config.gobj_formtable = self.yuno.gobj_create_unique(
+        self.config.gobj_formtable_schema = self.yuno.gobj_create_unique(
             self.name + ".ft",
             Ui_formtable,
             {

@@ -29,10 +29,6 @@
         image_data_on_moving: null,
 
         layer_title_height: 30,
-        vertex_cx: 200,
-        vertex_cy: 90,
-        vertex_cy_sep: 40,
-
         locked: true,
 
         layers: [
@@ -743,8 +739,13 @@
                             "</i></pre><br/>";
                     }
                     if(kw_has_key(cell.value, "__last_rowid__")) {
-                        t += "size: <pre style='display:inline'>" +
+                        t += "rows: <pre style='display:inline'>" +
                             cell.value.__last_rowid__ +
+                            "</pre><br/>";
+                    }
+                    if(kw_has_key(cell.value, "topic_version")) {
+                        t += "topic_version: <pre style='display:inline'>" +
+                            cell.value.topic_version +
                             "</pre><br/>";
                     }
                 }
@@ -833,12 +834,20 @@
     function load_topics(self, graph, tranger_name, topics)
     {
         var model = graph.getModel();
-        var cx = self.config.vertex_cx;
-        var cy = self.config.vertex_cy;
-        var vertex_cy_sep = self.config.vertex_cy_sep;
-        var raw_y = self.config.layer_title_height + vertex_cy_sep/2;
-        var treedb_y = self.config.layer_title_height + vertex_cy_sep/2;
-        var msg2db_y = self.config.layer_title_height + vertex_cy_sep/2;
+        var cx = 200;
+        var raw_cy_sep = 40;
+        var msg2db_cy_sep = 60;
+        var treedb_cy_sep = 60;
+        var raw_cy = 80;
+        var msg2db_cy = 110;
+        var treedb_cy = 110;
+        var raw_cx = 200;
+        var msg2db_cx = 200;
+        var treedb_cx = 200;
+
+        var raw_y = self.config.layer_title_height + 20;
+        var treedb_y = self.config.layer_title_height + 20;
+        var msg2db_y = self.config.layer_title_height + 20;
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
@@ -853,11 +862,11 @@
                         topic.topic_name,       // id
                         topic,                  // value
                         0, treedb_y,            // x,y
-                        cx + cx/2, cy,          // width,height
+                        treedb_cx, treedb_cy,   // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    treedb_y += cy + vertex_cy_sep;
+                    treedb_y += treedb_cy + treedb_cy_sep;
                     break;
 
                 case "msg2db_topic":
@@ -866,11 +875,11 @@
                         topic.topic_name,       // id
                         topic,                  // value
                         0, msg2db_y,            // x,y
-                        cx, cy,                 // width,height
+                        msg2db_cx, msg2db_cy,          // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    msg2db_y += cy + vertex_cy_sep;
+                    msg2db_y += msg2db_cy + msg2db_cy_sep;
                     break;
 
                 case "raw_topic":
@@ -880,11 +889,11 @@
                         topic.topic_name,       // id
                         topic,                  // value
                         0, raw_y,               // x,y
-                        cx, cy,                 // width,height
+                        raw_cx, raw_cy,             // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    raw_y += cy + vertex_cy_sep;
+                    raw_y += raw_cy + raw_cy_sep;
                     break;
             }
         }

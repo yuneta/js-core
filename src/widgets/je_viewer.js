@@ -175,6 +175,16 @@
     /********************************************
      *
      ********************************************/
+    function ac_update_data(self, event, kw, src)
+    {
+        self.config._jsoneditor.update(kw.data);
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
         // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
@@ -192,6 +202,16 @@
         } else {
             self.config.$ui.hide();
         }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_select_item(self, event, kw, src)
+    {
+        self.config._jsoneditor.setSelection({path: kw.data});
 
         return 0;
     }
@@ -241,7 +261,9 @@
             "JE_IS_FIELD_EDITABLE",
             "JE_CLICK",
             "EV_LOAD_DATA",
+            "EV_UPDATE_DATA",
             "EV_CLEAR_DATA",
+            "EV_SELECT_ITEM",
             "EV_SELECT",
             "EV_REFRESH",
             "EV_REBUILD_PANEL"
@@ -255,7 +277,9 @@
                 ["JE_IS_FIELD_EDITABLE",    ac_je_is_field_editable,    undefined],
                 ["JE_CLICK",                ac_je_click,                undefined],
                 ["EV_LOAD_DATA",            ac_load_data,               undefined],
+                ["EV_UPDATE_DATA",          ac_update_data,             undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,              undefined],
+                ["EV_SELECT_ITEM",          ac_select_item,             undefined],
                 ["EV_SELECT",               ac_select,                  undefined],
                 ["EV_REFRESH",              ac_refresh,                 undefined],
                 ["EV_REBUILD_PANEL",        ac_rebuild_panel,           undefined]
