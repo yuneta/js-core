@@ -516,8 +516,16 @@
         var record = kw.record;
 
         if(is_topic_schema) {
+            /*
+             *  Add a new field to schema
+             */
             var topic = self.config.tranger.topics[topic_name];
+            topic["schema_modified"] = true; // Mark schema modified
             topic.cols[record.id] = record;
+
+            /*
+             *  Add the the new row to formtable and select it
+             */
             var schema = kwid_collect(topic.cols, null, null, null);
             src.gobj_send_event(
                 "EV_LOAD_DATA",
@@ -526,11 +534,32 @@
             );
             src.gobj_send_event("EV_RECORD_BY_ID", {id: record.id}, self);
 
+            /*
+             *  Update jsoneditor
+             */
             self.config.gobj_je_tranger.gobj_send_event(
                 "EV_UPDATE_DATA",
                 {
                     data: self.config.tranger
                 },
+                self
+            );
+
+            /*
+             *  Update general schema
+             */
+            self.config.gobj_formtable_schema.gobj_send_event(
+                "EV_LOAD_DATA",
+                schema,
+                self
+            );
+
+            /*
+             *  Select topic box
+             */
+            self.config.gobj_tranger_viewer.gobj_send_event(
+                "EV_SELECT_ITEM",
+                {id: topic_name},
                 self
             );
 
@@ -551,7 +580,53 @@
         var record = kw.record;
 
         if(is_topic_schema) {
+            /*
+             *  Add a new field to schema
+             */
             var topic = self.config.tranger.topics[topic_name];
+            topic["schema_modified"] = true; // Mark schema modified
+            topic.cols[record.id] = record;
+
+            /*
+             *  Add the the new row to formtable and select it
+             */
+            var schema = kwid_collect(topic.cols, null, null, null);
+            src.gobj_send_event(
+                "EV_LOAD_DATA",
+                schema,
+                self
+            );
+            src.gobj_send_event("EV_RECORD_BY_ID", {id: record.id}, self);
+
+            /*
+             *  Update jsoneditor
+             */
+            self.config.gobj_je_tranger.gobj_send_event(
+                "EV_UPDATE_DATA",
+                {
+                    data: self.config.tranger
+                },
+                self
+            );
+
+            /*
+             *  Update general schema
+             */
+            self.config.gobj_formtable_schema.gobj_send_event(
+                "EV_LOAD_DATA",
+                schema,
+                self
+            );
+
+            /*
+             *  Select topic box
+             */
+            self.config.gobj_tranger_viewer.gobj_send_event(
+                "EV_SELECT_ITEM",
+                {id: topic_name},
+                self
+            );
+
         } else {
             // TODO
         }

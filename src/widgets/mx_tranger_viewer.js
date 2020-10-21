@@ -24,6 +24,7 @@
 
         image_topic_json_graph: null,
         image_formtable: null,
+        image_save: null,
         image_data_in_disk: null,
         image_data_in_memory: null,
         image_data_on_moving: null,
@@ -106,6 +107,10 @@
         );
         self.config.image_formtable = new mxImage(
             '/static/app/images/yuneta/formtable.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_save = new mxImage(
+            '/static/app/images/yuneta/save.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
         self.config.image_data_in_disk = new mxImage(
@@ -558,6 +563,31 @@
                         self
                     );
                 });
+
+                if(cell.value.schema_modified) {
+                    var overlay_role = new mxCellOverlay(
+                        self.config.image_save,
+                        "Save Topic Schema",    // tooltip
+                        mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
+                        mxConstants.ALIGN_BOTTOM,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                        new mxPoint(1*offsx - offsy, offsy + offsy/2),    // offset
+                        "pointer"                   // cursor
+                    );
+                    graph.addCellOverlay(cell, overlay_role);
+
+                    // Installs a handler for clicks on the overlay
+                    overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
+                        var topic = evt2.getProperty('cell').value;
+                        self.parent.gobj_send_event(
+                            "EV_MX_SAVE_TOPIC_SCHEMA",
+                            {
+                                topic_name: topic.topic_name,
+                                topic: topic
+                            },
+                            self
+                        );
+                    });
+                }
             }
 
             if(1) {
@@ -845,9 +875,9 @@
         var msg2db_cx = 200;
         var treedb_cx = 200;
 
-        var raw_y = self.config.layer_title_height + 20;
-        var treedb_y = self.config.layer_title_height + 20;
-        var msg2db_y = self.config.layer_title_height + 20;
+        var raw_y = self.config.layer_title_height + 30;
+        var treedb_y = self.config.layer_title_height + 30;
+        var msg2db_y = self.config.layer_title_height + 30;
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
@@ -951,7 +981,7 @@
     function ac_select_item(self, event, kw, src)
     {
         var cell = self.config._mxgraph.model.getCell(kw.id);
-        self.config._mxgraph.setSelectionCell(cell);
+        self.config._mxgraph.setSelectionCell(cell); // Callback mxEvent.CHANGE called
 
         return 0;
     }
@@ -1047,10 +1077,10 @@
 
     var FSM = {
         "event_list": [
-            "EV_SELECT_ITEM",
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
             "EV_CLICK_ITEM",
+            "EV_SELECT_ITEM",
             "EV_SELECT",
             "EV_REFRESH",
             "EV_REBUILD_PANEL"
@@ -1061,10 +1091,10 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_LOAD_DATA",            ac_load_data,       undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
                 ["EV_CLICK_ITEM",           ac_click_item,      undefined],
+                ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_SELECT",               ac_select,          undefined],
                 ["EV_REFRESH",              ac_refresh,         undefined],
                 ["EV_REBUILD_PANEL",        ac_rebuild_panel,   undefined]

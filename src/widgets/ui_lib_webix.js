@@ -20,13 +20,12 @@
     {
         /*
          *  Multicombo propio
-         *  HACK recuerda pasar también options como options_
          */
         webix.protoUI({
             name: "multicombo2",
             $init:function(config) {
-                if(!config.options_) {
-                    config.options_ = __duplicate__(config.options);
+                if(config.options) {
+                    config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {
@@ -45,11 +44,7 @@
             },
             getValue: function() {
                 var value = webix.ui.multicombo.prototype.getValue.call(this);
-                var new_value = kwid_collect(
-                    this.config.options_,
-                    value.split(","),
-                    null, null
-                );
+                var new_value = value.split(",");
                 if(new_value.length) {
                     return new_value;
                 } else {
@@ -60,13 +55,12 @@
 
         /*
          *  Combo propio
-         *  HACK recuerda pasar también options como options_
          */
         webix.protoUI({
             name: "combo2",
             $init:function(config) {
-                if(!config.options_) {
-                    config.options_ = __duplicate__(config.options);
+                if(config.options) {
+                    config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {
@@ -74,19 +68,15 @@
                     value = value.id;
                 }
                 return webix.ui.combo.prototype.setValue.call(this, value);
-            },
-            getValue: function() {
-                var value = webix.ui.combo.prototype.getValue.call(this);
-                var new_value = kwid_collect(
-                    this.config.options_,
-                    value,
-                    null, null
-                );
-                if(new_value.length) {
-                    return new_value[0];
-                } else {
-                    return value;
-                }
+//             },
+//             getValue: function() {
+//                 var value = webix.ui.combo.prototype.getValue.call(this);
+//                 var new_value = value.split(",");
+//                 if(new_value.length) {
+//                     return new_value[0];
+//                 } else {
+//                     return value;
+//                 }
             }
         }, webix.ui.combo);
 
