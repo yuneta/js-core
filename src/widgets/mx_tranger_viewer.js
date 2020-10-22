@@ -36,17 +36,23 @@
             {
                 id: "raw_topic",
                 title: "Raw Topics",
-                width: 250
+                y: 0,
+                cy_sep: 40,
+                cx: 250
             },
             {
                 id: "msg2db_topic",
                 title: "Msg2Db Topics",
-                width: 250
+                y: 0,
+                cy_sep: 60,
+                cx: 250
             },
             {
                 id: "treedb_topic",
                 title: "TreeDb Topics",
-                width: 400
+                y: 0,
+                cy_sep: 60,
+                cx: 400
             }
         ],
         _mxgraph: null,
@@ -393,14 +399,20 @@
         if(layers && layers.length) {
             var x = 0;
             var cx = 0;
+
+            /*
+             *  Create the root
+             */
             root = new mxCell();
             root.setId("__mx_root__");
 
             for(var i=0; i<layers.length; i++) {
                 var layer = layers[i];
 
-                // Create the layer
-                cx = kw_get_int(layer, "width", 200, false);
+                /*
+                 *  Create a layer
+                 */
+                cx = kw_get_int(layer, "cx", 200, false);
                 var __layer__ = new mxCell(
                     kw_get_str(layer, "value", "", false),
                     new mxGeometry(x, 0, cx, 100),
@@ -417,17 +429,6 @@
                 if(id) {
                     __layer__.setId(id);
                 }
-
-                // Set Title
-                graph.insertVertex(
-                    __layer__,                              // group
-                    kw_get_str(layer, "title", "", false),  // id
-                    kw_get_str(layer, "title", "", false),  // value
-                    0, 0,                                   // x,y
-                    cx-20, self.config.layer_title_height,  // width,height
-                    "title",                                // style
-                    false                                   // relative
-                );
             }
         } else {
             root = graph.getModel().createRoot()
@@ -446,11 +447,25 @@
     /************************************************************
      *
      ************************************************************/
-    function get_layer(self, layer)
+    function get_layer_record(self, layer_id)
     {
         var layers = self.config.layers;
         for(var i=0; i<layers.length; i++) {
-            if(layers[i].id == layer) {
+            if(layers[i].id == layer_id) {
+                return layers[i];
+            }
+        }
+        return null;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_layer(self, layer_id)
+    {
+        var layers = self.config.layers;
+        for(var i=0; i<layers.length; i++) {
+            if(layers[i].id == layer_id) {
                 return layers[i].__layer__;
             }
         }
@@ -729,7 +744,7 @@
         create_graph_style(
             graph,
             "title",
-            "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;shadow=1;glass=0;sketch=0;fontSize=16;fontColor=#095C86;spacingLeft=10;spacingTop=5;fontStyle=1;"
+            "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;shadow=1;glass=0;sketch=0;fontSize=16;fontColor=orange;spacingLeft=10;spacingTop=5;fontStyle=1;"
         );
 
         // Handles clicks on cells
@@ -776,6 +791,11 @@
                     if(kw_has_key(cell.value, "topic_version")) {
                         t += "topic_version: <pre style='display:inline'>" +
                             cell.value.topic_version +
+                            "</pre><br/>";
+                    }
+                    if(kw_has_key(cell.value, "schema_version")) {
+                        t += "schema_version: <pre style='display:inline'>" +
+                            cell.value.schema_version +
                             "</pre><br/>";
                     }
                 }
@@ -861,23 +881,98 @@
     /************************************************************
      *
      ************************************************************/
-    function load_topics(self, graph, tranger_name, topics)
+    function get_schema_version(self, tranger, type)
+    {
+        var dbs = tranger[type];
+        for(var name in dbs) {
+            if(!dbs.hasOwnProperty(name)) {
+                continue;
+            }
+            var db = dbs[name];
+            if(kw_has_key(db, "__schema_version__")) {
+                return db.__schema_version__;
+            }
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function load_title_layers(self, graph, tranger)
+    {
+        var layers = self.config.layers;
+
+        for(var i=0; i<layers.length; i++) {
+            var layer_record = layers[i];
+            var cx = kw_get_int(layer_record, "cx", 200, false);
+
+            switch(layer_record.id) {
+                case "treedb_topic":
+                    var schema_version = get_schema_version(self, tranger, "treedbs");
+                    var cy = self.config.layer_title_height*2;
+                    graph.insertVertex(
+                        layer_record.__layer__,                 // group
+                        layer_record.title,                     // id
+                        {                                       // value
+                            schema_version: schema_version
+                        },
+                        0, layer_record.y,                      // x,y
+                        cx-20, cy,                              // width,height
+                        "title",                                // style
+                        false                                   // relative
+                    );
+                    layer_record.y += cy + layer_record.cy_sep;
+                    break;
+
+                case "msg2db_topic":
+                    var schema_version = get_schema_version(self, tranger, "msg2dbs");
+                    var cy = self.config.layer_title_height*2;
+                    graph.insertVertex(
+                        layer_record.__layer__,                 // group
+                        layer_record.title,                     // id
+                        {                                       // value
+                            schema_version: schema_version
+                        },
+                        0, layer_record.y,                      // x,y
+                        cx-20, cy,                              // width,height
+                        "title",                                // style
+                        false                                   // relative
+                    );
+                    layer_record.y += cy + layer_record.cy_sep;
+                    break;
+
+                case "raw_topic":
+                default:
+                    var cy = self.config.layer_title_height;
+                    graph.insertVertex(
+                        layer_record.__layer__,                 // group
+                        layer_record.title,                     // id
+                        {                                       // value
+                        },
+                        0, layer_record.y,                      // x,y
+                        cx-20, cy,                              // width,height
+                        "title",                                // style
+                        false                                   // relative
+                    );
+                    layer_record.y += cy + layer_record.cy_sep;
+            }
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function load_topics(self, graph, topics)
     {
         var model = graph.getModel();
-        var cx = 200;
-        var raw_cy_sep = 40;
-        var msg2db_cy_sep = 60;
-        var treedb_cy_sep = 60;
-        var raw_cy = 80;
-        var msg2db_cy = 110;
-        var treedb_cy = 110;
+
         var raw_cx = 200;
         var msg2db_cx = 200;
         var treedb_cx = 200;
 
-        var raw_y = self.config.layer_title_height + 30;
-        var treedb_y = self.config.layer_title_height + 30;
-        var msg2db_y = self.config.layer_title_height + 30;
+        var raw_cy = 80;
+        var msg2db_cy = 110;
+        var treedb_cy = 110;
 
         for(var topic_name in topics) {
             if(!topics.hasOwnProperty(topic_name)) {
@@ -885,50 +980,55 @@
             }
             var topic = topics[topic_name];
             var topic_type = get_topic_type(topic);
+            var layer_record = get_layer_record(self, topic_type);
             switch(topic_type) {
                 case "treedb_topic":
+                    var cx = treedb_cx;
+                    var cy = treedb_cy;
                     graph.insertVertex(
-                        get_layer(self, topic_type),    // group
+                        layer_record.__layer__, // group
                         topic.topic_name,       // id
                         topic,                  // value
-                        0, treedb_y,            // x,y
-                        treedb_cx, treedb_cy,   // width,height
+                        0, layer_record.y,      // x,y
+                        cx, cy,                 // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    treedb_y += treedb_cy + treedb_cy_sep;
+                    layer_record.y += cy + layer_record.cy_sep;;
                     break;
 
                 case "msg2db_topic":
+                    var cx = msg2db_cx;
+                    var cy = msg2db_cy;
                     graph.insertVertex(
-                        get_layer(self, topic_type),    // group
+                        layer_record.__layer__, // group
                         topic.topic_name,       // id
                         topic,                  // value
-                        0, msg2db_y,            // x,y
-                        msg2db_cx, msg2db_cy,          // width,height
+                        0, layer_record.y,      // x,y
+                        cx, cy,                 // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    msg2db_y += msg2db_cy + msg2db_cy_sep;
+                    layer_record.y += cy + layer_record.cy_sep;;
                     break;
 
                 case "raw_topic":
                 default:
+                    var cx = raw_cx;
+                    var cy = raw_cy;
                     graph.insertVertex(
-                        get_layer(self, topic_type),    // group
+                        layer_record.__layer__, // group
                         topic.topic_name,       // id
                         topic,                  // value
-                        0, raw_y,               // x,y
-                        raw_cx, raw_cy,             // width,height
+                        0, layer_record.y,      // x,y
+                        cx, cy,                 // width,height
                         topic_type,             // style
                         false                   // relative
                     );
-                    raw_y += raw_cy + raw_cy_sep;
+                    layer_record.y += cy + layer_record.cy_sep;;
                     break;
             }
         }
-
-
     }
 
     /************************************************************
@@ -939,8 +1039,8 @@
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
 
-        var topics = data.topics;
-        load_topics(self, graph, tranger_name, topics);
+        load_title_layers(self, graph, data);
+        load_topics(self, graph, data.topics);
         graph.view.setTranslate(graph.border/2, graph.border/2);
     }
 
