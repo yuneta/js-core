@@ -461,6 +461,15 @@
     /********************************************
      *
      ********************************************/
+    function ac_mx_save_topic_schema(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var topic = kw.topic;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_mx_view_data_in_disk(self, event, kw, src)
     {
 
@@ -724,6 +733,7 @@
             "EV_MX_VERTEX_CLICKED",
             "EV_MX_SHOW_TOPIC_JSON_GRAPH",
             "EV_MX_SHOW_TOPIC_SCHEMA_FORM",
+            "EV_MX_SAVE_TOPIC_SCHEMA",
             "EV_MX_VIEW_DATA_IN_DISK",
             "EV_MX_VIEW_DATA_IN_MEMORY",
             "EV_MX_VIEW_DATA_ON_MOVING",
@@ -748,6 +758,8 @@
                 ["EV_MX_VERTEX_CLICKED",            ac_mx_vertex_clicked,           undefined],
                 ["EV_MX_SHOW_TOPIC_JSON_GRAPH",     ac_mx_show_topic_json_graph,    undefined],
                 ["EV_MX_SHOW_TOPIC_SCHEMA_FORM",    ac_mx_show_topic_schema_form,   undefined],
+                ["EV_MX_SAVE_TOPIC_SCHEMA",         ac_mx_save_topic_schema,        undefined],
+
                 ["EV_MX_VIEW_DATA_IN_DISK",         ac_mx_view_data_in_disk,        undefined],
                 ["EV_MX_VIEW_DATA_IN_MEMORY",       ac_mx_view_data_in_memory,      undefined],
                 ["EV_MX_VIEW_DATA_ON_MOVING",       ac_mx_view_data_on_moving,      undefined],

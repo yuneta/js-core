@@ -518,7 +518,7 @@
     /************************************************************
      *
      ************************************************************/
-    function add_tranger_overlays(self, graph, cell)
+    function add_overlays(self, graph, cell)
     {
         if(cell.style == "title") {
             return;
@@ -788,15 +788,34 @@
                             cell.value.__last_rowid__ +
                             "</pre><br/>";
                     }
+
                     if(kw_has_key(cell.value, "topic_version")) {
                         t += "topic_version: <pre style='display:inline'>" +
                             cell.value.topic_version +
                             "</pre><br/>";
+                        if(cell.value.schema_modified) {
+                            t += "<input type='image' src='" +
+                                "/static/app/images/yuneta/save.svg" +
+                                "' alt='Submit' width='" +
+                                self.config.top_overlay_icon_size +
+                                "' height='" +
+                                self.config.top_overlay_icon_size+
+                                "'>";
+                        }
                     }
                     if(kw_has_key(cell.value, "schema_version")) {
                         t += "schema_version: <pre style='display:inline'>" +
                             cell.value.schema_version +
                             "</pre><br/>";
+                        if(cell.value.schema_modified) {
+                            t += "<input type='image' src='" +
+                                "/static/app/images/yuneta/save.svg" +
+                                "' alt='Submit' width='" +
+                                self.config.top_overlay_icon_size +
+                                "' height='" +
+                                self.config.top_overlay_icon_size+
+                                "'>";
+                        }
                     }
                 }
                 switch(cell.style) {
@@ -869,7 +888,7 @@
                     for (var i = 0; i < cells_added.length; i++) {
                         var cell = cells_added[i];
                         graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_tranger_overlays(self, graph, cell);
+                        add_overlays(self, graph, cell);
                     }
                 }
             } catch (e) {
@@ -1080,9 +1099,10 @@
      ********************************************/
     function ac_select_item(self, event, kw, src)
     {
-        var cell = self.config._mxgraph.model.getCell(kw.id);
-        self.config._mxgraph.setSelectionCell(cell); // Callback mxEvent.CHANGE called
-
+        var graph = self.config._mxgraph;
+        var cell = graph.model.getCell(kw.id);
+        graph.setSelectionCell(cell); // Callback mxEvent.CHANGE called
+        //graph.refresh(cell);
         return 0;
     }
 
@@ -1130,6 +1150,11 @@
             self.config.$ui.show();
         } else {
             self.config.$ui.hide();
+        }
+
+        var layers = self.config.layers;
+        for(var i=0; i<layers.length; i++) {
+            layers[i].y = 0;
         }
 
         return 0;
