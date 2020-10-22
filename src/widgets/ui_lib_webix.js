@@ -68,15 +68,6 @@
                     value = value.id;
                 }
                 return webix.ui.combo.prototype.setValue.call(this, value);
-//             },
-//             getValue: function() {
-//                 var value = webix.ui.combo.prototype.getValue.call(this);
-//                 var new_value = value.split(",");
-//                 if(new_value.length) {
-//                     return new_value[0];
-//                 } else {
-//                     return value;
-//                 }
             }
         }, webix.ui.combo);
 
