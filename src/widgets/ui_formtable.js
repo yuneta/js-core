@@ -1286,6 +1286,7 @@
             case "list":
                 break;
             case "real":
+                value = parseFloat(value);
                 break;
             case "boolean":
                 break;
