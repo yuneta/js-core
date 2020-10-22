@@ -463,8 +463,44 @@
      ********************************************/
     function ac_mx_save_tranger_schema(self, event, kw, src)
     {
+        var schema_type = kw.schema_type;
         var schema_name = kw.schema_name;
         var schema_version = kw.schema_version;
+
+        var new_schema = {
+            id: schema_name,
+            schema_version: parseInt(schema_version) + 1,
+            topics: []
+        };
+
+        // Recupera los topic name de la zona de datos
+        var dbs = self.config.tranger[schema_type];
+        for(var schema_name in dbs) {
+            if(!dbs.hasOwnProperty(schema_name)) {
+                continue;
+            }
+            var schema = dbs[schema_name];
+            for(var topic_name in schema) {
+                if(!schema.hasOwnProperty(topic_name)) {
+                    continue;
+                }
+                if(topic_name.substr(0,2)==="__") {
+                    continue;
+                }
+                var topic = self.config.tranger.topics[topic_name];
+                var new_topic = {
+                    topic_name: topic_name,
+                    topic_version: parseInt(topic.topic_version) + 1
+                };
+
+                if(topic.schema_modified) {
+                    new_topic["cols"] = topic.cols;
+                    new_schema.topics.push(new_topic);
+                }
+            }
+        }
+
+        console.log(new_schema);
     }
 
     /********************************************

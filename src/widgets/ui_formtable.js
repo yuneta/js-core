@@ -1238,6 +1238,87 @@
         return collection;
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function get_schema_col(self, field_name)
+    {
+        var col = null;
+
+        for(var i=0; i<self.config.schema.length; i++) {
+            var col = self.config.schema[i];
+            if(col.id == field_name) {
+                return col;
+            }
+        }
+        return null;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function filtra(col, value)
+    {
+        var flag = col.flag;
+        var is_hook = elm_in_list("hook", flag);
+        var is_fkey = elm_in_list("fkey", flag);
+        var is_enum = elm_in_list("enum", flag);
+
+        var type = col.type; // By default is basic type
+        if(is_enum) {
+            type = "enum";
+        } else if(is_hook) {
+            type = "hook";
+        } else if(is_fkey) {
+            type = "fkey";
+        }
+
+        switch(type) {
+            case "string":
+                break;
+            case "integer":
+                value = parseInt(value);
+                break;
+            case "object":
+            case "dict":
+                break;
+            case "array":
+            case "list":
+                break;
+            case "real":
+                break;
+            case "boolean":
+                break;
+            case "blob":
+                break;
+
+            case "enum":
+                var real_type = col.type;
+                var enum_list = col.enum;
+                switch(real_type) {
+                    case "string":
+                        break;
+                    case "object":
+                    case "dict":
+                    case "array":
+                    case "list":
+                        break;
+                    default:
+                        log_error("col type unknown: " + real_type);
+                        break;
+                }
+                break;
+            case "hook":
+            case "fkey":
+                // TODO
+            default:
+                log_error("col type unknown:" + type);
+                break;
+        }
+
+        return value;
+    }
+
 
 
 
@@ -1341,6 +1422,13 @@
                 new_kw["id"] = kw["id_"];
                 delete new_kw["id_"];
             }
+
+            for(var field_name in new_kw) {
+                var value = new_kw[field_name];
+                var col = get_schema_col(self, field_name);
+                new_kw[field_name] = filtra(col, value);
+            }
+
             self.gobj_publish_event(
                 "EV_UPDATE_RECORD",
                 {
@@ -1397,10 +1485,14 @@
                 create_check_invalid_fields = false;
             }
             var new_kw = filter_dict(kw, self.config._writable_fields);
+
             if(self.config.with_webix_id) {
                 new_kw["id"] = kw["id_"];
                 delete new_kw["id_"];
             }
+            // TODO valida campos
+
+
             self.gobj_publish_event(
                 "EV_CREATE_RECORD",
                 {

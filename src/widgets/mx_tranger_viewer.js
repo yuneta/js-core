@@ -34,21 +34,21 @@
 
         layers: [
             {
-                id: "raw_topic",
+                id: "raws",
                 title: "Raw Topics",
                 y: 0,
                 cy_sep: 40,
                 cx: 250
             },
             {
-                id: "msg2db_topic",
+                id: "msg2dbs",
                 title: "Msg2Db Topics",
                 y: 0,
                 cy_sep: 60,
                 cx: 250
             },
             {
-                id: "treedb_topic",
+                id: "treedbs",
                 title: "TreeDb Topics",
                 y: 0,
                 cy_sep: 60,
@@ -501,14 +501,14 @@
         var lists = kw_get_dict_value(topic, "lists", [], 0);
         for(var i=0; i<lists.length; i++) {
             if(kw_has_key(lists[0], "treedb_name")) {
-                return "treedb_topic";
+                return "treedbs";
             }
             if(kw_has_key(lists[0], "msg2db_name")) {
-                return "msg2db_topic";
+                return "msg2dbs";
             }
         }
 
-        return "raw_topic";
+        return "raws";
     }
 
     /************************************************************
@@ -699,17 +699,17 @@
          */
         create_graph_style(
             graph,
-            "raw_topic",
+            "raws",
             "text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
         );
         create_graph_style(
             graph,
-            "msg2db_topic",
+            "msg2dbs",
             "text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
         );
         create_graph_style(
             graph,
-            "treedb_topic",
+            "treedbs",
             "text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;whiteSpace=wrap;overflow=hidden;gradientColor=#ffffff;shadow=1;spacingLeft=10;spacingTop=5;fontSize=12;"
         );
         create_graph_style(
@@ -801,11 +801,11 @@
                     }
                 }
                 switch(cell.style) {
-                    case "raw_topic":
+                    case "raws":
                         break;
-                    case "msg2db_topic":
+                    case "msg2dbs":
                         break;
-                    case "treedb_topic":
+                    case "treedbs":
                         break;
                     default:
                         break;
@@ -909,8 +909,8 @@
             var cx = kw_get_int(layer_record, "cx", 200, false);
 
             switch(layer_record.id) {
-                case "treedb_topic":
-                    var schema_node = get_schema_version(self, tranger, "treedbs");
+                case "treedbs":
+                    var schema_node = get_schema_version(self, tranger, layer_record.id);
                     var schema_name = schema_node[0];
                     var schema_version = schema_node[1];
                     var cy = self.config.layer_title_height*2;
@@ -918,6 +918,7 @@
                         layer_record.__layer__,                 // group
                         layer_record.title,                     // id
                         {                                       // value
+                            schema_type: layer_record.id,
                             schema_name: schema_name,
                             schema_version: schema_version
                         },
@@ -929,8 +930,8 @@
                     layer_record.y += cy + layer_record.cy_sep;
                     break;
 
-                case "msg2db_topic":
-                    var schema_node = get_schema_version(self, tranger, "msg2dbs");
+                case "msg2dbs":
+                    var schema_node = get_schema_version(self, tranger, layer_record.id);
                     var schema_name = schema_node[0];
                     var schema_version = schema_node[1];
                     var cy = self.config.layer_title_height*2;
@@ -938,6 +939,7 @@
                         layer_record.__layer__,                 // group
                         layer_record.title,                     // id
                         {                                       // value
+                            schema_type: layer_record.id,
                             schema_name: schema_name,
                             schema_version: schema_version
                         },
@@ -949,7 +951,7 @@
                     layer_record.y += cy + layer_record.cy_sep;
                     break;
 
-                case "raw_topic":
+                case "raws":
                 default:
                     var cy = self.config.layer_title_height;
                     graph.insertVertex(
@@ -990,7 +992,7 @@
             var topic_type = get_topic_type(topic);
             var layer_record = get_layer_record(self, topic_type);
             switch(topic_type) {
-                case "treedb_topic":
+                case "treedbs":
                     var cx = treedb_cx;
                     var cy = treedb_cy;
                     graph.insertVertex(
@@ -1005,7 +1007,7 @@
                     layer_record.y += cy + layer_record.cy_sep;;
                     break;
 
-                case "msg2db_topic":
+                case "msg2dbs":
                     var cx = msg2db_cx;
                     var cy = msg2db_cy;
                     graph.insertVertex(
@@ -1020,7 +1022,7 @@
                     layer_record.y += cy + layer_record.cy_sep;;
                     break;
 
-                case "raw_topic":
+                case "raws":
                 default:
                     var cx = raw_cx;
                     var cy = raw_cy;
