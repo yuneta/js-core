@@ -24,11 +24,11 @@
 
         image_topic_json_graph: null,
         image_formtable: null,
-        image_save: null,
         image_data_in_disk: null,
         image_data_in_memory: null,
         image_data_on_moving: null,
 
+        tranger: null,
         layer_title_height: 30,
         locked: true,
 
@@ -113,10 +113,6 @@
         );
         self.config.image_formtable = new mxImage(
             '/static/app/images/yuneta/formtable.svg',
-            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
-        );
-        self.config.image_save = new mxImage(
-            '/static/app/images/yuneta/save.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
         self.config.image_data_in_disk = new mxImage(
@@ -578,31 +574,6 @@
                         self
                     );
                 });
-
-                if(cell.value.schema_modified) {
-                    var overlay_role = new mxCellOverlay(
-                        self.config.image_save,
-                        "Save Topic Schema",    // tooltip
-                        mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
-                        mxConstants.ALIGN_BOTTOM,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                        new mxPoint(1*offsx - offsy, offsy + offsy/2),    // offset
-                        "pointer"                   // cursor
-                    );
-                    graph.addCellOverlay(cell, overlay_role);
-
-                    // Installs a handler for clicks on the overlay
-                    overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
-                        var topic = evt2.getProperty('cell').value;
-                        self.parent.gobj_send_event(
-                            "EV_MX_SAVE_TOPIC_SCHEMA",
-                            {
-                                topic_name: topic.topic_name,
-                                topic: topic
-                            },
-                            self
-                        );
-                    });
-                }
             }
 
             if(1) {
@@ -794,13 +765,19 @@
                             cell.value.topic_version +
                             "</pre><br/>";
                         if(cell.value.schema_modified) {
-                            t += "<input type='image' src='" +
+                            var id = "btn_save_topic_schema-" + cell.value.topic_name;
+                            t += "<input " +
+                                "id='" + id + "' " +
+                                "style='cursor:default' " +
+                                "type='image' src='" +
                                 "/static/app/images/yuneta/save.svg" +
-                                "' alt='Submit' width='" +
+                                "' alt='Submit' " +
+                                "width='" +
                                 self.config.top_overlay_icon_size +
-                                "' height='" +
-                                self.config.top_overlay_icon_size+
-                                "'>";
+                                "' " +
+                                "height='" +
+                                self.config.top_overlay_icon_size +
+                                "'>"
                         }
                     }
                     if(kw_has_key(cell.value, "schema_version")) {
@@ -808,13 +785,18 @@
                             cell.value.schema_version +
                             "</pre><br/>";
                         if(cell.value.schema_modified) {
-                            t += "<input type='image' src='" +
+                            var id = "btn_save_all_schemas-" + cell.value.schema_name;
+                            t += "<input " +
+                                "id='" + id + "' " +
+                                "type='image' src='" +
                                 "/static/app/images/yuneta/save.svg" +
-                                "' alt='Submit' width='" +
+                                "' alt='Submit' " +
+                                "width='" +
                                 self.config.top_overlay_icon_size +
-                                "' height='" +
-                                self.config.top_overlay_icon_size+
-                                "'>";
+                                "' " +
+                                "height='" +
+                                self.config.top_overlay_icon_size +
+                                "'>"
                         }
                     }
                 }
@@ -907,9 +889,10 @@
             if(!dbs.hasOwnProperty(name)) {
                 continue;
             }
+            // TODO by now only one db by type, return the first
             var db = dbs[name];
             if(kw_has_key(db, "__schema_version__")) {
-                return db.__schema_version__;
+                return [name, db.__schema_version__];
             }
         }
     }
@@ -927,12 +910,15 @@
 
             switch(layer_record.id) {
                 case "treedb_topic":
-                    var schema_version = get_schema_version(self, tranger, "treedbs");
+                    var schema_node = get_schema_version(self, tranger, "treedbs");
+                    var schema_name = schema_node[0];
+                    var schema_version = schema_node[1];
                     var cy = self.config.layer_title_height*2;
                     graph.insertVertex(
                         layer_record.__layer__,                 // group
                         layer_record.title,                     // id
                         {                                       // value
+                            schema_name: schema_name,
                             schema_version: schema_version
                         },
                         0, layer_record.y,                      // x,y
@@ -944,12 +930,15 @@
                     break;
 
                 case "msg2db_topic":
-                    var schema_version = get_schema_version(self, tranger, "msg2dbs");
+                    var schema_node = get_schema_version(self, tranger, "msg2dbs");
+                    var schema_name = schema_node[0];
+                    var schema_version = schema_node[1];
                     var cy = self.config.layer_title_height*2;
                     graph.insertVertex(
                         layer_record.__layer__,                 // group
                         layer_record.title,                     // id
                         {                                       // value
+                            schema_name: schema_name,
                             schema_version: schema_version
                         },
                         0, layer_record.y,                      // x,y
@@ -990,7 +979,7 @@
         var treedb_cx = 200;
 
         var raw_cy = 80;
-        var msg2db_cy = 110;
+        var msg2db_cy = 130;
         var treedb_cy = 110;
 
         for(var topic_name in topics) {
@@ -1058,6 +1047,7 @@
         // HACK is already in a beginUpdate/endUpdate
         var graph = self.config._mxgraph;
 
+        self.config.tranger = data;
         load_title_layers(self, graph, data);
         load_topics(self, graph, data.topics);
         graph.view.setTranslate(graph.border/2, graph.border/2);
@@ -1072,39 +1062,6 @@
 
 
 
-
-    /********************************************
-     *
-     ********************************************/
-    function ac_click_item(self, event, kw, src)
-    {
-        var graph = self.config._mxgraph;
-
-        var cell = graph.model.getCell(kw.id);
-        if(cell) {
-            /*
-             *  Simula un click !!!
-             */
-            graph.fireEvent(
-                new mxEventObject(
-                    mxEvent.CLICK, 'event', {}, 'cell', cell
-                ),
-                cell
-            );
-        }
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function ac_select_item(self, event, kw, src)
-    {
-        var graph = self.config._mxgraph;
-        var cell = graph.model.getCell(kw.id);
-        graph.setSelectionCell(cell); // Callback mxEvent.CHANGE called
-        //graph.refresh(cell);
-        return 0;
-    }
 
     /********************************************
      *
@@ -1163,6 +1120,83 @@
     /********************************************
      *
      ********************************************/
+    function ac_schema_modified(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var cell = graph.model.getCell(kw.id);
+        if(cell) {
+            graph.setSelectionCell(cell); // Callback mxEvent.CHANGE will be called
+
+            var topic = self.config.tranger.topics[cell.value.topic_name];
+            var topic_type = get_topic_type(topic);
+            var layer_record = get_layer_record(self, topic_type);
+            var cell_title = graph.model.getCell(layer_record.title);
+            cell_title.value["schema_modified"] = true;
+            graph.refresh(cell_title);
+
+            var elem = document.getElementById("btn_save_topic_schema-" + topic.topic_name);
+            elem.onclick = function() {
+                // FUTURE when schema will be in treedb then individual topi schema could be saved
+                //self.parent.gobj_send_event(
+                //    "EV_MX_SAVE_TOPIC_SCHEMA",
+                //    {
+                //        topic: cell.value
+                //    },
+                //    self
+                //);
+            }
+            var elem = document.getElementById(
+                "btn_save_all_schemas-" + cell_title.value.schema_name
+            );
+            elem.onclick = function() {
+                self.parent.gobj_send_event(
+                    "EV_MX_SAVE_TRANGER_SCHEMA",
+                    cell_title.value,
+                    self
+                );
+            }
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_click_item(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+
+        var cell = graph.model.getCell(kw.id);
+        if(cell) {
+            /*
+             *  Simula un click !!!
+             */
+            graph.fireEvent(
+                new mxEventObject(
+                    mxEvent.CLICK, 'event', {}, 'cell', cell
+                ),
+                cell
+            );
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_select_item(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var cell = graph.model.getCell(kw.id);
+        if(cell) {
+            graph.setSelectionCell(cell); // Callback mxEvent.CHANGE will be called
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_select(self, event, kw, src)
     {
 
@@ -1204,6 +1238,7 @@
         "event_list": [
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
+            "EV_SCHEMA_MODIFIED",
             "EV_CLICK_ITEM",
             "EV_SELECT_ITEM",
             "EV_SELECT",
@@ -1218,6 +1253,7 @@
             [
                 ["EV_LOAD_DATA",            ac_load_data,       undefined],
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
+                ["EV_SCHEMA_MODIFIED",      ac_schema_modified, undefined],
                 ["EV_CLICK_ITEM",           ac_click_item,      undefined],
                 ["EV_SELECT_ITEM",          ac_select_item,     undefined],
                 ["EV_SELECT",               ac_select,          undefined],

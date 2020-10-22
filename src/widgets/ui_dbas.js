@@ -461,10 +461,19 @@
     /********************************************
      *
      ********************************************/
+    function ac_mx_save_tranger_schema(self, event, kw, src)
+    {
+        var schema_name = kw.schema_name;
+        var schema_version = kw.schema_version;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_mx_save_topic_schema(self, event, kw, src)
     {
-        var topic_name = kw.topic_name;
         var topic = kw.topic;
+        // FUTURE when schema will be in treedb then individual topi schema could be saved
     }
 
     /********************************************
@@ -567,7 +576,7 @@
              *  Select topic box
              */
             self.config.gobj_tranger_viewer.gobj_send_event(
-                "EV_SELECT_ITEM",
+                "EV_SCHEMA_MODIFIED",
                 {id: topic_name},
                 self
             );
@@ -631,7 +640,7 @@
              *  Select topic box
              */
             self.config.gobj_tranger_viewer.gobj_send_event(
-                "EV_SELECT_ITEM",
+                "EV_SCHEMA_MODIFIED",
                 {id: topic_name},
                 self
             );
@@ -734,6 +743,7 @@
             "EV_MX_SHOW_TOPIC_JSON_GRAPH",
             "EV_MX_SHOW_TOPIC_SCHEMA_FORM",
             "EV_MX_SAVE_TOPIC_SCHEMA",
+            "EV_MX_SAVE_TRANGER_SCHEMA",
             "EV_MX_VIEW_DATA_IN_DISK",
             "EV_MX_VIEW_DATA_IN_MEMORY",
             "EV_MX_VIEW_DATA_ON_MOVING",
@@ -758,6 +768,7 @@
                 ["EV_MX_VERTEX_CLICKED",            ac_mx_vertex_clicked,           undefined],
                 ["EV_MX_SHOW_TOPIC_JSON_GRAPH",     ac_mx_show_topic_json_graph,    undefined],
                 ["EV_MX_SHOW_TOPIC_SCHEMA_FORM",    ac_mx_show_topic_schema_form,   undefined],
+                ["EV_MX_SAVE_TRANGER_SCHEMA",       ac_mx_save_tranger_schema,      undefined],
                 ["EV_MX_SAVE_TOPIC_SCHEMA",         ac_mx_save_topic_schema,        undefined],
 
                 ["EV_MX_VIEW_DATA_IN_DISK",         ac_mx_view_data_in_disk,        undefined],
