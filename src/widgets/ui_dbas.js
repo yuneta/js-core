@@ -500,6 +500,10 @@
             }
         }
 
+        /*
+         *  save new_schema to backend
+         */
+        // TODO
         console.log(new_schema);
     }
 
