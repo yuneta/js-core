@@ -2,6 +2,7 @@
  *          ui_gclass_viewer.js
  *
  *          GClass Viewer
+ *
  *          "Container Panel"
  *
  *          Copyright (c) 2020 Niyamaka.
@@ -114,6 +115,7 @@
 
         view_handler: "view1", // "json", "view1",... TODO
         mxnode_gclass: null,
+        locked: false,
 
         layout_options: [
             {
@@ -305,6 +307,37 @@
                         self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            graph.setCellsLocked(false);
+
+                            graph.rubberband.setEnabled(true);
+                            graph.panningHandler.useLeftButtonForPanning = false;
+
+                            self.config.locked = false;
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            graph.setCellsLocked(true);
+
+                            graph.rubberband.setEnabled(false);
+                            graph.panningHandler.useLeftButtonForPanning = true;
+
+                            self.config.locked = true;
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
+                    }
+                },
                 { view:"label", label: ""},
                 {
                     view:"button",
@@ -452,24 +485,28 @@
     {
         var graph = self.config._mxgraph;
 
-        mxEvent.disableContextMenu(graph.container);
-
         create_root_and_layers(graph, self.config.layers);
 
-        // Enables rubberband selection
-        new mxRubberband(graph);
+        mxEvent.disableContextMenu(graph.container);
 
-        // Panning, by default working with right button, left button for selection
-        graph.setPanning(false);
+        graph.border = 40;
+        graph.view.setTranslate(graph.border/2, graph.border/2);
+
+        // Enables rubberband selection
+        graph.rubberband = new mxRubberband(graph);
+        graph.rubberband.setEnabled(false);
+
+        graph.setPanning(true);
+        graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
-        graph.allowNegativeCoordinates = true;
+        graph.allowNegativeCoordinates = false;
 
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(true);
 
         // Avoids overlap of edges and collapse icons
-        graph.keepEdgesInBackground = false; // YES edges overlap vertex
+        graph.keepEdgesInBackground = true;
 
         /*---------------------------*
          *      PERMISOS
@@ -477,6 +514,7 @@
         // Enable/Disable cell handling
         graph.setEnabled(true);
 
+        graph.setCellsLocked(true);
         graph.setConnectable(false);    // (true) Crear edges/links, update mxConnectionHandler.enabled
         graph.cellsDisconnectable = false;  // (true) Override by isCellDisconnectable()
         graph.cellsLocked = false;      // (false)  Override by isCellsLocked()

@@ -2,6 +2,7 @@
  *          mx_json_viewer.js
  *
  *          Json with mxgrah
+ *
  *          "Pinhold Window"
  *
  *          HACK the parent MUST be a pinhold handler

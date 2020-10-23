@@ -52,6 +52,7 @@
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
+        locked: false,
 
         layout_options: [
             {
@@ -361,6 +362,37 @@
                         self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            graph.setCellsLocked(false);
+
+                            graph.rubberband.setEnabled(true);
+                            graph.panningHandler.useLeftButtonForPanning = false;
+
+                            self.config.locked = false;
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            graph.setCellsLocked(true);
+
+                            graph.rubberband.setEnabled(false);
+                            graph.panningHandler.useLeftButtonForPanning = true;
+
+                            self.config.locked = true;
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
+                    }
+                },
                 { view:"label", label: ""},
                 {
                     view:"button",
@@ -525,7 +557,8 @@
         mxEvent.disableContextMenu(graph.container);
 
         // Enables rubberband selection
-        new mxRubberband(graph);
+        graph.rubberband = new mxRubberband(graph);
+        graph.rubberband.setEnabled(false);
 
         // Panning, by default working with right button, left button for selection
         graph.setPanning(false);

@@ -5,6 +5,11 @@
  *          Igual que ui_gobj_tree_c.js pero como solución global
  *          El enlace al menú principal se hace externamente.
  *
+ *          Visor de yuno con sus arbol de gobj's,
+ *              con vista en mxgraph del arbol jerarquico de gobjs
+ *              con vista de la estructura de la clase del gobj seleccionado en mxgraph
+ *              con vista de los attrs del gobj en formtable
+ *
  *          Copyright (c) 2020 Niyamaka
  *          All Rights Reserved.
  ***********************************************************************/

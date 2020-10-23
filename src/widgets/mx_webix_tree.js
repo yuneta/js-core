@@ -2,14 +2,15 @@
  *          mx_webix_tree.js
  *
  *          Webix Tree with mxgrah
+ *
  *          "Container Panel"
  *
  *
         Schema
         ------
 
-        Jerarquica Tree with one-direction link to the same class/rol/object
-
+        Vista con mxgraph de un arbol jerarquico de gobjs (js),
+        usando la estructura estilo webix:
             {
                 "id":
                 "value":
@@ -31,6 +32,7 @@
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
+        locked: false,
 
         layout_options: [
             {
@@ -276,6 +278,37 @@
                         self.config._mxgraph.view.setTranslate(0, 0);
                     }
                 },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            graph.setCellsLocked(false);
+
+                            graph.rubberband.setEnabled(true);
+                            graph.panningHandler.useLeftButtonForPanning = false;
+
+                            self.config.locked = false;
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            graph.setCellsLocked(true);
+
+                            graph.rubberband.setEnabled(false);
+                            graph.panningHandler.useLeftButtonForPanning = true;
+
+                            self.config.locked = true;
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
+                    }
+                },
                 { view:"label", label: ""}
             ]
         };
@@ -399,10 +432,13 @@
 
         create_root_and_layers(graph, self.config.layers);
 
-        // Enables rubberband selection
-        new mxRubberband(graph);
+        graph.border = 40;
+        graph.view.setTranslate(graph.border/2, graph.border/2);
 
-        // Panning? HACK if panning is setted then rubberband selection will not work
+        // Enables rubberband selection
+        graph.rubberband = new mxRubberband(graph);
+        graph.rubberband.setEnabled(false);
+
         graph.setPanning(true);
         graph.panningHandler.useLeftButtonForPanning = true;
 

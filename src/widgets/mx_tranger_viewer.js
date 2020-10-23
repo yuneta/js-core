@@ -1,7 +1,8 @@
 /***********************************************************************
  *          mx_tranger_viewer.js
  *
- *          TimeRanger Viewer with mxgrah
+ *          TimeRanger Viewer with mxgrah, jsoneditor and formtable
+ *
  *          "Container Panel"
  *
  *          Copyright (c) 2020 Niyamaka.
@@ -268,7 +269,7 @@
                     icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
                     css: "webix_transparent icon_toolbar_16",
                     autosize: true,
-                    label: t("unlock vertices"),
+                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
                     click: function() {
                         var graph = self.config._mxgraph;
                         if(graph.isCellsLocked()) {
@@ -682,6 +683,8 @@
          *---------------------------*/
         // Enable/Disable cell handling
         graph.setEnabled(true);
+        graph.setHtmlLabels(true);
+        graph.setTooltips(true);
 
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
@@ -734,7 +737,6 @@
         /*
          *  Own getLabel
          */
-        graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
                 var t = "<b>" + cell.id + "</b><br/>";
@@ -818,7 +820,6 @@
         /*
          *  Tooltip
          */
-        graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
             var tip = null;
             if (cell != null && cell.getTooltip != null) {
