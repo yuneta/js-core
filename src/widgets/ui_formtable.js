@@ -1343,6 +1343,7 @@
         var data = kw;
         if(!is_array(data)) {
             log_error("FormTable, data MUST be an array");
+            trace_msg(data);
             return -1;
         }
 
