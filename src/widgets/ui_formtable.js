@@ -50,6 +50,7 @@
         delete_mode_enabled: false,
         delete_record_event_name: "EV_DELETE_RECORD", // TODO
         fields_enabled: null,
+        hide_private_fields: false,
         with_drag: false,
         with_checkbox: false,
         with_radio: false,
@@ -738,8 +739,10 @@
         for(var i=0; schema && i<schema.length; i++) {
             var webix_col = null;
             var tranger_col = schema[i];
-            if(tranger_col.id.charAt(0)=='_') {
-                continue;
+            if(self.config.hide_private_fields) {
+                if(tranger_col.id.charAt(0)=='_') {
+                    continue;
+                }
             }
 
             webix_col = {
@@ -915,8 +918,10 @@
         for(var i=0; schema && i<schema.length; i++) {
             var webix_element = null;
             var tranger_col = schema[i];
-            if(tranger_col.id.charAt(0)=='_') {
-                continue;
+            if(self.config.hide_private_fields) {
+                if(tranger_col.id.charAt(0)=='_') {
+                    continue;
+                }
             }
 
             var id = self.config.with_webix_id?
