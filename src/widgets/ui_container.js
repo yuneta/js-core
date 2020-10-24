@@ -269,20 +269,21 @@
             log_warning("Nobody in fullscreen");
             return -1;
         }
-        var gobj = self.yuno.gobj_find_unique_gobj(self.config.gobj_name_in_fullscreen, true);
-
         webix.fullscreen.exit();
 
-        $$(build_name(gobj, "ct_panel_top_toolbar")).show();
-
-        self.config.gobj_name_in_fullscreen = "";
+        var gobj = self.yuno.gobj_find_unique_gobj(self.config.gobj_name_in_fullscreen, false);
+        if(gobj) {
+            $$(build_name(gobj, "ct_panel_top_toolbar")).show();
+        }
 
         /*
          *  Save persistent attrs
          */
+        self.config.gobj_name_in_fullscreen = "";
         if(self.gobj_is_unique()) {
             self.gobj_save_persistent_attrs();
         }
+
         return 0;
     }
 

@@ -29,6 +29,7 @@
         subscriber: null,       // Subscriber of published events, by default the parent.
         is_pinhold_window: false, // By default it's a Container Panel
         panel_properties: {},   // creator can set "Container Panel" properties
+        window_properties: {},  // creator can set "Pinhold Window" properties
         ui_properties: null,    // creator can set webix properties
         $ui: null,
         $ui_fullscreen: null,   // Which part of window will be fullscreened "Pinhold Window"

@@ -114,7 +114,7 @@
         $ui: null,
 
         gclass: null,
-        mxnode_gclass: null,
+        node_gclass: null,
         locked: true,
 
         layout_options: [
@@ -167,7 +167,7 @@
     };
 
     /************************************************************
-     *   Schema
+     *   Schemas
      ************************************************************/
     var attrs_cols = [
         {
@@ -213,6 +213,59 @@
         {
             "id": "description",
             "header": "Description",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
+
+    var commands_cols = [
+        {
+            "id": "id",
+            "header": "Id",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "alias",
+            "header": "Alias",
+            "fillspace": 10,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "description",
+            "header": "Description",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "usage",
+            "header": "Usage",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "parameters",
+            "header": "Parameters",
             "fillspace": 30,
             "type": "string",
             "flag": [
@@ -644,18 +697,11 @@
             "attrs",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
-
-
-        // Handles clicks on cells
-//         graph.addListener(mxEvent.CLICK, function(sender, evt) {
-//             var cell = evt.getProperty('cell');
-//             if (cell != null) {
-//                 var id = evt.properties.cell.id;
-//                 if(cell.isVertex()) {
-//                     self.gobj_publish_event("EV_MX_JSON_ITEM_CLICKED", {id:id});
-//                 }
-//             }
-//         });
+        create_graph_style(
+            graph,
+            "commands",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
 
         /*
          *  Own getLabel
@@ -707,6 +753,7 @@
                     case "gclass_container":
                         return 'default';
                     case "attrs":
+                    case "commands":
                         return 'pointer';
                     default:
                         return 'default';
@@ -747,7 +794,7 @@
             "gclass_trace_level": gclass.gclass_trace_level,
             "gclass_no_trace_level": gclass.gclass_no_trace_level
         }
-        self.config.mxnode_gclass = graph.insertVertex(
+        self.config.node_gclass = graph.insertVertex(
             layer,          // parent
             gclass.id,      // id
             class_attrs,    // value
@@ -757,23 +804,9 @@
         );
 
         /*-------------------------------*
-         *      Obj attrs
+         *      Attrs
          *-------------------------------*/
-//             "attrs": [
-//                 {
-//                     "id": "persistent_channels",
-//                     "type": "signed32",
-//                     "default_value": 0,
-//                     "description": "Set True to do channels persistent (in sqlite database).",
-//                     "flag": "SDF_RD"
-//                 },
-//                 ...
-//             ],
-
-        /*
-         *  Obj attrs Button, inside of container
-         */
-        var button_obj_attrs = graph.insertVertex(
+        var node_attrs = graph.insertVertex(
             layer,                  // parent
             "Attrs",                // id
             gclass.attrs,           // value
@@ -786,78 +819,32 @@
             layer,          // parent
             null,                       // id
             '',                         // value
-            self.config.mxnode_gclass,  // source
-            button_obj_attrs,           // target
+            self.config.node_gclass,    // source
+            node_attrs,                 // target
             null                        // style
         );
 
-//         /*-------------------------------*
-//          *      Commands
-//          *-------------------------------*/
-// //             "commands": [
-// //                 {
-// //                     "id": "help",
-// //                     "alias": [
-// //                         "h",
-// //                         "?"
-// //                     ],
-// //                     "description": "Available commands or help about a command.",
-// //                     "usage": "help  [cmd='?'] [level='?']",
-// //                     "parameters": [
-// //                         {
-// //                             "id": "cmd",
-// //                             "type": "string",
-// //                             "default_value": "",
-// //                             "description": "command about you want help.",
-// //                             "flag": ""
-// //                         },
-// //                         ...
-// //                     ]
-// //                 },
-// //             ],
-//         var commands = gclass.commands;
-//
-//         /*
-//          *  Commands Button, inside of container
-//          */
-//         var button_commands = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
-//             "Commands Button",                      // id
-//             "Commands",                             // value
-//             20, 20+60*2, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Commands Content
-//          */
-//         var content_commands = graph.insertVertex(
-//             button_commands,                        // parent
-//             "Commands Content",                     // id
-//             commands,                               // value
-//             cx_ctr+sep, -20, cx_box*2, cy_box,      // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "rounded=0;json=1;resizable=1;foldable=1;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Link between "Commands Button" y "Commands Content"
-//          */
-//         graph.insertEdge(
-//             button_commands,            // parent
-//             null,                       // id
-//             '',                         // value
-//             button_commands,            // source
-//             content_commands,           // target
-//             null                        // style
-//         );
-//
+        /*-------------------------------*
+         *      Commands
+         *-------------------------------*/
+        var node_commands = graph.insertVertex(
+            layer,                  // parent
+            "Commands",             // id
+            gclass.commands,        // value
+            0, 0, 100, 100,         // x,y,width,height
+            "commands",             // style
+            false                   // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            self.config.node_gclass,    // source
+            node_commands,              // target
+            null                        // style
+        );
+
 //         /*-------------------------------*
 //          *      Global Methods
 //          *-------------------------------*/
@@ -871,7 +858,7 @@
 //          *  Global Methods Button, inside of container
 //          */
 //         var button_global_methods = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "Global Methods Button",                // id
 //             "Global Methods",                       // value
 //             20, 20+60*3, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -918,7 +905,7 @@
 //          *  Local Methods Button, inside of container
 //          */
 //         var button_local_methods = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "Local Methods Button",                 // id
 //             "Local Methods",                        // value
 //             20, 20+60*4, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -967,7 +954,7 @@
 //          *  FSM Button, inside of container
 //          */
 //         var button_fsm = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "FSM Button",                           // id
 //             "FSM",                                  // value
 //             20, 20+60*5, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -1014,7 +1001,7 @@
 //          *  ACL Button, inside of container
 //          */
 //         var button_acl = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "ACL Button",                           // id
 //             "ACL",                                  // value
 //             20, 20+60*6, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -1038,7 +1025,7 @@
 //          *  Info Global Trace Button, inside of container
 //          */
 //         var button_info_global_trace = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "Info Global Trace Button",             // id
 //             "Info Global Trace",                    // value
 //             20, 20+60*7, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -1088,7 +1075,7 @@
 //          *  Info GClass Trace Button, inside of container
 //          */
 //         var button_info_gclass_trace = graph.insertVertex(
-//             self.config.mxnode_gclass,              // parent
+//             self.config.node_gclass,              // parent
 //             "Info GClass Trace Button",             // id
 //             "Info GClass Trace",                    // value
 //             20, 20+60*8, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
@@ -1133,7 +1120,7 @@
     function show_formtable_attrs(self, kw)
     {
         var gobj = self.yuno.gobj_create(
-            name,
+            get_unique_id(),
             Ui_formtable,
             {
                 subscriber: self,  // HACK get all output events
@@ -1144,7 +1131,7 @@
                     minHeight: 500
                 },
 
-                topic_name: kw.topic_name,
+                topic_name: kw.id,
                 schema: attrs_cols ,
                 is_topic_schema: false,
                 with_checkbox: false,
@@ -1159,15 +1146,81 @@
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: self.config.gclass.id + " Attrs",
+                    with_panel_title: "'" + self.config.gclass.id + "' GClass Attrs",
                     with_panel_hidden_btn: true,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: true
                 },
+                window_properties: {
+                    without_window_pin_btn: true,
+//                     without_window_fullscreen_btn: false,
+                    without_window_hidden_btn: false
+                },
                 is_pinhold_window: true,
-                window_title: self.config.gclass.id + " Attrs",
+                window_title: "'" + self.config.gclass.id + "' GClass Attrs",
                 window_image: "",
-                width: 800,
+                width: 1000,
+                height: 600
+            },
+            __yuno__.__pinhold__
+        );
+
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_commands(self, kw)
+    {
+        var gobj = self.yuno.gobj_create(
+            get_unique_id(),
+            Ui_formtable,
+            {
+                subscriber: self,  // HACK get all output events
+
+                ui_properties: {
+                    gravity: 3,
+                    minWidth: 360,
+                    minHeight: 500
+                },
+
+                topic_name: kw.id,
+                schema: commands_cols ,
+                subschema: attrs_cols,
+                is_topic_schema: false,
+                with_checkbox: false,
+                with_textfilter: true,
+                with_sort: true,
+                with_top_title: true,
+                with_footer: true,
+                with_navigation_toolbar: true,
+                update_mode_enabled: true,
+                create_mode_enabled: false,
+                delete_mode_enabled: false,
+
+                panel_properties: {
+                    with_panel_top_toolbar: true,
+                    with_panel_title: "'" + self.config.gclass.id + "' GClass Commands",
+                    with_panel_hidden_btn: true,
+                    with_panel_fullscreen_btn: true,
+                    with_panel_resize_btn: true
+                },
+                window_properties: {
+                    without_window_pin_btn: true,
+//                     without_window_fullscreen_btn: false,
+                    without_window_hidden_btn: false
+                },
+                is_pinhold_window: true,
+                window_title: "'" + self.config.gclass.id + "' GClass Commands",
+                window_image: "",
+                width: 1000,
                 height: 600
             },
             __yuno__.__pinhold__
@@ -1258,12 +1311,12 @@
      *  o por redimensionamiento del panel, propio o de hermanos
      *
      *  Tasks:
-     *      - Centra mxnode_gclass
+     *      - Centra node_gclass
      *
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
-        if(1 || !self.config.mxnode_gclass) {
+        if(1 || !self.config.node_gclass) {
             return 0; // No centres nada
         }
 
@@ -1271,7 +1324,7 @@
         var graph = self.config._mxgraph;
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
-        var geo = graph.getCellGeometry(self.config.mxnode_gclass);
+        var geo = graph.getCellGeometry(self.config.node_gclass);
         var new_x = geo.x;
         var new_y = geo.y;
         var cx = geo.width;
@@ -1291,7 +1344,7 @@
 
         graph.getModel().beginUpdate();
         try {
-            var cells = [self.config.mxnode_gclass];
+            var cells = [self.config.node_gclass];
             graph.moveCells(cells, -dx, -dy);
             graph.refresh();
         } catch (e) {
@@ -1321,6 +1374,9 @@
         switch(kw.id) {
             case "Attrs":
                 show_formtable_attrs(self, kw.value);
+                break;
+            case "Commands":
+                show_formtable_commands(self, kw.value);
                 break;
             default:
                 break;
