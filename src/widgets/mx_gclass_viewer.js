@@ -702,6 +702,21 @@
             "commands",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
+        create_graph_style(
+            graph,
+            "global_methods",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "ACL",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "trace_levels",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
 
         /*
          *  Own getLabel
@@ -776,11 +791,8 @@
         var win_cy = self.config.$ui.$height;
         var sep = 60;
 
-        var cx_ctr = 300;    // Container
-        var cy_ctr = 600;
-
-        var cx_box = 400;    // Content Box
-        var cy_box = 200;
+        var cx = 150;
+        var cy = 150;
 
         /*-------------------------------*
          *      GClass container
@@ -806,11 +818,11 @@
         /*-------------------------------*
          *      Attrs
          *-------------------------------*/
-        var node_attrs = graph.insertVertex(
+        var attrs_node = graph.insertVertex(
             layer,                  // parent
-            "Attrs",                // id
+            "Attributes",           // id
             gclass.attrs,           // value
-            0, 0, 100, 100,         // x,y,width,height
+            0, 0, cx, cy,           // x,y,width,height
             "attrs",                // style
             false                   // relative
         );
@@ -820,18 +832,18 @@
             null,                       // id
             '',                         // value
             self.config.node_gclass,    // source
-            node_attrs,                 // target
+            attrs_node,                 // target
             null                        // style
         );
 
         /*-------------------------------*
          *      Commands
          *-------------------------------*/
-        var node_commands = graph.insertVertex(
+        var commands_node = graph.insertVertex(
             layer,                  // parent
             "Commands",             // id
             gclass.commands,        // value
-            0, 0, 100, 100,         // x,y,width,height
+            0, 0, cx, cy,           // x,y,width,height
             "commands",             // style
             false                   // relative
         );
@@ -841,113 +853,86 @@
             null,                       // id
             '',                         // value
             self.config.node_gclass,    // source
-            node_commands,              // target
+            commands_node,              // target
             null                        // style
         );
 
-//         /*-------------------------------*
-//          *      Global Methods
-//          *-------------------------------*/
-// //             "global_methods": [
-// //                 "mt_create",
-// //                 ...
-// //             ],
-//         var global_methods = gclass.global_methods;
-//
-//         /*
-//          *  Global Methods Button, inside of container
-//          */
-//         var button_global_methods = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "Global Methods Button",                // id
-//             "Global Methods",                       // value
-//             20, 20+60*3, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Global Methods Content
-//          */
-//         var content_global_methods = graph.insertVertex(
-//             button_global_methods,                  // parent
-//             "Global Methods Content",               // id
-//             global_methods,                         // value
-//             cx_ctr+sep, 140, cx_box, cy_box,        // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "rounded=0;json=1;resizable=1;foldable=1;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Link between "Global Methods Button" y "Global Methods Content"
-//          */
-//         graph.insertEdge(
-//             button_global_methods,      // parent
-//             null,                       // id
-//             '',                         // value
-//             button_global_methods,      // source
-//             content_global_methods,     // target
-//             null                        // style
-//         );
-//
-//         /*-------------------------------*
-//          *      Local Methods
-//          *-------------------------------*/
-// //             "local_methods": [],
-//         var local_methods = gclass.local_methods;
-//
-//         /*
-//          *  Local Methods Button, inside of container
-//          */
-//         var button_local_methods = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "Local Methods Button",                 // id
-//             "Local Methods",                        // value
-//             20, 20+60*4, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*-------------------------------*
-//          *      FSM
-//          *-------------------------------*/
-// //             "FSM": {
-// //                 "input_events": [
-// //                     {
-// //                         "event": "EV_IEV_MESSAGE",
-// //                         "permission": "",
-// //                         "description": ""
-// //                     },
-// //                     ...
-// //                 ],
-// //                 "output_events": [
-// //                     {
-// //                         "event": "EV_ON_MESSAGE",
-// //                         "permission": "",
-// //                         "description": "Message received"
-// //                     },
-// //                     ...
-// //                 ],
-// //                 "states": {
-// //                     "ST_IDLE": [
-// //                         [
-// //                             "EV_ON_MESSAGE",
-// //                             "ac_action",
-// //                             0
-// //                         ],
-// //                         ...
-// //                     ],
-// //                     ...
-// //                 }
-// //             },
+        /*-------------------------------*
+         *      Global Methods
+         *-------------------------------*/
+        var global_methods_node = graph.insertVertex(
+            layer,                  // parent
+            "Global Methods",       // id
+            gclass.global_methods,  // value
+            0, 0, cx, cy,           // x,y,width,height
+            "global_methods",       // style
+            false                   // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            self.config.node_gclass,    // source
+            global_methods_node,        // target
+            null                        // style
+        );
+
+        /*-------------------------------*
+         *      Local Methods
+         *-------------------------------*/
+        if(0) {
+            var local_methods_node = graph.insertVertex(
+                layer,                  // parent
+                "Local Methods",       // id
+                gclass.local_methods,  // value
+                0, 0, cx, cy,           // x,y,width,height
+                "local_methods",       // style
+                false                   // relative
+            );
+
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                self.config.node_gclass,    // source
+                local_methods_node,        // target
+                null                        // style
+            );
+        }
+
+        /*-------------------------------*
+         *      FSM
+         *-------------------------------*/
+//             "FSM": {
+//                 "input_events": [
+//                     {
+//                         "event": "EV_IEV_MESSAGE",
+//                         "permission": "",
+//                         "description": ""
+//                     },
+//                     ...
+//                 ],
+//                 "output_events": [
+//                     {
+//                         "event": "EV_ON_MESSAGE",
+//                         "permission": "",
+//                         "description": "Message received"
+//                     },
+//                     ...
+//                 ],
+//                 "states": {
+//                     "ST_IDLE": [
+//                         [
+//                             "EV_ON_MESSAGE",
+//                             "ac_action",
+//                             0
+//                         ],
+//                         ...
+//                     ],
+//                     ...
+//                 }
+//             },
 //         var fsm = gclass.FSM;
 //
 //         /*
@@ -990,128 +975,54 @@
 //             content_fsm,                // target
 //             null                        // style
 //         );
-//
-//         /*-------------------------------*
-//          *      ACL
-//          *-------------------------------*/
-// //             "ACL": [],
-//         var acl = gclass.ACL;
-//
-//         /*
-//          *  ACL Button, inside of container
-//          */
-//         var button_acl = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "ACL Button",                           // id
-//             "ACL",                                  // value
-//             20, 20+60*6, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*-------------------------------*
-//          *      Info Global traces
-//          *-------------------------------*/
-// //             "info_global_trace": {
-// //                 "machine": "Trace machine",
-// //                 ...
-// //             },
-//         var info_global_trace = gclass.info_global_trace;
-//
-//         /*
-//          *  Info Global Trace Button, inside of container
-//          */
-//         var button_info_global_trace = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "Info Global Trace Button",             // id
-//             "Info Global Trace",                    // value
-//             20, 20+60*7, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Info Global Trace Content
-//          */
-//         var content_info_global_trace = graph.insertVertex(
-//             button_info_global_trace,               // parent
-//             "Info Global Trace Content",            // id
-//             info_global_trace,                      // value
-//             cx_ctr+sep, 120, cx_box*2, cy_box,      // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "rounded=0;json=1;resizable=1;foldable=1;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Link between "Info Global Trace Button" y "Info Global Trace Content"
-//          */
-//         graph.insertEdge(
-//             button_info_global_trace,   // parent
-//             null,                       // id
-//             '',                         // value
-//             button_info_global_trace,   // source
-//             content_info_global_trace,  // target
-//             null                        // style
-//         );
-//
-//         /*-------------------------------*
-//          *      Info Class traces
-//          *-------------------------------*/
-// //             "info_gclass_trace": {
-// //                 "connection": "Trace connections of iogates",
-// //                 ...
-// //             },
-//         var info_gclass_trace = gclass.info_gclass_trace;
-//
-//         /*
-//          *  Info GClass Trace Button, inside of container
-//          */
-//         var button_info_gclass_trace = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "Info GClass Trace Button",             // id
-//             "Info GClass Trace",                    // value
-//             20, 20+60*8, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Info GClass Trace Content
-//          */
-//         var content_info_gclass_trace = graph.insertVertex(
-//             button_info_gclass_trace,               // parent
-//             "Info GClass Trace Content",            // id
-//             info_gclass_trace,                      // value
-//             cx_ctr+sep, 280, cx_box*2, cy_box,      // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "rounded=0;json=1;resizable=1;foldable=1;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Link between "Info GClass Trace Button" y "Info GClass Trace Content"
-//          */
-//         graph.insertEdge(
-//             button_info_gclass_trace,   // parent
-//             null,                       // id
-//             '',                         // value
-//             button_info_gclass_trace,   // source
-//             content_info_gclass_trace,  // target
-//             null                        // style
-//         );
 
+        /*-------------------------------*
+         *      ACL
+         *-------------------------------*/
+        if(1) {
+            var acl_node = graph.insertVertex(
+                layer,       // parent
+                "ACL",       // id
+                gclass.ACL,  // value
+                0, 0, cx, cy,// x,y,width,height
+                "ACL",       // style
+                false                   // relative
+            );
+
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                self.config.node_gclass,    // source
+                acl_node,        // target
+                null                        // style
+            );
+        }
+
+
+        /*-------------------------------*
+         *      Info trace levels
+         *-------------------------------*/
+        if(1) {
+            var trace_levels = gclass.info_global_trace + gclass.info_gclass_trace;
+            var info_trace_levels_node = graph.insertVertex(
+                layer,       // parent
+                "Trace levels",       // id
+                trace_levels,   // value
+                0, 0, cx, cy,   // x,y,width,height
+                "trace_levels", // style
+                false           // relative
+            );
+
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                self.config.node_gclass,    // source
+                info_trace_levels_node,     // target
+                null                        // style
+            );
+        }
     }
 
     /********************************************
@@ -1153,7 +1064,7 @@
                 },
                 window_properties: {
                     without_window_pin_btn: true,
-//                     without_window_fullscreen_btn: false,
+                    without_window_fullscreen_btn: false,
                     without_window_hidden_btn: false
                 },
                 is_pinhold_window: true,
@@ -1214,7 +1125,7 @@
                 },
                 window_properties: {
                     without_window_pin_btn: true,
-//                     without_window_fullscreen_btn: false,
+                    without_window_fullscreen_btn: false,
                     without_window_hidden_btn: false
                 },
                 is_pinhold_window: true,
