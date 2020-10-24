@@ -27,9 +27,10 @@
         info_no_wait: function() {},
 
         /*
-         *
+         *  remote_service: Remote service to ask data,
+         *  if it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
          */
-        remote_service: null, // Servicio remoto al que pedir los datos
+        remote_service: null,
         tranger_name: null,
         expanded: true,
         lists_limit: 100,
