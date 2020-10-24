@@ -113,18 +113,11 @@
 
         $ui: null,
 
-        view_handler: "view1", // "json", "view1",... TODO
+        gclass: null,
         mxnode_gclass: null,
-        locked: false,
+        locked: true,
 
         layout_options: [
-            {
-                id: "no_layout",
-                value: "No Layout",
-                layout: function(layout_option, graph) {
-                    return null;
-                }
-            },
             {
                 id: "tree_layout",
                 value: "Compact Tree Layout",
@@ -164,15 +157,70 @@
                     return layout;
                 }
             }
-
         ],
 
-        layout_selected: "no_layout",
+        layout_selected: "tree_layout",
 
         __writable_attrs__: [
             "layout_selected"
         ]
     };
+
+    /************************************************************
+     *   Schema
+     ************************************************************/
+    var attrs_cols = [
+        {
+            "id": "id",
+            "header": "Id",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "type",
+            "header": "Type",
+            "fillspace": 10,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "default_value",
+            "header": "Default Value",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "flag",
+            "header": "Flag",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "description",
+            "header": "Description",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
 
 
 
@@ -216,6 +264,7 @@
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
 
         initialize_mxgraph(self);
+        create_root_and_layers(self);
         rebuild_layouts(self);
     }
 
@@ -237,7 +286,6 @@
                     id: build_name(self, "layout_options"),
                     tooltip: t("Select layout"),
                     width: 180,
-                    hidden: true, // HACK own layout
                     options: self.config.layout_options,
                     value: self.config.layout_selected,
                     label: "",
@@ -368,6 +416,9 @@
                 {
                     view: "mxgraph",
                     id: build_name(self, "mxgraph"),
+                    events: [
+                        mxEvent.CLICK
+                    ],
                     gobj: self
                 },
                 bottom_toolbar
@@ -407,12 +458,10 @@
     /********************************************
      *  Execute layout
      ********************************************/
-    function execute_layout(self, group)
+    function execute_layout(self)
     {
         var graph = self.config._mxgraph;
-        if(group) {
-            group = get_layer(self, "layer?");
-        }
+        var group = get_layer(self, "layer?");
 
         var cur_layout = kwid_collect(
             self.config.layout_options,
@@ -422,7 +471,11 @@
         if(!cur_layout) {
             cur_layout = self.config.layout_options[0];
         }
-        cur_layout = self.config.layout_options[0]; // HACK no layout please
+
+        var locked = graph.isCellsLocked();
+        if(locked) {
+            graph.setCellsLocked(false);
+        }
 
         if(cur_layout && cur_layout.exe) {
             graph.getModel().beginUpdate();
@@ -434,35 +487,25 @@
                 graph.getModel().endUpdate();
             }
         }
+
+        if(locked) {
+            graph.setCellsLocked(true);
+        }
     }
 
     /********************************************
      *  Create root and layers
      ********************************************/
-    function create_root_and_layers(graph, layers)
+    function create_root_and_layers(self)
     {
+        var graph = self.config._mxgraph;
         var root = null;
-        if(layers && layers.length) { // TODO
-            root = new mxCell();
-            root.setId("__mx_root__");
 
-            for(var i=0; i<layers.length; i++) {
-                var layer = layers[i];
+        root = new mxCell();
+        root.setId("__mx_root__");
 
-                // Create the layer
-                var __mx_cell__ = root.insert(new mxCell());
-
-                // Set reference
-                layer["__mx_cell__"] = __mx_cell__;
-
-                var id = kw_get_str(layer, "id", null, false);
-                if(id) {
-                    __mx_cell__.setId(id);
-                }
-            }
-        } else {
-            root = graph.getModel().createRoot()
-        }
+        // Create the layer
+        var __mx_cell__ = root.insert(new mxCell());
 
         graph.getModel().beginUpdate();
         try {
@@ -472,6 +515,39 @@
         } finally {
             graph.getModel().endUpdate();
         }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_layer(self, layer)
+    {
+        return self.config._mxgraph.getDefaultParent();
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function create_graph_style(graph, name, s)
+    {
+        var style = {};
+        var list = s.split(";");
+        for(var i=0; i<list.length; i++) {
+            var sty = list[i];
+            if(empty_string(sty)) {
+                continue;
+            }
+            var key_value = sty.split("=");
+            if(key_value.length==1) {
+                // Without = must be the shape
+                style["shape"] = key_value[0];
+            } else if(key_value.length==2) {
+                style[key_value[0]] = key_value[1];
+            } else {
+                log_error("create_graph_style() bad style: " + sty);
+            }
+        }
+        graph.getStylesheet().putCellStyle(name, style);
     }
 
     /*********************************************************
@@ -485,12 +561,10 @@
     {
         var graph = self.config._mxgraph;
 
-        create_root_and_layers(graph, self.config.layers);
-
         mxEvent.disableContextMenu(graph.container);
 
-        graph.border = 40;
-        graph.view.setTranslate(graph.border/2, graph.border/2);
+        graph.border = 30;
+        graph.view.setTranslate(graph.border, graph.border);
 
         // Enables rubberband selection
         graph.rubberband = new mxRubberband(graph);
@@ -506,31 +580,28 @@
         graph.setMultigraph(true);
 
         // Avoids overlap of edges and collapse icons
-        graph.keepEdgesInBackground = true;
+        graph.keepEdgesInBackground = false;
+
+        graph.setAutoSizeCells(true);
 
         /*---------------------------*
          *      PERMISOS
          *---------------------------*/
         // Enable/Disable cell handling
         graph.setEnabled(true);
+        graph.setHtmlLabels(true);
+        graph.setTooltips(true);
 
-        graph.setCellsLocked(true);
-        graph.setConnectable(false);    // (true) Crear edges/links, update mxConnectionHandler.enabled
-        graph.cellsDisconnectable = false;  // (true) Override by isCellDisconnectable()
-        graph.cellsLocked = false;      // (false)  Override by isCellsLocked()
-        graph.portsEnabled = true;      // (true)   Override by isPortsEnabled()
-        graph.cellsEditable = false;    // (true)   Override by isCellEditable()
-        graph.cellsResizable = true;    // (true)   Override by isCellResizable()
-        graph.setCellsMovable = true;   // (true)   Override by isCellMovable()
-        graph.disconnectOnMove = false; // (true)   Override by isDisconnectOnMove()
-        graph.constrainChildren = false;// (true)   Override by isConstrainChildren()
-        graph.extendParents = false;    // (true)   Override by isExtendParents()
-        graph.extendParentsOnAdd = false;// (true)  Override by isExtendParentsOnAdd()
-        graph.extendParentsOnMove = false; // (false) Override by isExtendParentsOnMove()
-        graph.foldingEnabled = true;    // (true) General para todos, sin Override
-        graph.dropEnabled = false;      // (false)  Override by isDropEnabled()
+        graph.setConnectable(false); // Crear edges/links
+        graph.setCellsDisconnectable(false); // Modificar egdes/links
+        mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
+        graph.setCellsLocked(self.config.locked);
+        graph.setPortsEnabled(true);
+        graph.setCellsEditable(false);
 
-        graph.graphHandler.setCloneEnabled(false); // Ctrl+Drag will clone a cell
+        mxGraph.prototype.isCellSelectable = function(cell) {
+            return true;
+        };
 
         /*
          *  HACK Por defecto si los hijos salen un overlap del 50%
@@ -541,299 +612,109 @@
         mxGraph.prototype.defaultOverlap = 1; // Permite a hijos irse tan lejos como quieran
 
         /*
-         *  Enable/Disable basic selection (se activa marco de redimensionamiento o movible)
-         *  Si se cambia isCellSelectable() entonces es lo que prima.
-         *  Seleccionable, se puede activar:
-         *      - el marco de redimensionamiento (setCellsResizable a true)
-         *      - el marco de movimiento
-         */
-        graph.cellsSelectable = false; // Default: true, Override by isCellSelectable()
-        mxGraph.prototype.isCellSelectable = function(cell) {
-            return isCellSelectable(self, cell);
-        };
-
-        /*
          *  General Vertex Style
          */
         var style = graph.getStylesheet().getDefaultVertexStyle();
-        style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-
-        style[mxConstants.STYLE_FILLCOLOR] = '#FBB5CA';
-        style[mxConstants.STYLE_STROKECOLOR] = '#F8CECC';
-
-        style[mxConstants.STYLE_GRADIENTCOLOR] = '#FBD5E4';
-        style[mxConstants.STYLE_SHADOW] = true;
-        style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_FONTFAMILY] = "Arial";
+//         style[mxConstants.STYLE_FONTFAMILY] = 'monospace, "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", sans-serif, "courier new", courier';
+        style[mxConstants.STYLE_FONTSIZE] = '14';
         style[mxConstants.STYLE_FONTSTYLE] = '0';
-        style[mxConstants.STYLE_FONTSIZE] = '12';
 
         /*
          *  General Edge Style
          */
         style = graph.getStylesheet().getDefaultEdgeStyle();
-        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
         style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_STROKEWIDTH] = '2';
-        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+        style[mxConstants.STYLE_STROKEWIDTH] = '1';
+
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.Loop;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SideToSide;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.OrthConnector;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SegmentConnector;
+
+        create_graph_style(
+            graph,
+            "gclass_container",
+            "rounded=1;whiteSpace=wrap;html=1;shadow=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;horizontal=1;spacingLeft=10;spacingTop=10;glass=0;sketch=0;gradientColor=#ffffff;"
+        );
+        create_graph_style(
+            graph,
+            "attrs",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+
+
+        // Handles clicks on cells
+//         graph.addListener(mxEvent.CLICK, function(sender, evt) {
+//             var cell = evt.getProperty('cell');
+//             if (cell != null) {
+//                 var id = evt.properties.cell.id;
+//                 if(cell.isVertex()) {
+//                     self.gobj_publish_event("EV_MX_JSON_ITEM_CLICKED", {id:id});
+//                 }
+//             }
+//         });
 
         /*
-         *  Set html labels
+         *  Own getLabel
          */
-        graph.setHtmlLabels(true); // See https://jgraph.github.io/mxgraph/docs/known-issues.html#19
+        graph.getLabel = function(cell) {
+            if (this.getModel().isVertex(cell)) {
+                switch(cell.style) {
+                    case "gclass_container":
+                        var t = "<b>" + cell.id + "</b><br/>";
+                        if(is_object(cell.value)) {
+                            for(var key in cell.value) {
+                                var v = cell.value[key];
+                                t += key + ": <pre style='display:inline'><i>" +
+                                    v +
+                                    "</i></pre><br/>";
+                            }
+                        }
+                        return t;
+                    default:
+                        var t = "<b>" + cell.id + "</b><br/>";
+                        return t;
+                }
+            }
+            return "";
+        };
+
 
         /*
-         *  Own convertValueToString()
-         *  No uses getLabel() para cambiar la label, es mejor convertValueToString().
-         *  La original simplemente returna un value.toString()
-         *  Used in:
-         *      - graph.getLabel() called if la cell es visible y no tiene style "noLabel"
-         *      - graph.getEditingValue()
-         *      - graph.getTooltipForCell() si getTooltip() es null
-         *      - graph.getEditingValue()
-         *      - editor.getTitle()
-         *      - editor.getRootTitle()
+         *  Tooltip
          */
-        // Overrides method to provide a cell label in the display
-        graph.convertValueToString = function(cell) {
-            return convertValueToString(self, cell);
-        }
-
-        /*
-         *  Own getTooltip
-         */
-        graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
             var tip = null;
             if (cell != null && cell.getTooltip != null) {
                 tip = cell.getTooltip();
             } else {
-                return getTooltipForCell(self, cell);
+                if(cell.id && cell.isVertex()) {
+                    return cell.id;
+                }
             }
             return tip;
         };
 
         /*
-         *  Mouse Cursor
+         *  Cursor pointer
          */
         graph.getCursorForCell = function(cell) {
-            return getCursorForCell(self, cell);
-        };
-
-        /*
-         *  Setup events
-         */
-        setup_events(self, graph);
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function setup_events(self, graph)
-    {
-        var events = [
-            mxEvent.ROOT,
-            mxEvent.ALIGN_CELLS,
-            mxEvent.FLIP_EDGE,
-            mxEvent.ORDER_CELLS,
-            mxEvent.CELLS_ORDERED,
-            mxEvent.GROUP_CELLS,
-            mxEvent.UNGROUP_CELLS,
-            mxEvent.REMOVE_CELLS_FROM_PARENT,
-            mxEvent.ADD_CELLS,
-            mxEvent.CELLS_ADDED,
-            mxEvent.REMOVE_CELLS,
-            mxEvent.CELLS_REMOVED,
-            mxEvent.SPLIT_EDGE,
-            mxEvent.TOGGLE_CELLS,
-            mxEvent.FOLD_CELLS,
-            mxEvent.CELLS_FOLDED,
-            mxEvent.UPDATE_CELL_SIZE,
-            mxEvent.RESIZE_CELLS,
-            mxEvent.CELLS_RESIZED,
-            mxEvent.MOVE_CELLS,
-            mxEvent.CELLS_MOVED,
-            mxEvent.CONNECT_CELL,
-            mxEvent.CELL_CONNECTED,
-            mxEvent.REFRESH,
-            mxEvent.CLICK,
-            mxEvent.DOUBLE_CLICK,
-            mxEvent.GESTURE,
-            mxEvent.TAP_AND_HOLD,
-            //mxEvent.FIRE_MOUSE_EVENT, too much events
-            mxEvent.SIZE,
-            mxEvent.START_EDITING,
-            mxEvent.EDITING_STARTED,
-            mxEvent.EDITING_STOPPED,
-            mxEvent.LABEL_CHANGED,
-            mxEvent.ADD_OVERLAY,
-            mxEvent.REMOVE_OVERLAY
-        ];
-        for(var i=0; i<events.length; i++) {
-            var ev = events[i];
-            graph.addListener(ev, function(sender, evt) {
-                self.gobj_send_event("MX_" + evt.name, evt.properties, self);
-            });
-        }
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function get_layer(self, layer)
-    {
-// TODO        var layers = self.config.layers;
-//         for(var i=0; i<layers.length; i++) {
-//             if(layers[i].id == layer) {
-//                 return layers[i].__mx_cell__;
-//             }
-//         }
-//         var x = self.config._mxgraph.getModel().getCell(layer);
-        return self.config._mxgraph.getDefaultParent();
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function load_gclass(self, data, layer)
-    {
-        /*
-         *  HACK is already in a beginUpdate/endUpdate
-         */
-        var graph = self.config._mxgraph;
-        var layer = get_layer(self, layer);
-
-        switch(self.config.view_handler) {
-            case "viewer1":
-            default:
-                show_view1(self, graph, layer, data);
-                break;
-        }
-
-        execute_layout(self, layer);
-    }
-
-
-    /************************************************************
-     *  Create JSON viewer
-     ************************************************************/
-    function json_view(self, container, jn_msg)
-    {
-        return new JSONEditor(
-            container,
-            {
-                mode: "code",
-                //modes: ["form","view","tree","code","text","preview"],
-                indentation: 4,
-                mainMenuBar: false,
-                navigationBar: false,
-                statusBar:false,
-                timestampTag: function({field, value, path}) {
-                    if (field === '__t__' || field === '__tm__' || field === 'tm' ||
-                        field === 'from_t' || field === 'to_t' || field === 't' ||
-                        field === 'from_tm' || field === 'to_tm'
-                    ) {
-                        return true;
-                    }
-                    return false;
-                },
-                timestampFormat: function({field, value, path}) {
-                    if (field === '__t__' || field === '__tm__' || field === 'tm' ||
-                        field === 'from_t' || field === 'to_t' || field === 't' ||
-                        field === 'from_tm' || field === 'to_tm'
-                    ) {
-                        return new Date(value*1000).toISOString();
-                    }
-                    return null;
-                },
-                onEditable: function({path, field, value}) {
-                    return false;
+            if(this.model.isVertex(cell)) {
+                switch(cell.style) {
+                    case "gclass_container":
+                        return 'default';
+                    case "attrs":
+                        return 'pointer';
+                    default:
+                        return 'default';
                 }
-            },
-            jn_msg
-        );
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function convertValueToString(self, cell)
-    {
-        var graph = self.config._mxgraph;
-
-        var style = graph.getCurrentCellStyle(cell);
-        if(style.json) {
-            var div = document.createElement('div');
-            div.style.position = 'relative';
-            div.style.left = 0 + 'px';
-            div.style.top = 0 + 'px';
-            div.style.width = cell.geometry.width - 40 +  'px';
-            div.style.height= cell.geometry.height - 45 + 'px';
-            //div.id = cell.value.id;
-            //div.style.border = "1px solid black";
-
-            var msg = cell.value;
-            var jn_msg = null;
-            try {
-                if(is_string(msg)) {
-                    jn_msg = JSON.parse(msg);
-                } else {
-                    jn_msg = msg;
-                }
-            } catch (e) {
-                jn_msg = {msg:String(msg)};
+            } else {
+                return 'default';
             }
-
-            json_view(self, div, jn_msg);
-            return div;
-        }
-
-        if(is_string(cell.value)) {
-            return "<strong>" + cell.value + "</strong>";
-        } else if(is_object(cell.value) && cell.value.id) {
-            return "<strong>" + cell.value.id + "</strong>";
-        } else if(is_string(cell.id)) {
-            return "<strong>" + cell.id + "</strong>";
-        }
-        return "";
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function getTooltipForCell(self, cell)
-    {
-        if(is_string(cell.value)) {
-            return "<strong>" + cell.value + "</strong>";
-        } else if(is_string(cell.id)) {
-            return "<strong>" + cell.id + "</strong>";
-        } else if(is_object(cell.value) && cell.value.id) {
-            return "<strong>" + cell.value.id + "</strong>";
-        }
-        return "";
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function isCellSelectable(self, cell)
-    {
-        if(cell.isVertex()) {
-            return true;
-        }
-        return false; // edges no selectable
-    }
-
-    /************************************************************
-     *
-     ************************************************************/
-    function getCursorForCell(self, cell)
-    {
-        if(cell.edge) {
-            return "default";
-        } else {
-            return "default";
-        }
+        };
     }
 
     /************************************************************
@@ -841,6 +722,9 @@
      ************************************************************/
     function show_view1(self, graph, layer, gclass)
     {
+        /*
+         *  HACK is already in a beginUpdate/endUpdate
+         */
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
         var sep = 60;
@@ -854,67 +738,22 @@
         /*-------------------------------*
          *      GClass container
          *-------------------------------*/
-        self.config.mxnode_gclass = graph.insertVertex(
-            layer,          // parent
-            gclass.id,      // id
-            gclass,         // value
-            20, 140, cx_ctr, cy_ctr,   // x,y,width,height
-            "verticalLabelPosition=top;verticalAlign=bottom;"+ // style
-            "foldable=0;resizable=0;",
-            false           // relative
-        );
-
-        /*-------------------------------*
-         *      Class attrs
-         *-------------------------------*/
         var class_attrs = {
             "id": gclass.id,
             "base": gclass.base,
             "priv_size": gclass.priv_size,
             "instances": gclass.instances,
+            "gcflag": gclass.gcflag,
             "gclass_trace_level": gclass.gclass_trace_level,
             "gclass_no_trace_level": gclass.gclass_no_trace_level
         }
-
-        /*
-         *  Class attrs Button, inside of container
-         */
-        var button_class_attrs = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Class Attributes Button",              // id
-            "Class Attributes",                     // value
-            20, 20+60*0, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*
-         *  Class attrs Content
-         */
-        var content_class_attrs = graph.insertVertex(
-            button_class_attrs,                     // parent
-            "Class Attributes Content",             // id
-            class_attrs,                            // value
-            cx_ctr+sep, -150, cx_box, cy_box,       // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "Class Attributes Button" y "Class Attributes Content"
-         */
-        graph.insertEdge(
-            button_class_attrs,         // parent
-            null,                       // id
-            '',                         // value
-            button_class_attrs,         // source
-            content_class_attrs,        // target
-            null                        // style
+        self.config.mxnode_gclass = graph.insertVertex(
+            layer,          // parent
+            gclass.id,      // id
+            class_attrs,    // value
+            0, 0, 250, 200, // x,y,width,height
+            "gclass_container", // style
+            false           // relative
         );
 
         /*-------------------------------*
@@ -930,383 +769,417 @@
 //                 },
 //                 ...
 //             ],
-        var obj_attrs = gclass.attrs;
 
         /*
          *  Obj attrs Button, inside of container
          */
         var button_obj_attrs = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Object Attributes Button",             // id
-            "Object Attributes",                    // value
-            20, 20+60*1, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
+            layer,                  // parent
+            "Attrs",                // id
+            gclass.attrs,           // value
+            0, 0, 100, 100,         // x,y,width,height
+            "attrs",                // style
+            false                   // relative
+        );
 
-        /*
-         *  Obj attrs Content
-         */
-        var content_obj_attrs = graph.insertVertex(
-            button_obj_attrs,                       // parent
-            "Object Attributes Content",            // id
-            obj_attrs,                              // value
-            cx_ctr+sep+cx_box+20, -180, cx_box*2, cy_box,   // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "Object Attributes Button" y "Object Attributes Content"
-         */
         graph.insertEdge(
-            button_obj_attrs,           // parent
+            layer,          // parent
             null,                       // id
             '',                         // value
-            button_obj_attrs,           // source
-            content_obj_attrs,          // target
+            self.config.mxnode_gclass,  // source
+            button_obj_attrs,           // target
             null                        // style
         );
 
-        /*-------------------------------*
-         *      Commands
-         *-------------------------------*/
-//             "commands": [
-//                 {
-//                     "id": "help",
-//                     "alias": [
-//                         "h",
-//                         "?"
-//                     ],
-//                     "description": "Available commands or help about a command.",
-//                     "usage": "help  [cmd='?'] [level='?']",
-//                     "parameters": [
-//                         {
-//                             "id": "cmd",
-//                             "type": "string",
-//                             "default_value": "",
-//                             "description": "command about you want help.",
-//                             "flag": ""
-//                         },
-//                         ...
-//                     ]
-//                 },
-//             ],
-        var commands = gclass.commands;
+//         /*-------------------------------*
+//          *      Commands
+//          *-------------------------------*/
+// //             "commands": [
+// //                 {
+// //                     "id": "help",
+// //                     "alias": [
+// //                         "h",
+// //                         "?"
+// //                     ],
+// //                     "description": "Available commands or help about a command.",
+// //                     "usage": "help  [cmd='?'] [level='?']",
+// //                     "parameters": [
+// //                         {
+// //                             "id": "cmd",
+// //                             "type": "string",
+// //                             "default_value": "",
+// //                             "description": "command about you want help.",
+// //                             "flag": ""
+// //                         },
+// //                         ...
+// //                     ]
+// //                 },
+// //             ],
+//         var commands = gclass.commands;
+//
+//         /*
+//          *  Commands Button, inside of container
+//          */
+//         var button_commands = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "Commands Button",                      // id
+//             "Commands",                             // value
+//             20, 20+60*2, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Commands Content
+//          */
+//         var content_commands = graph.insertVertex(
+//             button_commands,                        // parent
+//             "Commands Content",                     // id
+//             commands,                               // value
+//             cx_ctr+sep, -20, cx_box*2, cy_box,      // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "rounded=0;json=1;resizable=1;foldable=1;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Link between "Commands Button" y "Commands Content"
+//          */
+//         graph.insertEdge(
+//             button_commands,            // parent
+//             null,                       // id
+//             '',                         // value
+//             button_commands,            // source
+//             content_commands,           // target
+//             null                        // style
+//         );
+//
+//         /*-------------------------------*
+//          *      Global Methods
+//          *-------------------------------*/
+// //             "global_methods": [
+// //                 "mt_create",
+// //                 ...
+// //             ],
+//         var global_methods = gclass.global_methods;
+//
+//         /*
+//          *  Global Methods Button, inside of container
+//          */
+//         var button_global_methods = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "Global Methods Button",                // id
+//             "Global Methods",                       // value
+//             20, 20+60*3, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Global Methods Content
+//          */
+//         var content_global_methods = graph.insertVertex(
+//             button_global_methods,                  // parent
+//             "Global Methods Content",               // id
+//             global_methods,                         // value
+//             cx_ctr+sep, 140, cx_box, cy_box,        // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "rounded=0;json=1;resizable=1;foldable=1;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Link between "Global Methods Button" y "Global Methods Content"
+//          */
+//         graph.insertEdge(
+//             button_global_methods,      // parent
+//             null,                       // id
+//             '',                         // value
+//             button_global_methods,      // source
+//             content_global_methods,     // target
+//             null                        // style
+//         );
+//
+//         /*-------------------------------*
+//          *      Local Methods
+//          *-------------------------------*/
+// //             "local_methods": [],
+//         var local_methods = gclass.local_methods;
+//
+//         /*
+//          *  Local Methods Button, inside of container
+//          */
+//         var button_local_methods = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "Local Methods Button",                 // id
+//             "Local Methods",                        // value
+//             20, 20+60*4, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*-------------------------------*
+//          *      FSM
+//          *-------------------------------*/
+// //             "FSM": {
+// //                 "input_events": [
+// //                     {
+// //                         "event": "EV_IEV_MESSAGE",
+// //                         "permission": "",
+// //                         "description": ""
+// //                     },
+// //                     ...
+// //                 ],
+// //                 "output_events": [
+// //                     {
+// //                         "event": "EV_ON_MESSAGE",
+// //                         "permission": "",
+// //                         "description": "Message received"
+// //                     },
+// //                     ...
+// //                 ],
+// //                 "states": {
+// //                     "ST_IDLE": [
+// //                         [
+// //                             "EV_ON_MESSAGE",
+// //                             "ac_action",
+// //                             0
+// //                         ],
+// //                         ...
+// //                     ],
+// //                     ...
+// //                 }
+// //             },
+//         var fsm = gclass.FSM;
+//
+//         /*
+//          *  FSM Button, inside of container
+//          */
+//         var button_fsm = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "FSM Button",                           // id
+//             "FSM",                                  // value
+//             20, 20+60*5, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  FSM Content
+//          */
+//         var content_fsm = graph.insertVertex(
+//             button_fsm,                             // parent
+//             "FSM Content",                          // id
+//             fsm,                                    // value
+//             cx_ctr+sep+cx_box+20, 20, cx_box*2, cy_box,   // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "rounded=0;json=1;resizable=1;foldable=1;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Link between "FSM Button" y "FSM Content"
+//          */
+//         graph.insertEdge(
+//             button_fsm,                 // parent
+//             null,                       // id
+//             '',                         // value
+//             button_fsm,                 // source
+//             content_fsm,                // target
+//             null                        // style
+//         );
+//
+//         /*-------------------------------*
+//          *      ACL
+//          *-------------------------------*/
+// //             "ACL": [],
+//         var acl = gclass.ACL;
+//
+//         /*
+//          *  ACL Button, inside of container
+//          */
+//         var button_acl = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "ACL Button",                           // id
+//             "ACL",                                  // value
+//             20, 20+60*6, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*-------------------------------*
+//          *      Info Global traces
+//          *-------------------------------*/
+// //             "info_global_trace": {
+// //                 "machine": "Trace machine",
+// //                 ...
+// //             },
+//         var info_global_trace = gclass.info_global_trace;
+//
+//         /*
+//          *  Info Global Trace Button, inside of container
+//          */
+//         var button_info_global_trace = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "Info Global Trace Button",             // id
+//             "Info Global Trace",                    // value
+//             20, 20+60*7, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Info Global Trace Content
+//          */
+//         var content_info_global_trace = graph.insertVertex(
+//             button_info_global_trace,               // parent
+//             "Info Global Trace Content",            // id
+//             info_global_trace,                      // value
+//             cx_ctr+sep, 120, cx_box*2, cy_box,      // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "rounded=0;json=1;resizable=1;foldable=1;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Link between "Info Global Trace Button" y "Info Global Trace Content"
+//          */
+//         graph.insertEdge(
+//             button_info_global_trace,   // parent
+//             null,                       // id
+//             '',                         // value
+//             button_info_global_trace,   // source
+//             content_info_global_trace,  // target
+//             null                        // style
+//         );
+//
+//         /*-------------------------------*
+//          *      Info Class traces
+//          *-------------------------------*/
+// //             "info_gclass_trace": {
+// //                 "connection": "Trace connections of iogates",
+// //                 ...
+// //             },
+//         var info_gclass_trace = gclass.info_gclass_trace;
+//
+//         /*
+//          *  Info GClass Trace Button, inside of container
+//          */
+//         var button_info_gclass_trace = graph.insertVertex(
+//             self.config.mxnode_gclass,              // parent
+//             "Info GClass Trace Button",             // id
+//             "Info GClass Trace",                    // value
+//             20, 20+60*8, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "fontColor=black;strokeColor=black;"+
+//             "foldable=1;resizable=0;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Info GClass Trace Content
+//          */
+//         var content_info_gclass_trace = graph.insertVertex(
+//             button_info_gclass_trace,               // parent
+//             "Info GClass Trace Content",            // id
+//             info_gclass_trace,                      // value
+//             cx_ctr+sep, 280, cx_box*2, cy_box,      // x,y,width,height
+//             "shape=rectangle;"+                     // style
+//             "fillColor=white;"+
+//             "rounded=0;json=1;resizable=1;foldable=1;",
+//             false
+//         );                                          // relative
+//
+//         /*
+//          *  Link between "Info GClass Trace Button" y "Info GClass Trace Content"
+//          */
+//         graph.insertEdge(
+//             button_info_gclass_trace,   // parent
+//             null,                       // id
+//             '',                         // value
+//             button_info_gclass_trace,   // source
+//             content_info_gclass_trace,  // target
+//             null                        // style
+//         );
 
-        /*
-         *  Commands Button, inside of container
-         */
-        var button_commands = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Commands Button",                      // id
-            "Commands",                             // value
-            20, 20+60*2, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
+    }
 
-        /*
-         *  Commands Content
-         */
-        var content_commands = graph.insertVertex(
-            button_commands,                        // parent
-            "Commands Content",                     // id
-            commands,                               // value
-            cx_ctr+sep, -20, cx_box*2, cy_box,      // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_attrs(self, kw)
+    {
+        var gobj = self.yuno.gobj_create(
+            name,
+            Ui_formtable,
+            {
+                subscriber: self,  // HACK get all output events
 
-        /*
-         *  Link between "Commands Button" y "Commands Content"
-         */
-        graph.insertEdge(
-            button_commands,            // parent
-            null,                       // id
-            '',                         // value
-            button_commands,            // source
-            content_commands,           // target
-            null                        // style
+                ui_properties: {
+                    gravity: 3,
+                    minWidth: 360,
+                    minHeight: 500
+                },
+
+                topic_name: kw.topic_name,
+                schema: attrs_cols ,
+                is_topic_schema: false,
+                with_checkbox: false,
+                with_textfilter: true,
+                with_sort: true,
+                with_top_title: true,
+                with_footer: true,
+                with_navigation_toolbar: true,
+                update_mode_enabled: true,
+                create_mode_enabled: false,
+                delete_mode_enabled: false,
+
+                panel_properties: {
+                    with_panel_top_toolbar: true,
+                    with_panel_title: self.config.gclass.id + " Attrs",
+                    with_panel_hidden_btn: true,
+                    with_panel_fullscreen_btn: true,
+                    with_panel_resize_btn: true
+                },
+                is_pinhold_window: true,
+                window_title: self.config.gclass.id + " Attrs",
+                window_image: "",
+                width: 800,
+                height: 600
+            },
+            __yuno__.__pinhold__
         );
 
-        /*-------------------------------*
-         *      Global Methods
-         *-------------------------------*/
-//             "global_methods": [
-//                 "mt_create",
-//                 ...
-//             ],
-        var global_methods = gclass.global_methods;
-
-        /*
-         *  Global Methods Button, inside of container
-         */
-        var button_global_methods = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Global Methods Button",                // id
-            "Global Methods",                       // value
-            20, 20+60*3, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*
-         *  Global Methods Content
-         */
-        var content_global_methods = graph.insertVertex(
-            button_global_methods,                  // parent
-            "Global Methods Content",               // id
-            global_methods,                         // value
-            cx_ctr+sep, 140, cx_box, cy_box,        // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "Global Methods Button" y "Global Methods Content"
-         */
-        graph.insertEdge(
-            button_global_methods,      // parent
-            null,                       // id
-            '',                         // value
-            button_global_methods,      // source
-            content_global_methods,     // target
-            null                        // style
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
         );
 
-        /*-------------------------------*
-         *      Local Methods
-         *-------------------------------*/
-//             "local_methods": [],
-        var local_methods = gclass.local_methods;
-
-        /*
-         *  Local Methods Button, inside of container
-         */
-        var button_local_methods = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Local Methods Button",                 // id
-            "Local Methods",                        // value
-            20, 20+60*4, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*-------------------------------*
-         *      FSM
-         *-------------------------------*/
-//             "FSM": {
-//                 "input_events": [
-//                     {
-//                         "event": "EV_IEV_MESSAGE",
-//                         "permission": "",
-//                         "description": ""
-//                     },
-//                     ...
-//                 ],
-//                 "output_events": [
-//                     {
-//                         "event": "EV_ON_MESSAGE",
-//                         "permission": "",
-//                         "description": "Message received"
-//                     },
-//                     ...
-//                 ],
-//                 "states": {
-//                     "ST_IDLE": [
-//                         [
-//                             "EV_ON_MESSAGE",
-//                             "ac_action",
-//                             0
-//                         ],
-//                         ...
-//                     ],
-//                     ...
-//                 }
-//             },
-        var fsm = gclass.FSM;
-
-        /*
-         *  FSM Button, inside of container
-         */
-        var button_fsm = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "FSM Button",                           // id
-            "FSM",                                  // value
-            20, 20+60*5, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*
-         *  FSM Content
-         */
-        var content_fsm = graph.insertVertex(
-            button_fsm,                             // parent
-            "FSM Content",                          // id
-            fsm,                                    // value
-            cx_ctr+sep+cx_box+20, 20, cx_box*2, cy_box,   // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "FSM Button" y "FSM Content"
-         */
-        graph.insertEdge(
-            button_fsm,                 // parent
-            null,                       // id
-            '',                         // value
-            button_fsm,                 // source
-            content_fsm,                // target
-            null                        // style
-        );
-
-        /*-------------------------------*
-         *      ACL
-         *-------------------------------*/
-//             "ACL": [],
-        var acl = gclass.ACL;
-
-        /*
-         *  ACL Button, inside of container
-         */
-        var button_acl = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "ACL Button",                           // id
-            "ACL",                                  // value
-            20, 20+60*6, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*-------------------------------*
-         *      Info Global traces
-         *-------------------------------*/
-//             "info_global_trace": {
-//                 "machine": "Trace machine",
-//                 ...
-//             },
-        var info_global_trace = gclass.info_global_trace;
-
-        /*
-         *  Info Global Trace Button, inside of container
-         */
-        var button_info_global_trace = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Info Global Trace Button",             // id
-            "Info Global Trace",                    // value
-            20, 20+60*7, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*
-         *  Info Global Trace Content
-         */
-        var content_info_global_trace = graph.insertVertex(
-            button_info_global_trace,               // parent
-            "Info Global Trace Content",            // id
-            info_global_trace,                      // value
-            cx_ctr+sep, 120, cx_box*2, cy_box,      // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "Info Global Trace Button" y "Info Global Trace Content"
-         */
-        graph.insertEdge(
-            button_info_global_trace,   // parent
-            null,                       // id
-            '',                         // value
-            button_info_global_trace,   // source
-            content_info_global_trace,  // target
-            null                        // style
-        );
-
-        /*-------------------------------*
-         *      Info Class traces
-         *-------------------------------*/
-//             "info_gclass_trace": {
-//                 "connection": "Trace connections of iogates",
-//                 ...
-//             },
-        var info_gclass_trace = gclass.info_gclass_trace;
-
-        /*
-         *  Info GClass Trace Button, inside of container
-         */
-        var button_info_gclass_trace = graph.insertVertex(
-            self.config.mxnode_gclass,              // parent
-            "Info GClass Trace Button",             // id
-            "Info GClass Trace",                    // value
-            20, 20+60*8, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "fontColor=black;strokeColor=black;"+
-            "foldable=1;resizable=0;",
-            false
-        );                                          // relative
-
-        /*
-         *  Info GClass Trace Content
-         */
-        var content_info_gclass_trace = graph.insertVertex(
-            button_info_gclass_trace,               // parent
-            "Info GClass Trace Content",            // id
-            info_gclass_trace,                      // value
-            cx_ctr+sep, 280, cx_box*2, cy_box,      // x,y,width,height
-            "shape=rectangle;"+                     // style
-            "fillColor=white;"+
-            "rounded=0;json=1;resizable=1;foldable=1;",
-            false
-        );                                          // relative
-
-        /*
-         *  Link between "Info GClass Trace Button" y "Info GClass Trace Content"
-         */
-        graph.insertEdge(
-            button_info_gclass_trace,   // parent
-            null,                       // id
-            '',                         // value
-            button_info_gclass_trace,   // source
-            content_info_gclass_trace,  // target
-            null                        // style
-        );
-
+        return 0;
     }
 
 
@@ -1327,15 +1200,17 @@
         var layer = kw.layer;
         var data = __duplicate__(kw.data);
 
+        self.config.gclass = data;
+
+        var graph = self.config._mxgraph;
+        var layer = get_layer(self, layer);
         var model = self.config._mxgraph.getModel();
         model.beginUpdate();
         try {
-            switch(kw.type) {
-                case "gclass":
-                default:
-                    load_gclass(self, data, layer);
-                    break;
-            }
+            show_view1(self, graph, layer, data);
+            graph.view.setTranslate(graph.border, graph.border);
+            execute_layout(self);
+
         } catch (e) {
             log_error(e);
         } finally {
@@ -1441,15 +1316,15 @@
     /********************************************
      *
      ********************************************/
-    function ac_mx_event(self, event, kw, src)
+    function ac_mx_click(self, event, kw, src)
     {
-        var model = self.config._mxgraph.getModel();
-        if(model.updateLevel < 0) {
-            log_error("mxGraph beginUpdate/endUpdate NEGATIVE: " + model.updateLevel);
+        switch(kw.id) {
+            case "Attrs":
+                show_formtable_attrs(self, kw.value);
+                break;
+            default:
+                break;
         }
-        //trace_msg("mx event");
-        //trace_msg(kw);
-
         return 0;
     }
 
@@ -1470,42 +1345,7 @@
             "EV_SELECT",
             "EV_REFRESH",
             "EV_REBUILD_PANEL",
-            "MX_" + mxEvent.ROOT,
-            "MX_" + mxEvent.ALIGN_CELLS,
-            "MX_" + mxEvent.FLIP_EDGE,
-            "MX_" + mxEvent.ORDER_CELLS,
-            "MX_" + mxEvent.CELLS_ORDERED,
-            "MX_" + mxEvent.GROUP_CELLS,
-            "MX_" + mxEvent.UNGROUP_CELLS,
-            "MX_" + mxEvent.REMOVE_CELLS_FROM_PARENT,
-            "MX_" + mxEvent.ADD_CELLS,
-            "MX_" + mxEvent.CELLS_ADDED,
-            "MX_" + mxEvent.REMOVE_CELLS,
-            "MX_" + mxEvent.CELLS_REMOVED,
-            "MX_" + mxEvent.SPLIT_EDGE,
-            "MX_" + mxEvent.TOGGLE_CELLS,
-            "MX_" + mxEvent.FOLD_CELLS,
-            "MX_" + mxEvent.CELLS_FOLDED,
-            "MX_" + mxEvent.UPDATE_CELL_SIZE,
-            "MX_" + mxEvent.RESIZE_CELLS,
-            "MX_" + mxEvent.CELLS_RESIZED,
-            "MX_" + mxEvent.MOVE_CELLS,
-            "MX_" + mxEvent.CELLS_MOVED,
-            "MX_" + mxEvent.CONNECT_CELL,
-            "MX_" + mxEvent.CELL_CONNECTED,
-            "MX_" + mxEvent.REFRESH,
-            "MX_" + mxEvent.CLICK,
-            "MX_" + mxEvent.DOUBLE_CLICK,
-            "MX_" + mxEvent.GESTURE,
-            "MX_" + mxEvent.TAP_AND_HOLD,
-            "MX_" + mxEvent.FIRE_MOUSE_EVENT,
-            "MX_" + mxEvent.SIZE,
-            "MX_" + mxEvent.START_EDITING,
-            "MX_" + mxEvent.EDITING_STARTED,
-            "MX_" + mxEvent.EDITING_STOPPED,
-            "MX_" + mxEvent.LABEL_CHANGED,
-            "MX_" + mxEvent.ADD_OVERLAY,
-            "MX_" + mxEvent.REMOVE_OVERLAY
+            "MX_" + mxEvent.CLICK
         ],
         "state_list": [
             "ST_IDLE"
@@ -1515,45 +1355,10 @@
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
+                ["MX_" + mxEvent.CLICK,         ac_mx_click,                undefined],
                 ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined],
                 ["EV_SELECT",                   ac_select,                  undefined],
-                ["EV_REFRESH",                  ac_refresh,                 undefined],
-                ["MX_" + mxEvent.ROOT,          ac_mx_event,                undefined],
-                ["MX_" + mxEvent.ALIGN_CELLS,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.FLIP_EDGE,     ac_mx_event,                undefined],
-                ["MX_" + mxEvent.ORDER_CELLS,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_ORDERED, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.GROUP_CELLS,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.UNGROUP_CELLS, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.REMOVE_CELLS_FROM_PARENT, ac_mx_event,     undefined],
-                ["MX_" + mxEvent.ADD_CELLS,     ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_ADDED,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.REMOVE_CELLS,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_REMOVED, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.SPLIT_EDGE,    ac_mx_event,                undefined],
-                ["MX_" + mxEvent.TOGGLE_CELLS,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.FOLD_CELLS,    ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_FOLDED,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.UPDATE_CELL_SIZE, ac_mx_event,             undefined],
-                ["MX_" + mxEvent.RESIZE_CELLS,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_RESIZED, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.MOVE_CELLS,    ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELLS_MOVED,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CONNECT_CELL,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CELL_CONNECTED,ac_mx_event,                undefined],
-                ["MX_" + mxEvent.REFRESH,       ac_mx_event,                undefined],
-                ["MX_" + mxEvent.CLICK,         ac_mx_event,                undefined],
-                ["MX_" + mxEvent.DOUBLE_CLICK,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.GESTURE,       ac_mx_event,                undefined],
-                ["MX_" + mxEvent.TAP_AND_HOLD,  ac_mx_event,                undefined],
-                ["MX_" + mxEvent.FIRE_MOUSE_EVENT,ac_mx_event,              undefined],
-                ["MX_" + mxEvent.SIZE,          ac_mx_event,                undefined],
-                ["MX_" + mxEvent.START_EDITING, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.EDITING_STARTED,ac_mx_event,               undefined],
-                ["MX_" + mxEvent.EDITING_STOPPED,ac_mx_event,               undefined],
-                ["MX_" + mxEvent.LABEL_CHANGED, ac_mx_event,                undefined],
-                ["MX_" + mxEvent.ADD_OVERLAY,   ac_mx_event,                undefined],
-                ["MX_" + mxEvent.REMOVE_OVERLAY,ac_mx_event,                undefined]
+                ["EV_REFRESH",                  ac_refresh,                 undefined]
             ]
         }
     };

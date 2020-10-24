@@ -455,7 +455,6 @@
             self
         );
 
-
         return 0;
     }
 

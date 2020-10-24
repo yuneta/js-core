@@ -525,13 +525,13 @@
         style[mxConstants.STYLE_ROUNDED] = true;
         style[mxConstants.STYLE_STROKEWIDTH] = '1';
 
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.Loop;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SideToSide;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.OrthConnector;
-//         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SegmentConnector;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.Loop;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SideToSide;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.OrthConnector;
+        // style[mxConstants.STYLE_EDGE] = mxEdgeStyle.SegmentConnector;
 
         create_graph_style(
             graph,
