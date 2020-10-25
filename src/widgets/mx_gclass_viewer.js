@@ -52,7 +52,7 @@
                     ]
                 },
             ],
-            "global_methods": [
+            "gclass_methods": [
                 "mt_create",
                 ...
             ],
@@ -159,7 +159,7 @@
             }
         ],
 
-        layout_selected: "tree_layout",
+        layout_selected: "herarchical_layout",
 
         __writable_attrs__: [
             "layout_selected"
@@ -277,7 +277,7 @@
 
     var input_events_cols = [
         {
-            "id": "event",
+            "id": "id",
             "header": "Event",
             "fillspace": 30,
             "type": "string",
@@ -363,7 +363,7 @@
             ]
         }
     ];
-    var global_methods_cols = [
+    var gclass_methods_cols = [
         {
             "id": "id",
             "header": "Method",
@@ -826,7 +826,7 @@
         );
         create_graph_style(
             graph,
-            "global_methods",
+            "gclass_methods",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
         create_graph_style(
@@ -933,7 +933,7 @@
                         return 'default';
                     case "attributes":
                     case "commands":
-                    case "global_methods":
+                    case "gclass_methods":
                     case "local_methods":
                     case "ACL":
                     case "trace_levels_info":
@@ -970,10 +970,10 @@
             "id": gclass.id,
             "base": gclass.base,
             "priv_size": gclass.priv_size,
-            "instances": gclass.instances,
             "gcflag": gclass.gcflag,
             "gclass_trace_level": gclass.gclass_trace_level,
-            "gclass_no_trace_level": gclass.gclass_no_trace_level
+            "gclass_no_trace_level": gclass.gclass_no_trace_level,
+            "instances": gclass.instances
         }
         self.config.node_gclass = graph.insertVertex(
             layer,          // parent
@@ -1133,14 +1133,14 @@
         }
 
         /*-------------------------------*
-         *      Global Methods
+         *      GClass Methods
          *-------------------------------*/
-        var global_methods_node = graph.insertVertex(
+        var gclass_methods_node = graph.insertVertex(
             layer,                  // parent
-            "Global Methods",       // id
-            gclass.global_methods,  // value
+            "GClass Methods",       // id
+            gclass.gclass_methods,  // value
             0, 0, cx, cy,           // x,y,width,height
-            "global_methods",       // style
+            "gclass_methods",       // style
             false                   // relative
         );
 
@@ -1149,7 +1149,7 @@
             null,                       // id
             '',                         // value
             self.config.node_gclass,    // source
-            global_methods_node,        // target
+            gclass_methods_node,        // target
             null                        // style
         );
 
@@ -1384,14 +1384,14 @@
     /********************************************
      *
      ********************************************/
-    function show_formtable_global_methods(self, kw)
+    function show_formtable_gclass_methods(self, kw)
     {
         var data = [];
         for(var i=0; i<kw.length; i++) {
             data.push({id: kw[i]});
         }
 
-        var gobj = formtable_factory(self, "Global Methods", global_methods_cols);
+        var gobj = formtable_factory(self, "GClass Methods", gclass_methods_cols);
         gobj.gobj_send_event(
             "EV_LOAD_DATA",
             data,
@@ -1590,8 +1590,8 @@
             case "Commands":
                 show_formtable_commands(self, kw.value);
                 break;
-            case "Global Methods":
-                show_formtable_global_methods(self, kw.value);
+            case "GClass Methods":
+                show_formtable_gclass_methods(self, kw.value);
                 break;
             case "Input Events":
                 show_formtable_input_events(self, kw.value);
