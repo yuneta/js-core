@@ -21,7 +21,7 @@
                 "no_check_ouput_events"
             ],
             "priv_size": 72,
-            "attrs": [
+            "attributes": [
                 {
                     "id": "persistent_channels",
                     "type": "signed32",
@@ -275,6 +275,96 @@
         }
     ];
 
+    var input_events_cols = [
+        {
+            "id": "event",
+            "header": "Event",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "flag",
+            "header": "Flag",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "permission",
+            "header": "Permission",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "description",
+            "header": "Description",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
+    var output_events_cols = input_events_cols;
+
+    var states_cols = [
+        {
+            "id": "id",
+            "header": "Method",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
+    var global_methods_cols = [
+        {
+            "id": "id",
+            "header": "State",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
+    var trace_level_info_cols = [
+        {
+            "id": "level",
+            "header": "Level",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "description",
+            "header": "Description",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
 
 
 
@@ -694,7 +784,7 @@
         );
         create_graph_style(
             graph,
-            "attrs",
+            "attributes",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
         create_graph_style(
@@ -709,12 +799,47 @@
         );
         create_graph_style(
             graph,
+            "local_methods",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
             "ACL",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
         create_graph_style(
             graph,
-            "trace_levels",
+            "trace_levels_info",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "FSM",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "input_events",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "output_events",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "states",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "state",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+        );
+        create_graph_style(
+            graph,
+            "event",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
         );
 
@@ -737,6 +862,13 @@
                         return t;
                     default:
                         var t = "<b>" + cell.id + "</b><br/>";
+                        var len = 0;
+                        if(is_object(cell.value)) {
+                            len = json_object_size(cell.value);
+                        } else if(is_array(cell.value)) {
+                            len = cell.value.length;
+                        }
+                        t += "<span>(" + len + ")</span><br/>";
                         return t;
                 }
             }
@@ -767,10 +899,19 @@
                 switch(cell.style) {
                     case "gclass_container":
                         return 'default';
-                    case "attrs":
+                    case "attributes":
                     case "commands":
+                    case "global_methods":
+                    case "local_methods":
+                    case "ACL":
+                    case "trace_levels_info":
+                    case "input_events":
+                    case "output_events":
+                    case "states":
+                    case "state":
                         return 'pointer';
                     default:
+                    case "FSM":
                         return 'default';
                 }
             } else {
@@ -787,12 +928,8 @@
         /*
          *  HACK is already in a beginUpdate/endUpdate
          */
-        var win_cx = self.config.$ui.$width;
-        var win_cy = self.config.$ui.$height;
-        var sep = 60;
-
-        var cx = 150;
-        var cy = 150;
+        var cx = 120;
+        var cy = 120;
 
         /*-------------------------------*
          *      GClass container
@@ -823,7 +960,7 @@
             "Attributes",           // id
             gclass.attrs,           // value
             0, 0, cx, cy,           // x,y,width,height
-            "attrs",                // style
+            "attributes",                // style
             false                   // relative
         );
 
@@ -856,6 +993,135 @@
             commands_node,              // target
             null                        // style
         );
+
+        /*-------------------------------*
+         *      FSM
+         *-------------------------------*/
+        var FSM_node = graph.insertVertex(
+            layer,       // parent
+            "FSM",       // id
+            gclass.FSM,  // value
+            0, 0, cx, cy,           // x,y,width,height
+            "FSM",       // style
+            false                   // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            self.config.node_gclass,    // source
+            FSM_node,                   // target
+            null                        // style
+        );
+
+        /*-------------------------------*
+         *      FSM input_events
+         *-------------------------------*/
+        var input_events_node = graph.insertVertex(
+            layer,                  // parent
+            "Input Events",         // id
+            gclass.FSM.input_events,// value
+            0, 0, cx, cy,           // x,y,width,height
+            "input_events",         // style
+            false                   // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            FSM_node,                   // source
+            input_events_node,          // target
+            null                        // style
+        );
+
+        /*-------------------------------*
+         *      FSM output_events
+         *-------------------------------*/
+        var output_events_node = graph.insertVertex(
+            layer,                      // parent
+            "Output Events",            // id
+            gclass.FSM.output_events,   // value
+            0, 0, cx, cy,               // x,y,width,height
+            "output_events",            // style
+            false                       // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            FSM_node,                   // source
+            output_events_node,         // target
+            null                        // style
+        );
+
+        /*-------------------------------*
+         *      FSM states
+         *-------------------------------*/
+        var states_node = graph.insertVertex(
+            layer,                      // parent
+            "States",                   // id
+            gclass.FSM.states,          // value
+            0, 0, cx, cy,               // x,y,width,height
+            "states",                   // style
+            false                       // relative
+        );
+
+        graph.insertEdge(
+            layer,                      // parent
+            null,                       // id
+            '',                         // value
+            FSM_node,                   // source
+            states_node,                // target
+            null                        // style
+        );
+
+        for(var state_name in gclass.FSM.states) {
+            var state = gclass.FSM.states[state_name];
+
+            var state_node = graph.insertVertex(
+                layer,                      // parent
+                state_name,                 // id
+                state,                      // value
+                0, 0, cx, cy,               // x,y,width,height
+                "state",                    // style
+                false                       // relative
+            );
+
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                states_node,                // source
+                state_node,                 // target
+                null                        // style
+            );
+
+            for(var i=0; i<state.length; i++) {
+
+                var event = state[i];
+
+                var event_node = graph.insertVertex(
+                    layer,                      // parent
+                    event[0],                   // id
+                    event,                      // value
+                    0, 0, cx, cy,               // x,y,width,height
+                    "event",                    // style
+                    false                       // relative
+                );
+
+                graph.insertEdge(
+                    layer,                      // parent
+                    null,                       // id
+                    '',                         // value
+                    state_node,                 // source
+                    event_node,                 // target
+                    null                        // style
+                );
+            }
+        }
 
         /*-------------------------------*
          *      Global Methods
@@ -896,90 +1162,42 @@
                 null,                       // id
                 '',                         // value
                 self.config.node_gclass,    // source
-                local_methods_node,        // target
+                local_methods_node,         // target
                 null                        // style
             );
         }
 
         /*-------------------------------*
-         *      FSM
+         *      Info trace levels
          *-------------------------------*/
-//             "FSM": {
-//                 "input_events": [
-//                     {
-//                         "event": "EV_IEV_MESSAGE",
-//                         "permission": "",
-//                         "description": ""
-//                     },
-//                     ...
-//                 ],
-//                 "output_events": [
-//                     {
-//                         "event": "EV_ON_MESSAGE",
-//                         "permission": "",
-//                         "description": "Message received"
-//                     },
-//                     ...
-//                 ],
-//                 "states": {
-//                     "ST_IDLE": [
-//                         [
-//                             "EV_ON_MESSAGE",
-//                             "ac_action",
-//                             0
-//                         ],
-//                         ...
-//                     ],
-//                     ...
-//                 }
-//             },
-//         var fsm = gclass.FSM;
-//
-//         /*
-//          *  FSM Button, inside of container
-//          */
-//         var button_fsm = graph.insertVertex(
-//             self.config.node_gclass,              // parent
-//             "FSM Button",                           // id
-//             "FSM",                                  // value
-//             20, 20+60*5, cx_ctr - cx_ctr/8, 50,     // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "fontColor=black;strokeColor=black;"+
-//             "foldable=1;resizable=0;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  FSM Content
-//          */
-//         var content_fsm = graph.insertVertex(
-//             button_fsm,                             // parent
-//             "FSM Content",                          // id
-//             fsm,                                    // value
-//             cx_ctr+sep+cx_box+20, 20, cx_box*2, cy_box,   // x,y,width,height
-//             "shape=rectangle;"+                     // style
-//             "fillColor=white;"+
-//             "rounded=0;json=1;resizable=1;foldable=1;",
-//             false
-//         );                                          // relative
-//
-//         /*
-//          *  Link between "FSM Button" y "FSM Content"
-//          */
-//         graph.insertEdge(
-//             button_fsm,                 // parent
-//             null,                       // id
-//             '',                         // value
-//             button_fsm,                 // source
-//             content_fsm,                // target
-//             null                        // style
-//         );
+        if(1) {
+            var trace_levels_info = gclass.info_global_trace + gclass.info_gclass_trace;
+            var info_trace_levels_info_node = graph.insertVertex(
+                layer,                  // parent
+                "Trace Level Info",     // id
+                {                       // value
+                    info_global_trace: gclass.info_global_trace,
+                    info_gclass_trace: gclass.info_gclass_trace
+                },
+                0, 0, cx, cy,           // x,y,width,height
+                "trace_levels_info",    // style
+                false                   // relative
+            );
+
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                self.config.node_gclass,    // source
+                info_trace_levels_info_node,     // target
+                null                        // style
+            );
+        }
 
         /*-------------------------------*
          *      ACL
          *-------------------------------*/
-        if(1) {
+        if(0) {
             var acl_node = graph.insertVertex(
                 layer,       // parent
                 "ACL",       // id
@@ -999,36 +1217,12 @@
             );
         }
 
-
-        /*-------------------------------*
-         *      Info trace levels
-         *-------------------------------*/
-        if(1) {
-            var trace_levels = gclass.info_global_trace + gclass.info_gclass_trace;
-            var info_trace_levels_node = graph.insertVertex(
-                layer,       // parent
-                "Trace levels",       // id
-                trace_levels,   // value
-                0, 0, cx, cy,   // x,y,width,height
-                "trace_levels", // style
-                false           // relative
-            );
-
-            graph.insertEdge(
-                layer,                      // parent
-                null,                       // id
-                '',                         // value
-                self.config.node_gclass,    // source
-                info_trace_levels_node,     // target
-                null                        // style
-            );
-        }
     }
 
     /********************************************
      *
      ********************************************/
-    function show_formtable_attrs(self, kw)
+    function formtable_factory(self, title, schema)
     {
         var gobj = self.yuno.gobj_create(
             get_unique_id(),
@@ -1042,8 +1236,8 @@
                     minHeight: 500
                 },
 
-                topic_name: kw.id,
-                schema: attrs_cols ,
+                topic_name: title,
+                schema: schema,
                 is_topic_schema: false,
                 with_checkbox: false,
                 with_textfilter: true,
@@ -1057,7 +1251,7 @@
 
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: "'" + self.config.gclass.id + "' GClass Attrs",
+                    with_panel_title: "'" + self.config.gclass.id + "' " + title,
                     with_panel_hidden_btn: true,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: true
@@ -1068,14 +1262,22 @@
                     without_window_hidden_btn: false
                 },
                 is_pinhold_window: true,
-                window_title: "'" + self.config.gclass.id + "' GClass Attrs",
+                window_title: "'" + self.config.gclass.id + "' " + title,
                 window_image: "",
                 width: 1000,
                 height: 600
             },
             __yuno__.__pinhold__
         );
+        return gobj;
+    }
 
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_attrs(self, kw)
+    {
+        var gobj = formtable_factory(self, "GClass Attributes", attrs_cols);
         gobj.gobj_send_event(
             "EV_LOAD_DATA",
             kw,
@@ -1090,56 +1292,131 @@
      ********************************************/
     function show_formtable_commands(self, kw)
     {
-        var gobj = self.yuno.gobj_create(
-            get_unique_id(),
-            Ui_formtable,
-            {
-                subscriber: self,  // HACK get all output events
-
-                ui_properties: {
-                    gravity: 3,
-                    minWidth: 360,
-                    minHeight: 500
-                },
-
-                topic_name: kw.id,
-                schema: commands_cols ,
-                subschema: attrs_cols,
-                is_topic_schema: false,
-                with_checkbox: false,
-                with_textfilter: true,
-                with_sort: true,
-                with_top_title: true,
-                with_footer: true,
-                with_navigation_toolbar: true,
-                update_mode_enabled: true,
-                create_mode_enabled: false,
-                delete_mode_enabled: false,
-
-                panel_properties: {
-                    with_panel_top_toolbar: true,
-                    with_panel_title: "'" + self.config.gclass.id + "' GClass Commands",
-                    with_panel_hidden_btn: true,
-                    with_panel_fullscreen_btn: true,
-                    with_panel_resize_btn: true
-                },
-                window_properties: {
-                    without_window_pin_btn: true,
-                    without_window_fullscreen_btn: false,
-                    without_window_hidden_btn: false
-                },
-                is_pinhold_window: true,
-                window_title: "'" + self.config.gclass.id + "' GClass Commands",
-                window_image: "",
-                width: 1000,
-                height: 600
-            },
-            __yuno__.__pinhold__
-        );
-
+        var gobj = formtable_factory(self, "GClass Commands", commands_cols);
         gobj.gobj_send_event(
             "EV_LOAD_DATA",
             kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_input_events(self, kw)
+    {
+        var gobj = formtable_factory(self, "Input Events", input_events_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_output_events(self, kw)
+    {
+        var gobj = formtable_factory(self, "Output Events", output_events_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_states(self, kw)
+    {
+        var data = [];
+        for(var key in kw) {
+            data.push({id: key});
+        }
+
+        var gobj = formtable_factory(self, "States", states_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_global_methods(self, kw)
+    {
+        var data = [];
+        for(var i=0; i<kw.length; i++) {
+            data.push({id: kw[i]});
+        }
+
+        var gobj = formtable_factory(self, "Global Methods", global_methods_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_trace_level_info(self, kw)
+    {
+        var data = [];
+
+        data.push(
+            {
+                level: "GCLASS LEVELS",
+                description: ""
+            });
+        var dict = kw.info_gclass_trace;
+        for(var key in dict) {
+            var value = dict[key];
+            data.push(
+                {
+                    level: key,
+                    description: value
+                });
+        }
+        data.push(
+            {
+                level: "",
+                description: ""
+            });
+        data.push(
+            {
+                level: "GLOBAL LEVELS",
+                description: ""
+            });
+        var dict = kw.info_global_trace;
+        for(var key in dict) {
+            var value = dict[key];
+            data.push(
+                {
+                    level: key,
+                    description: value
+                });
+        }
+
+        var gobj = formtable_factory(self, "Trace Level Info", trace_level_info_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
             self
         );
 
@@ -1283,12 +1560,28 @@
     function ac_mx_click(self, event, kw, src)
     {
         switch(kw.id) {
-            case "Attrs":
+            case "Attributes":
                 show_formtable_attrs(self, kw.value);
                 break;
             case "Commands":
                 show_formtable_commands(self, kw.value);
                 break;
+            case "Global Methods":
+                show_formtable_global_methods(self, kw.value);
+                break;
+            case "Input Events":
+                show_formtable_input_events(self, kw.value);
+                break;
+            case "Output Events":
+                show_formtable_output_events(self, kw.value);
+                break;
+            case "States":
+                show_formtable_states(self, kw.value);
+                break;
+            case "Trace Level Info":
+                show_formtable_trace_level_info(self, kw.value);
+                break;
+
             default:
                 break;
         }
