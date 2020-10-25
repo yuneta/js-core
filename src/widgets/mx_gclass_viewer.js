@@ -56,7 +56,7 @@
                 "mt_create",
                 ...
             ],
-            "local_methods": [],
+            "internal_methods": [],
             "FSM": {
                 "input_events": [
                     {
@@ -159,7 +159,7 @@
             }
         ],
 
-        layout_selected: "herarchical_layout",
+        layout_selected: "tree_layout",
 
         __writable_attrs__: [
             "layout_selected"
@@ -401,7 +401,7 @@
 
 
             /***************************
-             *      Local Methods
+             *      Internal Methods
              ***************************/
 
 
@@ -812,67 +812,67 @@
         create_graph_style(
             graph,
             "gclass_container",
-            "rounded=1;whiteSpace=wrap;html=1;shadow=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;horizontal=1;spacingLeft=10;spacingTop=10;glass=0;sketch=0;gradientColor=#ffffff;"
+            "rounded=1;whiteSpace=wrap;html=1;shadow=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;horizontal=1;spacingLeft=10;spacingTop=10;glass=0;sketch=0;gradientColor=#ffffff;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "attributes",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;gradientColor=#ffd966;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "commands",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
-        );
-        create_graph_style(
-            graph,
-            "gclass_methods",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
-        );
-        create_graph_style(
-            graph,
-            "local_methods",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
-        );
-        create_graph_style(
-            graph,
-            "ACL",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
-        );
-        create_graph_style(
-            graph,
-            "trace_levels_info",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffcd28;strokeColor=#d79b00;gradientColor=#ffa500;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "FSM",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;gradientColor=#97d077;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "input_events",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;gradientColor=#ea6b66;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "output_events",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;gradientColor=#d5739d;fillColor=#e6d0de;strokeColor=#996185;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "states",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;gradientColor=#53D081;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "state",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;gradientColor=#CCFF99;fontColor=#000000;"
         );
         create_graph_style(
             graph,
             "event",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#b85450;fillColor=#F8EBE7;gradientColor=#EAA09A;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "gclass_methods",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dae8fc;strokeColor=#6c8ebf;gradientColor=#7ea6e0;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "internal_methods",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "ACL",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "trace_levels_info",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;strokeColor=#666666;gradientColor=#b3b3b3;fontColor=#000000;"
         );
 
         /*
@@ -934,7 +934,7 @@
                     case "attributes":
                     case "commands":
                     case "gclass_methods":
-                    case "local_methods":
+                    case "internal_methods":
                     case "ACL":
                     case "trace_levels_info":
                     case "input_events":
@@ -1154,15 +1154,15 @@
         );
 
         /*-------------------------------*
-         *      Local Methods
+         *      Internal Methods
          *-------------------------------*/
         if(0) {
-            var local_methods_node = graph.insertVertex(
+            var internal_methods_node = graph.insertVertex(
                 layer,                  // parent
-                "Local Methods",       // id
-                gclass.local_methods,  // value
+                "Internal Methods",       // id
+                gclass.internal_methods,  // value
                 0, 0, cx, cy,           // x,y,width,height
-                "local_methods",       // style
+                "internal_methods",       // style
                 false                   // relative
             );
 
@@ -1171,7 +1171,7 @@
                 null,                       // id
                 '',                         // value
                 self.config.node_gclass,    // source
-                local_methods_node,         // target
+                internal_methods_node,         // target
                 null                        // style
             );
         }
@@ -1180,7 +1180,6 @@
          *      Info trace levels
          *-------------------------------*/
         if(1) {
-            var trace_levels_info = gclass.info_global_trace + gclass.info_gclass_trace;
             var info_trace_levels_info_node = graph.insertVertex(
                 layer,                  // parent
                 "Trace Level Info",     // id
@@ -1192,7 +1191,6 @@
                 "trace_levels_info",    // style
                 false                   // relative
             );
-
             graph.insertEdge(
                 layer,                      // parent
                 null,                       // id
@@ -1201,6 +1199,41 @@
                 info_trace_levels_info_node,     // target
                 null                        // style
             );
+
+            var info_gclass_trace_node = graph.insertVertex(
+                layer,                  // parent
+                "GClass Trace Levels",     // id
+                gclass.info_gclass_trace,
+                0, 0, cx, cy,           // x,y,width,height
+                "trace_levels_info",    // style
+                false                   // relative
+            );
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                info_trace_levels_info_node,// source
+                info_gclass_trace_node,     // target
+                null                        // style
+            );
+
+            var info_gclass_trace_node = graph.insertVertex(
+                layer,                  // parent
+                "Global Trace Levels",     // id
+                gclass.info_global_trace,
+                0, 0, cx, cy,           // x,y,width,height
+                "trace_levels_info",    // style
+                false                   // relative
+            );
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                info_trace_levels_info_node,// source
+                info_gclass_trace_node,     // target
+                null                        // style
+            );
+
         }
 
         /*-------------------------------*
@@ -1447,6 +1480,59 @@
         return 0;
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_gclass_trace_levels(self, kw)
+    {
+        var data = [];
+
+        var dict = kw;
+        for(var key in dict) {
+            var value = dict[key];
+            data.push(
+                {
+                    id: key,
+                    description: value
+                });
+        }
+
+        var gobj = formtable_factory(self, "Global Trace Levels", trace_level_info_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_global_trace_levels(self, kw)
+    {
+        var data = [];
+
+        var dict = kw;
+        for(var key in dict) {
+            var value = dict[key];
+            data.push(
+                {
+                    id: key,
+                    description: value
+                });
+        }
+
+        var gobj = formtable_factory(self, "Global Trace Levels", trace_level_info_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
+            self
+        );
+
+        return 0;
+    }
 
 
 
@@ -1604,6 +1690,14 @@
                 break;
             case "Trace Level Info":
                 show_formtable_trace_level_info(self, kw.value);
+                break;
+
+            case "GClass Trace Levels":
+                show_formtable_gclass_trace_levels(self, kw.value);
+                break;
+
+            case "Global Trace Levels":
+                show_formtable_global_trace_levels(self, kw.value);
                 break;
 
             case "State":
