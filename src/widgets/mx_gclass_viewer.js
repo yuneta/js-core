@@ -178,8 +178,61 @@
             ]
         },
         {
-            "id": "parameters",
+            "id": "parameter",
             "header": "Parameters",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
+
+    var parameters_cols = [
+        {
+            "id": "id",
+            "header": "Parameter",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "type",
+            "header": "Type",
+            "fillspace": 10,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "default_value",
+            "header": "Default Value",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "flag",
+            "header": "Flag",
+            "fillspace": 15,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "description",
+            "header": "Description",
             "fillspace": 30,
             "type": "string",
             "flag": [
@@ -669,8 +722,9 @@
         graph.setMultigraph(true);
 
         // Avoids overlap of edges and collapse icons
-        graph.keepEdgesInBackground = false;
+        graph.keepEdgesInBackground = true;
 
+        // Enables automatic sizing for vertices after editing
         graph.setAutoSizeCells(true);
 
         /*---------------------------*
@@ -731,12 +785,22 @@
         create_graph_style(
             graph,
             "attributes",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;gradientColor=#ffd966;fontColor=#000000;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#d6b656;gradientColor=#FFFF33;fillColor=#E8E800;"
         );
         create_graph_style(
             graph,
             "commands",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffcd28;strokeColor=#d79b00;gradientColor=#ffa500;fontColor=#000000;"
+            "ellipse;foldable=1;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#d6b656;gradientColor=#ffd966;fillColor=#FFBF5E;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "command",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;gradientColor=#ffd966;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "parameter",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;strokeColor=#d6b656;gradientColor=#FFE6A1;fontColor=#000000;"
         );
         create_graph_style(
             graph,
@@ -766,7 +830,7 @@
         create_graph_style(
             graph,
             "event",
-            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#b85450;fillColor=#F8EBE7;gradientColor=#EAA09A;fontColor=#000000;"
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#d79b00;fillColor=#FFB366;gradientColor=#FFD4A8;fontColor=#000000;"
         );
         create_graph_style(
             graph,
@@ -817,6 +881,13 @@
                             }
                         }
                         return t;
+
+                    case "event":
+                        var t = "<b>" + cell.value + "</b><br/>";
+                        var len = 0;
+                        t += "<span>(" + len + ")</span><br/>";
+                        return t;
+
                     default:
                         var t = "<b>" + cell.id + "</b><br/>";
                         var len = 0;
@@ -858,6 +929,8 @@
                         return 'default';
                     case "attributes":
                     case "commands":
+                    case "command":
+                    case "parameter":
                     case "gclass_methods":
                     case "internal_methods":
                     case "ACL":
@@ -944,7 +1017,6 @@
             "commands",             // style
             false                   // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -953,6 +1025,48 @@
             commands_node,              // target
             null                        // style
         );
+
+        for(var i=0; i<gclass.commands.length; i++) {
+            var command = gclass.commands[i];
+
+            var command_node = graph.insertVertex(
+                layer,                  // parent
+                command.id,             // id
+                command.parameters,     // value
+                0, 0, cx, cy,           // x,y,width,height
+                "command",              // style
+                false                   // relative
+            );
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                commands_node,              // source
+                command_node,               // target
+                null                        // style
+            );
+
+            for(var j=0; j<command.parameters.length; j++) {
+                var parameter = command.parameters[j];
+
+                var parameter_node = graph.insertVertex(
+                    layer,                  // parent
+                    parameter.id,           // id
+                    [parameter],            // value
+                    0, 0, cx, cy,           // x,y,width,height
+                    "parameter",            // style
+                    false                   // relative
+                );
+                graph.insertEdge(
+                    layer,                      // parent
+                    null,                       // id
+                    '',                         // value
+                    command_node,               // source
+                    parameter_node,             // target
+                    null                        // style
+                );
+            }
+        }
 
         /*-------------------------------*
          *      FSM
@@ -965,7 +1079,6 @@
             "FSM",       // style
             false                   // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -986,7 +1099,6 @@
             "input_events",         // style
             false                   // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -1007,7 +1119,6 @@
             "output_events",            // style
             false                       // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -1028,7 +1139,6 @@
             "states",                   // style
             false                       // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -1049,7 +1159,6 @@
                 "state",                    // style
                 false                       // relative
             );
-
             graph.insertEdge(
                 layer,                      // parent
                 null,                       // id
@@ -1067,13 +1176,12 @@
 
                 var event_node = graph.insertVertex(
                     layer,                      // parent
-                    event[0],                   // id
-                    {},                         // value
+                    event[0],                   // id HACK can be repeted
+                    event[0],                   // value
                     0, 0, cx, cy,               // x,y,width,height
                     "event",                    // style
                     false                       // relative
                 );
-
                 graph.insertEdge(
                     layer,                      // parent
                     null,                       // id
@@ -1083,7 +1191,6 @@
                     null                        // style
                 );
             }
-
         }
 
         /*-------------------------------*
@@ -1097,7 +1204,6 @@
             "gclass_methods",       // style
             false                   // relative
         );
-
         graph.insertEdge(
             layer,                      // parent
             null,                       // id
@@ -1119,13 +1225,34 @@
                 "internal_methods",       // style
                 false                   // relative
             );
-
             graph.insertEdge(
                 layer,                      // parent
                 null,                       // id
                 '',                         // value
                 self.config.node_gclass,    // source
                 internal_methods_node,         // target
+                null                        // style
+            );
+        }
+
+        /*-------------------------------*
+         *      ACL
+         *-------------------------------*/
+        if(0) {
+            var acl_node = graph.insertVertex(
+                layer,       // parent
+                "ACL",       // id
+                gclass.ACL,  // value
+                0, 0, cx, cy,// x,y,width,height
+                "ACL",       // style
+                false                   // relative
+            );
+            graph.insertEdge(
+                layer,                      // parent
+                null,                       // id
+                '',                         // value
+                self.config.node_gclass,    // source
+                acl_node,        // target
                 null                        // style
             );
         }
@@ -1189,30 +1316,6 @@
             );
 
         }
-
-        /*-------------------------------*
-         *      ACL
-         *-------------------------------*/
-        if(0) {
-            var acl_node = graph.insertVertex(
-                layer,       // parent
-                "ACL",       // id
-                gclass.ACL,  // value
-                0, 0, cx, cy,// x,y,width,height
-                "ACL",       // style
-                false                   // relative
-            );
-
-            graph.insertEdge(
-                layer,                      // parent
-                null,                       // id
-                '',                         // value
-                self.config.node_gclass,    // source
-                acl_node,        // target
-                null                        // style
-            );
-        }
-
     }
 
     /********************************************
@@ -1289,6 +1392,36 @@
     function show_formtable_commands(self, kw)
     {
         var gobj = formtable_factory(self, "GClass Commands", commands_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_command(self, kw)
+    {
+        var gobj = formtable_factory(self, "Command", parameters_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            kw,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function show_formtable_parameters(self, kw)
+    {
+        var gobj = formtable_factory(self, "Parameters", parameters_cols);
         gobj.gobj_send_event(
             "EV_LOAD_DATA",
             kw,
@@ -1629,6 +1762,12 @@
                 break;
             case "commands":
                 show_formtable_commands(self, kw.value);
+                break;
+            case "command":
+                show_formtable_command(self, kw.value);
+                break;
+            case "parameter":
+                show_formtable_parameters(self, kw.value);
                 break;
             case "gclass_methods":
                 show_formtable_gclass_methods(self, kw.value);

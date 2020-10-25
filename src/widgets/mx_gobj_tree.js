@@ -52,7 +52,7 @@
         ui_properties: null,    // creator can set webix properties
 
         $ui: null,
-        locked: false,
+        locked: true,
 
         layout_options: [
             {
@@ -511,6 +511,11 @@
             cur_layout = self.config.layout_options[0];
         }
 
+        var locked = graph.isCellsLocked();
+        if(locked) {
+            graph.setCellsLocked(false);
+        }
+
         if(cur_layout) {
             graph.getModel().beginUpdate();
             try {
@@ -520,6 +525,10 @@
             } finally {
                 graph.getModel().endUpdate();
             }
+        }
+
+        if(locked) {
+            graph.setCellsLocked(true);
         }
     }
 
@@ -556,12 +565,15 @@
 
         mxEvent.disableContextMenu(graph.container);
 
+        graph.border = 30;
+        graph.view.setTranslate(graph.border, graph.border);
+
         // Enables rubberband selection
         graph.rubberband = new mxRubberband(graph);
         graph.rubberband.setEnabled(false);
 
-        // Panning, by default working with right button, left button for selection
-        graph.setPanning(false);
+        graph.setPanning(true);
+        graph.panningHandler.useLeftButtonForPanning = true;
 
         // Negative coordenates?
         graph.allowNegativeCoordinates = false;
@@ -584,7 +596,7 @@
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
         mxGraphHandler.prototype.setCloneEnabled(false); // Ctrl+Drag will clone a cell
-        graph.setCellsLocked(false);
+        graph.setCellsLocked(self.config.locked);
         graph.setPortsEnabled(true);
         graph.setCellsEditable(false);
 

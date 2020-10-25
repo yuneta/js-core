@@ -3,9 +3,12 @@
  *
  *          Json with mxgrah
  *
- *          "Pinhold Window"
+ *          Mix "Container Panel" & "Pinhold Window"
  *
- *          HACK the parent MUST be a pinhold handler
+ *          HACK the parent MUST be a pinhold handler if the role is "Pinhold Window"
+ *               or MUST be a container if the role is "Container Panel"
+ *
+ *          HACK But you can redirect the output events to "subscriber" gobj
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -17,23 +20,28 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        //////////////// Common Attributes //////////////////
+        subscriber: null,       // Subscriber of published events, by default the parent.
+        is_pinhold_window: true,// By default it's a Pinhold window
+        panel_properties: {},   // creator can set "Container Panel" properties
+        window_properties: {},  // creator can set "Pinhold Window" properties
         ui_properties: null,    // creator can set webix properties
-
         $ui: null,
-        $ui_fullscreen: null,   // What part of window will be fullscreened "Pinhold Window" HACK
-        resizing_event_id: null,
+        $ui_fullscreen: null,   // Which part of window will be fullscreened "Pinhold Window"
+        resizing_event_id: null,// Used by pinhold_panel_top_toolbar "Pinhold Window"
+        pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window"
+        window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        left: 0,                // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        top: 0,                 // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        width: 600,             // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
-        pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window" HACK
-        window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
-        window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window" HACK
+        //////////////// Particular Attributes //////////////////
 
         path: null,
         json_data: null,
 
-        left: 0,
-        top: 0,
-        width: 600,
-        height: 500,
         locked: true,
 
         group_cx_sep: 80,
@@ -53,13 +61,17 @@
 
         _mxgraph: null,
 
+        //////////////////////////////////
         __writable_attrs__: [
+            ////// Common /////
             "window_title",
             "window_image",
             "left",
             "top",
             "width",
             "height",
+
+            ////// Particular /////
             "path",
             "json_data"
         ]
@@ -248,24 +260,69 @@
             ]
         };
 
-        /*---------------------------------------*
-         *      UI
-         *---------------------------------------*/
-        self.config.$ui = webix.ui({
-            view: "window",
-            id: self.gobj_escaped_short_name(),
-            top: self.config.top,
-            left: self.config.left,
-            width: self.config.width,
-            height: self.config.height,
-            hidden: self.config.pinpushed?true:false,
-            move: true,
-            resize: true,
-            position: (self.config.left==0 && self.config.top==0)?"center":null,
-            head: get_pinhold_window_top_toolbar(self),
-            body: {
-                id: build_name(self, "fullscreen"),
+        /*----------------------------------------------------*
+         *                      UI
+         *  Common UI of Pinhold Window and Container Panel
+         *----------------------------------------------------*/
+        if(self.config.is_pinhold_window) {
+            /*-------------------------*
+             *      Pinhold Window
+             *-------------------------*/
+            self.config.$ui = webix.ui({
+                view: "window",
+                id: self.gobj_escaped_short_name(), // HACK can be a global gobj, use gclass_name+name
+                top: self.config.top,
+                left: self.config.left,
+                width: self.config.width,
+                height: self.config.height,
+                hidden: self.config.pinpushed?true:false,
+                move: true,
+                resize: true,
+                position: (self.config.left==0 && self.config.top==0)?"center":null,
+                head: get_pinhold_window_top_toolbar(self),
+                body: {
+                    id: build_name(self, "fullscreen"),
+                    ////////////////// REPEATED webix code /////////////////
+                    rows: [
+                        {
+                            view: "mxgraph",
+                            background_color: "#fefffe",
+                            id: build_name(self, "mxgraph"),
+                            gobj: self
+                        },
+                        bottom_toolbar
+                    ]
+                    ////////////////// webix code /////////////////
+                },
+                on: {
+                    "onViewResize": function() {
+                        self.config.left = this.gobj.config.$ui.config.left;
+                        self.config.top = this.gobj.config.$ui.config.top;
+                        self.config.width = this.gobj.config.$ui.config.width;
+                        self.config.height = this.gobj.config.$ui.config.height;
+                        self.gobj_save_persistent_attrs();
+                    },
+                    "onViewMoveEnd": function() {
+                        self.config.left = this.gobj.config.$ui.config.left;
+                        self.config.top = this.gobj.config.$ui.config.top;
+                        self.config.width = this.gobj.config.$ui.config.width;
+                        self.config.height = this.gobj.config.$ui.config.height;
+                        self.gobj_save_persistent_attrs();
+                    }
+                }
+            });
+            self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
+
+        } else {
+            /*-------------------------*
+             *      Container Panel
+             *-------------------------*/
+            self.config.$ui = webix.ui({
+                id: self.gobj_name(),
+                ////////////////// REPEATED webix code /////////////////
                 rows: [
+                    // HACK "Container Panel" toolbar suministrada por ui_container
+                    get_container_panel_top_toolbar(self),
                     {
                         view: "mxgraph",
                         background_color: "#fefffe",
@@ -274,28 +331,11 @@
                     },
                     bottom_toolbar
                 ]
-            },
-            on: {
-                "onViewResize": function() {
-                    self.config.left = this.gobj.config.$ui.config.left;
-                    self.config.top = this.gobj.config.$ui.config.top;
-                    self.config.width = this.gobj.config.$ui.config.width;
-                    self.config.height = this.gobj.config.$ui.config.height;
-                    self.gobj_save_persistent_attrs();
-                },
-                "onViewMoveEnd": function() {
-                    self.config.left = this.gobj.config.$ui.config.left;
-                    self.config.top = this.gobj.config.$ui.config.top;
-                    self.config.width = this.gobj.config.$ui.config.width;
-                    self.config.height = this.gobj.config.$ui.config.height;
-                    self.gobj_save_persistent_attrs();
-                }
-            }
-        });
-
-        self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
-
+                ////////////////// webix code /////////////////
+            });
+        }
         self.config.$ui.gobj = self;
+
         if(self.config.ui_properties) {
             self.config.$ui.define(self.config.ui_properties);
             if(self.config.$ui.refresh) {
@@ -303,10 +343,25 @@
             }
         }
 
-        automatic_resizing_cb(); // Adapt window size to device
+        /*----------------------------------------------*
+         *  Inform of panel viewed to "Container Panel"
+         *----------------------------------------------*/
+        if(!self.config.is_pinhold_window) {
+            self.config.$ui.attachEvent("onViewShow", function() {
+                self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
+            });
+        }
+
+        /*----------------------------------------------*
+         *  Set fullscreen ui in "Pinhold Window"
+         *----------------------------------------------*/
+        if(self.config.is_pinhold_window) {
+            self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
+            automatic_resizing_cb(); // Adapt window size to device
+        }
 
         /*---------------------------------------*
-         *      Automatic Resizing
+         *   Automatic Resizing in "Pinhold Window"
          *---------------------------------------*/
         function automatic_resizing(gadget, window_width, window_height)
         {
@@ -342,11 +397,13 @@
             automatic_resizing(self.gobj_escaped_short_name(), window_width, window_height);
         }
 
-        if(self.config.resizing_event_id) {
-            webix.eventRemove(self.config.resizing_event_id);
-            self.config.resizing_event_id = 0;
+        if(self.config.is_pinhold_window) {
+            if(self.config.resizing_event_id) {
+                webix.eventRemove(self.config.resizing_event_id);
+                self.config.resizing_event_id = 0;
+            }
+            self.config.resizing_event_id = webix.event(window, "resize", automatic_resizing_cb);
         }
-        self.config.resizing_event_id = webix.event(window, "resize", automatic_resizing_cb);
     }
 
     /********************************************
@@ -1103,6 +1160,34 @@
         self.config.$ui.hide();
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function ac_select(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /*************************************************************
+     *  Refresh, order from container
+     *  provocado por entry/exit de fullscreen
+     *  o por redimensionamiento del panel, propio o de hermanos
+     *************************************************************/
+    function ac_refresh(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
+    {
+        rebuild(self);
+        return 0;
+    }
+
 
 
 
@@ -1121,7 +1206,10 @@
             "EV_CLEAR_DATA",
             "EV_TOGGLE",
             "EV_SHOW",
-            "EV_HIDE"
+            "EV_HIDE",
+            "EV_SELECT",
+            "EV_REFRESH",
+            "EV_REBUILD_PANEL"
         ],
         "state_list": [
             "ST_IDLE"
@@ -1134,7 +1222,10 @@
                 ["EV_CLEAR_DATA",           ac_clear_data,      undefined],
                 ["EV_TOGGLE",               ac_toggle,          undefined],
                 ["EV_SHOW",                 ac_show,            undefined],
-                ["EV_HIDE",                 ac_hide,            undefined]
+                ["EV_HIDE",                 ac_hide,            undefined],
+                ["EV_SELECT",               ac_select,          undefined],
+                ["EV_REFRESH",              ac_refresh,         undefined],
+                ["EV_REBUILD_PANEL",        ac_rebuild_panel,   undefined]
             ]
         }
     };
