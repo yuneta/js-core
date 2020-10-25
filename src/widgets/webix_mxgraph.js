@@ -92,7 +92,7 @@ webix.protoUI({
                     if (cell != null) {
                         gobj.gobj_send_event(
                             "MX_" + evt.name,
-                            {id: cell.id, value: cell.value},
+                            {id: cell.id, value: cell.value, cell: cell},
                             gobj
                         )
                     }

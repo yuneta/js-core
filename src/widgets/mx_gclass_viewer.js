@@ -13,92 +13,6 @@
  *  -------
  *  1.0     Initial release
  *
-
-        {
-            "id": "IOGate",
-            "base": "",
-            "gcflag": [
-                "no_check_ouput_events"
-            ],
-            "priv_size": 72,
-            "attributes": [
-                {
-                    "id": "persistent_channels",
-                    "type": "signed32",
-                    "default_value": 0,
-                    "description": "Set True to do channels persistent (in sqlite database).",
-                    "flag": "SDF_RD"
-                },
-                ...
-            ],
-            "commands": [
-                {
-                    "id": "help",
-                    "alias": [
-                        "h",
-                        "?"
-                    ],
-                    "description": "Available commands or help about a command.",
-                    "usage": "help  [cmd='?'] [level='?']",
-                    "parameters": [
-                        {
-                            "id": "cmd",
-                            "type": "string",
-                            "default_value": "",
-                            "description": "command about you want help.",
-                            "flag": ""
-                        },
-                        ...
-                    ]
-                },
-            ],
-            "gclass_methods": [
-                "mt_create",
-                ...
-            ],
-            "internal_methods": [],
-            "FSM": {
-                "input_events": [
-                    {
-                        "event": "EV_IEV_MESSAGE",
-                        "permission": "",
-                        "description": ""
-                    },
-                    ...
-                ],
-                "output_events": [
-                    {
-                        "event": "EV_ON_MESSAGE",
-                        "permission": "",
-                        "description": "Message received"
-                    },
-                    ...
-                ],
-                "states": {
-                    "ST_IDLE": [
-                        [
-                            "EV_ON_MESSAGE",
-                            "ac_action",
-                            0
-                        ],
-                        ...
-                    ],
-                    ...
-                }
-            },
-            "ACL": [],
-            "info_global_trace": {
-                "machine": "Trace machine",
-                ...
-            },
-            "info_gclass_trace": {
-                "connection": "Trace connections of iogates",
-                ...
-            },
-            "gclass_trace_level": [],
-            "gclass_no_trace_level": [],
-            "instances": 2
-        }
  *
  ***********************************************************************/
 (function (exports) {
@@ -874,6 +788,17 @@
             "trace_levels_info",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;strokeColor=#666666;gradientColor=#b3b3b3;fontColor=#000000;"
         );
+        create_graph_style(
+            graph,
+            "gclass_trace_levels",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;strokeColor=#666666;gradientColor=#b3b3b3;fontColor=#000000;"
+        );
+        create_graph_style(
+            graph,
+            "global_trace_levels",
+            "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;strokeColor=#666666;gradientColor=#b3b3b3;fontColor=#000000;"
+        );
+
 
         /*
          *  Own getLabel
@@ -937,6 +862,8 @@
                     case "internal_methods":
                     case "ACL":
                     case "trace_levels_info":
+                    case "gclass_trace_levels":
+                    case "global_trace_levels":
                     case "input_events":
                     case "output_events":
                     case "states":
@@ -944,6 +871,7 @@
                         return 'pointer';
                     default:
                     case "FSM":
+                    case "event":
                         return 'default';
                 }
             } else {
@@ -1113,7 +1041,7 @@
         for(var state_name in gclass.FSM.states) {
             var state = gclass.FSM.states[state_name];
 
-            var state_node = graph.insertVertex(
+            state["_state_node"] = graph.insertVertex(
                 layer,                      // parent
                 state_name,                 // id
                 state,                      // value
@@ -1127,9 +1055,35 @@
                 null,                       // id
                 '',                         // value
                 states_node,                // source
-                state_node,                 // target
+                state["_state_node"],       // target
                 null                        // style
             );
+        }
+
+        for(var state_name in gclass.FSM.states) {
+            var state = gclass.FSM.states[state_name];
+            for(var i=0; i<state.length; i++) {
+                var event = state[i];
+
+                var event_node = graph.insertVertex(
+                    layer,                      // parent
+                    event[0],                   // id
+                    {},                         // value
+                    0, 0, cx, cy,               // x,y,width,height
+                    "event",                    // style
+                    false                       // relative
+                );
+
+                graph.insertEdge(
+                    layer,                      // parent
+                    null,                       // id
+                    '',                         // value
+                    state["_state_node"],       // source
+                    event_node,                 // target
+                    null                        // style
+                );
+            }
+
         }
 
         /*-------------------------------*
@@ -1205,7 +1159,7 @@
                 "GClass Trace Levels",     // id
                 gclass.info_gclass_trace,
                 0, 0, cx, cy,           // x,y,width,height
-                "trace_levels_info",    // style
+                "gclass_trace_levels",  // style
                 false                   // relative
             );
             graph.insertEdge(
@@ -1222,7 +1176,7 @@
                 "Global Trace Levels",     // id
                 gclass.info_global_trace,
                 0, 0, cx, cy,           // x,y,width,height
-                "trace_levels_info",    // style
+                "global_trace_levels",  // style
                 false                   // relative
             );
             graph.insertEdge(
@@ -1404,7 +1358,7 @@
             data.push({id: kw[i][0], action:kw[i][1], next_state:kw[i][2]});
         }
 
-        var gobj = formtable_factory(self, "States", state_cols);
+        var gobj = formtable_factory(self, "State", state_cols);
         gobj.gobj_send_event(
             "EV_LOAD_DATA",
             data,
@@ -1669,41 +1623,46 @@
      ********************************************/
     function ac_mx_click(self, event, kw, src)
     {
-        switch(kw.id) {
-            case "Attributes":
+        switch(kw.cell.style) {
+            case "attributes":
                 show_formtable_attrs(self, kw.value);
                 break;
-            case "Commands":
+            case "commands":
                 show_formtable_commands(self, kw.value);
                 break;
-            case "GClass Methods":
+            case "gclass_methods":
                 show_formtable_gclass_methods(self, kw.value);
                 break;
-            case "Input Events":
+            case "input_events":
                 show_formtable_input_events(self, kw.value);
                 break;
-            case "Output Events":
+            case "output_events":
                 show_formtable_output_events(self, kw.value);
                 break;
-            case "States":
+            case "states":
                 show_formtable_states(self, kw.value);
                 break;
-            case "Trace Level Info":
+            case "state":
+                show_formtable_state(self, kw.value);
+                break;
+            case "event":
+                break;
+
+            case "trace_levels_info":
                 show_formtable_trace_level_info(self, kw.value);
                 break;
 
-            case "GClass Trace Levels":
+            case "gclass_trace_levels":
                 show_formtable_gclass_trace_levels(self, kw.value);
                 break;
 
-            case "Global Trace Levels":
+            case "global_trace_levels":
                 show_formtable_global_trace_levels(self, kw.value);
                 break;
 
-            case "State":
             default:
-                show_formtable_state(self, kw.value);
                 break;
+
         }
         return 0;
     }
