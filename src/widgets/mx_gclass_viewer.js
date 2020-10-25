@@ -742,10 +742,6 @@
         graph.setPortsEnabled(true);
         graph.setCellsEditable(false);
 
-        mxGraph.prototype.isCellSelectable = function(cell) {
-            return true;
-        };
-
         /*
          *  HACK Por defecto si los hijos salen un overlap del 50%
          *  se quitan del padre y pasan al default
@@ -758,7 +754,6 @@
          *  General Vertex Style
          */
         var style = graph.getStylesheet().getDefaultVertexStyle();
-//         style[mxConstants.STYLE_FONTFAMILY] = 'monospace, "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", sans-serif, "courier new", courier';
         style[mxConstants.STYLE_FONTSIZE] = '14';
         style[mxConstants.STYLE_FONTSTYLE] = '0';
 
@@ -862,7 +857,6 @@
             "global_trace_levels",
             "ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f5f5f5;strokeColor=#666666;gradientColor=#b3b3b3;fontColor=#000000;"
         );
-
 
         /*
          *  Own getLabel

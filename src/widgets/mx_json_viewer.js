@@ -513,7 +513,11 @@
     }
 
     /********************************************
-     *
+     *  HACK una cell está compuesta gráficamente de:
+     *      - Shape de la celda
+     *      - Label     (Contenido a pintar en la celda)
+     *      - Overlays  (Cells extras)
+     *      - Control   (folding icon) + deleteControl?
      ********************************************/
     function initialize_mxgraph(self)
     {

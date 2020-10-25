@@ -557,7 +557,11 @@
     }
 
     /********************************************
-     *
+     *  HACK una cell está compuesta gráficamente de:
+     *      - Shape de la celda
+     *      - Label     (Contenido a pintar en la celda)
+     *      - Overlays  (Cells extras)
+     *      - Control   (folding icon) + deleteControl?
      ********************************************/
     function initialize_mxgraph(self)
     {
@@ -592,6 +596,8 @@
          *---------------------------*/
         // Enable/Disable cell handling
         graph.setEnabled(true);
+        graph.setHtmlLabels(true);
+        graph.setTooltips(true);
 
         graph.setConnectable(false); // Crear edges/links
         graph.setCellsDisconnectable(false); // Modificar egdes/links
@@ -599,27 +605,6 @@
         graph.setCellsLocked(self.config.locked);
         graph.setPortsEnabled(true);
         graph.setCellsEditable(false);
-
-        // TODO mira si sirve
-        // graph.disconnectOnMove = false;
-        // graph.foldingEnabled = false;
-        // graph.cellsResizable = false;
-        // graph.extendParents = false;
-
-        // // Disables automatic handling of ports. This disables the reset of the
-        // // respective style in mxGraph.cellConnected. Note that this feature may
-        // // be useful if floating and fixed connections are combined.
-        // graph.setPortsEnabled(false);
-
-        // Enable/Disable basic selection (selected = se activa marco de redimensionamiento)
-        graph.setCellsSelectable(true);
-
-        mxGraph.prototype.isCellSelectable = function(cell) {
-            if(cell.isVertex()) {
-                return true;
-            }
-            return false; // edges no selectable
-        };
 
         // Set stylesheet options
         var style = graph.getStylesheet().getDefaultVertexStyle();
@@ -652,7 +637,6 @@
         /*
          *  Own getLabel
          */
-        graph.setHtmlLabels(true);
         graph.getLabel = function(cell) {
             if (this.getModel().isVertex(cell)) {
                 return br(cell.value.shortname);
@@ -663,7 +647,6 @@
         /*
          *  Own getTooltip
          */
-        graph.setTooltips(true);
         graph.getTooltipForCell = function(cell) {
             var tip = null;
             if (cell != null && cell.getTooltip != null) {
@@ -676,18 +659,18 @@
             return tip;
         };
 
-        // Defines the condition for showing the folding icon
-        graph.isCellFoldable = function(cell, collapse)
-        {
-            return this.model.getOutgoingEdges(cell).length > 0;
-        };
-
         graph.getCursorForCell = function(cell) {
             if(this.model.isEdge(cell)) {
                 return 'default';
             } else {
                 return 'default';
             }
+        };
+
+        // Defines the condition for showing the folding icon
+        graph.isCellFoldable = function(cell, collapse)
+        {
+            return this.model.getOutgoingEdges(cell).length > 0;
         };
 
         // Defines the position of the folding icon
@@ -776,38 +759,16 @@
                     for (var i = 0; i < cells_added.length; i++) {
                         var cell = cells_added[i];
                         graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_state_overlays(self, graph, cell, cell.value);
-                        add_class_overlays(self, graph, cell, cell.value);
+                        if(cell.isVertex()) {
+                            add_state_overlays(self, graph, cell, cell.value);
+                            add_class_overlays(self, graph, cell, cell.value);
+                        }
                     }
                 }
             } catch (e) {
                 info_user_error(e);
             }
         });
-
-        if(0) {
-            /*
-             *  Sample of Context Menu
-             */
-            // Configures automatic expand on mouseover
-            graph.popupMenuHandler.autoExpand = true;
-
-            // Installs context menu
-            graph.popupMenuHandler.factoryMethod = function(menu, cell, evt)
-            {
-                menu.addItem('Item 1', null, function()
-                {
-                    alert('Item 1');
-                });
-
-                menu.addItem('Item 2', null, function()
-                {
-                    alert('Item 2');
-                });
-
-                menu.addSeparator();
-            };
-        }
     }
 
     /************************************************************
@@ -884,6 +845,9 @@
      ************************************************************/
     function add_state_overlays(self, graph, cell, record)
     {
+        if(!cell.isVertex()) {
+            return;
+        }
         var model = graph.getModel();
         model.beginUpdate();
         try {
