@@ -129,7 +129,7 @@
                     layout.useBoundingBox = false;
                     layout.edgeRouting = false;
                     layout.levelDistance = 30;
-                    layout.nodeDistance = 10;
+                    layout.nodeDistance = 20;
                     return layout;
                 }
             },
@@ -172,7 +172,7 @@
     var attrs_cols = [
         {
             "id": "id",
-            "header": "Id",
+            "header": "Attribute",
             "fillspace": 15,
             "type": "string",
             "flag": [
@@ -225,7 +225,7 @@
     var commands_cols = [
         {
             "id": "id",
-            "header": "Id",
+            "header": "Command",
             "fillspace": 15,
             "type": "string",
             "flag": [
@@ -331,10 +331,42 @@
             ]
         }
     ];
+    var state_cols = [
+        {
+            "id": "id",
+            "header": "Event",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "action",
+            "header": "Action",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        },
+        {
+            "id": "next_state",
+            "header": "Next State",
+            "fillspace": 30,
+            "type": "string",
+            "flag": [
+                "persistent",
+                "required"
+            ]
+        }
+    ];
     var global_methods_cols = [
         {
             "id": "id",
-            "header": "State",
+            "header": "Method",
             "fillspace": 30,
             "type": "string",
             "flag": [
@@ -345,7 +377,7 @@
     ];
     var trace_level_info_cols = [
         {
-            "id": "level",
+            "id": "id",
             "header": "Level",
             "fillspace": 30,
             "type": "string",
@@ -1098,29 +1130,6 @@
                 state_node,                 // target
                 null                        // style
             );
-
-            for(var i=0; i<state.length; i++) {
-
-                var event = state[i];
-
-                var event_node = graph.insertVertex(
-                    layer,                      // parent
-                    event[0],                   // id
-                    event,                      // value
-                    0, 0, cx, cy,               // x,y,width,height
-                    "event",                    // style
-                    false                       // relative
-                );
-
-                graph.insertEdge(
-                    layer,                      // parent
-                    null,                       // id
-                    '',                         // value
-                    state_node,                 // source
-                    event_node,                 // target
-                    null                        // style
-                );
-            }
         }
 
         /*-------------------------------*
@@ -1355,6 +1364,26 @@
     /********************************************
      *
      ********************************************/
+    function show_formtable_state(self, kw)
+    {
+        var data = [];
+        for(var i=0; i<kw.length; i++) {
+            data.push({id: kw[i][0], action:kw[i][1], next_state:kw[i][2]});
+        }
+
+        var gobj = formtable_factory(self, "States", state_cols);
+        gobj.gobj_send_event(
+            "EV_LOAD_DATA",
+            data,
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function show_formtable_global_methods(self, kw)
     {
         var data = [];
@@ -1381,7 +1410,7 @@
 
         data.push(
             {
-                level: "GCLASS LEVELS",
+                id: "GCLASS LEVELS",
                 description: ""
             });
         var dict = kw.info_gclass_trace;
@@ -1389,18 +1418,13 @@
             var value = dict[key];
             data.push(
                 {
-                    level: key,
+                    id: key,
                     description: value
                 });
         }
         data.push(
             {
-                level: "",
-                description: ""
-            });
-        data.push(
-            {
-                level: "GLOBAL LEVELS",
+                id: "GLOBAL LEVELS",
                 description: ""
             });
         var dict = kw.info_global_trace;
@@ -1408,7 +1432,7 @@
             var value = dict[key];
             data.push(
                 {
-                    level: key,
+                    id: key,
                     description: value
                 });
         }
@@ -1582,7 +1606,9 @@
                 show_formtable_trace_level_info(self, kw.value);
                 break;
 
+            case "State":
             default:
+                show_formtable_state(self, kw.value);
                 break;
         }
         return 0;
