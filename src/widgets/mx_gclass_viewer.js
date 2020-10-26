@@ -28,7 +28,7 @@
         $ui: null,
 
         gclass: null,
-        node_gclass: null,
+        gclass_node: null,
         locked: true,
         foldable_icon_size: 20,
         fitted: false,
@@ -1016,6 +1016,46 @@
             }
         };
 
+        /*
+         *  Add callback: Only cells selected have "class overlays"
+         */
+        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
+            /*
+             *  HACK "added" vs "removed"
+             *  The names are inverted due to historic reasons.  This cannot be changed.
+             *
+             *  HACK don't change the order, first removed, then added
+             */
+            try {
+                var cells_removed = evt.getProperty('added');
+                if(cells_removed) {
+                    for (var i = 0; i < cells_removed.length; i++) {
+                        var cell = cells_removed[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+
+            try {
+                var cells_added = evt.getProperty('removed');
+                if(cells_added) {
+                    for (var i = 0; i < cells_added.length; i++) {
+                        var cell = cells_added[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                        add_overlays(self, graph, cell);
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+        });
+
+        /*
+         *  Foldable
+         */
+
         // Defines new collapsed/expanded images
         mxGraph.prototype.collapsedImage = self.config.image_collapsed;
         mxGraph.prototype.expandedImage = self.config.image_expanded;
@@ -1084,41 +1124,6 @@
             graph.toggleCells(show, cells, true);
         };
 
-        /*
-         *  Add callback: Only cells selected have "class overlays"
-         */
-        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
-            /*
-             *  HACK "added" vs "removed"
-             *  The names are inverted due to historic reasons.  This cannot be changed.
-             *
-             *  HACK don't change the order, first removed, then added
-             */
-            try {
-                var cells_removed = evt.getProperty('added');
-                if(cells_removed) {
-                    for (var i = 0; i < cells_removed.length; i++) {
-                        var cell = cells_removed[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-
-            try {
-                var cells_added = evt.getProperty('removed');
-                if(cells_added) {
-                    for (var i = 0; i < cells_added.length; i++) {
-                        var cell = cells_added[i];
-                        graph.removeCellOverlays(cell); // Delete all previous overlays
-                        add_overlays(self, graph, cell);
-                    }
-                }
-            } catch (e) {
-                info_user_error(e);
-            }
-        });
     }
 
     /********************************************
@@ -1133,8 +1138,8 @@
         try {
             var cell_commands = model.getCell("Commands");
             var cell_states = model.getCell("States");
-            graph.foldCells(collapse, true, [cell_commands]);
-            graph.foldCells(collapse, true, [cell_states]);
+            graph.foldCells(collapse, recurse, [cell_commands]);
+            graph.foldCells(collapse, recurse, [cell_states]);
 
         } catch (e) {
             log_error(e);
@@ -1253,7 +1258,7 @@
             "gclass_no_trace_level": gclass.gclass_no_trace_level,
             "instances": gclass.instances
         }
-        self.config.node_gclass = graph.insertVertex(
+        self.config.gclass_node = graph.insertVertex(
             layer,          // parent
             gclass.id,      // id
             class_attrs,    // value
@@ -1278,7 +1283,7 @@
             layer,          // parent
             null,                       // id
             '',                         // value
-            self.config.node_gclass,    // source
+            self.config.gclass_node,    // source
             attrs_node,                 // target
             null                        // style
         );
@@ -1298,7 +1303,7 @@
             layer,                      // parent
             null,                       // id
             '',                         // value
-            self.config.node_gclass,    // source
+            self.config.gclass_node,    // source
             commands_node,              // target
             null                        // style
         );
@@ -1360,7 +1365,7 @@
             layer,                      // parent
             null,                       // id
             '',                         // value
-            self.config.node_gclass,    // source
+            self.config.gclass_node,    // source
             FSM_node,                   // target
             null                        // style
         );
@@ -1485,7 +1490,7 @@
             layer,                      // parent
             null,                       // id
             '',                         // value
-            self.config.node_gclass,    // source
+            self.config.gclass_node,    // source
             gclass_methods_node,        // target
             null                        // style
         );
@@ -1506,7 +1511,7 @@
                 layer,                      // parent
                 null,                       // id
                 '',                         // value
-                self.config.node_gclass,    // source
+                self.config.gclass_node,    // source
                 internal_methods_node,         // target
                 null                        // style
             );
@@ -1528,7 +1533,7 @@
                 layer,                      // parent
                 null,                       // id
                 '',                         // value
-                self.config.node_gclass,    // source
+                self.config.gclass_node,    // source
                 acl_node,        // target
                 null                        // style
             );
@@ -1553,7 +1558,7 @@
                 layer,                      // parent
                 null,                       // id
                 '',                         // value
-                self.config.node_gclass,    // source
+                self.config.gclass_node,    // source
                 info_trace_levels_info_node,     // target
                 null                        // style
             );
@@ -1930,7 +1935,7 @@
             model.endUpdate();
         }
 
-        collapse_graph(self, self.config.collapsed);
+        collapse_graph(self, self.config.collapsed, self.config.gclass_node);
         execute_layout(self);
 
         return 0;
@@ -2007,12 +2012,12 @@
      *  o por redimensionamiento del panel, propio o de hermanos
      *
      *  Tasks:
-     *      - Centra node_gclass
+     *      - Centra gclass_node
      *
      *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
-        if(1 || !self.config.node_gclass) {
+        if(1 || !self.config.gclass_node) {
             return 0; // No centres nada
         }
 
@@ -2020,7 +2025,7 @@
         var graph = self.config._mxgraph;
         var win_cx = self.config.$ui.$width;
         var win_cy = self.config.$ui.$height;
-        var geo = graph.getCellGeometry(self.config.node_gclass);
+        var geo = graph.getCellGeometry(self.config.gclass_node);
         var new_x = geo.x;
         var new_y = geo.y;
         var cx = geo.width;
@@ -2040,7 +2045,7 @@
 
         graph.getModel().beginUpdate();
         try {
-            var cells = [self.config.node_gclass];
+            var cells = [self.config.gclass_node];
             graph.moveCells(cells, -dx, -dy);
             graph.refresh();
         } catch (e) {
