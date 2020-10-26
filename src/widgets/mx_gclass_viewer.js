@@ -1957,21 +1957,50 @@
      ********************************************/
     function ac_clear_data(self, event, kw, src)
     {
-        // Get current index, remove UI from parent, re-build UI, add UI to parent with same idx.
-        var idx = self.config.$container_parent.index(self.config.$ui);
-        if(idx < 0) {
-            return -1;
+        /*
+         *  Get current index,
+         *  remove UI from parent,
+         *  re-build UI,
+         *  add UI to parent with same idx.
+         */
+//         var idx = self.config.$container_parent.index(self.config.$ui);
+//         if(idx < 0) {
+//             return -1;
+//         }
+//         var visible = self.parent.config.views_opened?
+//             self.parent.config.views_opened[self.name]:true;
+//         self.config.$container_parent.removeView(self.config.$ui);
+//         rebuild(self);
+//         self.config.$container_parent.addView(self.config.$ui, idx);
+//         if(visible) {
+//             self.config.$ui.show();
+//         } else {
+//             self.config.$ui.hide();
+//         }
+
+        if(self.config._mxgraph) {
+            self.config._mxgraph.destroy();
+            self.config._mxgraph = null;
         }
-        var visible = self.parent.config.views_opened?
-            self.parent.config.views_opened[self.name]:true;
-        self.config.$container_parent.removeView(self.config.$ui);
-        rebuild(self);
-        self.config.$container_parent.addView(self.config.$ui, idx);
-        if(visible) {
-            self.config.$ui.show();
-        } else {
-            self.config.$ui.hide();
-        }
+
+        var $mx = $$(build_name(self, "mxgraph"));
+        webix.ui({
+                view: "mxgraph",
+                id: build_name(self, "mxgraph"),
+                events: [
+                    mxEvent.CLICK
+                ],
+                gobj: self
+            },
+            $$(self.gobj_name()),
+            $mx
+        );
+
+        self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
+
+        initialize_mxgraph(self);
+        create_root_and_layers(self);
+        rebuild_layouts(self);
 
         return 0;
     }
