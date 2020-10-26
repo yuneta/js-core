@@ -519,12 +519,12 @@
                     click: function() {
                         if(self.config.collapsed) {
                             self.config.collapsed = false;
-                            collapse_graph(self, self.config.collapsed, false);
+                            collapse_graph(self, self.config.collapsed, true);
                             this.define("icon", "far fa-minus-square");
                             this.define("label", t("collapse"));
                         } else {
                             self.config.collapsed = true;
-                            collapse_graph(self, self.config.collapsed, false);
+                            collapse_graph(self, self.config.collapsed, true);
                             this.define("icon", "far fa-plus-square");
                             this.define("label", t("expand"));
                         }
@@ -1072,13 +1072,13 @@
             var cells = [];
 
             graph.traverse(cell, true, function(vertex) {
-                if (vertex != cell)
-                {
+                if (vertex != cell) {
                     cells.push(vertex);
                 }
 
                 // Stops recursion if a collapsed cell is seen
-                return vertex == cell || !graph.isCellCollapsed(vertex) || !recurse;
+                var ret = vertex == cell || !graph.isCellCollapsed(vertex);
+                return ret;
             });
 
             graph.toggleCells(show, cells, true);
@@ -1119,6 +1119,28 @@
                 info_user_error(e);
             }
         });
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function collapse_graph(self, collapse, recurse)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+        var layer = get_layer(self, layer);
+        model.beginUpdate();
+        try {
+            var cell_commands = model.getCell("Commands");
+            var cell_states = model.getCell("States");
+            graph.foldCells(collapse, true, [cell_commands]);
+            graph.foldCells(collapse, true, [cell_states]);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
     }
 
     /************************************************************
@@ -1576,28 +1598,6 @@
     /********************************************
      *
      ********************************************/
-    function collapse_graph(self, collapse, recurse)
-    {
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        var layer = get_layer(self, layer);
-        model.beginUpdate();
-        try {
-            var cell_commands = model.getCell("Commands");
-            var cell_states = model.getCell("States");
-            graph.foldCells(collapse, collapse?true:recurse, [cell_commands]);
-            graph.foldCells(collapse, collapse?true:recurse, [cell_states]);
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function formtable_factory(self, title, schema)
     {
         var gobj = self.yuno.gobj_create(
@@ -1930,7 +1930,7 @@
             model.endUpdate();
         }
 
-        collapse_graph(self, self.config.collapsed, true);
+        collapse_graph(self, self.config.collapsed);
         execute_layout(self);
 
         return 0;
