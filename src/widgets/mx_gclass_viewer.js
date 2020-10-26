@@ -519,12 +519,12 @@
                     click: function() {
                         if(self.config.collapsed) {
                             self.config.collapsed = false;
-                            collapse_graph(self, self.config.collapsed, true);
+                            collapse_gclass(self, self.config.collapsed);
                             this.define("icon", "far fa-minus-square");
                             this.define("label", t("collapse"));
                         } else {
                             self.config.collapsed = true;
-                            collapse_graph(self, self.config.collapsed, true);
+                            collapse_gclass(self, self.config.collapsed);
                             this.define("icon", "far fa-plus-square");
                             this.define("label", t("expand"));
                         }
@@ -839,7 +839,7 @@
         create_graph_style(
             graph,
             "gclass_container",
-            "rounded=1;whiteSpace=wrap;html=1;shadow=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;horizontal=1;spacingLeft=10;spacingTop=10;glass=0;sketch=0;gradientColor=#ffffff;fontColor=#000000;"
+            "rounded=1;whiteSpace=wrap;html=1;shadow=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;horizontal=1;spacingLeft=10;spacingTop=10;glass=0;sketch=0;gradientColor=#ffffff;fontColor=#000000;foldable=0"
         );
         create_graph_style(
             graph,
@@ -1063,7 +1063,10 @@
         // Defines the condition for showing the folding icon
         graph.isCellFoldable = function(cell, collapse)
         {
-            return this.model.getOutgoingEdges(cell).length > 0;
+            var style = this.getCurrentCellStyle(cell);
+
+            return this.model.getOutgoingEdges(cell).length > 0 &&
+                style[mxConstants.STYLE_FOLDABLE] != 0;
         };
 
         // Defines the position of the folding icon
@@ -1111,15 +1114,23 @@
             show = (show != null) ? show : true;
             var cells = [];
 
-            graph.traverse(cell, true, function(vertex) {
-                if (vertex != cell) {
-                    cells.push(vertex);
-                }
+            if(recurse || !recurse && !show) {
+                graph.traverse(cell, true, function(vertex) {
+                    if (vertex != cell) {
+                        cells.push(vertex);
+                    }
 
-                // Stops recursion if a collapsed cell is seen
-                var ret = vertex == cell || !graph.isCellCollapsed(vertex);
-                return ret;
-            });
+                    // Stops recursion if a collapsed cell is seen
+                    return vertex == cell || !graph.isCellCollapsed(vertex);
+                });
+            } else {
+                var edges = graph.getOutgoingEdges(cell);
+                for(var i=0; i<edges.length; i++) {
+                    var vertex = graph.model.getTerminal(edges[i], false);
+                    cells.push(vertex);
+                    graph.model.setCollapsed(vertex, show);
+                }
+            }
 
             graph.toggleCells(show, cells, true);
         };
@@ -1129,7 +1140,7 @@
     /********************************************
      *
      ********************************************/
-    function collapse_graph(self, collapse, recurse)
+    function collapse_gclass(self, collapse)
     {
         var graph = self.config._mxgraph;
         var model = graph.getModel();
@@ -1138,8 +1149,8 @@
         try {
             var cell_commands = model.getCell("Commands");
             var cell_states = model.getCell("States");
-            graph.foldCells(collapse, recurse, [cell_commands]);
-            graph.foldCells(collapse, recurse, [cell_states]);
+            graph.foldCells(collapse, true, [cell_commands]);
+            graph.foldCells(collapse, true, [cell_states]);
 
         } catch (e) {
             log_error(e);
@@ -1935,7 +1946,7 @@
             model.endUpdate();
         }
 
-        collapse_graph(self, self.config.collapsed, self.config.gclass_node);
+        collapse_gclass(self, self.config.collapsed);
         execute_layout(self);
 
         return 0;

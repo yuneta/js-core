@@ -1115,8 +1115,11 @@
      ********************************************/
     function ac_select_item(self, event, kw, src)
     {
-        var cell = self.config._mxgraph.model.getCell(kw.id);
-        self.config._mxgraph.setSelectionCell(cell);
+        var graph = self.config._mxgraph;
+        var cell = graph.model.getCell(kw.id);
+        if(cell) {
+            graph.setSelectionCell(cell); // Callback mxEvent.CHANGE will be called
+        }
 
         return 0;
     }
