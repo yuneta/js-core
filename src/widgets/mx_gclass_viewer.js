@@ -30,6 +30,8 @@
         gclass: null,
         node_gclass: null,
         locked: true,
+        foldable_icon_size: 20,
+        fitted: false,
 
         layout_options: [
             {
@@ -76,7 +78,8 @@
         layout_selected: "tree_layout",
 
         __writable_attrs__: [
-            "layout_selected"
+            "layout_selected",
+            "fit"
         ]
     };
 
@@ -389,6 +392,19 @@
     }
 
     /************************************************************
+     *  Load control button images
+     ************************************************************/
+    function load_icons(self)
+    {
+        self.config.image_collapsed = new mxImage('/static/app/images/yuneta/collapsed.svg',
+            self.config.foldable_icon_size, self.config.foldable_icon_size
+        );
+        self.config.image_expanded = new mxImage('/static/app/images/yuneta/expanded.svg',
+            self.config.foldable_icon_size, self.config.foldable_icon_size
+        );
+    }
+
+    /************************************************************
      *   Rebuild
      ************************************************************/
     function rebuild(self)
@@ -454,23 +470,24 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "fad fa-compress-arrows-alt",
+                    icon: "",
+                    icon: self.config.fitted? "fad fa-expand-arrows-alt":"fad fa-compress-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
                     maxWidth: 120,
-                    label: t("reset view"),
+                    label: self.config.fitted? t("reset view"):t("fit"),
                     click: function() {
-                        self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
-                    }
-                },
-                {
-                    view:"button",
-                    type: "icon",
-                    icon: "fad fa-expand-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
-                    maxWidth: 120,
-                    label: t("fit"),
-                    click: function() {
-                        self.config._mxgraph.fit();
+                        if(self.config.fitted) {
+                            self.config.fitted = false;
+                            self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
+                            this.define("icon", "fad fa-expand-arrows-alt");
+                            this.define("label", t("fit"));
+                        } else {
+                            self.config._mxgraph.fit();
+                            self.config.fitted = true;
+                            this.define("icon", "fad fa-compress-arrows-alt");
+                            this.define("label",  t("reset view"));
+                        }
+                        this.refresh();
                     }
                 },
                 {
@@ -632,6 +649,11 @@
 
         if(locked) {
             graph.setCellsLocked(true);
+        }
+        if(self.config.fitted) {
+            graph.fit();
+        } else {
+            graph.view.scaleAndTranslate(1, graph.border, graph.border);
         }
     }
 
@@ -897,7 +919,6 @@
             return "";
         };
 
-
         /*
          *  Tooltip
          */
@@ -944,6 +965,75 @@
             } else {
                 return 'default';
             }
+        };
+
+        // Defines new collapsed/expanded images
+        mxGraph.prototype.collapsedImage = self.config.image_collapsed;
+        mxGraph.prototype.expandedImage = self.config.image_expanded;
+
+        // Defines the condition for showing the folding icon
+        graph.isCellFoldable = function(cell, collapse)
+        {
+            return this.model.getOutgoingEdges(cell).length > 0;
+        };
+
+        // Defines the position of the folding icon
+        graph.cellRenderer.getControlBounds = function(state, w, h) {
+            if (state.control != null) {
+                var oldScale = state.control.scale;
+                var w = state.control.bounds.width / oldScale;
+                var h = state.control.bounds.height / oldScale;
+                var s = state.view.scale;
+
+                // 0 = TreeNodeShape.prototype.segment * s
+                return new mxRectangle(
+                    state.x + state.width/2 - (w/2)*s,
+                    state.y + state.height + (h/2)*s,
+                    w * s,
+                    h * s
+                );
+            }
+
+            return null;
+        };
+
+        // Implements the click on a folding icon
+        graph.foldCells = function(collapse, recurse, cells) {
+            this.model.beginUpdate();
+            try {
+                toggleSubtree(this, cells[0], !collapse);
+                this.model.setCollapsed(cells[0], collapse);
+
+                // Executes the layout for the new graph since
+                // changes to visiblity and collapsed state do
+                // not trigger a layout in the current manager.
+
+                execute_layout(self);
+            } catch (e) {
+                log_error(e);
+            } finally {
+                this.model.endUpdate();
+            }
+        };
+
+        // Updates the visible state of a given subtree taking into
+        // account the collapsed state of the traversed branches
+        function toggleSubtree(graph, cell, show) {
+            show = (show != null) ? show : true;
+            var cells = [];
+
+            graph.traverse(cell, true, function(vertex)
+            {
+                if (vertex != cell)
+                {
+                    cells.push(vertex);
+                }
+
+                // Stops recursion if a collapsed cell is seen
+                return vertex == cell || !graph.isCellCollapsed(vertex);
+            });
+
+            graph.toggleCells(show, cells, true);
         };
     }
 
@@ -1640,14 +1730,14 @@
         model.beginUpdate();
         try {
             show_view1(self, graph, layer, data);
-            graph.view.setTranslate(graph.border, graph.border);
-            execute_layout(self);
 
         } catch (e) {
             log_error(e);
         } finally {
             model.endUpdate();
         }
+
+        execute_layout(self);
 
         return 0;
     }
@@ -1868,9 +1958,7 @@
     {
         var self = this;
 
-        var self = this;
-
-        // TODO load_icons(self);
+        load_icons(self);
 
         var cur_layout = kwid_collect(
             self.config.layout_options,

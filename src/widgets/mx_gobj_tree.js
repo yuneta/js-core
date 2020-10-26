@@ -1129,6 +1129,8 @@
         var layer = kw.layer;
         var data = __duplicate__(kw.data);
 
+        var graph = self.config._mxgraph;
+        var layer = get_layer(self, layer);
         var model = self.config._mxgraph.getModel();
         model.beginUpdate();
         try {
@@ -1136,6 +1138,7 @@
                 case "gobj-tree":
                 default:
                     load_gobj_tree(self, data, layer);
+                    graph.view.setTranslate(graph.border, graph.border);
                     break;
             }
 
