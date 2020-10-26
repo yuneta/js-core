@@ -32,6 +32,14 @@
         locked: true,
         foldable_icon_size: 20,
         fitted: false,
+        collapsed: true,
+        top_overlay_icon_size: 24,
+        bottom_overlay_icon_size: 16,
+
+        image_collapsed: null,
+        image_expanded: null,
+        image_json_graph: null,
+        image_formtable: null,
 
         layout_options: [
             {
@@ -44,8 +52,8 @@
                     var layout = new mxCompactTreeLayout(graph, false);
                     layout.useBoundingBox = false;
                     layout.edgeRouting = false;
-                    layout.levelDistance = 30;
-                    layout.nodeDistance = 20;
+                    layout.levelDistance = 50;
+                    layout.nodeDistance = 30;
                     return layout;
                 }
             },
@@ -79,7 +87,8 @@
 
         __writable_attrs__: [
             "layout_selected",
-            "fit"
+            "fitted",
+            "collapsed"
         ]
     };
 
@@ -402,6 +411,14 @@
         self.config.image_expanded = new mxImage('/static/app/images/yuneta/expanded.svg',
             self.config.foldable_icon_size, self.config.foldable_icon_size
         );
+        self.config.image_json_graph = new mxImage(
+            '/static/app/images/yuneta/json_graph.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_formtable = new mxImage(
+            '/static/app/images/yuneta/formtable.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
     }
 
     /************************************************************
@@ -471,7 +488,7 @@
                     view:"button",
                     type: "icon",
                     icon: "",
-                    icon: self.config.fitted? "fad fa-expand-arrows-alt":"fad fa-compress-arrows-alt",
+                    icon: self.config.fitted? "fad fa-compress-arrows-alt":"fad fa-expand-arrows-alt",
                     css: "webix_transparent btn_icon_toolbar_16",
                     maxWidth: 120,
                     label: self.config.fitted? t("reset view"):t("fit"),
@@ -486,6 +503,30 @@
                             self.config.fitted = true;
                             this.define("icon", "fad fa-compress-arrows-alt");
                             this.define("label",  t("reset view"));
+                        }
+                        this.refresh();
+                    }
+                },
+
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "",
+                    icon: self.config.collapsed? "far fa-plus-square":"far fa-minus-square",
+                    css: "webix_transparent btn_icon_toolbar_16",
+                    maxWidth: 120,
+                    label: self.config.collapsed? t("expand"):t("collapse"),
+                    click: function() {
+                        if(self.config.collapsed) {
+                            self.config.collapsed = false;
+                            collapse_graph(self, self.config.collapsed, false);
+                            this.define("icon", "far fa-minus-square");
+                            this.define("label", t("collapse"));
+                        } else {
+                            self.config.collapsed = true;
+                            collapse_graph(self, self.config.collapsed, false);
+                            this.define("icon", "far fa-plus-square");
+                            this.define("label", t("expand"));
                         }
                         this.refresh();
                     }
@@ -620,6 +661,7 @@
     function execute_layout(self)
     {
         var graph = self.config._mxgraph;
+        var model = graph.getModel();
         var group = get_layer(self, "layer?");
 
         var cur_layout = kwid_collect(
@@ -637,23 +679,23 @@
         }
 
         if(cur_layout && cur_layout.exe) {
-            graph.getModel().beginUpdate();
+            model.beginUpdate();
             try {
                 cur_layout.exe.execute(group);
             } catch (e) {
                 log_error(e);
             } finally {
-                graph.getModel().endUpdate();
+                model.endUpdate();
             }
         }
 
-        if(locked) {
-            graph.setCellsLocked(true);
-        }
         if(self.config.fitted) {
             graph.fit();
         } else {
             graph.view.scaleAndTranslate(1, graph.border, graph.border);
+        }
+        if(locked) {
+            graph.setCellsLocked(true);
         }
     }
 
@@ -898,9 +940,16 @@
                         }
                         return t;
 
+                    case "parameter":
                     case "event":
-                        var t = "<b>" + cell.value + "</b><br/>";
+                        var v = cell.value;
                         var len = 0;
+                        if(is_object(v)) {
+                            v = cell.value.id;
+                        } else if(is_array(v)) {
+                            v = cell.value[0].id;
+                        }
+                        var t = "<b>" + v + "</b><br/>";
                         t += "<span>(" + len + ")</span><br/>";
                         return t;
 
@@ -945,7 +994,6 @@
                     case "attributes":
                     case "commands":
                     case "command":
-                    case "parameter":
                     case "gclass_methods":
                     case "internal_methods":
                     case "ACL":
@@ -958,6 +1006,7 @@
                     case "state":
                         return 'pointer';
                     default:
+                    case "parameter":
                     case "FSM":
                     case "event":
                         return 'default';
@@ -1001,7 +1050,7 @@
         graph.foldCells = function(collapse, recurse, cells) {
             this.model.beginUpdate();
             try {
-                toggleSubtree(this, cells[0], !collapse);
+                toggleSubtree(this, cells[0], !collapse, recurse);
                 this.model.setCollapsed(cells[0], collapse);
 
                 // Executes the layout for the new graph since
@@ -1018,23 +1067,145 @@
 
         // Updates the visible state of a given subtree taking into
         // account the collapsed state of the traversed branches
-        function toggleSubtree(graph, cell, show) {
+        function toggleSubtree(graph, cell, show, recurse) {
             show = (show != null) ? show : true;
             var cells = [];
 
-            graph.traverse(cell, true, function(vertex)
-            {
+            graph.traverse(cell, true, function(vertex) {
                 if (vertex != cell)
                 {
                     cells.push(vertex);
                 }
 
                 // Stops recursion if a collapsed cell is seen
-                return vertex == cell || !graph.isCellCollapsed(vertex);
+                return vertex == cell || !graph.isCellCollapsed(vertex) || !recurse;
             });
 
             graph.toggleCells(show, cells, true);
         };
+
+        /*
+         *  Add callback: Only cells selected have "class overlays"
+         */
+        graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
+            /*
+             *  HACK "added" vs "removed"
+             *  The names are inverted due to historic reasons.  This cannot be changed.
+             *
+             *  HACK don't change the order, first removed, then added
+             */
+            try {
+                var cells_removed = evt.getProperty('added');
+                if(cells_removed) {
+                    for (var i = 0; i < cells_removed.length; i++) {
+                        var cell = cells_removed[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+
+            try {
+                var cells_added = evt.getProperty('removed');
+                if(cells_added) {
+                    for (var i = 0; i < cells_added.length; i++) {
+                        var cell = cells_added[i];
+                        graph.removeCellOverlays(cell); // Delete all previous overlays
+                        add_overlays(self, graph, cell);
+                    }
+                }
+            } catch (e) {
+                info_user_error(e);
+            }
+        });
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function add_overlay_formtable(self, graph, cell, fn)
+    {
+        var offsy = self.config.top_overlay_icon_size/2;
+        var offsx = self.config.top_overlay_icon_size + 5;
+
+        var overlay_table = new mxCellOverlay(
+            self.config.image_formtable,
+            cell.id,                    // tooltip
+            mxConstants.ALIGN_LEFT,     // horizontal align
+            mxConstants.ALIGN_TOP,      // vertical align
+            new mxPoint(2*offsx - offsy, -offsy),   // offset
+            "pointer"                   // cursor
+        );
+        graph.addCellOverlay(cell, overlay_table);
+        // Installs a handler for clicks on the overlay
+        overlay_table.addListener(mxEvent.CLICK, function(sender, evt2) {
+            var value = evt2.getProperty('cell').value;
+            fn(self, value);
+        });
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function add_overlays(self, graph, cell)
+    {
+        var model = graph.getModel();
+        model.beginUpdate();
+        try {
+            switch(cell.style) {
+                case "attributes":
+                    add_overlay_formtable(self, graph, cell, show_formtable_attrs);
+                    break;
+                case "commands":
+                    add_overlay_formtable(self, graph, cell, show_formtable_commands);
+                    break;
+                case "command":
+                    add_overlay_formtable(self, graph, cell, show_formtable_command);
+                    break;
+                case "parameter":
+                    add_overlay_formtable(self, graph, cell, show_formtable_parameters);
+                    break;
+                case "gclass_methods":
+                    add_overlay_formtable(self, graph, cell, show_formtable_gclass_methods);
+                    break;
+                case "input_events":
+                    add_overlay_formtable(self, graph, cell, show_formtable_input_events);
+                    break;
+                case "output_events":
+                    add_overlay_formtable(self, graph, cell, show_formtable_output_events);
+                    break;
+                case "states":
+                    add_overlay_formtable(self, graph, cell, show_formtable_states);
+                    break;
+                case "state":
+                    add_overlay_formtable(self, graph, cell, show_formtable_state);
+                    break;
+                case "event":
+                    break;
+
+                case "trace_levels_info":
+                    add_overlay_formtable(self, graph, cell, show_formtable_trace_level_info);
+                    break;
+
+                case "gclass_trace_levels":
+                    add_overlay_formtable(self, graph, cell, show_formtable_gclass_trace_levels);
+                    break;
+
+                case "global_trace_levels":
+                    add_overlay_formtable(self, graph, cell, show_formtable_global_trace_levels);
+                    break;
+
+                default:
+                    break;
+
+            }
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
     }
 
     /************************************************************
@@ -1405,6 +1576,28 @@
     /********************************************
      *
      ********************************************/
+    function collapse_graph(self, collapse, recurse)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+        var layer = get_layer(self, layer);
+        model.beginUpdate();
+        try {
+            var cell_commands = model.getCell("Commands");
+            var cell_states = model.getCell("States");
+            graph.foldCells(collapse, collapse?true:recurse, [cell_commands]);
+            graph.foldCells(collapse, collapse?true:recurse, [cell_states]);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function formtable_factory(self, title, schema)
     {
         var gobj = self.yuno.gobj_create(
@@ -1725,8 +1918,8 @@
         self.config.gclass = data;
 
         var graph = self.config._mxgraph;
+        var model = graph.getModel();
         var layer = get_layer(self, layer);
-        var model = self.config._mxgraph.getModel();
         model.beginUpdate();
         try {
             show_view1(self, graph, layer, data);
@@ -1737,6 +1930,7 @@
             model.endUpdate();
         }
 
+        collapse_graph(self, self.config.collapsed, true);
         execute_layout(self);
 
         return 0;
@@ -1763,6 +1957,39 @@
             self.config.$ui.hide();
         }
 
+        return 0;
+    }
+
+
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
+    {
+        rebuild(self);
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_mx_click(self, event, kw, src)
+    {
+        self.gobj_send_event("EV_SELECT_ITEM", kw, src);
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_select_item(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var cell = graph.model.getCell(kw.id);
+        if(cell) {
+            graph.setSelectionCell(cell); // Callback mxEvent.CHANGE will be called
+        }
         return 0;
     }
 
@@ -1825,72 +2052,6 @@
         return 0;
     }
 
-    /********************************************
-     *  "Container Panel"
-     *  Order from container (parent): re-create
-     ********************************************/
-    function ac_rebuild_panel(self, event, kw, src)
-    {
-        rebuild(self);
-        return 0;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function ac_mx_click(self, event, kw, src)
-    {
-        switch(kw.cell.style) {
-            case "attributes":
-                show_formtable_attrs(self, kw.value);
-                break;
-            case "commands":
-                show_formtable_commands(self, kw.value);
-                break;
-            case "command":
-                show_formtable_command(self, kw.value);
-                break;
-            case "parameter":
-                show_formtable_parameters(self, kw.value);
-                break;
-            case "gclass_methods":
-                show_formtable_gclass_methods(self, kw.value);
-                break;
-            case "input_events":
-                show_formtable_input_events(self, kw.value);
-                break;
-            case "output_events":
-                show_formtable_output_events(self, kw.value);
-                break;
-            case "states":
-                show_formtable_states(self, kw.value);
-                break;
-            case "state":
-                show_formtable_state(self, kw.value);
-                break;
-            case "event":
-                break;
-
-            case "trace_levels_info":
-                show_formtable_trace_level_info(self, kw.value);
-                break;
-
-            case "gclass_trace_levels":
-                show_formtable_gclass_trace_levels(self, kw.value);
-                break;
-
-            case "global_trace_levels":
-                show_formtable_global_trace_levels(self, kw.value);
-                break;
-
-            default:
-                break;
-
-        }
-        return 0;
-    }
-
-
 
 
             /***************************
@@ -1904,10 +2065,11 @@
         "event_list": [
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
-            "EV_SELECT",
-            "EV_REFRESH",
+            "EV_SELECT_ITEM",
+            "MX_" + mxEvent.CLICK,
             "EV_REBUILD_PANEL",
-            "MX_" + mxEvent.CLICK
+            "EV_SELECT",
+            "EV_REFRESH"
         ],
         "state_list": [
             "ST_IDLE"
@@ -1919,6 +2081,7 @@
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["MX_" + mxEvent.CLICK,         ac_mx_click,                undefined],
                 ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined],
+                ["EV_SELECT_ITEM",              ac_select_item,             undefined],
                 ["EV_SELECT",                   ac_select,                  undefined],
                 ["EV_REFRESH",                  ac_refresh,                 undefined]
             ]

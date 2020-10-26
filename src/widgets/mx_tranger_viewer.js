@@ -23,7 +23,7 @@
         top_overlay_icon_size: 24,
         bottom_overlay_icon_size: 16,
 
-        image_topic_json_graph: null,
+        image_json_graph: null,
         image_formtable: null,
         image_data_in_disk: null,
         image_data_in_memory: null,
@@ -108,7 +108,7 @@
          *                  acaso no es eso una bacteria, un virus?
          */
 
-        self.config.image_topic_json_graph = new mxImage(
+        self.config.image_json_graph = new mxImage(
             '/static/app/images/yuneta/json_graph.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
@@ -529,7 +529,7 @@
 
             if(cell.value && cell.value.cols &&  Object.keys(cell.value.cols).length > 0) {
                 var overlay_role = new mxCellOverlay(
-                    self.config.image_topic_json_graph,
+                    self.config.image_json_graph,
                     "Show Topic Json Graph",        // tooltip
                     mxConstants.ALIGN_LEFT,     // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH>
                     mxConstants.ALIGN_TOP,      // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
@@ -545,7 +545,7 @@
                         "EV_MX_SHOW_TOPIC_JSON_GRAPH",
                         {
                             topic_name: topic.topic_name,
-                            image: self.config.image_topic_json_graph.src,
+                            image: self.config.image_json_graph.src,
                             topic: topic
                         },
                         self
