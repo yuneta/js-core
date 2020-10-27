@@ -300,6 +300,7 @@
         }
         if(result < 0) {
             log_error(comment);
+            return;
         } else {
             if(comment) {
                 log_warning(comment);
@@ -508,7 +509,7 @@
             self,
             "tranger",
             "save-tranger-schema",
-            new_schema
+            {schema: new_schema}
         );
 
         return 0;
