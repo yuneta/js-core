@@ -900,6 +900,7 @@
                 return [name, db.__schema_version__];
             }
         }
+        return null;
     }
 
     /************************************************************
@@ -916,44 +917,48 @@
             switch(layer_record.id) {
                 case "treedbs":
                     var schema_node = get_schema_version(self, tranger, layer_record.id);
-                    var schema_name = schema_node[0];
-                    var schema_version = schema_node[1];
-                    var cy = self.config.layer_title_height*2;
-                    graph.insertVertex(
-                        layer_record.__layer__,                 // group
-                        layer_record.title,                     // id
-                        {                                       // value
-                            schema_type: layer_record.id,
-                            schema_name: schema_name,
-                            schema_version: schema_version
-                        },
-                        0, layer_record.y,                      // x,y
-                        cx-20, cy,                              // width,height
-                        "title",                                // style
-                        false                                   // relative
-                    );
-                    layer_record.y += cy + layer_record.cy_sep;
+                    if(schema_node) {
+                        var schema_name = schema_node[0];
+                        var schema_version = schema_node[1];
+                        var cy = self.config.layer_title_height*2;
+                        graph.insertVertex(
+                            layer_record.__layer__,                 // group
+                            layer_record.title,                     // id
+                            {                                       // value
+                                schema_type: layer_record.id,
+                                schema_name: schema_name,
+                                schema_version: schema_version
+                            },
+                            0, layer_record.y,                      // x,y
+                            cx-20, cy,                              // width,height
+                            "title",                                // style
+                            false                                   // relative
+                        );
+                        layer_record.y += cy + layer_record.cy_sep;
+                    }
                     break;
 
                 case "msg2dbs":
                     var schema_node = get_schema_version(self, tranger, layer_record.id);
-                    var schema_name = schema_node[0];
-                    var schema_version = schema_node[1];
-                    var cy = self.config.layer_title_height*2;
-                    graph.insertVertex(
-                        layer_record.__layer__,                 // group
-                        layer_record.title,                     // id
-                        {                                       // value
-                            schema_type: layer_record.id,
-                            schema_name: schema_name,
-                            schema_version: schema_version
-                        },
-                        0, layer_record.y,                      // x,y
-                        cx-20, cy,                              // width,height
-                        "title",                                // style
-                        false                                   // relative
-                    );
-                    layer_record.y += cy + layer_record.cy_sep;
+                    if(schema_node) {
+                        var schema_name = schema_node[0];
+                        var schema_version = schema_node[1];
+                        var cy = self.config.layer_title_height*2;
+                        graph.insertVertex(
+                            layer_record.__layer__,                 // group
+                            layer_record.title,                     // id
+                            {                                       // value
+                                schema_type: layer_record.id,
+                                schema_name: schema_name,
+                                schema_version: schema_version
+                            },
+                            0, layer_record.y,                      // x,y
+                            cx-20, cy,                              // width,height
+                            "title",                                // style
+                            false                                   // relative
+                        );
+                        layer_record.y += cy + layer_record.cy_sep;
+                    }
                     break;
 
                 case "raws":
