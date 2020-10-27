@@ -303,7 +303,7 @@
             return;
         } else {
             if(comment) {
-                log_warning(comment);
+                log_info(comment);
             }
         }
 
@@ -318,6 +318,9 @@
                     "schema", self.config.system_topic_schema
                 );
                 self.config.gobj_formtable_schema.gobj_send_event("EV_REBUILD_TABLE", {}, self);
+                break;
+
+            case "save-tranger-schema":
                 break;
 
             case "get-2key-subvalue":

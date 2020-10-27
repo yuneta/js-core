@@ -983,7 +983,7 @@
 
         var raw_cx = 200;
         var msg2db_cx = 200;
-        var treedb_cx = 200;
+        var treedb_cx = 300;
 
         var raw_cy = 80;
         var msg2db_cy = 130;
