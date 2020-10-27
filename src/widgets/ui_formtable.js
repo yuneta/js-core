@@ -14,6 +14,7 @@
  *  -------
  *  1.0     Initial release
  *  1.1     Convert to Mix Panel/Window
+ *  1.2     Public name of datable in self.config.webix_datatable_id
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -45,6 +46,7 @@
         //////////////// Particular Attributes //////////////////
         topic_name: null,
         schema: null,
+        webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
         update_mode_enabled: false,
         create_mode_enabled: false,
@@ -488,6 +490,8 @@
                 }
             }
         };
+
+        self.config.webix_datatable_id = build_name(self, "list_table");
 
         var update_form_window = {
             view: "scrollview",
