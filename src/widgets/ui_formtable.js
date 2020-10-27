@@ -815,14 +815,14 @@
                         case "string":
                             webix_col["editor"] = "combo";
 //                             webix_col["optionslist"] = true;
-                            webix_col["options"] = enum2options(enum_list);
+                            webix_col["options"] = list2options(enum_list);
                             break;
                         case "object":
                         case "dict":
                         case "array":
                         case "list":
                             webix_col["optionslist"] = true;
-                            webix_col["options"] = enum2options(enum_list);
+                            webix_col["options"] = list2options(enum_list);
                             webix_col["editor"] = "multiselect";
                             webix_col["suggest"] = {
                                view:"checksuggest"
@@ -834,7 +834,7 @@
                                 "' is invalid: " + real_type
                             );
                             webix_col["optionslist"] = true;
-                            webix_col["options"] = enum2options(enum_list);
+                            webix_col["options"] = list2options(enum_list);
                             webix_col["editor"] = "multiselect";
                             webix_col["suggest"] = {
                                view:"checksuggest"
@@ -873,21 +873,6 @@
         $table.refreshColumns();
 
         return $table;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function enum2options(enum_)
-    {
-        var options = [];
-        for(var i=0; i<enum_.length; i++) {
-            options.push({
-                id: enum_[i],
-                value: enum_[i]
-            });
-        }
-        return options;
     }
 
     /********************************************
@@ -1083,7 +1068,7 @@
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true,
-                                options: enum2options(enum_list)
+                                options: list2options(enum_list)
                             };
                             break;
                         case "object":
@@ -1096,7 +1081,7 @@
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true,
-                                options: enum2options(enum_list)
+                                options: list2options(enum_list)
                             };
                             break;
                         default:
@@ -1110,7 +1095,7 @@
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true,
-                                options: enum2options(enum_list)
+                                options: list2options(enum_list)
                             };
                             break;
                     }

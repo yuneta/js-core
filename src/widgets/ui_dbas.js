@@ -469,6 +469,7 @@
 
         var new_schema = {
             id: schema_name,
+            schema_type: schema_type,
             schema_version: parseInt(schema_version) + 1,
             topics: []
         };
@@ -503,8 +504,14 @@
         /*
          *  save new_schema to backend
          */
-        // TODO
-        console.log(new_schema);
+        send_command_to_remote_service(
+            self,
+            "tranger",
+            "save-tranger-schema",
+            new_schema
+        );
+
+        return 0;
     }
 
     /********************************************
@@ -513,7 +520,8 @@
     function ac_mx_save_topic_schema(self, event, kw, src)
     {
         var topic = kw.topic;
-        // FUTURE when schema will be in treedb then individual topi schema could be saved
+        // FUTURE when schema will be in treedb then individual topic schema could be saved
+        return 0;
     }
 
     /********************************************

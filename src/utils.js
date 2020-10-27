@@ -1386,6 +1386,40 @@
         }
     }
 
+    /********************************************************
+     *  Convert [s] or [{}] or {} in a webix list options
+     ********************************************************/
+    function list2options(list, field_id, field_value)
+    {
+        field_id = field_id?field_id:"id";
+        field_value = field_value?field_value:"value";
+
+        var options = [];
+
+        if(is_array(list)) {
+            for(var i=0; i<list.length; i++) {
+                var v = list[i];
+                if(is_string(v)) {
+                    options.push({
+                        id: list[i],
+                        value: list[i]
+                    });
+                } else if(is_object(v)) {
+                    var vv = __duplicate__(v);
+                    vv["id"] = v[field_id];
+                    vv["value"] = v[field_value];
+                    options.push(vv);
+                } else {
+                    log_error("list2options(): case1 not implemented");
+                }
+            }
+        } else {
+            log_error("list2options(): case2 not implemented");
+        }
+
+        return options;
+    }
+
     /************************************************************
      *   Init json database
      ************************************************************/
@@ -1707,6 +1741,7 @@
         }
     }
 
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -1768,6 +1803,7 @@
     exports.uuidv4 = uuidv4;
     exports.load_json_file = load_json_file;
     exports.strstr = strstr;
+    exports.list2options = list2options;
 
     exports.jdb_init = jdb_init;
     exports.jdb_update = jdb_update;
