@@ -1406,6 +1406,12 @@
                     });
                 } else if(is_object(v)) {
                     var vv = __duplicate__(v);
+                    if(!kw_has_key(vv, field_id)) {
+                        log_error("list2options(): object without field id: " + field_id);
+                    }
+                    if(!kw_has_key(vv, field_value)) {
+                        log_error("list2options(): object without field value: " + field_value);
+                    }
                     vv["id"] = v[field_id];
                     vv["value"] = v[field_value];
                     options.push(vv);
