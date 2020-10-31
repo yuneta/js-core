@@ -1715,10 +1715,14 @@
      ********************************************/
     function ac_rebuild_table(self, event, kw, src)
     {
+        /*
+         *  Parameters can be passed here as event's attrs
+         *  or with previously attributes writing
+         */
         if(kw_has_key(kw, "title")) {
-            // Parameters can be passed here as event's attrs
-            //  or with previously attributes writing
             self.config.title = kw_get_str(kw, "title", "", 0);
+        }
+        if(kw_has_key(kw, "schema")) {
             self.config.schema = kw_get_dict_value(kw, "schema", [], 0);
         }
         build_table(self);
