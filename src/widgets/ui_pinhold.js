@@ -4,12 +4,12 @@
  *          Holder of pin's
  *          NOTE search "Pinhold Window" phrase to locate related code
  *
- *  window_properties:
- *
+ *  window_properties: all values are false by default
+
         without_window_pin_btn: false,              // Hide pin button
         without_window_fullscreen_btn: false,       // Hide fullscreen button
         without_window_hidden_btn: false,           // Hide minimize button
-        no_destroy_window: false                    // No destroy window on minimize
+        without_destroy_window_on_minimize: false   // No destroy window on minimize
  *
  *
  *  Version
@@ -537,7 +537,8 @@
     function ac_close_window(self, event, kw, src)
     {
         var src_name = src.gobj_name();
-        if(self.config.windows_pinpushed[src_name] || src.config.no_destroy_window) {
+        if(self.config.windows_pinpushed[src_name] ||
+                src.config.window_properties.without_destroy_window_on_minimize) {
             // Only minimize
             src.config.$ui.hide();
         } else {

@@ -4,6 +4,15 @@
  *          Container of widgets
  *          NOTE search "Container Panel" phrase to locate related code
  *
+ *  panel_properties: all values are false by default
+
+        with_panel_fullscreen_btn: false,   // show fullscreen button in top toolbar
+        with_panel_hidden_btn: false,       // show minimize button in top toolbar
+        with_panel_resize_btn: false,       // show resizes buttons in top toolbar
+        with_panel_title: "",               // title to show if not empty in top toolbar
+        with_panel_top_toolbar: false       // show top toolbar
+
+
  *  Version
  *  -------
  *  1.0     Initial release
@@ -561,7 +570,7 @@
             child.config.$ui.define({gravity:gravity});
         }
 
-        if(!child.config.panel_properties.with_panel_hidden_btn ) {
+        if(!child.config.panel_properties.with_panel_hidden_btn) {
             self.config.views_opened[child.gobj_name()] = true;
             child.config.$ui.hide();
             child.config.$ui.show();

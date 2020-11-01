@@ -1821,8 +1821,8 @@
             "EV_GET_DATA",
             "EV_GET_CHECKED_DATA",
 
-            "EV_UPDATE_RECORD: output",
             "EV_CREATE_RECORD: output",
+            "EV_UPDATE_RECORD: output",
             "EV_DELETE_RECORD: output",
             "EV_REFRESH_TABLE: output",
             "EV_ROW_CHECKED: output",
