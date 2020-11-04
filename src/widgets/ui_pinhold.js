@@ -8,8 +8,8 @@
 
         without_window_pin_btn: false,              // Hide pin button
         without_window_fullscreen_btn: false,       // Hide fullscreen button
-        without_window_hidden_btn: false,           // Hide minimize button
-        without_destroy_window_on_minimize: false   // No destroy window on minimize
+        without_window_close_btn: false,            // Hide minimize/destroy button
+        without_destroy_window_on_close: false      // No destroy window on close (hide window)
  *
  *
  *  Version
@@ -538,7 +538,7 @@
     {
         var src_name = src.gobj_name();
         if(self.config.windows_pinpushed[src_name] ||
-                src.config.window_properties.without_destroy_window_on_minimize) {
+                src.config.window_properties.without_destroy_window_on_close) {
             // Only minimize
             src.config.$ui.hide();
         } else {
@@ -902,10 +902,14 @@
                     }
                 },
                 {
-                    view:"icon",
-                    hidden: self.config.window_properties.without_window_hidden_btn?true:false,
-                    icon:"far fa-window-minimize",
-                    tooltip: t("minimize"),
+                    view: "icon",
+                    hidden: self.config.window_properties.without_window_close_btn?true:false,
+                    icon: (self.config.pinpushed ||
+                            self.config.window_properties.without_destroy_window_on_close)?
+                        "far fa-window-minimize":"fas fa-times",
+                    tooltip: (self.config.pinpushed ||
+                            self.config.window_properties.without_destroy_window_on_close)?
+                        t("hide"):t("close"),
                     click: function() {
                         self.parent.gobj_send_event("EV_CLOSE_WINDOW", {}, self);
                     }
