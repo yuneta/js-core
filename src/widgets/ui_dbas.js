@@ -27,10 +27,10 @@
         info_no_wait: function() {},
 
         /*
-         *  remote_service: Remote service to ask data,
+         *  gobj_remote_yuno: Remote yuno to ask data,
          *  if it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
          */
-        remote_service: null,
+        gobj_remote_yuno: null,
         tranger_name: null,
 
         expanded: true,
@@ -114,21 +114,6 @@
             {
                 view: "button",
                 type: "icon",
-                icon: "fas fa-folder-tree",
-                autowidth: true,
-                css: "webix_transparent btn_icon_toolbar_16",
-                tooltip: t("TimeRanger"),
-                label: t("TimeRanger"),
-                click: function() {
-                    /*-----------------------------------------*
-                     *  Toggle panel view, "Container Panel"
-                     *-----------------------------------------*/
-                    toggle_container_panel(self.config.gobj_je_tranger);
-                }
-            },
-            {
-                view: "button",
-                type: "icon",
                 icon: "fas fa-project-diagram",
                 autowidth: true,
                 css: "webix_transparent btn_icon_toolbar_16",
@@ -155,6 +140,21 @@
                      *-----------------------------------------*/
                     toggle_container_panel(self.config.gobj_formtable_schema);
                 }
+            },
+            {
+                view: "button",
+                type: "icon",
+                icon: "fas fa-folder-tree",
+                autowidth: true,
+                css: "webix_transparent btn_icon_toolbar_16",
+                tooltip: t("TimeRanger"),
+                label: t("TimeRanger"),
+                click: function() {
+                    /*-----------------------------------------*
+                     *  Toggle panel view, "Container Panel"
+                     *-----------------------------------------*/
+                    toggle_container_panel(self.config.gobj_je_tranger);
+                }
             }
         ];
 
@@ -175,10 +175,10 @@
     /********************************************
      *
      ********************************************/
-    function send_command_to_remote_service(self, service, command, kw)
+    function send_command_to_remote_yuno(self, command, service, kw)
     {
-        if(!self.config.remote_service) {
-            log_error(self.gobj_short_name() + ": No remote_service defined");
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
             return;
         }
         var kw_req = {
@@ -191,7 +191,7 @@
 
         self.config.info_wait();
 
-        var ret = self.config.remote_service.gobj_command(
+        var ret = self.config.gobj_remote_yuno.gobj_command(
             command,
             kw_req,
             self
@@ -225,20 +225,18 @@
             self
         );
 
-        send_command_to_remote_service(
+        send_command_to_remote_yuno(
             self,
-            "__root__",
             "system-topic-schema",
+            "__root__",
             {
             }
         );
-        send_command_to_remote_service(
+        send_command_to_remote_yuno(
             self,
-            "__root__",
-            "get-2key-value",
+            "print-tranger",
+            self.config.tranger_name,
             {
-                key1: "tranger",
-                key2: self.config.tranger_name,
                 expanded: self.config.expanded,
                 lists_limit: self.config.lists_limit,
                 dicts_limit: self.config.dicts_limit
@@ -249,7 +247,7 @@
     /********************************************
      *
      ********************************************/
-    function process_get_2key_value(self, data, clear)
+    function process_print_tranger(self, data, clear)
     {
         self.config.tranger = data;
 
@@ -300,17 +298,17 @@
             return;
         }
         if(result < 0) {
-            log_error(comment);
+            info_user_error(comment);
             return;
         } else {
             if(comment) {
-                log_info(comment);
+                // log_info(comment); No pintes
             }
         }
 
         switch(__md_iev__.__command__) {
-            case "get-2key-value":
-                process_get_2key_value(self, data);
+            case "print-tranger":
+                process_print_tranger(self, data);
                 break;
 
             case "system-topic-schema":
@@ -323,10 +321,6 @@
 
             case "save-tranger-schema":
                 break;
-
-            case "get-2key-subvalue":
-//  TODO               process_get_2key_subvalue(self, data);
-//                 break;
 
             default:
                 log_error(self.gobj_short_name() + " Command unknown: " + __md_iev__.__command__);
@@ -375,7 +369,7 @@
             {
                 window_title: "Json View of " + kw.topic_name,
                 window_image: kw.image,
-                width: 800,
+                width: 900,
                 height: 600
             },
             __yuno__.__pinhold__
@@ -440,7 +434,7 @@
                 is_pinhold_window: true,
                 window_title: "Schema of " + kw.topic_name,
                 window_image: kw.image,
-                width: 800,
+                width: 950,
                 height: 600
             },
             __yuno__.__pinhold__
@@ -509,10 +503,10 @@
         /*
          *  save new_schema to backend
          */
-        send_command_to_remote_service(
+        send_command_to_remote_yuno(
             self,
-            "tranger",
             "save-tranger-schema",
+            self.config.tranger_name,
             {schema: new_schema}
         );
 
@@ -902,30 +896,6 @@
         );
 
         /*
-         *  Create TimeRanger
-         */
-        self.config.gobj_je_tranger = self.yuno.gobj_create_unique(
-            self.name + ".tr",
-            Je_viewer,
-            {
-                ui_properties: {
-                    gravity: 4,
-                    minWidth: 360,
-                    minHeight: 500
-                },
-
-                panel_properties: {
-                    with_panel_top_toolbar: true,
-                    with_panel_title: "Tranger JSON " + self.name,
-                    with_panel_hidden_btn: true,
-                    with_panel_fullscreen_btn: true,
-                    with_panel_resize_btn: true
-                }
-            },
-            self.config.gobj_container
-        );
-
-        /*
          *  Create Treedb Schema
          */
         self.config.gobj_tranger_viewer = self.yuno.gobj_create_unique(
@@ -975,6 +945,29 @@
             self.config.gobj_container
         );
 
+        /*
+         *  Create TimeRanger jsoneditor
+         */
+        self.config.gobj_je_tranger = self.yuno.gobj_create_unique(
+            self.name + ".tr",
+            Je_viewer,
+            {
+                ui_properties: {
+                    gravity: 4,
+                    minWidth: 360,
+                    minHeight: 500
+                },
+
+                panel_properties: {
+                    with_panel_top_toolbar: true,
+                    with_panel_title: "Tranger JSON " + self.name,
+                    with_panel_hidden_btn: true,
+                    with_panel_fullscreen_btn: true,
+                    with_panel_resize_btn: true
+                }
+            },
+            self.config.gobj_container
+        );
     }
 
     /************************************************
@@ -993,7 +986,7 @@
     {
         var self = this;
 
-        if(self.config.remote_service) {
+        if(self.config.gobj_remote_yuno) {
             refresh_tranger(self);
         }
     }

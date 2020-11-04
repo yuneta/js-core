@@ -1,7 +1,7 @@
 /***********************************************************************
  *          ui_gobj_tree_c.js
  *
- *          C Gobj's tree UI
+ *          C Gobj's tree UI (i.e. a yuno)
  *
  *
  *  Version
@@ -25,11 +25,10 @@
         info_no_wait: function() {},
 
         /*
-         *  remote_service: Remote service to ask data,
+         *  gobj_remote_yuno: Remote service to ask data,
          *  if it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
          */
-        remote_service: null,
-        tranger_name: null,
+        gobj_remote_yuno: null,
 
         gobj_container: null,
         gobj_je_gclass: null,
@@ -246,7 +245,7 @@
     /********************************************
      *
      ********************************************/
-    function send_command_to_remote_service(self, service, command, kw)
+    function send_command_to_remote_yuno(self, command, service, kw)
     {
         var kw_req = {
             service: service
@@ -256,8 +255,9 @@
         }
         msg_write_MIA_key(kw_req, "__command__", command);
 
-        info_user_warning(t("wait"), true);
-        __yuno__.__remote_service__.gobj_command(
+        self.config.info_wait();
+
+        self.config.gobj_remote_yuno.gobj_command(
             command,
             kw_req,
             self
@@ -288,7 +288,7 @@
             self
         );
 
-        send_command_to_remote_service(self, "__root__", "view-gobj-treedb");
+        send_command_to_remote_yuno(self, "view-gobj-treedb", "__root__");
     }
 
     /********************************************
@@ -303,7 +303,7 @@
             self
         );
 
-        send_command_to_remote_service(self, "__root__", "view-attrs2", {gobj_name:kw.id});
+        send_command_to_remote_yuno(self, "view-attrs2", "__root__", {gobj_name:kw.id});
     }
 
     /********************************************
@@ -318,8 +318,8 @@
             self
         );
 
-        send_command_to_remote_service(
-            self, "__root__", "view-gclass", {gclass_name:kw.gclass_name}
+        send_command_to_remote_yuno(
+            self, "view-gclass", "__root__", {gclass_name:kw.gclass_name}
         );
     }
 
@@ -396,7 +396,7 @@
     {
         var webix_msg = kw;
 
-        info_user("");
+        self.config.info_no_wait();
 
         try {
             var result = webix_msg.result;
@@ -405,14 +405,15 @@
             var data = webix_msg.data;
             var __md_iev__ = webix_msg.__md_iev__;
         } catch (e) {
-            log_error("" + e);
+            log_error(e);
             return;
         }
         if(result < 0) {
             info_user_error(comment);
+            return;
         } else {
             if(comment) {
-                info_user_warning(comment);
+                // log_info(comment); No pintes
             }
         }
 
