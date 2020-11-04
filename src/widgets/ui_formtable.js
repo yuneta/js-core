@@ -1187,7 +1187,6 @@
      ********************************************/
     function build_table(self)
     {
-        var title = self.config.title;
         var schema = self.config.schema;
 
         /*
@@ -1204,8 +1203,6 @@
          *  Bind form to table
          */
         $update.bind($table);
-//         $update.attachEvent("onBindRequest", function() {
-//         });
 
         /*
          *  Form create

@@ -18,6 +18,19 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        /*
+         *  Funciones que debe suministrar el padre
+         */
+        info_wait: function() {},
+        info_no_wait: function() {},
+
+        /*
+         *  remote_service: Remote service to ask data,
+         *  if it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
+         */
+        remote_service: null,
+        tranger_name: null,
+
         gobj_container: null,
         gobj_je_gclass: null,
         gobj_mx_gobj_tree: null,

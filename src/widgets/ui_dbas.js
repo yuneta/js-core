@@ -32,6 +32,7 @@
          */
         remote_service: null,
         tranger_name: null,
+
         expanded: true,
         lists_limit: 100,
         dicts_limit: 100,
