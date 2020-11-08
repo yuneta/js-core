@@ -89,6 +89,7 @@
             "top",
             "width",
             "height",
+            "pinpushed",
 
             ////// Particular /////
             "page_size"

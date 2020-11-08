@@ -70,6 +70,7 @@
             "top",
             "width",
             "height",
+            "pinpushed",
 
             ////// Particular /////
             "path",

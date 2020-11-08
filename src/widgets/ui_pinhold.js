@@ -10,6 +10,7 @@
         without_window_fullscreen_btn: false,       // Hide fullscreen button
         without_window_close_btn: false,            // Hide minimize/destroy button
         without_destroy_window_on_close: false      // No destroy window on close (hide window)
+        without_create_window_on_start: false,      // Don't create window on start
  *
  *
  *  Version
@@ -493,27 +494,27 @@
      ********************************************/
     function ac_toggle_window(self, event, kw, src)
     {
-        var pinpushed;
-
         if(!src.gobj_is_unique() || !self.gobj_is_unique()) {
             return false; // Self and src must be unique to be pinpushed
         }
 
         var src_name = src.gobj_name();
         if(self.config.windows_pinpushed[src_name]) {
-            pinpushed = false;
+            src.config.pinpushed = false;
             // Delete from pinhold handler
             delete self.config.windows_pinpushed[src_name];
             src.gobj_remove_persistent_attrs();
             del_icon(self, src_name);
 
         } else {
-            pinpushed = true;
+            src.config.pinpushed = true;
             // Add self to pinhold handler
             self.config.windows_pinpushed[src_name] = {
                 gobj_name: src.gobj_name(),
                 gclass_name: src.gobj_gclass_name(),
-                window_image: kw.window_image
+                window_image: kw.window_image,
+                without_create_window_on_start:
+                    src.config.window_properties.without_create_window_on_start?true:false
             }
             src.gobj_save_persistent_attrs();
 
@@ -523,7 +524,7 @@
 
         manage_pinhold_button(self);
 
-        return pinpushed;
+        return src.config.pinpushed;
     }
 
     /********************************************
@@ -794,17 +795,26 @@
             var gclass_name = self.config.windows_pinpushed[key].gclass_name;
             var gobj_name = self.config.windows_pinpushed[key].gobj_name;
             var image = self.config.windows_pinpushed[key].window_image;
-
-            self.yuno.gobj_create_unique(
-                gobj_name,
-                gobj_find_gclass(gclass_name, true),
-                {
-                    pinpushed: true
-                },
-                self
-            );
-
-            add_icon(self, gobj_name, image);
+            var no_create = self.config.windows_pinpushed[key].without_create_window_on_start;
+            var add = true;
+            if(!no_create) {
+                try {
+                    self.yuno.gobj_create_unique(
+                        gobj_name,
+                        gobj_find_gclass(gclass_name, true),
+                        {
+                            pinpushed: true
+                        },
+                        self
+                    );
+                } catch (e) {
+                    add = false;
+                    log_error(e);
+                }
+            }
+            if(add) {
+                add_icon(self, gobj_name, image);
+            }
         }
         manage_pinhold_button(self);
     }
