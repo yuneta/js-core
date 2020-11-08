@@ -850,8 +850,10 @@
                 case "hook":
                 case "fkey":
                     // TODO
+                    break;
+
                 default:
-                    log_error("col type unknown:" + type);
+                    log_error("col type unknown 1: " + type);
                     break;
             }
             if(tranger_col.template) {
@@ -1108,8 +1110,10 @@
                 case "hook":
                 case "fkey":
                     // TODO
+                    break;
+
                 default:
-                    log_error("col type unknown: " + type);
+                    log_error("col type unknown 2: " + type);
                     break;
             }
             if(webix_element) {
@@ -1298,15 +1302,17 @@
                     case "list":
                         break;
                     default:
-                        log_error("col type unknown: " + real_type);
+                        log_error("col type unknown 3: " + real_type);
                         break;
                 }
                 break;
             case "hook":
             case "fkey":
                 // TODO
+                break;
+
             default:
-                log_error("col type unknown:" + type);
+                log_error("col type unknown 4: " + type);
                 break;
         }
 
