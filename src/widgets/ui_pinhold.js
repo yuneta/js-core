@@ -857,7 +857,8 @@
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
-            id: build_name(self, "pinhold_window_top_toolbar"), // HACK build_name() is from here
+            // HACK build_name() is from this file
+            id: build_name(self, "pinhold_window_top_toolbar"),
             css: "toolbar2color",
             height: 30,
             cols: [
@@ -887,6 +888,19 @@
                             this.define("image", "/static/app/images/yuneta/pin.svg");
                         }
                         this.refresh();
+
+                        var $close_btn = $$(build_name(self, "pinhold_window_top_toolbar-close"));
+                        $close_btn.define("icon",
+                            (self.config.pinpushed ||
+                            self.config.window_properties.without_destroy_window_on_close)?
+                            "far fa-window-minimize":"fas fa-times"
+                        );
+                        $close_btn.define("tooltip",
+                            (self.config.pinpushed ||
+                            self.config.window_properties.without_destroy_window_on_close)?
+                            t("hide"):t("close")
+                        );
+                        $close_btn.refresh();
                     }
                 },
                 {gravity: 1},
@@ -913,7 +927,11 @@
                 },
                 {
                     view: "icon",
+                    // HACK build_name() is from this file
+                    id: build_name(self, "pinhold_window_top_toolbar-close"),
                     hidden: self.config.window_properties.without_window_close_btn?true:false,
+
+                    // HACK repeated above
                     icon: (self.config.pinpushed ||
                             self.config.window_properties.without_destroy_window_on_close)?
                         "far fa-window-minimize":"fas fa-times",
