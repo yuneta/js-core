@@ -14,6 +14,7 @@
 webix.protoUI({
     name: "mxgraph",
     defaults: {
+        editor: false,
         events: [],
         gobj: null
     },
@@ -36,8 +37,16 @@ webix.protoUI({
     },
 
     render: function() {
-        // Create the graph
-        this._mxgraph = new mxGraph(this._contentobj);
+        if(this.config.editor) {
+            // Sets the graph container and configures the editor
+            this._mxeditor = new mxEditor();
+            this._mxeditor.setGraphContainer(this._contentobj);
+            this._mxgraph = this._mxeditor.graph;
+        } else {
+            // Create the graph
+            this._mxgraph = new mxGraph(this._contentobj);
+        }
+
         this._mxgraph.gobj = this.config.gobj;
         this._events = [
             mxEvent.ROOT,
@@ -104,6 +113,10 @@ webix.protoUI({
 
     getMxgraph: function() {
         return this._mxgraph;
+    },
+
+    getEditor: function() {
+        return this._mxeditor;
     },
 
     getContainer: function() {
