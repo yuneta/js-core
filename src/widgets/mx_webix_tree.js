@@ -475,8 +475,8 @@
         var style = [];
         style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
         style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-        style[mxConstants.STYLE_STROKECOLOR] = 'gray';
         style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_STROKECOLOR] = 'gray';
         style[mxConstants.STYLE_FILLCOLOR] = '#D2E3EF';
         style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
         style[mxConstants.STYLE_FONTCOLOR] = '#774400';
