@@ -6,11 +6,11 @@
  *
  *  window_properties: all values are false by default
 
-        without_window_pin_btn: false,              // Hide pin button
-        without_window_fullscreen_btn: false,       // Hide fullscreen button
-        without_window_close_btn: false,            // Hide minimize/destroy button
-        without_destroy_window_on_close: false      // No destroy window on close (hide window)
-        without_create_window_on_start: false,      // Don't create window on start
+        without_window_pin_btn: false,          // true: Hide pin button
+        without_window_fullscreen_btn: false,   // true: Hide fullscreen button
+        without_window_close_btn: false,        // true: Hide minimize/destroy button
+        without_destroy_window_on_close: false, // true: No destroy window on close (hide)
+        without_create_window_on_start: false,  // true: Don't create window on start
  *
  *
  *  Version

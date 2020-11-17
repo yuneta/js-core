@@ -48,10 +48,10 @@
         schema: null,
         webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
+        list_mode_enabled: true,
         update_mode_enabled: false,
         create_mode_enabled: false,
         delete_mode_enabled: false,
-        delete_record_event_name: "EV_DELETE_RECORD", // TODO
         fields_enabled: null,
         hide_private_fields: false,
         with_drag: false,
@@ -141,22 +141,41 @@
         /*---------------------------------------*
          *      Particular UI code
          *---------------------------------------*/
-        var segmented_tooltip = t("list");
+        var segmented_tooltip = "";
+
+        if(self.config.list_mode_enabled) {
+            if(segmented_tooltip) {
+                segmented_tooltip += " | ";
+            }
+            segmented_tooltip += t("list");
+        }
         if(self.config.update_mode_enabled) {
-            segmented_tooltip += " | " + t("update");
+            if(segmented_tooltip) {
+                segmented_tooltip += " | ";
+            }
+            segmented_tooltip += t("update");
         }
         if(self.config.create_mode_enabled) {
-            segmented_tooltip += " | " + t("create");
+            if(segmented_tooltip) {
+                segmented_tooltip += " | ";
+            }
+            segmented_tooltip += t("create");
         }
 
         var segmented_size = 60;
         var show_segmented = false;
-        var segmented_options = [
-            {
-                id: "list",
-                value: "<span style='font-size:22px;' class='fal fa-table'>&nbsp;</span>"
-            }
-        ];
+        var segmented_options = [];
+
+        if(self.config.list_mode_enabled) {
+            show_segmented = true;
+            segmented_size += 60;
+            segmented_options.push(
+                {
+                    id: "list",
+                    value: "<span style='font-size:22px;' class='fal fa-table'>&nbsp;</span>"
+                }
+            );
+        }
         if(self.config.update_mode_enabled) {
             show_segmented = true;
             segmented_size += 60;
