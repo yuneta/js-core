@@ -1234,9 +1234,19 @@
         var $create = build_create_form(self, schema);
 
         /*
-         *  Set table mode
+         *  Set mode
          */
-        self.gobj_send_event("EV_LIST_MODE", {}, self);
+
+        if(self.config.list_mode_enabled) {
+            self.gobj_send_event("EV_LIST_MODE", {}, self);
+        } else if(self.config.update_mode_enabled) {
+            self.gobj_send_event("EV_UPDATE_MODE", {}, self);
+        } else if(self.config.create_mode_enabled) {
+            self.gobj_send_event("EV_CREATE_MODE", {}, self);
+        } else {
+            log_error("No mode in " + self.gobj_short_name());
+            self.gobj_send_event("EV_LIST_MODE", {}, self);
+        }
     }
 
     /********************************************
