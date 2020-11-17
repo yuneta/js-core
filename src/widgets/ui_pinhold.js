@@ -850,7 +850,7 @@
     //=======================================================================
     //      Common code for pinhold panels
     //=======================================================================
-    function get_pinhold_window_top_toolbar(self)
+    function get_pinhold_window_top_toolbar(gobj_window)
     {
         /*------------------------------------------*
          *      Top Toolbar of "Pinhold Window"
@@ -858,27 +858,27 @@
         var top_toolbar = {
             view:"toolbar",
             // HACK build_name() is from this file
-            id: build_name(self, "pinhold_window_top_toolbar"),
+            id: build_name(gobj_window, "pinhold_window_top_toolbar"),
             css: "toolbar2color",
             height: 30,
             cols: [
                 {
                     view: "button",
-                    hidden: self.config.window_properties.without_window_pin_btn?true:false,
+                    hidden: gobj_window.config.window_properties.without_window_pin_btn?true:false,
                     type: "image",
                     width: 40,
-                    image: self.config.pinpushed?
+                    image: gobj_window.config.pinpushed?
                         "/static/app/images/yuneta/pin-push.svg":
                         "/static/app/images/yuneta/pin.svg",
                     css: "webix_transparent btn_icon_toolbar_16",
                     tooltip: t("Pin the window"),
                     click: function() {
-                        var pinpushed = self.parent.gobj_send_event(
+                        var pinpushed = gobj_window.parent.gobj_send_event(
                             "EV_TOGGLE_WINDOW",
                             {
-                                window_image: self.config.window_image
+                                window_image: gobj_window.config.window_image
                             },
-                            self
+                            gobj_window
                         );
                         if(pinpushed) {
                             // Pin push on
@@ -889,15 +889,15 @@
                         }
                         this.refresh();
 
-                        var $close_btn = $$(build_name(self, "pinhold_window_top_toolbar-close"));
+                        var $close_btn = $$(build_name(gobj_window, "pinhold_window_top_toolbar-close"));
                         $close_btn.define("icon",
-                            (self.config.pinpushed ||
-                            self.config.window_properties.without_destroy_window_on_close)?
+                            (gobj_window.config.pinpushed ||
+                            gobj_window.config.window_properties.without_destroy_window_on_close)?
                             "far fa-window-minimize":"fas fa-times"
                         );
                         $close_btn.define("tooltip",
-                            (self.config.pinpushed ||
-                            self.config.window_properties.without_destroy_window_on_close)?
+                            (gobj_window.config.pinpushed ||
+                            gobj_window.config.window_properties.without_destroy_window_on_close)?
                             t("hide"):t("close")
                         );
                         $close_btn.refresh();
@@ -907,39 +907,39 @@
                 {
                     view: "label",
                     gravity: 20,
-                    label: self.config.window_title
+                    label: gobj_window.config.window_title
                 },
                 {gravity: 1},
                 {
                     view:"icon",
-                    hidden: self.config.window_properties.without_window_fullscreen_btn?true:false,
+                    hidden: gobj_window.config.window_properties.without_window_fullscreen_btn?true:false,
                     icon: "fas fa-expand-wide",
                     tooltip: t("fullscreen"),
                     click: function() {
-                        self.parent.gobj_send_event(
+                        gobj_window.parent.gobj_send_event(
                             "EV_SET_FULLSCREEN",
                             {
-                                title: self.config.window_title
+                                title: gobj_window.config.window_title
                             },
-                            self
+                            gobj_window
                         );
                     }
                 },
                 {
                     view: "icon",
                     // HACK build_name() is from this file
-                    id: build_name(self, "pinhold_window_top_toolbar-close"),
-                    hidden: self.config.window_properties.without_window_close_btn?true:false,
+                    id: build_name(gobj_window, "pinhold_window_top_toolbar-close"),
+                    hidden: gobj_window.config.window_properties.without_window_close_btn?true:false,
 
                     // HACK repeated above
-                    icon: (self.config.pinpushed ||
-                            self.config.window_properties.without_destroy_window_on_close)?
+                    icon: (gobj_window.config.pinpushed ||
+                            gobj_window.config.window_properties.without_destroy_window_on_close)?
                         "far fa-window-minimize":"fas fa-times",
-                    tooltip: (self.config.pinpushed ||
-                            self.config.window_properties.without_destroy_window_on_close)?
+                    tooltip: (gobj_window.config.pinpushed ||
+                            gobj_window.config.window_properties.without_destroy_window_on_close)?
                         t("hide"):t("close"),
                     click: function() {
-                        self.parent.gobj_send_event("EV_CLOSE_WINDOW", {}, self);
+                        gobj_window.parent.gobj_send_event("EV_CLOSE_WINDOW", {}, gobj_window);
                     }
                 }
             ]

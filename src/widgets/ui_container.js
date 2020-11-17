@@ -622,87 +622,111 @@
         gobj_panel.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, gobj_panel);
     }
 
-    function get_container_panel_top_toolbar(self)
+    function get_container_panel_top_toolbar(gobj_panel)
     {
         /*------------------------------------------*
          *      Top Toolbar of "Container Panel"
          *------------------------------------------*/
         var top_toolbar = {
             view:"toolbar",
-            id: build_name(self, "ct_panel_top_toolbar"), // HACK build_name() es el de aquí
-            hidden: self.config.panel_properties.with_panel_top_toolbar?false:true,
+            id: build_name(gobj_panel, "ct_panel_top_toolbar"), // HACK build_name() es el de aquí
+            hidden: gobj_panel.config.panel_properties.with_panel_top_toolbar?false:true,
             css: "toolbar2color",
             height: 30,
             cols: [
                 {
                     view:"icon",
-                    hidden: self.config.panel_properties.with_panel_resize_btn?false:true,
+                    hidden: gobj_panel.config.panel_properties.with_panel_resize_btn?false:true,
                     icon: "far fa-expand-alt",
                     tooltip: t("enlarge"),
                     click: function() {
-                        var gravity = self.config.$ui.config.gravity;
-                        gravity++;
-                        self.config.ui_properties["gravity"] = gravity;
+                        if(gobj_panel.parent.config.mode == "horizontal") {
+                            var gravity = gobj_panel.config.$ui.config.gravity;
+                            gravity++;
+                            gobj_panel.config.ui_properties["gravity"] = gravity;
 
-                        self.config.$ui.define({gravity:gravity});
-                        if(self.config.$ui.refresh) {
-                            self.config.$ui.refresh();
-                        } else if(self.config.$ui.resize) {
-                            self.config.$ui.resize();
+                            gobj_panel.config.$ui.define({gravity:gravity});
+                            if(gobj_panel.config.$ui.refresh) {
+                                gobj_panel.config.$ui.refresh();
+                            } else if(gobj_panel.config.$ui.resize) {
+                                gobj_panel.config.$ui.resize();
+                            }
+                        } else {
+                            var height = gobj_panel.config.$ui.$height;
+                            height += 40;
+                            gobj_panel.config.$ui.define({height:height});
+                            if(gobj_panel.config.$ui.resize) {
+                                gobj_panel.config.$ui.resize();
+                            } else if(gobj_panel.config.$ui.refresh) {
+                                gobj_panel.config.$ui.refresh();
+                            }
                         }
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                        gobj_panel.parent.gobj_send_event("EV_REFRESH", {}, gobj_panel);
                     }
                 },
                 {
                     view:"icon",
-                    hidden: self.config.panel_properties.with_panel_resize_btn?false:true,
+                    hidden: gobj_panel.config.panel_properties.with_panel_resize_btn?false:true,
                     icon: "far fa-compress-alt",
                     tooltip: t("narrow"),
                     click: function() {
-                        var gravity = self.config.$ui.config.gravity;
-                        gravity--;
+                        if(gobj_panel.parent.config.mode == "horizontal") {
+                            var gravity = gobj_panel.config.$ui.config.gravity;
+                            gravity--;
 
-                        if(gravity>0) {
-                            self.config.ui_properties["gravity"] = gravity;
-                            self.config.$ui.define({gravity:gravity});
-                            if(self.config.$ui.refresh) {
-                                self.config.$ui.refresh();
-                            } else if(self.config.$ui.resize) {
-                                self.config.$ui.resize();
+                            if(gravity>0) {
+                                gobj_panel.config.ui_properties["gravity"] = gravity;
+                                gobj_panel.config.$ui.define({gravity:gravity});
+                                if(gobj_panel.config.$ui.refresh) {
+                                    gobj_panel.config.$ui.refresh();
+                                } else if(gobj_panel.config.$ui.resize) {
+                                    gobj_panel.config.$ui.resize();
+                                }
+                            }
+                        } else {
+                            var height = gobj_panel.config.$ui.$height;
+                            height -= 40;
+                            if(height > 100) {
+                                gobj_panel.config.$ui.define({height:height});
+                                if(gobj_panel.config.$ui.resize) {
+                                    gobj_panel.config.$ui.resize();
+                                } else if(gobj_panel.config.$ui.refresh) {
+                                    gobj_panel.config.$ui.refresh();
+                                }
                             }
                         }
-                        self.parent.gobj_send_event("EV_REFRESH", {}, self);
+                        gobj_panel.parent.gobj_send_event("EV_REFRESH", {}, gobj_panel);
                     }
                 },
                 {gravity:1},
                 {
                     view: "label",
                     gravity: 10,
-                    hidden: self.config.panel_properties.with_panel_title?false:true,
-                    label: self.config.panel_properties.with_panel_title?
-                        self.config.panel_properties.with_panel_title:"",
+                    hidden: gobj_panel.config.panel_properties.with_panel_title?false:true,
+                    label: gobj_panel.config.panel_properties.with_panel_title?
+                        gobj_panel.config.panel_properties.with_panel_title:"",
                     click: function() {
                     }
                 },
                 {gravity:1},
                 {
                     view:"icon",
-                    hidden: self.config.panel_properties.with_panel_fullscreen_btn?false:true,
+                    hidden: gobj_panel.config.panel_properties.with_panel_fullscreen_btn?false:true,
                     icon: "fas fa-expand-wide",
                     tooltip: t("fullscreen"),
                     click: function() {
-                        self.parent.gobj_send_event(
+                        gobj_panel.parent.gobj_send_event(
                             "EV_SET_FULLSCREEN",
                             {
-                                title: self.config.panel_properties.with_panel_title
+                                title: gobj_panel.config.panel_properties.with_panel_title
                             },
-                            self
+                            gobj_panel
                         );
                     }
                 },
                 {
                     view:"icon",
-                    hidden: self.config.panel_properties.with_panel_hidden_btn?false:true,
+                    hidden: gobj_panel.config.panel_properties.with_panel_hidden_btn?false:true,
                     icon:"far fa-window-minimize",
                     tooltip: t("minimize"),
                     click: function() {
@@ -714,7 +738,7 @@
                         /*----------------------------------------------*
                          *  Inform of view state to "Container Panel"
                          *----------------------------------------------*/
-                        self.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, self);
+                        gobj_panel.parent.gobj_send_event("EV_ON_VIEW_SHOW", {}, gobj_panel);
                     }
                 }
             ]
