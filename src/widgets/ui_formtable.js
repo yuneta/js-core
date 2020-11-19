@@ -15,6 +15,7 @@
  *  1.0     Initial release
  *  1.1     Convert to Mix Panel/Window
  *  1.2     Public name of datable in self.config.webix_datatable_id
+ *  1.3     Add user_data attribute, set initial mode
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -44,6 +45,7 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
+        user_data: null,
         topic_name: null,
         schema: null,
         webix_datatable_id: null,   // webix public id of datatable
@@ -52,6 +54,7 @@
         update_mode_enabled: false,
         create_mode_enabled: false,
         delete_mode_enabled: false,
+        current_mode: null,
         fields_enabled: null,
         hide_private_fields: false,
         with_drag: false,
@@ -73,7 +76,6 @@
 
         _writable_fields: null, // automatic built
 
-        current_mode: null,
         page_size: 0,
         page: 0,            // current page
         record_idx: 0,      // current idx of selected record
@@ -138,6 +140,22 @@
      ************************************************************/
     function build_webix(self)
     {
+        /*
+         *  Set initial mode
+         */
+        if(!self.config.current_mode) {
+            if(self.config.list_mode_enabled) {
+                self.config.current_mode = "list";
+            } else if(self.config.update_mode_enabled) {
+                self.config.current_mode = "update";
+            } else if(self.config.create_mode_enabled) {
+                self.config.current_mode = "create";
+            } else {
+                log_error("No mode in " + self.gobj_short_name());
+                self.config.current_mode = "list";
+            }
+        }
+
         /*---------------------------------------*
          *      Particular UI code
          *---------------------------------------*/
@@ -213,7 +231,7 @@
                         view: "segmented",
                         id: build_name(self, "segmented"),
                         width: segmented_size,
-                        value: "list",
+                        value: self.config.current_mode,
                         hidden: show_segmented?false:true,
                         tooltip: segmented_tooltip,
                         options: segmented_options,
@@ -1233,19 +1251,16 @@
          */
         var $create = build_create_form(self, schema);
 
-        /*
-         *  Set mode
-         */
-
-        if(self.config.list_mode_enabled) {
-            self.gobj_send_event("EV_LIST_MODE", {}, self);
-        } else if(self.config.update_mode_enabled) {
-            self.gobj_send_event("EV_UPDATE_MODE", {}, self);
-        } else if(self.config.create_mode_enabled) {
-            self.gobj_send_event("EV_CREATE_MODE", {}, self);
-        } else {
-            log_error("No mode in " + self.gobj_short_name());
-            self.gobj_send_event("EV_LIST_MODE", {}, self);
+        switch(self.config.current_mode) {
+            case "update":
+                self.gobj_send_event("EV_UPDATE_MODE", {}, self);
+                break;
+            case "create":
+                self.gobj_send_event("EV_CREATE_MODE", {}, self);
+                break;
+            default:
+                self.gobj_send_event("EV_LIST_MODE", {}, self);
+                break;
         }
     }
 
