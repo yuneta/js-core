@@ -81,10 +81,10 @@
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
 
-    /*
+    /************************************************************
      *  Update a dict with another dict: ONLY existing items!! (NOT recursive)
      *  Like json_object_update_existing()
-     */
+     ************************************************************/
     function __update_dict__(destination, source) {
         'use strict';
         for (var property in source) {
@@ -95,11 +95,11 @@
         return destination;
     }
 
-    /*
+    /************************************************************
      *  Extend a dict with another dict (NOT recursive),
      *  adding new keys and overwriting existing keys.
      *  Like json_object_update()
-     */
+     ************************************************************/
     function __extend_dict__(destination, source) {
         'use strict';
         for (var property in source) {
@@ -110,10 +110,10 @@
         return destination;
     }
 
-    /*
+    /************************************************************
      *  Update a dict with another dict: ONLY missing items!! (NOT recursive)
      *  Like json_object_update_missing()
-     */
+     ************************************************************/
     function json_object_update_missing(destination, source) {
         'use strict';
         for (var property in source) {
@@ -124,13 +124,27 @@
         return destination;
     }
 
-    /**
+    /************************************************************
+     *
+     ************************************************************/
+    function array_real_length(list)
+    {
+        var ln = 0;
+        for(var i in list) {
+            if(list.hasOwnProperty(i)) {
+                ln++;
+            }
+        }
+        return ln;
+    }
+
+    /************************************************************
      * Finds the index of the element in the array.
      *
      * @param {Function} elm Element to look for.
      * @param {Function[]} list Array to search through.
      * @return {Number} Index of the specified elm, -1 if not found
-     */
+     ************************************************************/
     function index_of_list(elm, list) {
         'use strict';
         // Existence of a native index
@@ -1757,6 +1771,7 @@
     exports.__extend_dict__ = __extend_dict__;
     exports.json_object_update = __extend_dict__;
     exports.json_object_update_missing = json_object_update_missing;
+    exports.array_real_length = array_real_length;
     exports.index_of_list = index_of_list;
     exports.elm_in_list = elm_in_list;
     exports.index_in_list = index_in_list;

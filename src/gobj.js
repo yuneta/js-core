@@ -1417,7 +1417,7 @@ __inside_event_loop__ = 0;
         var event_id = fsm.event_index[event] || 0;
         if (event_id <= 0) {
             try {
-                var kw_ = JSON.stringify(kw);
+                var kw_ = JSON.stringify(__duplicate__(kw));
             } catch (e) {
                 kw_ = kw;
             }
