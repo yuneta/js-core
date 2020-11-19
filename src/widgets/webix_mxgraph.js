@@ -64,7 +64,6 @@ webix.protoUI({
             mxEvent.SIZE,
             mxEvent.SELECT,
             mxEvent.FIRED,
-            mxEvent.FIRE_MOUSE_EVENT, // WARNING too much events
             mxEvent.GESTURE,
             mxEvent.TAP_AND_HOLD,
             mxEvent.GET,
@@ -135,7 +134,8 @@ webix.protoUI({
             mxEvent.ESCAPE,
             mxEvent.DOUBLE_CLICK,
             mxEvent.START,
-            mxEvent.RESET
+            mxEvent.RESET,
+            mxEvent.FIRE_MOUSE_EVENT  // WARNING too much events
         ];
 
         var model = this._mxgraph.getModel();
@@ -148,9 +148,16 @@ webix.protoUI({
             if(elm_in_list(ev, this._events)) {
                 this._mxgraph.addListener(ev, function(sender, evt) {
                     var gobj = sender.gobj;
+                    var properties = evt.getProperties(); // HACK associative array, merde!!!
+                    var kw = {};
+                    for(var k in properties) {
+                        if(properties.hasOwnProperty(k)) {
+                            kw[k] = properties[k];
+                        }
+                    }
                     gobj.gobj_send_event(
-                        "MX_" + evt.name,
-                        evt,
+                        "EV_MX_" + evt.name.toUpperCase(),
+                        kw,
                         gobj
                     );
                 });
