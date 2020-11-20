@@ -14,6 +14,7 @@
 webix.protoUI({
     name: "mxgraph",
     defaults: {
+        all_events: false,
         events: [],
         gobj: null
     },
@@ -143,9 +144,9 @@ webix.protoUI({
             log_error("mxGraph beginUpdate/endUpdate NEGATIVE: " + model.updateLevel);
         }
 
-        for(var i=0; i<this.config.events.length; i++) {
-            var ev = this.config.events[i];
-            if(elm_in_list(ev, this._events)) {
+        if(this.config.all_events) {
+            for(var i=0; i<this._events.length-1; i++) {
+                var ev = this._events[i];
                 this._mxgraph.addListener(ev, function(sender, evt) {
                     var gobj = sender.gobj;
                     var properties = evt.getProperties(); // HACK associative array, merde!!!
@@ -161,6 +162,27 @@ webix.protoUI({
                         gobj
                     );
                 });
+            }
+        } else {
+            for(var i=0; i<this.config.events.length; i++) {
+                var ev = this.config.events[i];
+                if(elm_in_list(ev, this._events)) {
+                    this._mxgraph.addListener(ev, function(sender, evt) {
+                        var gobj = sender.gobj;
+                        var properties = evt.getProperties(); // HACK associative array, merde!!!
+                        var kw = {};
+                        for(var k in properties) {
+                            if(properties.hasOwnProperty(k)) {
+                                kw[k] = properties[k];
+                            }
+                        }
+                        gobj.gobj_send_event(
+                            "EV_MX_" + evt.name.toUpperCase(),
+                            kw,
+                            gobj
+                        );
+                    });
+                }
             }
         }
     },
