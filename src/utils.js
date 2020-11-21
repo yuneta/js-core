@@ -897,7 +897,7 @@
 
     /*
      *  From a dict,
-     *  get a new list with the same objects with only attributes in keylist
+     *  get a new dict with the same objects with only attributes in keylist
      *  keylist can be a [s,...] of {s:..., ...}
      */
     function filter_dict(dict, keylist)
