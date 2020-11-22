@@ -218,13 +218,13 @@
         var navigation_toolbar = {
             view: "scrollview",
             height: 50,
-            scroll: "auto",
+            scroll: "x",
             hidden: self.config.with_navigation_toolbar?false:true,
             body: {
                 view: "toolbar",
                 css: "toolbar2color",
                 elementsConfig: {
-                    height: 45
+                    height: 40
                 },
                 cols: [
                     {
@@ -544,7 +544,7 @@
                         scroll:true,
                         elementsConfig: {
                             labelAlign:"left",
-                            labelWidth: 160
+                            labelWidth: 140
                         },
                         elements: [],
                         on: {
@@ -802,11 +802,13 @@
             if(self.config.with_footer) {
                 if(i==0) {
                     webix_col.footer = {
-                        content: "countColumn"
+                        content: "countColumn",
+                        height: 25
                     };
                 } else if(i==1) {
                     webix_col.footer = {
-                        text: t("records")
+                        text: t("records"),
+                        height: 25
                     };
                 }
             }
