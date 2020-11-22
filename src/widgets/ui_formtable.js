@@ -415,7 +415,7 @@
         var update_toolbar = {
             view: "toolbar",
             id: build_name(self, "update_toolbar"),
-            width: 50,
+            width: 40,
             css: "toolbar2color",
             rows: [
                 {
@@ -448,7 +448,7 @@
         var create_toolbar = {
             view: "toolbar",
             id: build_name(self, "create_toolbar"),
-            width: 50,
+            width: 40,
             css: "toolbar2color",
             rows: [
                 {
