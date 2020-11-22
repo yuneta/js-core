@@ -939,6 +939,9 @@
                             gobj_window.config.window_properties.without_destroy_window_on_close)?
                         t("hide"):t("close"),
                     click: function() {
+                        if(gobj_window.gobj_event_in_input_event_list("EV_CLOSE_WINDOW")) {
+                            gobj_window.gobj_send_event("EV_CLOSE_WINDOW", {}, gobj_window);
+                        }
                         gobj_window.parent.gobj_send_event("EV_CLOSE_WINDOW", {}, gobj_window);
                     }
                 }

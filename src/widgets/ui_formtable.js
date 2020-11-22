@@ -15,7 +15,8 @@
  *  1.0     Initial release
  *  1.1     Convert to Mix Panel/Window
  *  1.2     Public name of datable in self.config.webix_datatable_id
- *  1.3     Add user_data attribute, set initial mode
+ *  1.3     Add user_data attribute
+ *          Set initial mode
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -1799,6 +1800,15 @@
     }
 
     /********************************************
+     *  Pinhold to inform of window close
+     ********************************************/
+    function ac_close_window(self, event, kw, src)
+    {
+        self.gobj_publish_event(event, kw, self);
+        return 0;
+    }
+
+    /********************************************
      *
      ********************************************/
     function ac_toggle(self, event, kw, src)
@@ -1808,6 +1818,7 @@
         } else {
             self.config.$ui.show();
         }
+        return 0;
     }
 
     /********************************************
@@ -1816,6 +1827,7 @@
     function ac_show(self, event, kw, src)
     {
         self.config.$ui.show();
+        return 0;
     }
 
     /********************************************
@@ -1824,6 +1836,7 @@
     function ac_hide(self, event, kw, src)
     {
         self.config.$ui.hide();
+        return 0;
     }
 
     /********************************************
@@ -1876,6 +1889,7 @@
             "EV_DELETE_RECORD: output",
             "EV_REFRESH_TABLE: output",
             "EV_ROW_CHECKED: output",
+            "EV_CLOSE_WINDOW: output",
 
             "EV_UNDO_RECORD",
             "EV_DISCARD_RECORD",
@@ -1926,6 +1940,7 @@
                 ["EV_RECORD_BY_ID",             ac_record_by_id,            undefined],
                 ["EV_PAGE",                     ac_page,                    undefined],
                 ["EV_REBUILD_TABLE",            ac_rebuild_table,           undefined],
+                ["EV_CLOSE_WINDOW",             ac_close_window,            undefined],
                 ["EV_TOGGLE",                   ac_toggle,                  undefined],
                 ["EV_SHOW",                     ac_show,                    undefined],
                 ["EV_HIDE",                     ac_hide,                    undefined],
