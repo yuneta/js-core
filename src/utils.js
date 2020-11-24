@@ -73,7 +73,9 @@
         if (obj instanceof Object) {
             copy = {};
             for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) copy[attr] = __duplicate__(obj[attr]);
+                if (obj.hasOwnProperty(attr)) {
+                    copy[attr] = __duplicate__(obj[attr]);
+                }
             }
             return copy;
         }
