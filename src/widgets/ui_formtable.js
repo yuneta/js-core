@@ -1801,6 +1801,10 @@
 
     /********************************************
      *  Pinhold to inform of window close
+     *  Publish
+     *  kw
+     *      {destroying: true}   Window destroying
+     *      {destroying: false}  Window minifying
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {

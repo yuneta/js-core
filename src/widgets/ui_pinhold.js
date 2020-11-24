@@ -540,10 +540,18 @@
         var src_name = src.gobj_name();
         if(self.config.windows_pinpushed[src_name] ||
                 src.config.window_properties.without_destroy_window_on_close) {
+
+            if(src.gobj_event_in_input_event_list("EV_CLOSE_WINDOW")) {
+                src.gobj_send_event("EV_CLOSE_WINDOW", {destroying:false}, self);
+            }
+
             // Only minimize
             src.config.$ui.hide();
         } else {
             // Destroy
+            if(src.gobj_event_in_input_event_list("EV_CLOSE_WINDOW")) {
+                src.gobj_send_event("EV_CLOSE_WINDOW", {destroying:true}, self);
+            }
             __yuno__.gobj_destroy(src); // deleted from windows_pinpushed in mt_destroy()
             manage_pinhold_button(self);
         }
@@ -939,9 +947,6 @@
                             gobj_window.config.window_properties.without_destroy_window_on_close)?
                         t("hide"):t("close"),
                     click: function() {
-                        if(gobj_window.gobj_event_in_input_event_list("EV_CLOSE_WINDOW")) {
-                            gobj_window.gobj_send_event("EV_CLOSE_WINDOW", {}, gobj_window);
-                        }
                         gobj_window.parent.gobj_send_event("EV_CLOSE_WINDOW", {}, gobj_window);
                     }
                 }
