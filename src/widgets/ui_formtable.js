@@ -426,10 +426,7 @@
                     tooltip: t("update record"),
                     click: function() {
                         var $form = $$(build_name(self, "update_form"));
-                        var changed = $form.isDirty();
-                        if(changed) {
-                            self.gobj_send_event("EV_UPDATE_RECORD", $form.getValues(), self);
-                        }
+                        self.gobj_send_event("EV_UPDATE_RECORD", $form.getValues(), self);
                     }
                 },
                 {
@@ -459,10 +456,7 @@
                     tooltip: t("save record"),
                     click: function() {
                         var $new = $$(build_name(self, "create_form"));
-                        var changed = $new.isDirty();
-                        if(changed) {
-                            self.gobj_send_event("EV_CREATE_RECORD", $new.getValues(), self);
-                        }
+                        self.gobj_send_event("EV_CREATE_RECORD", $new.getValues(), self);
                     }
                 },
                 {
@@ -557,6 +551,9 @@
                                     btn = $$(build_name(self, "undo_record"));
                                     webix.html.addCss(btn.getNode(), "icon_color_cancel");
                                 }
+                            },
+                            onValidationError: function(key, obj) {
+                                log_warning(t("check field") + ": '" + key + "'");
                             }
                         }
                     },
@@ -590,6 +587,9 @@
                                     btn = $$(build_name(self, "discard_record"));
                                     webix.html.addCss(btn.getNode(), "icon_color_cancel");
                                 }
+                            },
+                            onValidationError: function(key, obj) {
+                                log_warning(t("check field") + ": '" + key + "'");
                             }
                         }
                     },
@@ -928,7 +928,6 @@
     function cols2webix_form_elements(self, schema, mode)
     {
         var _writable_fields = [];
-        var webix_rules = {};
         var webix_elements = [];
 
         var system_topic = false;
@@ -976,13 +975,6 @@
                     if(!system_topic && (is_required || is_persistent || is_writable)) {
                         is_writable = true;
                         _writable_fields.push(id);
-
-                        if(is_required) {
-                            webix_rules[id] = webix.rules.isNotEmpty;
-                        }
-                        if(is_email) {
-                            webix_rules[id] = webix.rules.isEmail;
-                        }
                     } else {
                         is_writable = false;
                     }
@@ -991,13 +983,6 @@
                 default:
                     if(!system_topic && (is_writable)) {
                         _writable_fields.push(id);
-
-                        if(is_required) {
-                            webix_rules[id] = webix.rules.isNotEmpty;
-                        }
-                        if(is_email) {
-                            webix_rules[id] = webix.rules.isEmail;
-                        }
                     } else {
                         is_writable = false;
                     }
@@ -1036,6 +1021,15 @@
                         readonly: is_writable?false:true,
                         type: type
                     };
+
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
+                    }
+                    if(is_email) {
+                        webix_element["validate"] = webix.rules.isEmail;
+                        webix_element["invalidMessage"] = t("incorrect email address");
+                    }
                     break;
                 case "integer":
                     webix_element = {
@@ -1047,7 +1041,12 @@
                         type: "number"
                     };
                     if(is_writable) {
-                        webix_rules[id] = webix.rules.isNumber;
+                        webix_element["validate"] = webix.rules.isNumber;
+                        webix_element["invalidMessage"] = t("invalid number");
+                    }
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
                     }
                     break;
                 case "object":
@@ -1082,7 +1081,12 @@
                         type: "number"
                     };
                     if(is_writable) {
-                        webix_rules[id] = webix.rules.isNumber;
+                        webix_element["validate"] = webix.rules.isNumber;
+                        webix_element["invalidMessage"] = t("invalid number");
+                    }
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
                     }
                     break;
                 case "boolean":
@@ -1093,6 +1097,10 @@
                         css: "input_font_fijo",
                         readonly: is_writable?false:true
                     };
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
+                    }
                     break;
                 case "blob":
                     webix_element = {
@@ -1103,6 +1111,10 @@
                         readonly: is_writable?false:true,
                         type: "text"
                     };
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
+                    }
                     break;
                 case "enum":
                     var real_type = tranger_col.type;
@@ -1146,10 +1158,26 @@
                             };
                             break;
                     }
+                    if(is_required) {
+                        webix_element["validate"] = webix.rules.isNotEmpty;
+                        webix_element["invalidMessage"] = t("can not be empty");
+                    }
                     break;
                 case "hook":
                 case "fkey":
-                    // TODO
+//                     webix_element = {
+//                         view: "text",
+//                         name: id,
+//                         label: t(tranger_col.header),
+//                         css: "input_font_fijo",
+//                         readonly: true, // TODO de momento is_writable?false:true,
+//                         type: "text"
+//                     };
+                    if(is_required) {
+                        // TODO de momento
+                        //webix_element["validate"] = webix.rules.isNotEmpty;
+                        //webix_element["invalidMessage"] = t("can not be empty");
+                    }
                     break;
 
                 default:
@@ -1161,7 +1189,7 @@
             }
         }
 
-        return [webix_elements, webix_rules, _writable_fields];
+        return [webix_elements, _writable_fields];
     }
 
     /********************************************
@@ -1177,10 +1205,7 @@
         // redefine elements
         $form.define("elements", eles[0]);
 
-        // redefine rules
-        $form.define("rules", eles[1]);
-
-        self.config._writable_fields = eles[2];
+        self.config._writable_fields = eles[1];
 
         $form.reconstruct();
         return $form;
@@ -1199,10 +1224,7 @@
         // redefine elements
         $form.define("elements", eles[0]);
 
-        // redefine rules
-        $form.define("rules", eles[1]);
-
-        self.config._writable_fields = eles[2];
+        self.config._writable_fields = eles[1];
 
         $form.reconstruct();
         return $form;
