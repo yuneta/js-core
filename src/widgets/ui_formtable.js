@@ -1488,7 +1488,7 @@
             //$form.save(); update asynchronously by backend
         } else {
             update_check_invalid_fields = true;
-            info_user(t("check invalid fields"));
+            log_warning(t("check invalid fields"));
         }
         return 0;
     }
@@ -1560,7 +1560,7 @@
             //$form.save(); new asynchronously by backend
         } else {
             create_check_invalid_fields = true;
-            info_user(t("check invalid fields"));
+            log_warning(t("check invalid fields"));
         }
         return 0;
     }
