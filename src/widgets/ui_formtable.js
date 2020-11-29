@@ -576,7 +576,7 @@
                         scroll:true,
                         elementsConfig: {
                             labelAlign:"left",
-                            labelWidth: 160
+                            labelWidth: 140
                         },
                         elements: [],
                         on: {
