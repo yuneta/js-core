@@ -48,7 +48,8 @@
         //////////////// Particular Attributes //////////////////
         user_data: null,
         topic_name: null,
-        schema: null,
+        schema: null,   // TODO change to cols
+        cols: null,
         webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
         list_mode_enabled: true,
@@ -751,7 +752,7 @@
     /********************************************
      *
      ********************************************/
-    function cols2webix_table_cols(self, schema)
+    function cols2webix_table_cols(self, cols)
     {
         var webix_schema = [];
         if(self.config.with_checkbox) {
@@ -780,9 +781,9 @@
             );
         }
 
-        for(var i=0; schema && i<schema.length; i++) {
+        for(var i=0; cols && i<cols.length; i++) {
             var webix_col = null;
-            var tranger_col = schema[i];
+            var tranger_col = cols[i];
             if(self.config.hide_private_fields) {
                 if(tranger_col.id.charAt(0)=='_') {
                     continue;
@@ -910,13 +911,13 @@
     /********************************************
      *
      ********************************************/
-    function build_list_table(self, schema)
+    function build_list_table(self, cols)
     {
         var $table = $$(build_name(self, "list_table"));
         $table.clearAll();
 
         // redefine columns
-        $table.config.columns = cols2webix_table_cols(self, schema);
+        $table.config.columns = cols2webix_table_cols(self, cols);
         $table.refreshColumns();
 
         return $table;
@@ -925,7 +926,7 @@
     /********************************************
      *
      ********************************************/
-    function cols2webix_form_elements(self, schema, mode)
+    function cols2webix_form_elements(self, cols, mode)
     {
         var _writable_fields = [];
         var webix_elements = [];
@@ -947,9 +948,9 @@
             });
         }
 
-        for(var i=0; schema && i<schema.length; i++) {
+        for(var i=0; cols && i<cols.length; i++) {
             var webix_element = null;
-            var tranger_col = schema[i];
+            var tranger_col = cols[i];
             if(self.config.hide_private_fields) {
                 if(tranger_col.id.charAt(0)=='_') {
                     continue;
@@ -1195,12 +1196,12 @@
     /********************************************
      *
      ********************************************/
-    function build_update_form(self, schema)
+    function build_update_form(self, cols)
     {
         var $form = $$(build_name(self, "update_form"));
         $form.clear();
 
-        var eles = cols2webix_form_elements(self, schema, "update");
+        var eles = cols2webix_form_elements(self, cols, "update");
 
         // redefine elements
         $form.define("elements", eles[0]);
@@ -1214,12 +1215,12 @@
     /********************************************
      *
      ********************************************/
-    function build_create_form(self, schema)
+    function build_create_form(self, cols)
     {
         var $form = $$(build_name(self, "create_form"));
         $form.clear();
 
-        var eles = cols2webix_form_elements(self, schema, "create");
+        var eles = cols2webix_form_elements(self, cols, "create");
 
         // redefine elements
         $form.define("elements", eles[0]);
@@ -1254,17 +1255,20 @@
      ********************************************/
     function build_table(self)
     {
-        var schema = self.config.schema;
+        var cols = self.config.cols;
+        if(!cols) {
+            cols = self.config.schema;
+        }
 
         /*
          *  Tabla
          */
-        var $table = build_list_table(self, schema);
+        var $table = build_list_table(self, cols);
 
         /*
          *  Form update
          */
-        var $update = build_update_form(self, schema);
+        var $update = build_update_form(self, cols);
 
         /*
          *  Bind form to table
@@ -1274,7 +1278,7 @@
         /*
          *  Form create
          */
-        var $create = build_create_form(self, schema);
+        var $create = build_create_form(self, cols);
 
         switch(self.config.current_mode) {
             case "update":
@@ -1310,9 +1314,10 @@
     function get_schema_col(self, field_name)
     {
         var col = null;
+        var cols = self.config.schema;
 
-        for(var i=0; i<self.config.schema.length; i++) {
-            var col = self.config.schema[i];
+        for(var i=0; i<cols.length; i++) {
+            var col = cols[i];
             if(col.id == field_name) {
                 return col;
             }
@@ -1795,8 +1800,13 @@
         if(kw_has_key(kw, "title")) {
             self.config.title = kw_get_str(kw, "title", "", 0);
         }
-        if(kw_has_key(kw, "schema")) {
-            self.config.schema = kw_get_dict_value(kw, "schema", [], 0);
+        if(kw_has_key(kw, "topic_name")) {
+            self.config.topic_name = kw_get_str(kw, "topic_name", "", 0);
+        }
+        if(kw_has_key(kw, "cols")) {
+            self.config.cols = self.config.schema = kw_get_dict_value(kw, "cols", [], 0);
+        } else if(kw_has_key(kw, "schema")) {
+            self.config.cols = self.config.schema = kw_get_dict_value(kw, "schema", [], 0);
         }
         build_table(self);
         return 0;
