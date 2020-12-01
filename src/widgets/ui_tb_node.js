@@ -386,6 +386,7 @@
                 with_top_title: true,
                 with_footer: true,
                 with_navigation_toolbar: true,
+                hide_private_fields: true,
                 update_mode_enabled: true,
                 create_mode_enabled: true,
                 delete_mode_enabled: true,
