@@ -921,6 +921,21 @@
         return webix_schema;
     }
 
+
+
+    /********************************************
+     *
+     ********************************************/
+    function rule_json(value, fields, name)
+    {
+        try {
+            JSON.parse(value);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
     /********************************************
      *
      ********************************************/
@@ -1037,8 +1052,7 @@
                     };
 
                     if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
+                        webix_element["required"] = true;
                     }
                     if(is_email) {
                         webix_element["validate"] = webix.rules.isEmail;
@@ -1054,13 +1068,12 @@
                         readonly: is_writable?false:true,
                         type: "number"
                     };
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
                     if(is_writable) {
                         webix_element["validate"] = webix.rules.isNumber;
                         webix_element["invalidMessage"] = t("invalid number");
-                    }
-                    if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
                     }
                     break;
                 case "object":
@@ -1094,13 +1107,12 @@
                         readonly: is_writable?false:true,
                         type: "number"
                     };
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
                     if(is_writable) {
                         webix_element["validate"] = webix.rules.isNumber;
                         webix_element["invalidMessage"] = t("invalid number");
-                    }
-                    if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
                     }
                     break;
                 case "boolean":
@@ -1112,8 +1124,7 @@
                         readonly: is_writable?false:true
                     };
                     if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
+                        webix_element["required"] = true;
                     }
                     break;
                 case "blob":
@@ -1126,9 +1137,10 @@
                         type: "text"
                     };
                     if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
+                        webix_element["required"] = true;
                     }
+                    webix_element["validate"] = rule_json;
+                    webix_element["invalidMessage"] = t("invalid json");
                     break;
                 case "enum":
                     var real_type = tranger_col.type;
@@ -1173,8 +1185,7 @@
                             break;
                     }
                     if(is_required) {
-                        webix_element["validate"] = webix.rules.isNotEmpty;
-                        webix_element["invalidMessage"] = t("can not be empty");
+                        webix_element["required"] = true;
                     }
                     break;
                 case "hook":
@@ -1189,8 +1200,7 @@
 //                     };
                     if(is_required) {
                         // TODO de momento
-                        //webix_element["validate"] = webix.rules.isNotEmpty;
-                        //webix_element["invalidMessage"] = t("can not be empty");
+                        //webix_element["required"] = true;
                     }
                     break;
 
