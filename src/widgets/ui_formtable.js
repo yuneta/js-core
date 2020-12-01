@@ -554,12 +554,14 @@
                         elements: [],
                         on: {
                             onChange: function(new_v, old_v) {
-                                var changed = $$(build_name(self, "update_form")).isDirty();
-                                if(changed) {
-                                    var btn = $$(build_name(self, "update_record"));
-                                    webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                                    btn = $$(build_name(self, "undo_record"));
-                                    webix.html.addCss(btn.getNode(), "icon_color_cancel");
+                                if(this.validate()) {
+                                    var changed = $$(build_name(self, "update_form")).isDirty();
+                                    if(changed) {
+                                        var btn = $$(build_name(self, "update_record"));
+                                        webix.html.addCss(btn.getNode(), "icon_color_submmit");
+                                        btn = $$(build_name(self, "undo_record"));
+                                        webix.html.addCss(btn.getNode(), "icon_color_cancel");
+                                    }
                                 }
                             },
                             onValidationError: function(key, obj) {
@@ -590,12 +592,14 @@
                         elements: [],
                         on: {
                             onChange: function(create_v, old_v) {
-                                var changed = $$(build_name(self, "create_form")).isDirty();
-                                if(changed) {
-                                    var btn = $$(build_name(self, "create_record"));
-                                    webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                                    btn = $$(build_name(self, "discard_record"));
-                                    webix.html.addCss(btn.getNode(), "icon_color_cancel");
+                                if(this.validate()) {
+                                    var changed = $$(build_name(self, "create_form")).isDirty();
+                                    if(changed) {
+                                        var btn = $$(build_name(self, "create_record"));
+                                        webix.html.addCss(btn.getNode(), "icon_color_submmit");
+                                        btn = $$(build_name(self, "discard_record"));
+                                        webix.html.addCss(btn.getNode(), "icon_color_cancel");
+                                    }
                                 }
                             },
                             onValidationError: function(key, obj) {
@@ -1474,7 +1478,9 @@
             case "boolean":
                 break;
             case "blob":
-                value = JSON.parse(value);
+                if(!empty_string(value)) {
+                    value = JSON.parse(value);
+                }
                 break;
 
             case "enum":
@@ -1687,8 +1693,13 @@
                 new_kw["id"] = kw["id_"];
                 delete new_kw["id_"];
             }
-            // TODO valida campos
 
+            try {
+                new_kw = record2backend(self, new_kw);
+            } catch (e) {
+                log_warning(e);
+                return -1;
+            }
 
             self.gobj_publish_event(
                 "EV_CREATE_RECORD",
