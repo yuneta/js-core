@@ -591,7 +591,7 @@
                         },
                         elements: [],
                         on: {
-                            onChange: function(create_v, old_v) {
+                            onChange: function(new_v, old_v) {
                                 if(this.validate()) {
                                     var changed = $$(build_name(self, "create_form")).isDirty();
                                     if(changed) {
@@ -921,10 +921,8 @@
         return webix_schema;
     }
 
-
-
     /********************************************
-     *
+     *  Own rules to form
      ********************************************/
     function rule_json(value, fields, name)
     {
