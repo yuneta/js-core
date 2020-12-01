@@ -53,7 +53,7 @@
         ],
         _mxgraph: null,
 
-        showing: true,
+        showing: false,
         left: 0,
         top: 0,
         width: 400,
