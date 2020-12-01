@@ -1335,9 +1335,112 @@
     }
 
     /********************************************
-     *
+     *  Transform from frontend to backend
      ********************************************/
-    function filtra(col, value)
+    function record2frontend(self, kw)
+    {
+        for(var field_name in kw) {
+            var value = kw[field_name];
+            var col = get_schema_col(self, field_name);
+            if(col) {
+                kw[field_name] = col2frontend(col, value);
+            } else {
+                if(field_name.substring(0, 2) != "__") { // pass metadata
+                    log_error("No col def for " + field_name);
+                }
+            }
+        }
+        return kw;
+    }
+
+    /********************************************
+     *  Transform from backend to frontend
+     ********************************************/
+    function col2frontend(col, value)
+    {
+        var flag = col.flag;
+        var is_hook = elm_in_list("hook", flag);
+        var is_fkey = elm_in_list("fkey", flag);
+        var is_enum = elm_in_list("enum", flag);
+
+        var type = col.type; // By default is basic type
+        if(is_enum) {
+            type = "enum";
+        } else if(is_hook) {
+            type = "hook";
+        } else if(is_fkey) {
+            type = "fkey";
+        }
+
+        switch(type) {
+            case "string":
+                break;
+            case "integer":
+                break;
+            case "object":
+            case "dict":
+                break;
+            case "array":
+            case "list":
+                break;
+            case "real":
+                break;
+            case "boolean":
+                break;
+            case "blob":
+                value = JSON.stringify(value);
+                break;
+
+            case "enum":
+                var real_type = col.type;
+                var enum_list = col.enum;
+                switch(real_type) {
+                    case "string":
+                        break;
+                    case "object":
+                    case "dict":
+                    case "array":
+                    case "list":
+                        break;
+                    default:
+                        log_error("col type unknown 3: " + real_type);
+                        break;
+                }
+                break;
+            case "hook":
+            case "fkey":
+                // TODO
+                break;
+
+            default:
+                log_error("col type unknown 4: " + type);
+                break;
+        }
+
+        return value;
+    }
+
+    /********************************************
+     *  Convert from frontend to backend
+     ********************************************/
+    function record2backend(self, kw)
+    {
+        for(var field_name in kw) {
+            var value = kw[field_name];
+            var col = get_schema_col(self, field_name);
+            if(col) {
+                kw[field_name] = col2backend(col, value);
+            } else {
+                log_error("No col def for " + field_name);
+            }
+        }
+        return kw;
+    }
+
+    /********************************************
+     *  Transform from frontend to backend
+     ********************************************/
+    function col2backend(col, value)
     {
         var flag = col.flag;
         var is_hook = elm_in_list("hook", flag);
@@ -1371,6 +1474,7 @@
             case "boolean":
                 break;
             case "blob":
+                value = JSON.parse(value);
                 break;
 
             case "enum":
@@ -1385,7 +1489,7 @@
                     case "list":
                         break;
                     default:
-                        log_error("col type unknown 3: " + real_type);
+                        log_error("col type unknown 5: " + real_type);
                         break;
                 }
                 break;
@@ -1395,7 +1499,7 @@
                 break;
 
             default:
-                log_error("col type unknown 4: " + type);
+                log_error("col type unknown 6: " + type);
                 break;
         }
 
@@ -1433,10 +1537,17 @@
                 delete data[i]["id"];
             }
         }
+
+        for(var i=0; i<data.length; i++) {
+            var kw = data[i];
+            record2frontend(self, kw);
+        }
         $table.parse(data);
+
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);
 
+        // TODO y si es un update? deja la id actual
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
@@ -1507,10 +1618,11 @@
                 delete new_kw["id_"];
             }
 
-            for(var field_name in new_kw) {
-                var value = new_kw[field_name];
-                var col = get_schema_col(self, field_name);
-                new_kw[field_name] = filtra(col, value);
+            try {
+                new_kw = record2backend(self, new_kw);
+            } catch (e) {
+                log_warning(e);
+                return -1;
             }
 
             self.gobj_publish_event(
@@ -1525,6 +1637,7 @@
         } else {
             update_check_invalid_fields = true;
             log_warning(t("check invalid fields"));
+            return -1;
         }
         return 0;
     }
