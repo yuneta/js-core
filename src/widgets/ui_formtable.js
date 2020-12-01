@@ -554,15 +554,7 @@
                         elements: [],
                         on: {
                             onChange: function(new_v, old_v) {
-                                if(this.validate()) {
-                                    var changed = $$(build_name(self, "update_form")).isDirty();
-                                    if(changed) {
-                                        var btn = $$(build_name(self, "update_record"));
-                                        webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                                        btn = $$(build_name(self, "undo_record"));
-                                        webix.html.addCss(btn.getNode(), "icon_color_cancel");
-                                    }
-                                }
+                                update_form_onChange(self, new_v, old_v);
                             },
                             onValidationError: function(key, obj) {
                                 log_warning(t("check field") + ": '" + key + "'");
@@ -592,15 +584,7 @@
                         elements: [],
                         on: {
                             onChange: function(new_v, old_v) {
-                                if(this.validate()) {
-                                    var changed = $$(build_name(self, "create_form")).isDirty();
-                                    if(changed) {
-                                        var btn = $$(build_name(self, "create_record"));
-                                        webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                                        btn = $$(build_name(self, "discard_record"));
-                                        webix.html.addCss(btn.getNode(), "icon_color_cancel");
-                                    }
-                                }
+                                create_form_onChange(self, new_v, old_v);
                             },
                             onValidationError: function(key, obj) {
                                 log_warning(t("check field") + ": '" + key + "'");
@@ -919,6 +903,40 @@
             }
         }
         return webix_schema;
+    }
+
+    /********************************************
+     *  General onChange for create form
+     ********************************************/
+    function create_form_onChange(self, new_v, old_v)
+    {
+        var $form = $$(build_name(self, "create_form"));
+        if($form.validate()) {
+            var changed = $form.isDirty();
+            if(changed) {
+                var btn = $$(build_name(self, "create_record"));
+                webix.html.addCss(btn.getNode(), "icon_color_submmit");
+                btn = $$(build_name(self, "discard_record"));
+                webix.html.addCss(btn.getNode(), "icon_color_cancel");
+            }
+        }
+    }
+
+    /********************************************
+     *  General onChange for create form
+     ********************************************/
+    function update_form_onChange(self, new_v, old_v)
+    {
+        var $form = $$(build_name(self, "update_form"));
+        if($form.validate()) {
+            var changed = $form.isDirty();
+            if(changed) {
+                var btn = $$(build_name(self, "update_record"));
+                webix.html.addCss(btn.getNode(), "icon_color_submmit");
+                btn = $$(build_name(self, "undo_record"));
+                webix.html.addCss(btn.getNode(), "icon_color_cancel");
+            }
+        }
     }
 
     /********************************************
