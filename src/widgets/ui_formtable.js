@@ -17,6 +17,7 @@
  *  1.2     Public name of datable in self.config.webix_datatable_id
  *  1.3     Add user_data attribute
  *          Set initial mode
+ *  1.4     Paging optional
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -66,6 +67,7 @@
         with_textfilter: false,
         with_sort: false,
         with_navigation_toolbar: false,
+        with_paging: false,
 
         with_tooltip: true,
         with_footer: true,
@@ -317,7 +319,8 @@
                     {
                         view: "text",
                         id: build_name(self, "record_idx"),
-                        minWidth: 100,
+                        minWidth: 90,
+                        maxWidth: 140,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("record_idx"),
                         tooltip: t("record_idx"),
@@ -338,7 +341,9 @@
                     {
                         view: "text",
                         id: build_name(self, "page"),
+                        hidden: self.config.with_paging?false:true,
                         minWidth: 70,
+                        maxWidth: 140,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("page"),
                         tooltip: t("page"),
@@ -357,7 +362,9 @@
                     {
                         view: "text",
                         id: build_name(self, "total"),
-                        minWidth: 100,
+                        hidden: self.config.with_paging?false:true,
+                        minWidth: 90,
+                        maxWidth: 140,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("total"),
                         readonly: true,
@@ -369,7 +376,9 @@
                     {
                         view: "text",
                         id: build_name(self, "page_size"),
+                        hidden: self.config.with_paging?false:true,
                         minWidth: 70,
+                        maxWidth: 140,
                         format: "1" + webix.i18n.groupDelimiter + "111",
                         label: t("page_size"),
                         tooltip: t("page_size"),
