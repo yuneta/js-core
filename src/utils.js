@@ -1391,7 +1391,8 @@
         var pos = 0;
 
         haystack += "";
-        pos = haystack.indexOf(needle); if (pos == -1) {
+        pos = haystack.indexOf(needle);
+        if (pos == -1) {
             return false;
         } else {
             if (bool) {
