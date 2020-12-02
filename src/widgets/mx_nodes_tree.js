@@ -932,13 +932,6 @@
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(false);
 
-        // Source nodes needs 1..2 connected Targets
-        graph.multiplicities.push(new mxMultiplicity(
-            true, 'Source', null, null, 1, 2, ['Target'],
-            'Source Must Have 1 or 2 Targets',
-            'Source Must Connect to Target')
-        );
-
         if(0) { // TODO TEST
             // Removes cells when [DELETE] is pressed
             var keyHandler = new mxKeyHandler(graph);
