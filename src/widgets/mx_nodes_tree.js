@@ -824,6 +824,8 @@
 
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.TopToBottom;
         style[mxConstants.STYLE_STROKEWIDTH] = '2';
+        style[mxConstants.STYLE_STROKECOLOR] = 'black';
+
         style[mxConstants.STYLE_ROUNDED] = true;
         style[mxConstants.STYLE_CURVED] = "1";
     };
@@ -1587,7 +1589,7 @@
                 }
                 var fkey = fkeys;
                 if(!empty_string(fkey)) {
-                    draw_link(self, fkey_port_cell, fkey);
+                    draw_link(self, topic_name, fkey_port_cell, fkey);
                 }
 
             } else if(is_array(fkeys)) {
@@ -1598,7 +1600,7 @@
                 for(var j=0; j<fkeys.length; j++) {
                     var fkey = fkeys[j];
                     if(!empty_string(fkey)) {
-                        draw_link(self, fkey_port_cell, fkey);
+                        draw_link(self, topic_name, fkey_port_cell, fkey);
                     }
                 }
 
@@ -1629,16 +1631,16 @@
     /************************************************************
      *  Draw link
      ************************************************************/
-    function draw_link(self, fkey_port_cell, ref)
+    function draw_link(self, source_topic_name, fkey_port_cell, ref)
     {
         var graph = self.config._mxgraph;
         var model = graph.model;
 
         try {
-            var ff = ref.split("^");
-            var target_topic_name = ff[0];
-            var target_topic_id = ff[1];
-            var target_hook = ff[2];
+            var tt = ref.split("^");
+            var target_topic_name = tt[0];
+            var target_topic_id = tt[1];
+            var target_hook = tt[2];
 
             var target_cell_name = build_cell_name(
                 self, target_topic_name, target_topic_id
@@ -1658,12 +1660,12 @@
             var link_cell = model.getCell(cell_id);
             if(!link_cell) {
                 graph.insertEdge(
-                    get_layer(self),    // group
-                    cell_id,            // id
-                    cell_id,            // value
-                    fkey_port_cell,     // source
-                    target_port_cell,   // target
-                    "general_arrow"
+                    get_layer(self),                // group
+                    cell_id,                        // id
+                    cell_id,                        // value
+                    fkey_port_cell,                 // source
+                    target_port_cell,               // target
+                    source_topic_name + "_arrow"    // style
                 );
             }
 
