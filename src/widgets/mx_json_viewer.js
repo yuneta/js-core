@@ -1068,6 +1068,9 @@
             return;
         }
         var path = kw_get_str(self.config, "path", "`", false);
+        if(empty_string(path)) {
+            path = "`";
+        }
         var graph = self.config._mxgraph;
         var model = graph.getModel();
         model.beginUpdate();
