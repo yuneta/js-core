@@ -28,7 +28,7 @@
         treedb_name: null,
         topic_name: null,
 
-        topic_schema: null,
+        schema: null,
         gobj_formtable_nodes: null,
 
         $ui: null
@@ -126,8 +126,6 @@
      ********************************************/
     function ac_open_window(self, event, kw, src)
     {
-        var name = build_name(self, "formtable");
-
         self.config.gobj_formtable_nodes.gobj_send_event("EV_TOGGLE", {}, self);
         return 0;
     }
@@ -162,6 +160,7 @@
 
         switch(__md_iev__.__command__) {
             case "nodes":
+                self.config.schema = schema;
                 self.config.gobj_formtable_nodes.gobj_send_event(
                     "EV_REBUILD_TABLE",
                     {
@@ -366,7 +365,7 @@
         var self = this;
 
         self.config.gobj_formtable_nodes = self.yuno.gobj_create_unique(
-            "nodes",
+            build_name(self, "-formtable"),
             Ui_formtable,
             {
                 subscriber: self,  // HACK get all output events
@@ -377,8 +376,10 @@
                     minHeight: 200
                 },
 
+                treedb_name: self.config.treedb_name,
                 topic_name: self.config.topic_name,
-                schema: self.config.topic_schema,
+                cols: null, // later, when arriving data
+                global_data: true,
                 is_topic_schema: false,
                 with_checkbox: false,
                 with_textfilter: true,
@@ -416,6 +417,10 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        var self = this;
+        if(self.config.global_data) {
+            // TODO unregister
+        }
     }
 
     /************************************************

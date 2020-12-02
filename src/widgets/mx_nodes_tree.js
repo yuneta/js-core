@@ -54,7 +54,6 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
-        tree_item_selected_event_name: "EV_TREE_ITEM_SELECTED",
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
         topics_name: null,  // topics_name editing
@@ -2287,8 +2286,9 @@
                 minHeight: 300
             },
 
+            treedb_name: self.config.treedb_name,
             topic_name: schema.topic_name,
-            schema: schema.cols,
+            cols: schema.cols,
             is_topic_schema: false,
             with_checkbox: false,
             with_textfilter: true,

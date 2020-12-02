@@ -48,9 +48,11 @@
 
         //////////////// Particular Attributes //////////////////
         user_data: null,
+        treedb_name: null,
         topic_name: null,
-        schema: null,   // TODO change to cols
+        schema: null,   // TODO change all users creating this to use cols, then remove schema
         cols: null,
+        global_data: false, // true for register data in treedb common
         webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
         list_mode_enabled: true,
@@ -890,6 +892,9 @@
                     break;
 
                 case "fkey":    // definition of webix table col
+                    webix_col["optionslist"] = true;
+                    webix_col["editor"] = "multiselect";
+                    webix_col["options"] = get_fkey_options(self, tranger_col);
                     break;
 
                 default:
@@ -1214,18 +1219,17 @@
                     break;
 
                 case "fkey":    // Definition of webix form element
-//                     var fkey_topic_name =col.fkey ???
-//                     webix_element = {
-//                         view: "multicombo2",
-//                         name: id,
-//                         label: t(tranger_col.header),
-//                         css: "input_font_fijo",
-//                         readonly: is_writable?false:true,
-//                         options: list2options(table, "id", "id")
-//                     };
-//                     if(is_required) {
-//                         webix_element["required"] = true;
-//                     }
+                    webix_element = {
+                        view: "multicombo2",
+                        name: id,
+                        label: t(tranger_col.header),
+                        css: "input_font_fijo",
+                        readonly: is_writable?false:true,
+                        options: get_fkey_options(self, tranger_col)
+                    };
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
                     break;
 
                 default:
@@ -1327,6 +1331,9 @@
          */
         var $create = build_create_form(self, cols);
 
+        /*
+         *  Set initial mode
+         */
         switch(self.config.current_mode) {
             case "update":
                 self.gobj_send_event("EV_UPDATE_MODE", {}, self);
@@ -1338,6 +1345,53 @@
                 self.gobj_send_event("EV_LIST_MODE", {}, self);
                 break;
         }
+
+        /*
+         *  Register as global data if
+         */
+        if(self.config.global_data) {
+            treedb_register_data(
+                self.config.treedb_name,
+                self.config.topic_name,
+                $table.data
+            );
+        }
+    }
+
+    /********************************************
+     *  Return {topic_name, id, hook_name}
+     ********************************************/
+    function split_ref(self, ref)
+    {
+        var tt = ref.split('^');
+        if(tt.length != 3) {
+            log_error("Bad pkey ref: " + ref);
+            return {
+                topic_name: "",
+                id: "",
+                hook_name: ""
+            }
+        } else {
+            return {
+                topic_name: tt[0],
+                id: tt[1],
+                hook_name: tt[2]
+            }
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_fkey_options(self, col)
+    {
+        for(var topic_name in col.fkey) {
+            // HACK we work with only one fkey
+            var current_list = treedb_list_nodes(self.config.treedb_name, topic_name);
+            return list2options(current_list, "id", "id");
+        }
+        log_error("No fkey options found" + STRING.stringify(col));
+        return null;
     }
 
     /********************************************
@@ -1361,7 +1415,10 @@
     function get_schema_col(self, field_name)
     {
         var col = null;
-        var cols = self.config.schema;
+        var cols = self.config.cols;
+        if(!cols) {
+            cols = self.config.schema;
+        }
 
         for(var i=0; i<cols.length; i++) {
             var col = cols[i];
@@ -1606,7 +1663,7 @@
     }
 
     /********************************************
-     *
+     *  External wants data
      ********************************************/
     function ac_get_data(self, event, kw, src)
     {
@@ -1624,7 +1681,7 @@
     }
 
     /********************************************
-     *
+     *  External wants data
      ********************************************/
     function ac_get_checked_data(self, event, kw, src)
     {
