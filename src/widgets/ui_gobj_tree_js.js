@@ -113,7 +113,7 @@
                 type: "icon",
                 icon: "fas fa-border-center-v",
                 autowidth: true,
-                css: "webix_transparent btn_icon_toolbar_16",
+                css: "webix_transparent icon_toolbar_16",
                 tooltip: t("view mode: horizontal/vertical"),
                 label: t("view mode"),
                 click: function() {
@@ -137,7 +137,7 @@
                 type: "icon",
                 icon: "fas fa-sync",
                 autowidth: true,
-                css: "webix_transparent btn_icon_toolbar_16",
+                css: "webix_transparent icon_toolbar_16",
                 tooltip: t("refresh"),
                 label: t("refresh"),
                 click: function() {

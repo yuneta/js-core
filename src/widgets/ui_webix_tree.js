@@ -104,7 +104,7 @@
                     view:"button",
                     type: "icon",
                     icon: "far fa-plus-square",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     label: t("expand"),
                     click: function() {
                         $$(build_name(self, "webix_tree")).openAll();

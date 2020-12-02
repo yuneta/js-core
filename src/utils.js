@@ -1404,7 +1404,9 @@
     }
 
     /********************************************************
-     *  Convert [s] or [{}] or {} in a webix list options
+     *  Convert [s] or [{}] or {}
+     *  in a webix list options:
+     *      [{id:"", value:""}, ...]
      ********************************************************/
     function list2options(list, field_id, field_value)
     {

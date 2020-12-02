@@ -121,11 +121,11 @@
                     type: "image",
                     image: "/static/app/images/yuneta/json_graph.svg",
                     autowidth: true,
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     tooltip: t("graph view"),
                     label: t("graph view"),
                     click: function() {
-                        var name = self.name + "-Mx_json_viewer";
+                        var name = "Graph of Json: " + self.name;
                         var gobj_mx_json_viewer = self.yuno.gobj_find_unique_gobj(name);
                         if(gobj_mx_json_viewer) {
                             gobj_mx_json_viewer.gobj_send_event("EV_TOGGLE", {}, self);
@@ -135,7 +135,7 @@
                             name,
                             Mx_json_viewer,
                             {
-                                window_title: "Mx Json View"
+                                window_title: name
                             },
                             __yuno__.__pinhold__
                         );

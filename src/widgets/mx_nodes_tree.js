@@ -195,6 +195,10 @@
         /*
          *  Load control button images
          */
+        self.config.image_folder_tree = new mxImage(
+            '/static/app/images/yuneta/folder-tree.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
         self.config.image_json_graph = new mxImage(
             '/static/app/images/yuneta/json_graph.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
@@ -317,7 +321,7 @@
                     view:"button",
                     type: "icon",
                     icon: "fas fa-layer-plus",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     label: t("create"),
                     popup: build_name(self, "create_menu_popup")
                 },
@@ -353,17 +357,18 @@
                     type: "icon",
                     icon: "",
                     icon: self.config.fitted? "fad fa-compress-arrows-alt":"fad fa-expand-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: self.config.fitted? t("reset view"):t("fit"),
                     click: function() {
+                        var graph = self.config._mxgraph;
                         if(self.config.fitted) {
                             self.config.fitted = false;
-                            self.config._mxgraph.view.scaleAndTranslate(1, 0, 0);
+                            graph.view.scaleAndTranslate(1, graph.border, graph.border);
                             this.define("icon", "fad fa-expand-arrows-alt");
                             this.define("label", t("fit"));
                         } else {
-                            self.config._mxgraph.fit();
+                            graph.fit();
                             self.config.fitted = true;
                             this.define("icon", "fad fa-compress-arrows-alt");
                             this.define("label",  t("reset view"));
@@ -377,7 +382,7 @@
                     type: "icon",
                     icon: "",
                     icon: self.config.collapsed? "far fa-plus-square":"far fa-minus-square",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: self.config.collapsed? t("expand"):t("collapse"),
                     click: function() {
@@ -399,7 +404,7 @@
                     view:"button",
                     type: "icon",
                     icon: "far fa-search-plus",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("zoom in"),
                     click: function() {
@@ -452,13 +457,14 @@
                     maxWidth: 120,
                     label: t("Mxgraph"),
                     click: function() {
-                        var n = "mx-json of " + self.name;
+                        var n = "Json Mxgraph Inside: " + self.name;
                         var gobj_je = __yuno__.gobj_find_unique_gobj(n);
                         if(!gobj_je) {
                             gobj_je = __yuno__.gobj_create_unique(
                                 n,
                                 Je_viewer,
                                 {
+                                    window_title: n,
                                     width: 900,
                                     height: 600
                                 },
@@ -886,6 +892,9 @@
 
         mxEvent.disableContextMenu(graph.container);
 
+        graph.border = 30;
+        graph.view.setTranslate(graph.border, graph.border);
+
         // Assigns some global constants for general behaviour, eg. minimum
         // size (in pixels) of the active region for triggering creation of
         // new connections, the portion (100%) of the cell area to be used
@@ -1165,6 +1174,53 @@
                 }
 
                 /*--------------------------*
+                 *  Inside of cell
+                 *--------------------------*/
+                if(!self.config.locked) {
+                    var overlay_instance = new mxCellOverlay(
+                        self.config.image_folder_tree,
+                        "Inside Json View", // tooltip
+                        mxConstants.ALIGN_LEFT, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+                        mxConstants.ALIGN_TOP, // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                        new mxPoint(2*offsx - offsy, -offsy), // offset
+                        "pointer" // cursor
+                    );
+                    graph.addCellOverlay(cell, overlay_instance);
+                    overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+                        var n = "Json Cell Inside: " + cell.id;
+                        var gobj_je = __yuno__.gobj_find_unique_gobj(n);
+                        if(!gobj_je) {
+                            gobj_je = __yuno__.gobj_create_unique(
+                                n,
+                                Je_viewer,
+                                {
+                                    window_title: n,
+                                    width: 900,
+                                    height: 600
+                                },
+                                __yuno__.__pinhold__
+                            );
+                            gobj_je.gobj_start();
+                        }
+                        gobj_je.gobj_send_event(
+                            "EV_SHOW",
+                            {},
+                            self
+                        );
+                        gobj_je.gobj_send_event(
+                            "EV_CLEAR_DATA",
+                            {},
+                            self
+                        );
+                        gobj_je.gobj_send_event(
+                            "EV_LOAD_DATA",
+                            {data: cell.value},
+                            self
+                        );
+                    });
+                }
+
+                /*--------------------------*
                  *  Red/Green Save button
                  *--------------------------*/
                 if(cell.value.tosave_red) {
@@ -1239,6 +1295,7 @@
                         );
                     });
                 }
+
             } else if(cell.isEdge()) {
                 /*--------------------------------------*
                  *          Links

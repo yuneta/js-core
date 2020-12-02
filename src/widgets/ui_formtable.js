@@ -254,7 +254,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-arrow-to-left",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("first_record"),
                         width: 50,
                         click: function() {
@@ -265,7 +265,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-angle-double-left",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("prev_page"),
                         width: 50,
                         click: function() {
@@ -276,7 +276,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-angle-left",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("prev_record"),
                         width: 50,
                         click: function() {
@@ -287,7 +287,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-angle-right",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("next_record"),
                         width: 50,
                         click: function() {
@@ -298,7 +298,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-angle-double-right",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("next_page"),
                         width: 50,
                         click: function() {
@@ -309,7 +309,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-arrow-to-right",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("last_record"),
                         width: 50,
                         click: function() {
@@ -399,7 +399,7 @@
                         view: "button",
                         type: "icon",
                         icon: "far fa-sync",
-                        css: "webix_transparent btn_icon_toolbar_16",
+                        css: "webix_transparent icon_toolbar_16",
                         tooltip: t("refresh"),
                         width: 50,
                         click: function() {
@@ -857,7 +857,7 @@
                     switch(real_type) {
                         case "string":
                             webix_col["editor"] = "combo";
-//                             webix_col["optionslist"] = true;
+                            //webix_col["optionslist"] = true;
                             webix_col["options"] = list2options(enum_list);
                             break;
                         case "object":
@@ -885,21 +885,26 @@
                             break;
                     }
                     break;
-                case "hook":
-                case "fkey":
-                    // TODO
+
+                case "hook":    // definition of webix table col
+                    break;
+
+                case "fkey":    // definition of webix table col
                     break;
 
                 default:
                     log_error("col type unknown 1: " + type);
                     break;
             }
-            if(tranger_col.template) {
-                webix_col["template"] = tranger_col.template;
-            }
-            if(!self.config.fields_enabled ||
-                    elm_in_list(webix_col.id, self.config.fields_enabled)) {
-                webix_schema.push(webix_col);
+
+            if(webix_col) {
+                if(tranger_col.template) {
+                    webix_col["template"] = tranger_col.template;
+                }
+                if(!self.config.fields_enabled ||
+                        elm_in_list(webix_col.id, self.config.fields_enabled)) {
+                    webix_schema.push(webix_col);
+                }
             }
         }
         return webix_schema;
@@ -1204,20 +1209,23 @@
                         webix_element["required"] = true;
                     }
                     break;
-                case "hook":
-                case "fkey":
+
+                case "hook":    // Definition of webix form element
+                    break;
+
+                case "fkey":    // Definition of webix form element
+//                     var fkey_topic_name =col.fkey ???
 //                     webix_element = {
-//                         view: "text",
+//                         view: "multicombo2",
 //                         name: id,
 //                         label: t(tranger_col.header),
 //                         css: "input_font_fijo",
-//                         readonly: true, // TODO de momento is_writable?false:true,
-//                         type: "text"
+//                         readonly: is_writable?false:true,
+//                         options: list2options(table, "id", "id")
 //                     };
-                    if(is_required) {
-                        // TODO de momento
-                        //webix_element["required"] = true;
-                    }
+//                     if(is_required) {
+//                         webix_element["required"] = true;
+//                     }
                     break;
 
                 default:
@@ -1365,7 +1373,7 @@
     }
 
     /********************************************
-     *  Transform from frontend to backend
+     *  Convert from frontend to backend
      ********************************************/
     function record2frontend(self, kw)
     {
@@ -1384,7 +1392,7 @@
     }
 
     /********************************************
-     *  Transform from backend to frontend
+     *  Convert from backend to frontend
      ********************************************/
     function col2frontend(col, value)
     {
@@ -1437,9 +1445,12 @@
                         break;
                 }
                 break;
-            case "hook":
-            case "fkey":
+
+            case "hook":    // Convert data from backend to frontend
                 // TODO
+                break;
+
+            case "fkey":    // Convert data from backend to frontend
                 break;
 
             default:
@@ -1468,7 +1479,7 @@
     }
 
     /********************************************
-     *  Transform from frontend to backend
+     *  Convert from frontend to backend
      ********************************************/
     function col2backend(col, value)
     {
@@ -1525,9 +1536,12 @@
                         break;
                 }
                 break;
-            case "hook":
-            case "fkey":
+
+            case "hook":    // Convert data from frontend to backend
                 // TODO
+                break;
+
+            case "fkey":    // Convert data from frontend to backend
                 break;
 
             default:

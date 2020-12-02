@@ -43,6 +43,7 @@
         json_data: null,
 
         locked: true,
+        fitted: false,
 
         group_cx_sep: 80,
         group_cy_sep: 40,
@@ -73,6 +74,7 @@
             "pinpushed",
 
             ////// Particular /////
+            "fitted",
             "path",
             "json_data"
         ]
@@ -121,8 +123,6 @@
         self.config._mxgraph = $$(build_name(self, "mxgraph")).getMxgraph();
 
         initialize_mxgraph(self);
-        create_root_and_layers(self);
-        rebuild_layouts(self);
     }
 
     /************************************************************
@@ -162,35 +162,37 @@
                         }
                     }
                 },
+
                 {
                     view:"button",
                     type: "icon",
-                    icon: "fad fa-compress-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
-                    autosize: true,
-                    label: t("reset view"),
+                    icon: "",
+                    icon: self.config.fitted? "fad fa-compress-arrows-alt":"fad fa-expand-arrows-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: self.config.fitted? t("reset view"):t("fit"),
                     click: function() {
                         var graph = self.config._mxgraph;
-                        graph.view.scaleAndTranslate(1, graph.border, graph.border);
-                    }
-                },
-                {
-                    view:"button",
-                    type: "icon",
-                    icon: "fad fa-expand-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
-                    autosize: true,
-                    label: t("fit"),
-                    click: function() {
-                        var graph = self.config._mxgraph;
-                        graph.fit();
+                        if(self.config.fitted) {
+                            self.config.fitted = false;
+                            graph.view.scaleAndTranslate(1, graph.border, graph.border);
+                            this.define("icon", "fad fa-expand-arrows-alt");
+                            this.define("label", t("fit"));
+                        } else {
+                            graph.fit();
+                            self.config.fitted = true;
+                            this.define("icon", "fad fa-compress-arrows-alt");
+                            this.define("label",  t("reset view"));
+                        }
+                        this.refresh();
+                        self.gobj_save_persistent_attrs();
                     }
                 },
                 {
                     view:"button",
                     type: "icon",
                     icon: "far fa-search-plus",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     autosize: true,
                     label: t("zoom in"),
                     click: function() {
@@ -451,6 +453,11 @@
             }
         }
 
+        if(self.config.fitted) {
+            graph.fit();
+        } else {
+            graph.view.scaleAndTranslate(1, graph.border, graph.border);
+        }
         if(locked) {
             graph.setCellsLocked(true);
         }
@@ -523,6 +530,9 @@
     function initialize_mxgraph(self)
     {
         var graph = self.config._mxgraph;
+
+        create_root_and_layers(self);
+        rebuild_layouts(self);
 
         mxEvent.disableContextMenu(graph.container);
 

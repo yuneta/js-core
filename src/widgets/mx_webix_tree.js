@@ -236,7 +236,7 @@
                     view:"button",
                     type: "icon",
                     icon: "fad fa-compress-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("reset view"),
                     click: function() {
@@ -247,7 +247,7 @@
                     view:"button",
                     type: "icon",
                     icon: "fad fa-expand-arrows-alt",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("fit"),
                     click: function() {
@@ -258,7 +258,7 @@
                     view:"button",
                     type: "icon",
                     icon: "far fa-search-plus",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("zoom in"),
                     click: function() {

@@ -878,7 +878,7 @@
                     image: gobj_window.config.pinpushed?
                         "/static/app/images/yuneta/pin-push.svg":
                         "/static/app/images/yuneta/pin.svg",
-                    css: "webix_transparent btn_icon_toolbar_16",
+                    css: "webix_transparent icon_toolbar_16",
                     tooltip: t("Pin the window"),
                     click: function() {
                         var pinpushed = gobj_window.parent.gobj_send_event(
