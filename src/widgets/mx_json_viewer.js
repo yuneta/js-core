@@ -830,7 +830,7 @@
         group.setVertex(true);
         group.setConnectable(false);
 
-        graph.groupCells(
+        graph.groupCells1(
             group,
             0, // border between the child area and the group bounds
             cells
