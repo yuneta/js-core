@@ -44,12 +44,7 @@
             },
             getValue: function() {
                 var value = webix.ui.multicombo.prototype.getValue.call(this);
-                var new_value = value.split(",");
-                if(new_value.length) {
-                    return new_value;
-                } else {
-                    return value;
-                }
+                return value.split(",");
             }
         }, webix.ui.multicombo);
 
@@ -97,12 +92,7 @@
             },
             getValue: function() {
                 var value = webix.ui.multiselect.prototype.getValue.call(this);
-                var new_value = value.split(",");
-                if(new_value.length) {
-                    return new_value;
-                } else {
-                    return value;
-                }
+                return value.split(",");
             }
         }, webix.ui.multiselect);
 

@@ -1609,29 +1609,41 @@
             var fkey_port_cell = model.getCell(fkey_port_name);
             var fkeys = cell.value.record[col.id];
 
-            if(is_string(fkeys)) {
-                if(col.type != "string") {
-                    log_warning("fkey type must be string: " + JSON.stringify(fkeys));
-                }
-                var fkey = fkeys;
-                if(!empty_string(fkey)) {
-                    draw_link(self, topic_name, fkey_port_cell, fkey);
-                }
-
-            } else if(is_array(fkeys)) {
-                if(!(col.type != "array" || col.type != "list")) {
-                    log_warning("fkey type must be array: " + JSON.stringify(fkeys));
-                }
-
-                for(var j=0; j<fkeys.length; j++) {
-                    var fkey = fkeys[j];
+            if(fkeys) {
+                if(is_string(fkeys)) {
+                    if(col.type != "string") {
+                        log_warning("fkey type must be string: " + JSON.stringify(fkeys));
+                    }
+                    var fkey = fkeys;
                     if(!empty_string(fkey)) {
                         draw_link(self, topic_name, fkey_port_cell, fkey);
                     }
-                }
 
-            } else {
-                log_error("fkey type unsupported: " + JSON.stringify(fkeys));
+                } else if(is_array(fkeys)) {
+                    if(!(col.type != "array" || col.type != "list")) {
+                        log_warning("fkey type must be array: " + JSON.stringify(fkeys));
+                    }
+
+                    for(var j=0; j<fkeys.length; j++) {
+                        var fkey = fkeys[j];
+                        if(!empty_string(fkey)) {
+                            draw_link(self, topic_name, fkey_port_cell, fkey);
+                        }
+                    }
+                } else if(is_object(fkeys)) {
+                    if(!(col.type != "object" || col.type != "dict")) {
+                        log_warning("fkey type must be array: " + JSON.stringify(fkeys));
+                    }
+
+                    for(var fkey in fkeys) {
+                        if(!empty_string(fkey)) {
+                            draw_link(self, topic_name, fkey_port_cell, fkey);
+                        }
+                    }
+
+                } else {
+                    log_error("fkey type unsupported: " + JSON.stringify(fkeys));
+                }
             }
         }
     }
@@ -2274,7 +2286,7 @@
             with_footer: true,
             with_navigation_toolbar: true,
             without_refresh: true,
-            hide_private_fields: true,
+            hide_private_fields: false, // TODO TEST dejalo en true, para probar el json
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",
             update_mode_enabled: cell_name?true:false,
@@ -2508,6 +2520,12 @@
                     child_cell = target_cell;
                 } else if(target_cell.value.hook) {
                     parent_cell = target_cell;
+                }
+
+                if(!parent_cell || !child_cell) {
+                    graph.removeCells([cell]);
+                    log_warning(t("links must be between fkey and hook port"));
+                    return -1;
                 }
 
                 var future_cell_id = child_cell.id + " ==> " + parent_cell.id; // HACK "==>" repeated

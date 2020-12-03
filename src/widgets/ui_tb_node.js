@@ -150,8 +150,8 @@
             return;
         }
         if(result < 0) {
-            info_user_error(comment);
-            return;
+            info_user_warning(comment);
+            // HACK don't return, pass errors when need it.
         } else {
             if(comment) {
                 // log_info(comment); No pintes
@@ -160,28 +160,32 @@
 
         switch(__md_iev__.__command__) {
             case "nodes":
-                self.config.schema = schema;
-                self.config.gobj_formtable_nodes.gobj_send_event(
-                    "EV_REBUILD_TABLE",
-                    {
-                        topic_name: schema.topic_name,
-                        cols: schema.cols
-                    },
-                    self
-                );
-                self.config.gobj_formtable_nodes.gobj_send_event(
-                    "EV_LOAD_DATA",
-                    data,
-                    self
-                );
+                if(result >= 0) {
+                    self.config.schema = schema;
+                    self.config.gobj_formtable_nodes.gobj_send_event(
+                        "EV_REBUILD_TABLE",
+                        {
+                            topic_name: schema.topic_name,
+                            cols: schema.cols
+                        },
+                        self
+                    );
+                    self.config.gobj_formtable_nodes.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        data,
+                        self
+                    );
+                }
                 break;
 
             case "create-node":
-                self.config.gobj_formtable_nodes.gobj_send_event(
-                    "EV_LOAD_DATA",
-                    is_object(data)?[data]:data,
-                    self
-                );
+                if(result >= 0) {
+                    self.config.gobj_formtable_nodes.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        is_object(data)?[data]:data,
+                        self
+                    );
+                }
                 break;
 
             case "update-node":
@@ -193,6 +197,8 @@
                 break;
 
             case "delete-node":
+                if(result >= 0) {
+                }
                 break;
 
             default:
@@ -387,7 +393,7 @@
                 with_top_title: true,
                 with_footer: true,
                 with_navigation_toolbar: true,
-                hide_private_fields: true,
+                hide_private_fields: false, // TODO TEST dejalo en true, para probar el json
                 update_mode_enabled: true,
                 create_mode_enabled: true,
                 delete_mode_enabled: true,

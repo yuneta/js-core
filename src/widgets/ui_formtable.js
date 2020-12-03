@@ -506,12 +506,12 @@
             footer: self.config.with_footer,
             select: self.config.with_select,
             multiselect: self.config.with_multiselect,
-            editable: false, // TODO
+            editable: false, // FUTURE de momento datatable no editable (solo en form)
             navigation: self.config.with_keyboard_navigation,
             resizeColumn: self.config.with_resizeColumn,
             resizeRow: self.config.with_resizeRow,
             fixedRowHeight: self.config.with_fixedRowHeight,
-            drag: self.config.with_drag? "source":false, // TODO let "target" too?
+            drag: self.config.with_drag? "source":false,
             gobj: self, // HACK needed for factory. Available in config.gobj
             on: {
                 onCheck: function(rowId, colId, state){
@@ -823,12 +823,12 @@
             var is_enum = elm_in_list("enum", flag);
 
             var type = tranger_col.type; // By default is basic type
-            if(is_enum) {
-                type = "enum";
-            } else if(is_hook) {
+            if(is_hook) {
                 type = "hook";
             } else if(is_fkey) {
                 type = "fkey";
+            } else if(is_enum) {
+                type = "enum";
             }
 
             switch(type) {
@@ -927,14 +927,12 @@
     function create_form_onChange(self, new_v, old_v)
     {
         var $form = $$(build_name(self, "create_form"));
-        if($form.validate()) {
-            var changed = $form.isDirty();
-            if(changed) {
-                var btn = $$(build_name(self, "create_record"));
-                webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                btn = $$(build_name(self, "discard_record"));
-                webix.html.addCss(btn.getNode(), "icon_color_cancel");
-            }
+        var changed = $form.isDirty();
+        if(changed) {
+            var btn = $$(build_name(self, "create_record"));
+            webix.html.addCss(btn.getNode(), "icon_color_submmit");
+            btn = $$(build_name(self, "discard_record"));
+            webix.html.addCss(btn.getNode(), "icon_color_cancel");
         }
     }
 
@@ -944,14 +942,12 @@
     function update_form_onChange(self, new_v, old_v)
     {
         var $form = $$(build_name(self, "update_form"));
-        if($form.validate()) {
-            var changed = $form.isDirty();
-            if(changed) {
-                var btn = $$(build_name(self, "update_record"));
-                webix.html.addCss(btn.getNode(), "icon_color_submmit");
-                btn = $$(build_name(self, "undo_record"));
-                webix.html.addCss(btn.getNode(), "icon_color_cancel");
-            }
+        var changed = $form.isDirty();
+        if(changed) {
+            var btn = $$(build_name(self, "update_record"));
+            webix.html.addCss(btn.getNode(), "icon_color_submmit");
+            btn = $$(build_name(self, "undo_record"));
+            webix.html.addCss(btn.getNode(), "icon_color_cancel");
         }
     }
 
@@ -960,6 +956,9 @@
      ********************************************/
     function rule_json(value, fields, name)
     {
+        if(empty_string(value)) {
+            return true;
+        }
         try {
             JSON.parse(value);
         } catch (e) {
@@ -1051,12 +1050,12 @@
             }
 
             var type = tranger_col.type; // By default is basic type
-            if(is_enum) {
-                type = "enum";
-            } else if(is_hook) {
+            if(is_hook) {
                 type = "hook";
             } else if(is_fkey) {
                 type = "fkey";
+            } else if(is_enum) {
+                type = "enum";
             }
 
             switch(type) {
@@ -1160,6 +1159,7 @@
                     }
                     break;
                 case "blob":
+                    // TODO botón en campo del form para abrir js_editor
                     webix_element = {
                         view: "text",
                         name: id,
@@ -1227,7 +1227,8 @@
                         name: id,
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
-                        readonly: is_writable?false:true,
+                        // TODO si lo dejamos editar hay que manejar los link/unlink
+                        readonly: true, // is_writable?false:true,
                         options: get_hook_options(self, tranger_col)
                     };
                     break;
@@ -1510,12 +1511,12 @@
         var is_enum = elm_in_list("enum", flag);
 
         var type = col.type; // By default is basic type
-        if(is_enum) {
-            type = "enum";
-        } else if(is_hook) {
+        if(is_hook) {
             type = "hook";
         } else if(is_fkey) {
             type = "fkey";
+        } else if(is_enum) {
+            type = "enum";
         }
 
         switch(type) {
@@ -1558,29 +1559,31 @@
 
             case "hook":    // Convert data from backend to frontend
                 var new_value = [];
-                if(is_string(value)) {
-                    var hook_splitted_ref = split_hook_ref(self, col, value);
-                    if(hook_splitted_ref.id) {
-                        new_value.push(hook_splitted_ref.id);
-                    }
-                } else if(is_array(value)) {
-                    for(var i=0; i<value.length; i++) {
-                        var hook_splitted_ref = split_hook_ref(self, col, value[i]);
+                if(value) {
+                    if(is_string(value)) {
+                        var hook_splitted_ref = split_hook_ref(self, col, value);
                         if(hook_splitted_ref.id) {
                             new_value.push(hook_splitted_ref.id);
                         }
-                    }
-                } else if(is_object(value)) {
-                    for(var k in value) {
-                        var hook_splitted_ref = split_hook_ref(self, col, k);
-                        if(hook_splitted_ref.id) {
-                            new_value.push(hook_splitted_ref.id);
+                    } else if(is_array(value)) {
+                        for(var i=0; i<value.length; i++) {
+                            var hook_splitted_ref = split_hook_ref(self, col, value[i]);
+                            if(hook_splitted_ref.id) {
+                                new_value.push(hook_splitted_ref.id);
+                            }
                         }
+                    } else if(is_object(value)) {
+                        for(var k in value) {
+                            var hook_splitted_ref = split_hook_ref(self, col, k);
+                            if(hook_splitted_ref.id) {
+                                new_value.push(hook_splitted_ref.id);
+                            }
+                        }
+                    } else {
+                        log_error("hook type unknown");
+                        log_error(col);
+                        log_error(value);
                     }
-                } else {
-                    log_error("hook type unknown");
-                    log_error(col);
-                    log_error(value);
                 }
 
                 value = new_value;
@@ -1589,29 +1592,31 @@
 
             case "fkey":    // Convert data from backend to frontend
                 var new_value = [];
-                if(is_string(value)) {
-                    var fkey_splitted_ref = split_fkey_ref(self, col, value);
-                    if(fkey_splitted_ref.id) {
-                        new_value.push(fkey_splitted_ref.id);
-                    }
-                } else if(is_array(value)) {
-                    for(var i=0; i<value.length; i++) {
-                        var fkey_splitted_ref = split_fkey_ref(self, col, value[i]);
+                if(value) {
+                    if(is_string(value)) {
+                        var fkey_splitted_ref = split_fkey_ref(self, col, value);
                         if(fkey_splitted_ref.id) {
                             new_value.push(fkey_splitted_ref.id);
                         }
-                    }
-                } else if(is_object(value)) {
-                    for(var k in value) {
-                        var fkey_splitted_ref = split_fkey_ref(self, col, k);
-                        if(fkey_splitted_ref.id) {
-                            new_value.push(fkey_splitted_ref.id);
+                    } else if(is_array(value)) {
+                        for(var i=0; i<value.length; i++) {
+                            var fkey_splitted_ref = split_fkey_ref(self, col, value[i]);
+                            if(fkey_splitted_ref.id) {
+                                new_value.push(fkey_splitted_ref.id);
+                            }
                         }
+                    } else if(is_object(value)) {
+                        for(var k in value) {
+                            var fkey_splitted_ref = split_fkey_ref(self, col, k);
+                            if(fkey_splitted_ref.id) {
+                                new_value.push(fkey_splitted_ref.id);
+                            }
+                        }
+                    } else {
+                        log_error("fkey type unknown");
+                        log_error(col);
+                        log_error(value);
                     }
-                } else {
-                    log_error("fkey type unknown");
-                    log_error(col);
-                    log_error(value);
                 }
 
                 value = new_value;
@@ -1705,11 +1710,12 @@
                 break;
 
             case "hook":    // Convert data from frontend to backend
-                // TODO
+                // TODO de momento no dejamos editar los hook, habría que manejar los link/unlink
+                value = null;
                 break;
 
             case "fkey":    // Convert data from frontend to backend
-                //value = build_fkey(record.departments, "gest_departments", "users");
+                value = build_fkey_ref(self, col, value);
                 break;
 
             default:
@@ -1721,35 +1727,56 @@
     }
 
     /********************************************
-     *  TODO
+     *
      ********************************************/
-    function build_fkey(id, topic, hook)
+    function build_fkey_ref(self, col, value)
     {
-        var fkeys = [];
+        // HACK we work with only one fkey
+        var topic_name = Object.keys(col.fkey)[0]; // Get the first key
+        var hook = col.fkey[topic_name];
 
-        // Trabaja con arrays o con strings. Con formato ^^ o sin.
-        if(is_array(id)) {
-            var ids = id;
-            ids.forEach(function(id) {
-                if(id.split('^').length==3) {
-                    fkeys.push(topic + "^" + id.split('^')[1] + "^" + hook);
-                } else if(!empty_string(id)) {
-                    if(id != "x") {
-                        fkeys.push(topic + "^" + id + "^" + hook);
+        var refs = null;
+
+        switch(col.type) {
+            case "string":
+                // TODO check if widget is not multi select
+                if(value.length > 0) {
+                    var v = value[0];
+                    if(!empty_string(v)) {
+                        refs = topic_name + "^" + v + "^" + hook;
                     }
                 }
-            });
-        } else if(is_string(id)) {
-            if(id.split('^').length==3) {
-                fkeys.push(topic + "^" + id.split('^')[1] + "^" + hook);
-            } else if(!empty_string(id)) {
-                if(id != "x") {
-                    fkeys.push(topic + "^" + id + "^" + hook);
+                break;
+            case "object":
+            case "dict":
+                if(value.length > 0) {
+                    refs = {};
+                    for(var i=0; i<value.length; i++) {
+                        var v = value[i];
+                        if(!empty_string(v)) {
+                            refs[topic_name + "^" + v + "^" + hook] = true;
+                        }
+                    }
                 }
-            }
+                break;
+            case "array":
+            case "list":
+                if(value.length > 0) {
+                    refs = [];
+                    for(var i=0; i<value.length; i++) {
+                        var v = value[i];
+                        if(!empty_string(v)) {
+                            refs.push(topic_name + "^" + v + "^" + hook);
+                        }
+                    }
+                }
+                break;
+            default:
+                log_error("Merde type: " + col.type);
+                break;
         }
 
-        return fkeys;
+        return refs;
     }
 
 
