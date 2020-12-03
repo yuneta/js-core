@@ -2296,6 +2296,7 @@
             with_top_title: true,
             with_footer: true,
             with_navigation_toolbar: true,
+            without_refresh: true,
             hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",

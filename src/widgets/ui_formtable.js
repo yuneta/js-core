@@ -70,7 +70,6 @@
         with_sort: false,
         with_navigation_toolbar: false,
         with_paging: false,
-
         with_tooltip: true,
         with_footer: true,
         with_select: true,
@@ -79,6 +78,7 @@
         with_resizeColumn: true,
         with_resizeRow: false,
         with_fixedRowHeight: true,
+        without_refresh: false,
 
         _writable_fields: null, // automatic built
 
@@ -399,6 +399,7 @@
                     },
                     {
                         view: "button",
+                        hidden: self.config.without_refresh?true:false,
                         type: "icon",
                         icon: "far fa-sync",
                         css: "webix_transparent icon_toolbar_16",
@@ -1345,17 +1346,6 @@
                 self.gobj_send_event("EV_LIST_MODE", {}, self);
                 break;
         }
-
-        /*
-         *  Register as global data if
-         */
-        if(self.config.global_data) {
-            treedb_register_data(
-                self.config.treedb_name,
-                self.config.topic_name,
-                $table.data
-            );
-        }
     }
 
     /********************************************
@@ -1657,6 +1647,17 @@
             }
         } else if(data.length > 1) {
             self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+        }
+
+        /*
+         *  Register as global data if
+         */
+        if(self.config.global_data) {
+            treedb_register_data(
+                self.config.treedb_name,
+                self.config.topic_name,
+                $table.serialize(true)
+            );
         }
 
         return 0;
