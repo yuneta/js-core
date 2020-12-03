@@ -890,9 +890,10 @@
                     break;
 
                 case "hook":    // definition of webix table col
+                    // TODO button to open a large paging formtable?
                     break;
 
-                case "fkey":    // definition of webix table col
+                case "fkey":    // definition of webix DATATABLE col
                     webix_col["optionslist"] = true;
                     webix_col["editor"] = "multiselect";
                     webix_col["options"] = get_fkey_options(self, tranger_col);
@@ -1217,9 +1218,10 @@
                     break;
 
                 case "hook":    // Definition of webix form element
+                    // TODO button to open a large paging formtable?
                     break;
 
-                case "fkey":    // Definition of webix form element
+                case "fkey":    // Definition of webix FORM element
                     webix_element = {
                         view: "multicombo2",
                         name: id,
@@ -1349,13 +1351,20 @@
     }
 
     /********************************************
-     *  Return {topic_name, id, hook_name}
+     *  Return
+     *      {
+     *          topic_name:
+     *          id:
+     *          hook_name:
+     *      }
+     *
      ********************************************/
-    function split_ref(self, ref)
+    function split_fkey_ref(self, col, ref)
     {
         var tt = ref.split('^');
         if(tt.length != 3) {
-            log_error("Bad pkey ref: " + ref);
+            log_error(self.topic_name + ": Bad pkey ref: " + ref);
+            log_error(col);
             return {
                 topic_name: "",
                 id: "",
@@ -1422,20 +1431,21 @@
     /********************************************
      *  Convert from frontend to backend
      ********************************************/
-    function record2frontend(self, kw)
+    function record2frontend(self, record)
     {
-        for(var field_name in kw) {
-            var value = kw[field_name];
+        var new_record = {};
+        for(var field_name in record) {
+            var value = record[field_name];
             var col = get_schema_col(self, field_name);
             if(col) {
-                kw[field_name] = col2frontend(col, value);
+                new_record[field_name] = col2frontend(col, value);
             } else {
                 if(field_name.substring(0, 2) != "__") { // pass metadata
                     log_error("No col def for " + field_name);
                 }
             }
         }
-        return kw;
+        return new_record;
     }
 
     /********************************************
@@ -1489,6 +1499,8 @@
                         break;
                     default:
                         log_error("col type unknown 3: " + real_type);
+                        log_error(col);
+                        log_error(value);
                         break;
                 }
                 break;
@@ -1498,10 +1510,40 @@
                 break;
 
             case "fkey":    // Convert data from backend to frontend
+                var new_value = [];
+                if(is_string(value)) {
+                    var fkey_splitted_ref = split_fkey_ref(self, col, value);
+                    if(fkey_splitted_ref.id) {
+                        new_value.push(fkey_splitted_ref.id);
+                    }
+                } else if(is_array(value)) {
+                    for(var i=0; i<value.length; i++) {
+                        var fkey_splitted_ref = split_fkey_ref(self, col, value[i]);
+                        if(fkey_splitted_ref.id) {
+                            new_value.push(fkey_splitted_ref.id);
+                        }
+                    }
+                } else if(is_object(value)) {
+                    for(var k in value) {
+                        var fkey_splitted_ref = split_fkey_ref(self, col, k);
+                        if(fkey_splitted_ref.id) {
+                            new_value.push(fkey_splitted_ref.id);
+                        }
+                    }
+                } else {
+                    log_error("fkey type unknown");
+                    log_error(col);
+                    log_error(value);
+                }
+
+                value = new_value;
+
                 break;
 
             default:
                 log_error("col type unknown 4: " + type);
+                log_error(col);
+                log_error(value);
                 break;
         }
 
@@ -1589,6 +1631,7 @@
                 break;
 
             case "fkey":    // Convert data from frontend to backend
+                //value = build_fkey(record.departments, "gest_departments", "users");
                 break;
 
             default:
@@ -1597,6 +1640,38 @@
         }
 
         return value;
+    }
+
+    /********************************************
+     *  TODO
+     ********************************************/
+    function build_fkey(id, topic, hook)
+    {
+        var fkeys = [];
+
+        // Trabaja con arrays o con strings. Con formato ^^ o sin.
+        if(is_array(id)) {
+            var ids = id;
+            ids.forEach(function(id) {
+                if(id.split('^').length==3) {
+                    fkeys.push(topic + "^" + id.split('^')[1] + "^" + hook);
+                } else if(!empty_string(id)) {
+                    if(id != "x") {
+                        fkeys.push(topic + "^" + id + "^" + hook);
+                    }
+                }
+            });
+        } else if(is_string(id)) {
+            if(id.split('^').length==3) {
+                fkeys.push(topic + "^" + id.split('^')[1] + "^" + hook);
+            } else if(!empty_string(id)) {
+                if(id != "x") {
+                    fkeys.push(topic + "^" + id + "^" + hook);
+                }
+            }
+        }
+
+        return fkeys;
     }
 
 
@@ -1631,11 +1706,12 @@
             }
         }
 
+        var new_data = [];
         for(var i=0; i<data.length; i++) {
-            var kw = data[i];
-            record2frontend(self, kw);
+            var record = data[i];
+            new_data.push(record2frontend(self, record));
         }
-        $table.parse(data);
+        $table.parse(new_data);
 
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);

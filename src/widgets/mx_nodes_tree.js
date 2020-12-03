@@ -1156,7 +1156,7 @@
                     graph.addCellOverlay(cell, overlay_role);
                     overlay_role.addListener(mxEvent.CLICK, function(sender, evt2) {
                         self.gobj_send_event(
-                            "EV_SHOW_TOPIC_DATA_FORM",
+                            "EV_SHOW_CELL_DATA_FORM",
                             {
                                 cell: cell
                             },
@@ -1166,7 +1166,7 @@
                 }
 
                 /*--------------------------*
-                 *  Inside of cell
+                 *  Json Inside of cell
                  *--------------------------*/
                 if(!self.config.locked) {
                     var overlay_instance = new mxCellOverlay(
@@ -1179,34 +1179,11 @@
                     );
                     graph.addCellOverlay(cell, overlay_instance);
                     overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                        var n = "Json Cell Inside: " + cell.id;
-                        var gobj_je = __yuno__.gobj_find_unique_gobj(n);
-                        if(!gobj_je) {
-                            gobj_je = __yuno__.gobj_create_unique(
-                                n,
-                                Je_viewer,
-                                {
-                                    window_title: n,
-                                    width: 900,
-                                    height: 600
-                                },
-                                __yuno__.__pinhold__
-                            );
-                            gobj_je.gobj_start();
-                        }
-                        gobj_je.gobj_send_event(
-                            "EV_SHOW",
-                            {},
-                            self
-                        );
-                        gobj_je.gobj_send_event(
-                            "EV_CLEAR_DATA",
-                            {},
-                            self
-                        );
-                        gobj_je.gobj_send_event(
-                            "EV_LOAD_DATA",
-                            {data: cell.value},
+                        self.gobj_send_event(
+                            "EV_SHOW_CELL_DATA_JSON",
+                            {
+                                cell: cell
+                            },
                             self
                         );
                     });
@@ -2257,9 +2234,9 @@
     }
 
     /********************************************
-     *  Edit record, from here
+     *  Show formtable to edit record, from here
      ********************************************/
-    function ac_show_topic_data_form(self, event, kw, src)
+    function ac_show_cell_data_form(self, event, kw, src)
     {
         var cell = kw.cell;
         var cell_name = cell.value.cell_name; // Null on new nodes
@@ -2348,6 +2325,49 @@
                 self
             );
         }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Show inside json of cell
+     ********************************************/
+    function ac_show_cell_data_json(self, event, kw, src)
+    {
+        var cell = kw.cell;
+
+        var n = "Json Cell Inside: " + cell.id;
+        var gobj_je = __yuno__.gobj_find_unique_gobj(n);
+        if(!gobj_je) {
+            gobj_je = __yuno__.gobj_create_unique(
+                n,
+                Je_viewer,
+                {
+                    window_title: n,
+                    width: 900,
+                    height: 600
+                },
+                __yuno__.__pinhold__
+            );
+            gobj_je.gobj_start();
+        }
+        gobj_je.gobj_send_event(
+            "EV_SHOW",
+            {},
+            self
+        );
+        gobj_je.gobj_send_event(
+            "EV_CLEAR_DATA",
+            {},
+            self
+        );
+        var data = new Object(cell.value);
+        delete data.gobj_cell_formtable;
+        gobj_je.gobj_send_event(
+            "EV_LOAD_DATA",
+            {data: cell.value},
+            self
+        );
 
         return 0;
     }
@@ -2611,7 +2631,7 @@
      *  From formtable,
      *  when window is destroying or minififying
      ********************************************/
-    function ac_close_formtable(self, event, kw, src)
+    function ac_close_window(self, event, kw, src)
     {
         var graph = self.config._mxgraph;
         var model = graph.model;
@@ -2741,7 +2761,8 @@
             "EV_NODE_DELETED",
             "EV_NODES_LINKED",
             "EV_NODES_UNLINKED",
-            "EV_SHOW_TOPIC_DATA_FORM",
+            "EV_SHOW_CELL_DATA_FORM",
+            "EV_SHOW_CELL_DATA_JSON",
 
             "EV_SAVE_RED",
             "EV_SAVE_GREEN",
@@ -2778,7 +2799,8 @@
                 ["EV_NODES_LINKED",             ac_nodes_linked,            undefined],
                 ["EV_NODES_UNLINKED",           ac_nodes_unlinked,          undefined],
 
-                ["EV_SHOW_TOPIC_DATA_FORM",     ac_show_topic_data_form,    undefined],
+                ["EV_SHOW_CELL_DATA_FORM",      ac_show_cell_data_form,     undefined],
+                ["EV_SHOW_CELL_DATA_JSON",      ac_show_cell_data_json,     undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
 
@@ -2792,7 +2814,7 @@
                 ["EV_MX_RESIZECELLS",           ac_mx_resizecells,          undefined],
                 ["EV_MX_CONNECTCELL",           ac_mx_connectcell,          undefined],
 
-                ["EV_CLOSE_WINDOW",             ac_close_formtable,         undefined],
+                ["EV_CLOSE_WINDOW",             ac_close_window,         undefined],
                 ["EV_TOGGLE",                   ac_toggle,                  undefined],
                 ["EV_SHOW",                     ac_show,                    undefined],
                 ["EV_HIDE",                     ac_hide,                    undefined],

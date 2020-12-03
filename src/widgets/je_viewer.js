@@ -407,6 +407,7 @@
         } else {
             self.config.$ui.show();
         }
+        return 0;
     }
 
     /********************************************
@@ -415,6 +416,7 @@
     function ac_show(self, event, kw, src)
     {
         self.config.$ui.show();
+        return 0;
     }
 
     /********************************************
@@ -423,6 +425,7 @@
     function ac_hide(self, event, kw, src)
     {
         self.config.$ui.hide();
+        return 0;
     }
 
     /********************************************
