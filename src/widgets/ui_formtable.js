@@ -82,6 +82,7 @@
 
         _writable_fields: null, // automatic built
 
+        last_selected_id: null,
         page_size: 0,
         page: 0,            // current page
         record_idx: 0,      // current idx of selected record
@@ -407,6 +408,7 @@
                         width: 50,
                         click: function() {
                             var $table = $$(build_name(self, "list_table"));
+                            self.config.last_selected_id = $table.getSelectedId();
                             $table.clearAll();
 
                             self.gobj_send_event("EV_UNDO_RECORD", {}, self);
@@ -1792,13 +1794,16 @@
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);
 
-        // TODO y si es un update? deja la id actual
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
             }
         } else if(data.length > 1) {
-            self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+            if(self.config.last_selected_id) {
+                self.gobj_send_event("EV_RECORD_BY_ID", {id:self.config.last_selected_id.id}, self);
+            } else {
+                self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+            }
         }
 
         /*
@@ -2142,9 +2147,16 @@
      ********************************************/
     function ac_record_by_id(self, event, kw, src)
     {
+        var id =  kw.id;
+
         var $widget = $$(build_name(self, "list_table"));
-        $widget.select(kw.id);
-        $widget.showItem(kw.id);
+        $widget.select(id);
+        if($widget.getSelectedId() != id) {
+            id = $widget.getFirstId();
+            $widget.select(id);
+        }
+
+        $widget.showItem(id);
         return 0;
     }
 
