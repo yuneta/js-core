@@ -15,19 +15,19 @@
  *        Utils
  **************************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /************************************************************
      *
      ************************************************************/
     Function.prototype.__makeSubclass__ = function() {
-        'use strict';
+        "use strict";
 
         function Class() {
             if (!(this instanceof Class)) {
-                  throw('Constructor called without "new"');
+                  throw("Constructor called without new");
             }
-            if ('__init__' in this) {
+            if ("__init__" in this) {
                 this.__init__.apply(this, arguments);
             }
         }
@@ -46,7 +46,7 @@
         **clone** is a copy with incref references
      ************************************************************/
     function __duplicate__(obj) {
-        'use strict';
+        "use strict";
 
         var copy;
 
@@ -80,7 +80,7 @@
             return copy;
         }
 
-        throw new Error("Unable to copy obj! Its type isn't supported.");
+        throw new Error("Unable to copy obj! Its type is not supported.");
     }
 
     /************************************************************
@@ -88,7 +88,7 @@
      *  Like json_object_update_existing()
      ************************************************************/
     function __update_dict__(destination, source) {
-        'use strict';
+        "use strict";
         for (var property in source) {
             if (source.hasOwnProperty(property) && destination.hasOwnProperty(property)) {
                 destination[property] = source[property];
@@ -103,7 +103,7 @@
      *  Like json_object_update()
      ************************************************************/
     function __extend_dict__(destination, source) {
-        'use strict';
+        "use strict";
         for (var property in source) {
             if (source.hasOwnProperty(property)) {
                 destination[property] = source[property];
@@ -117,7 +117,7 @@
      *  Like json_object_update_missing()
      ************************************************************/
     function json_object_update_missing(destination, source) {
-        'use strict';
+        "use strict";
         for (var property in source) {
             if(source.hasOwnProperty(property) && !destination.hasOwnProperty(property)) {
                 destination[property] = source[property];
@@ -148,7 +148,7 @@
      * @return {Number} Index of the specified elm, -1 if not found
      ************************************************************/
     function index_of_list(elm, list) {
-        'use strict';
+        "use strict";
         // Existence of a native index
         var nativeIndexOf = list.indexOf? true : false;
 
@@ -161,7 +161,7 @@
         // Use a manual loop to find the index
         var i = list.length;
         while(i--) {
-            // If the elm matches, return it's index
+            // If the elm matches, return it is index
             if(list[i] === elm) {
                 return i;
             }
@@ -175,7 +175,7 @@
      *
      ************************************************************/
     function elm_in_list(elm, list) {
-        'use strict';
+        "use strict";
         if(!list) {
             throw "ERROR: elm_in_list() list empty";
         }
@@ -194,7 +194,7 @@
      *
      ************************************************************/
     function index_in_list(list, elm) {
-        'use strict';
+        "use strict";
         if(!list) {
             throw "ERROR: index_in_list() list empty";
         }
@@ -210,7 +210,7 @@
      *
      ************************************************************/
     function id_index_in_obj_list(list, id) {
-        'use strict';
+        "use strict";
         if(!list) {
             return -1;
         }
@@ -226,7 +226,7 @@
      *
      ************************************************************/
     function get_object_from_list(list, id) {
-        'use strict';
+        "use strict";
 
         if(!list) {
             return null;
@@ -243,7 +243,7 @@
      *
      ************************************************************/
     function none_in_list(list) {
-        'use strict';
+        "use strict";
         for(var i=0; i<list.length; i++) {
             if(!list[i]) {
                 return true;
@@ -256,21 +256,21 @@
      *
      ************************************************************/
     function delete_from_list(list, elm) {
-        'use strict';
+        "use strict";
         for(var i=0; i<list.length; i++) {
             if(elm === list[i]) {
                 list.splice(i, 1);
                 return true;
             }
         }
-        return false; // elm doesn't exist!
+        return false; // elm does not exist!
     }
 
     /************************************************************
      *
      ************************************************************/
     function same_list(arrA, arrB) {
-        'use strict';
+        "use strict";
         //check if lengths are different
         if(arrA.length !== arrB.length) {
             return false;
@@ -293,15 +293,15 @@
      *
      ************************************************************/
     function __strip__(s){
-        'use strict';
-        return ( s || '' ).replace( /^\s+|\s+$/g, '' );
+        "use strict";
+        return ( s || "" ).replace( /^\s+|\s+$/g, "" );
     }
 
     /************************************************************
      *
      ************************************************************/
     function __set__(arr) {
-        'use strict';
+        "use strict";
         var seen = {},
             result = [];
         var len = arr.length;
@@ -319,15 +319,15 @@
      *
      ************************************************************/
     function get_function_name(func) {
-        'use strict';
+        "use strict";
         var fName = null;
         if (typeof func === "function" || typeof func === "object") {
             fName = ("" + func).match(/function\s*([\w\$]*)\s*\(/);
         }
         if (fName !== null) {
-            return fName[1] + '()';
+            return fName[1] + "()";
         }
-        return '';
+        return "";
     }
 
     /************************************************************
@@ -345,8 +345,8 @@
      *      http://stackoverflow.com/questions/202605/repeat-string-javascript
      ************************************************************/
     String.prototype.repeat = function(count) {
-        if (count < 1) return '';
-        var result = '', pattern = this.valueOf();
+        if (count < 1) return "";
+        var result = "", pattern = this.valueOf();
         while (count > 1) {
             if (count & 1) result += pattern;
             count >>= 1, pattern += pattern;
@@ -369,12 +369,12 @@
         // +      improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
         // +       revised by: gorthaur
         // + reimplemented by: Brett Zamir (http://brett-zamir.me)
-        // *     example 1: strncmp('aaa', 'aab', 2);
+        // *     example 1: strncmp("aaa", "aab", 2);
         // *     returns 1: 0
-        // *     example 2: strncmp('aaa', 'aab', 3 );
+        // *     example 2: strncmp("aaa", "aab", 3 );
         // *     returns 2: -1
-        var s1 = (str1+'').substr(0, lgth);
-        var s2 = (str2+'').substr(0, lgth);
+        var s1 = (str1+"").substr(0, lgth);
+        var s2 = (str2+"").substr(0, lgth);
 
         return ( ( s1 == s2 ) ? 0 : ( ( s1 > s2 ) ? 1 : -1 ) );
     }
@@ -416,7 +416,7 @@
     // Return if a value is a string
     function is_string(value)
     {
-        return typeof value === 'string' || value instanceof String;
+        return typeof value === "string" || value instanceof String;
     }
 
     /************************************************************
@@ -424,7 +424,7 @@
      ************************************************************/
     // Return if a value is a number
     function is_number(value) {
-        return typeof value === 'number' && isFinite(value);
+        return typeof value === "number" && isFinite(value);
     }
 
     /************************************************************
@@ -448,8 +448,8 @@
      ************************************************************/
     function empty_string(s)
     {
-        'use strict';
-        if(!s || typeof(s) !== 'string') {
+        "use strict";
+        if(!s || typeof(s) !== "string") {
             return true;
         }
 
@@ -497,9 +497,9 @@
         // +      input by: Steve Hilder
         // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
         // +    revised by: gorthaur
-        // *     example 1: strcmp( 'waldo', 'owald' );
+        // *     example 1: strcmp( "waldo", "owald" );
         // *     returns 1: 1
-        // *     example 2: strcmp( 'owald', 'waldo' );
+        // *     example 2: strcmp( "owald", "waldo" );
         // *     returns 2: -1
 
         return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
@@ -1168,7 +1168,7 @@
         if(!elm_in_list(msg_type, msg_type_list)) {
             return;
         }
-        msg_write_MIA_key(kw, '__msg_type__', msg_type)
+        msg_write_MIA_key(kw, "__msg_type__", msg_type)
     }
 
     /************************************************************
@@ -1176,7 +1176,7 @@
      ************************************************************/
     function msg_get_msg_type(kw)
     {
-        return msg_read_MIA_key(kw, '__msg_type__')
+        return msg_read_MIA_key(kw, "__msg_type__")
     }
 
     /************************************************************
@@ -1322,7 +1322,7 @@
     function get_unique_id(prefix)
     {
         if(!prefix) {
-            prefix = 'random';
+            prefix = "random";
         }
         return prefix + "-" + uuidv4();
     }
@@ -1332,7 +1332,7 @@
      ************************************************************/
     function uuidv4()
     {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,
             function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
@@ -1344,13 +1344,13 @@
      *          Load json file from server
      ************************************************************/
     function fileLoaded(xhr) {
-        return xhr.status == 0 && xhr.responseText && xhr.responseURL.startsWith('file:');
+        return xhr.status == 0 && xhr.responseText && xhr.responseURL.startsWith("file:");
     }
     function load_json_file(url, on_success, on_error)
     {
         var req = new XMLHttpRequest();
-        req.open('GET', url, true);
-        req.setRequestHeader('Accept', 'application/json');
+        req.open("GET", url, true);
+        req.setRequestHeader("Accept", "application/json");
 
         req.onreadystatechange = function () {
             if (req.readyState == 4) {
@@ -1477,7 +1477,7 @@
             return null;
         }
 
-        var ids = path.split('`');
+        var ids = path.split("`");
 
         var id;
         var v = topic;
@@ -1530,7 +1530,7 @@
             return null;
         }
 
-        var ids = path.split('`');
+        var ids = path.split("`");
 
         var id;
         var v = topic;
