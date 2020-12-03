@@ -72,6 +72,59 @@
         }, webix.ui.combo);
 
         /*
+         *  Multiselect propio
+         */
+        webix.protoUI({
+            name: "multiselect2",
+            $init:function(config) {
+                if(config.options) {
+                    config.options = __duplicate__(config.options);
+                }
+            },
+            setValue: function(value) {
+                if(webix.isArray(value)) {
+                    var temp = [];
+                    for (var i = 0; i < value.length; i++) {
+                        if(is_object(value[i])) {
+                            temp.push(value[i].id);
+                        } else {
+                            temp.push(value[i]);
+                        }
+                    }
+                    value = temp;
+                }
+                return webix.ui.multiselect.prototype.setValue.call(this, value);
+            },
+            getValue: function() {
+                var value = webix.ui.multiselect.prototype.getValue.call(this);
+                var new_value = value.split(",");
+                if(new_value.length) {
+                    return new_value;
+                } else {
+                    return value;
+                }
+            }
+        }, webix.ui.multiselect);
+
+        /*
+         *  Select propio
+         */
+        webix.protoUI({
+            name: "select2",
+            $init:function(config) {
+                if(config.options) {
+                    config.options = __duplicate__(config.options);
+                }
+            },
+            setValue: function(value) {
+                if(is_object(value)) {
+                    value = value.id;
+                }
+                return webix.ui.select.prototype.setValue.call(this, value);
+            }
+        }, webix.ui.select);
+
+        /*
          *  Contador de rows para las tablas
          */
         webix.ui.datafilter.countColumn = webix.extend({

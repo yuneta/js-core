@@ -889,8 +889,10 @@
                     }
                     break;
 
-                case "hook":    // definition of webix table col
-                    // TODO button to open a large paging formtable?
+                case "hook":    // definition of webix DATATABLE col
+                    webix_col["optionslist"] = true;
+                    webix_col["editor"] = "multiselect";
+                    webix_col["options"] = get_hook_options(self, tranger_col);
                     break;
 
                 case "fkey":    // definition of webix DATATABLE col
@@ -1217,8 +1219,15 @@
                     }
                     break;
 
-                case "hook":    // Definition of webix form element
-                    // TODO button to open a large paging formtable?
+                case "hook":    // Definition of webix FORM element
+                    webix_element = {
+                        view: "multiselect2",
+                        name: id,
+                        label: t(tranger_col.header),
+                        css: "input_font_fijo",
+                        readonly: is_writable?false:true,
+                        options: get_hook_options(self, tranger_col)
+                    };
                     break;
 
                 case "fkey":    // Definition of webix FORM element
@@ -1351,17 +1360,17 @@
     }
 
     /********************************************
+     *  Format of fkey ref: topic_name^topic_id^hook_name
      *  Return
      *      {
      *          topic_name:
      *          id:
      *          hook_name:
      *      }
-     *
      ********************************************/
-    function split_fkey_ref(self, col, ref)
+    function split_fkey_ref(self, col, fkey_ref)
     {
-        var tt = ref.split('^');
+        var tt = fkey_ref.split('^');
         if(tt.length != 3) {
             log_error(self.topic_name + ": Bad pkey ref: " + ref);
             log_error(col);
@@ -1380,6 +1389,32 @@
     }
 
     /********************************************
+     *  Format of hook ref: topic_name^topic_id
+     *  Return
+     *      {
+     *          topic_name:
+     *          id:
+     *      }
+     ********************************************/
+    function split_hook_ref(self, col, hook_ref)
+    {
+        var tt = hook_ref.split('^');
+        if(tt.length != 2) {
+            log_error(self.topic_name + ": Bad pkey ref: " + ref);
+            log_error(col);
+            return {
+                topic_name: "",
+                id: ""
+            }
+        } else {
+            return {
+                topic_name: tt[0],
+                id: tt[1]
+            }
+        }
+    }
+
+    /********************************************
      *
      ********************************************/
     function get_fkey_options(self, col)
@@ -1390,6 +1425,20 @@
             return list2options(current_list, "id", "id");
         }
         log_error("No fkey options found" + STRING.stringify(col));
+        return null;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_hook_options(self, col)
+    {
+        for(var topic_name in col.hook) {
+            // HACK we work with only one hook
+            var current_list = treedb_list_nodes(self.config.treedb_name, topic_name);
+            return list2options(current_list, "id", "id");
+        }
+        log_error("No hook options found" + STRING.stringify(col));
         return null;
     }
 
@@ -1506,7 +1555,34 @@
                 break;
 
             case "hook":    // Convert data from backend to frontend
-                // TODO
+                var new_value = [];
+                if(is_string(value)) {
+                    var hook_splitted_ref = split_hook_ref(self, col, value);
+                    if(hook_splitted_ref.id) {
+                        new_value.push(hook_splitted_ref.id);
+                    }
+                } else if(is_array(value)) {
+                    for(var i=0; i<value.length; i++) {
+                        var hook_splitted_ref = split_hook_ref(self, col, value[i]);
+                        if(hook_splitted_ref.id) {
+                            new_value.push(hook_splitted_ref.id);
+                        }
+                    }
+                } else if(is_object(value)) {
+                    for(var k in value) {
+                        var hook_splitted_ref = split_hook_ref(self, col, k);
+                        if(hook_splitted_ref.id) {
+                            new_value.push(hook_splitted_ref.id);
+                        }
+                    }
+                } else {
+                    log_error("hook type unknown");
+                    log_error(col);
+                    log_error(value);
+                }
+
+                value = new_value;
+
                 break;
 
             case "fkey":    // Convert data from backend to frontend
