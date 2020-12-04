@@ -1840,7 +1840,7 @@
             treedb_register_data(
                 self.config.treedb_name,
                 self.config.topic_name,
-                $table.serialize(true)
+                $table.serialize(true) // TODO  global data fuera de la table
             );
         }
 
