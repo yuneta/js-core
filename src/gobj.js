@@ -637,11 +637,13 @@ __inside_event_loop__ = 0;
         this.__config__ = null;
         this.__global__ = null;
         this.__filter__ = null;
+        this.__service__ = null;
 
         if(kw) {
             var __global__ = kw["__global__"];
             var __config__ = kw["__config__"];
             var __filter__ = kw["__filter__"];
+            var __service__ = kw["__service__"];
 
             if(__global__) {
                 this.__global__ = __duplicate__(__global__);
@@ -668,6 +670,9 @@ __inside_event_loop__ = 0;
             }
             if(__filter__) {
                 this.__filter__ = __duplicate__(__filter__);
+            }
+            if(__service__) {
+                this.__service__ = __service__;
             }
         }
     };

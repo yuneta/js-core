@@ -877,6 +877,7 @@ DEBUG: {
         __config__          json (dict)
         __global__          json (dict)
         __filter__          json (dict)
+        __service__         json (str)
 
      *
      ************************************************/
@@ -908,11 +909,7 @@ DEBUG: {
         /*
          *      __MESSAGE__
          */
-        var __service__ = null;
-        if(kw_has_key(kw, "__service__")) {
-            __service__ = kw.__service__;
-            delete kw.__service__;
-        }
+        var __service__ = subs.__service__?subs.__service__:null;
         var jn_ievent_id = build_ievent_request(
             this,
             subs.subscriber.name,
@@ -981,11 +978,7 @@ DEBUG: {
         /*
          *      __MESSAGE__
          */
-        var __service__ = null;
-        if(kw_has_key(kw, "__service__")) {
-            __service__ = kw.__service__;
-            delete kw.__service__;
-        }
+        var __service__ = subs.__service__?subs.__service__:null;
         var jn_ievent_id = build_ievent_request(
             this,
             subs.subscriber.name,
