@@ -440,7 +440,7 @@
         self.config.gobj_remote_yuno.gobj_subscribe_event(
             "EV_TREEDB_NODE_UPDATED",
             {
-                "service": self.config.treedb_name,
+                __service__: self.config.treedb_name,
                 __filter__: {
                     "topic_name": self.config.topic_name
                 }
@@ -450,7 +450,7 @@
         self.config.gobj_remote_yuno.gobj_subscribe_event(
             "EV_TREEDB_NODE_DELETED",
             {
-                "service": self.config.treedb_name,
+                __service__: self.config.treedb_name,
                 __filter__: {
                     "topic_name": self.config.topic_name
                 }
