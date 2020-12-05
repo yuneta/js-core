@@ -844,10 +844,15 @@ DEBUG: {
              *  Pon el ievent si no viene con él,
              *  si lo trae es que será alguna respuesta/redirección
              */
+            var __service__ = null;
+            if(kw_has_key(kw, "__service__")) {
+                __service__ = kw.__service__;
+                delete kw.__service__;
+            }
             var jn_ievent_id = build_ievent_request(
                 self,
                 src.name,
-                null
+                __service__
             );
             msg_iev_push_stack(
                 kw,         // not owned
@@ -903,10 +908,15 @@ DEBUG: {
         /*
          *      __MESSAGE__
          */
+        var __service__ = null;
+        if(kw_has_key(kw, "__service__")) {
+            __service__ = kw.__service__;
+            delete kw.__service__;
+        }
         var jn_ievent_id = build_ievent_request(
             this,
             subs.subscriber.name,
-            null
+            __service__
         );
         msg_iev_push_stack(
             kw,         // not owned
@@ -971,10 +981,15 @@ DEBUG: {
         /*
          *      __MESSAGE__
          */
+        var __service__ = null;
+        if(kw_has_key(kw, "__service__")) {
+            __service__ = kw.__service__;
+            delete kw.__service__;
+        }
         var jn_ievent_id = build_ievent_request(
             this,
             subs.subscriber.name,
-            null
+            __service__
         );
         msg_iev_push_stack(
             kw,         // not owned

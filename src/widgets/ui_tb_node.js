@@ -68,21 +68,20 @@
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
             return;
         }
-        var kw_req = {
-            service: service,
-            topic_name: topic_name
-        };
-        if(kw) {
-            __extend_dict__(kw_req, kw);
+        if(service) {
+            kw.service = service;
         }
-        msg_write_MIA_key(kw_req, "__command__", command);
-        msg_write_MIA_key(kw_req, "__topic_name__", topic_name);
+        if(topic_name) {
+            kw.topic_name = topic_name;
+            msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        }
+        msg_write_MIA_key(kw, "__command__", command);
 
         self.config.info_wait();
 
         var ret = self.config.gobj_remote_yuno.gobj_command(
             command,
-            kw_req,
+            kw,
             self
         );
         if(ret) {
@@ -437,6 +436,28 @@
         var self = this;
 
         refresh_node(self);
+
+        self.config.gobj_remote_yuno.gobj_subscribe_event(
+            "EV_TREEDB_NODE_UPDATED",
+            {
+                "service": self.config.treedb_name,
+                __filter__: {
+                    "topic_name": self.config.topic_name
+                }
+            },
+            self
+        );
+        self.config.gobj_remote_yuno.gobj_subscribe_event(
+            "EV_TREEDB_NODE_DELETED",
+            {
+                "service": self.config.treedb_name,
+                __filter__: {
+                    "topic_name": self.config.topic_name
+                }
+            },
+            self
+        );
+
     }
 
     /************************************************
