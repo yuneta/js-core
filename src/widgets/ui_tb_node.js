@@ -29,7 +29,7 @@
         topic_name: null,
 
         schema: null,
-        gobj_formtable_nodes: null,
+        gobj_formtable: null,
 
         $ui: null
     };
@@ -94,7 +94,7 @@
      ********************************************/
     function refresh_node(self)
     {
-        self.config.gobj_formtable_nodes.gobj_send_event(
+        self.config.gobj_formtable.gobj_send_event(
             "EV_CLEAR_DATA",
             {
             },
@@ -125,7 +125,7 @@
      ********************************************/
     function ac_open_window(self, event, kw, src)
     {
-        self.config.gobj_formtable_nodes.gobj_send_event("EV_TOGGLE", {}, self);
+        self.config.gobj_formtable.gobj_send_event("EV_TOGGLE", {}, self);
         return 0;
     }
 
@@ -161,7 +161,7 @@
             case "nodes":
                 if(result >= 0) {
                     self.config.schema = schema;
-                    self.config.gobj_formtable_nodes.gobj_send_event(
+                    self.config.gobj_formtable.gobj_send_event(
                         "EV_REBUILD_TABLE",
                         {
                             topic_name: schema.topic_name,
@@ -169,7 +169,7 @@
                         },
                         self
                     );
-                    self.config.gobj_formtable_nodes.gobj_send_event(
+                    self.config.gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
                         data,
                         self
@@ -179,7 +179,7 @@
 
             case "create-node":
                 if(result >= 0) {
-                    self.config.gobj_formtable_nodes.gobj_send_event(
+                    self.config.gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
                         is_object(data)?[data]:data,
                         self
@@ -188,7 +188,7 @@
                 break;
 
             case "update-node":
-                self.config.gobj_formtable_nodes.gobj_send_event(
+                self.config.gobj_formtable.gobj_send_event(
                     "EV_LOAD_DATA",
                     is_object(data)?[data]:data,
                     self
@@ -202,6 +202,48 @@
 
             default:
                 log_error(self.gobj_short_name() + " Command unknown: " + __md_iev__.__command__);
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
+    function ac_treedb_node_updated(self, event, kw, src)
+    {
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+
+        if(treedb_name == self.config.treedb_name &&
+                topic_name == self.config.topic_name) {
+            self.config.gobj_formtable.gobj_send_event(
+                "EV_LOAD_DATA",
+                is_object(node)?[node]:node,
+                self
+            );
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
+    function ac_treedb_node_deleted(self, event, kw, src)
+    {
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+
+        if(treedb_name == self.config.treedb_name &&
+                topic_name == self.config.topic_name) {
+            self.config.gobj_formtable.gobj_send_event(
+                "EV_DELETE_DATA",
+                is_object(node)?[node]:node,
+                self
+            );
         }
 
         return 0;
@@ -308,6 +350,8 @@
     var FSM = {
         "event_list": [
             "EV_MT_COMMAND_ANSWER",
+            "EV_TREEDB_NODE_UPDATED",
+            "EV_TREEDB_NODE_DELETED",
             "EV_OPEN_WINDOW",
             "EV_CREATE_RECORD",
             "EV_UPDATE_RECORD",
@@ -324,6 +368,8 @@
             "ST_IDLE":
             [
                 ["EV_MT_COMMAND_ANSWER",    ac_mt_command_answer,   undefined],
+                ["EV_TREEDB_NODE_UPDATED",  ac_treedb_node_updated, undefined],
+                ["EV_TREEDB_NODE_DELETED",  ac_treedb_node_deleted, undefined],
                 ["EV_OPEN_WINDOW",          ac_open_window,         undefined],
                 ["EV_CREATE_RECORD",        ac_create_record,       undefined],
                 ["EV_UPDATE_RECORD",        ac_update_record,       undefined],
@@ -369,7 +415,7 @@
     {
         var self = this;
 
-        self.config.gobj_formtable_nodes = self.yuno.gobj_create_unique(
+        self.config.gobj_formtable = self.yuno.gobj_create_unique(
             build_name(self, "-formtable"),
             Ui_formtable,
             {
@@ -412,7 +458,7 @@
             },
             __yuno__.__pinhold__
         );
-        self.config.gobj_formtable_nodes.config.$ui.hide();
+        self.config.gobj_formtable.config.$ui.hide();
     }
 
     /************************************************
