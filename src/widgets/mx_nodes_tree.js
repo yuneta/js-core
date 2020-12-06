@@ -2258,9 +2258,6 @@
         var name = self.gobj_escaped_short_name() + "'" + (cell_name?cell_name:"");
 
         var gobj_cell_formtable = cell.value.gobj_cell_formtable;
-        //if(cell_name) {
-        //    gobj_cell_formtable = __yuno__.gobj_find_unique_gobj(name);
-        //}
         if(gobj_cell_formtable) {
             gobj_cell_formtable.gobj_send_event("EV_TOGGLE", {}, self);
             return 0;
@@ -2324,12 +2321,6 @@
         }
         cell.value.gobj_cell_formtable = gobj_cell_formtable;
 
-        gobj_cell_formtable.gobj_send_event(
-            "EV_CLEAR_DATA",
-            {
-            },
-            self
-        );
         if(record) {
             gobj_cell_formtable.gobj_send_event(
                 "EV_LOAD_DATA",
