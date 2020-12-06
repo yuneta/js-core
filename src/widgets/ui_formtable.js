@@ -335,7 +335,7 @@
                                 newVal = Number(newVal);
                                 if(self.config.record_idx != newVal) {
                                     self.gobj_send_event(
-                                        "EV_RECORD_BY_IDX", {record_idx:newVal}, self
+                                        "EV_RECORD_BY_INDEX", {record_idx:newVal}, self
                                     );
                                 }
                             }
@@ -1423,7 +1423,7 @@
     function get_fkey_options(self, col)
     {
         for(var topic_name in col.fkey) {
-            // HACK we work with only one fkey
+            // HACK we work only with one fkey
             var current_list = treedb_list_nodes(self.config.treedb_name, topic_name);
             return list2options(current_list, "id", "id");
         }
@@ -1731,7 +1731,7 @@
      ********************************************/
     function build_fkey_ref(self, col, value)
     {
-        // HACK we work with only one fkey
+        // HACK we work only with one fkey
         var topic_name = Object.keys(col.fkey)[0]; // Get the first key
         var hook = col.fkey[topic_name];
 
@@ -1824,6 +1824,14 @@
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
+
+                if(self.config.current_mode == "update") {
+                    var $form_update = $$(build_name(self, "update_form"));
+                    $form_update.parse(data)
+                } else if(self.config.current_mode == "create") {
+                    var $form_create = $$(build_name(self, "create_form"));
+                    $form_create.parse(data);
+                }
             }
         } else if(data.length > 1) {
             if(self.config.last_selected_id) {
@@ -1848,18 +1856,122 @@
     }
 
     /********************************************
+     *  Data modified by other than this
+     ********************************************/
+    function ac_update_data(self, event, kw, src)
+    {
+        var data = kw;
+        if(!is_array(data)) {
+            log_error("FormTable, data MUST be an array");
+            trace_msg(data);
+            return -1;
+        }
+
+        var $table = $$(build_name(self, "list_table"));
+
+        if(self.config.with_webix_id) {
+            // HACK change id by id_, in webix id is key primary, in yuneta id can be repeated.
+            for(var i=0; i<data.length; i++) {
+                data[i]["id_"] = data[i].id;
+                delete data[i]["id"];
+            }
+        }
+
+        var new_data = [];
+        for(var i=0; i<data.length; i++) {
+            var record = data[i];
+            new_data.push(record2frontend(self, record));
+        }
+        $table.parse(new_data);
+
+        self.config.total = $table.count();
+        $$(build_name(self, "total")).setValue(self.config.total);
+
+        if(data.length == 1) {
+            if(!self.config.with_webix_id) {
+                var id = $table.getSelectedId();
+                if(id == data[0].id) {
+                    if(self.config.current_mode == "update") {
+                        var $form_update = $$(build_name(self, "update_form"));
+                        $form_update.parse(data)
+                    }
+                }
+            }
+        }
+
+        /*
+         *  Register as global data if
+         */
+        if(self.config.global_data) {
+            treedb_register_data(
+                self.config.treedb_name,
+                self.config.topic_name,
+                $table.serialize(true) // TODO  global data fuera de la table
+            );
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_delete_data(self, event, kw, src)
+    {
+        var data = kw;
+        if(!is_array(data)) {
+            log_error("FormTable, data MUST be an array");
+            trace_msg(data);
+            return -1;
+        }
+
+        var $table = $$(build_name(self, "list_table"));
+
+        if(self.config.with_webix_id) {
+            // HACK change id by id_, in webix id is key primary, in yuneta id can be repeated.
+            for(var i=0; i<data.length; i++) {
+                data[i]["id_"] = data[i].id;
+                delete data[i]["id"];
+            }
+        }
+
+        // TODO delete data
+
+        // TODO sync with form
+
+        self.config.total = $table.count();
+        $$(build_name(self, "total")).setValue(self.config.total);
+
+        // TODO select previous deleted record?
+        self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+
+        /*
+         *  Register as global data if
+         */
+        if(self.config.global_data) {
+            treedb_register_data(
+                self.config.treedb_name,
+                self.config.topic_name,
+                $table.serialize(true) // TODO  global data fuera de la table
+            );
+        }
+
+        return 0;
+    }
+
+    /********************************************
      *  External wants data
      ********************************************/
     function ac_get_data(self, event, kw, src)
     {
         var data = [];
-        var $widget = $$(build_name(self, "list_table"));
+        var $table = $$(build_name(self, "list_table"));
 
         // TODO pongo filtros?
         var ids = kwid_get_ids(kw.id);
         for(var i=0; i<ids.length; i++) {
             var id = ids[i];
-            var record = $widget.getItem(id);
+            var record = $table.getItem(id);
             data.push(record);
         }
         return data;
@@ -1871,10 +1983,10 @@
     function ac_get_checked_data(self, event, kw, src)
     {
         var data = [];
-        var $widget = $$(build_name(self, "list_table"));
+        var $table = $$(build_name(self, "list_table"));
 
         if(self.config.with_checkbox) {
-            $widget.data.each(function(obj){
+            $table.data.each(function(obj){
                 if(obj.row) {
                     data.push(obj);
                 }
@@ -1943,11 +2055,11 @@
 
         $form.clearValidation();
 
-        var $widget = $$(build_name(self, "list_table"));
-        var id = $widget.getSelectedId();
+        var $table = $$(build_name(self, "list_table"));
+        var id = $table.getSelectedId();
         if(id) {
-            $widget.unselectAll();
-            $widget.select(id);
+            $table.unselectAll();
+            $table.select(id);
         }
         var btn = $$(build_name(self, "update_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_submmit");
@@ -2071,10 +2183,10 @@
      ********************************************/
     function ac_first_record(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
-        var id = $widget.getFirstId();
+        var $table = $$(build_name(self, "list_table"));
+        var id = $table.getFirstId();
         if(id) {
-            $widget.select(id);
+            $table.select(id);
         }
 
         return 0;
@@ -2100,10 +2212,10 @@
      ********************************************/
     function ac_previous_record(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
-        var id = $widget.getPrevId($widget.getSelectedId());
+        var $table = $$(build_name(self, "list_table"));
+        var id = $table.getPrevId($table.getSelectedId());
         if(id) {
-            $widget.select(id);
+            $table.select(id);
         }
         return 0;
     }
@@ -2113,10 +2225,10 @@
      ********************************************/
     function ac_next_record(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
-        var id = $widget.getNextId($widget.getSelectedId());
+        var $table = $$(build_name(self, "list_table"));
+        var id = $table.getNextId($table.getSelectedId());
         if(id) {
-            $widget.select(id);
+            $table.select(id);
         }
         return 0;
     }
@@ -2141,10 +2253,10 @@
      ********************************************/
     function ac_last_record(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
-        var id = $widget.getLastId();
+        var $table = $$(build_name(self, "list_table"));
+        var id = $table.getLastId();
         if(id) {
-            $widget.select(id);
+            $table.select(id);
         }
         return 0;
     }
@@ -2152,19 +2264,19 @@
     /********************************************
      *
      ********************************************/
-    function ac_record_by_idx(self, event, kw, src)
+    function ac_record_by_index(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
+        var $table = $$(build_name(self, "list_table"));
         var idx = kw.record_idx -1;
 
         if(idx >= 0 && idx < self.config.total) {
-            var id = $widget.getIdByIndex(idx);
-            $widget.select(id);
-            $widget.showItem(id);
+            var id = $table.getIdByIndex(idx);
+            $table.select(id);
+            $table.showItem(id);
         } else {
-            var id = $widget.getSelectedId();
-            $widget.unselectAll();
-            $widget.select(id);
+            var id = $table.getSelectedId();
+            $table.unselectAll();
+            $table.select(id);
         }
         return 0;
     }
@@ -2176,14 +2288,16 @@
     {
         var id =  kw.id;
 
-        var $widget = $$(build_name(self, "list_table"));
-        $widget.select(id);
-        if($widget.getSelectedId() != id) {
-            id = $widget.getFirstId();
-            $widget.select(id);
-        }
+        var $table = $$(build_name(self, "list_table"));
 
-        $widget.showItem(id);
+        var idx = $table.getIndexById(id);
+        if(idx < 0) {
+            id = $table.getFirstId();
+            $table.select(id);
+        } else {
+            $table.select(id);
+        }
+        $table.showItem(id);
         return 0;
     }
 
@@ -2192,20 +2306,20 @@
      ********************************************/
     function ac_page(self, event, kw, src)
     {
-        var $widget = $$(build_name(self, "list_table"));
+        var $table = $$(build_name(self, "list_table"));
         var page = kw.page;
 
         var idx = ((page-1) * self.config.page_size);
 
         if(idx >= 0 && idx < self.config.total) {
-            var id = $widget.getIdByIndex(idx);
+            var id = $table.getIdByIndex(idx);
             self.config.page = page;
-            $widget.select(id);
-            $widget.showItem(id);
+            $table.select(id);
+            $table.showItem(id);
         } else {
-            var id = $widget.getSelectedId();
-            $widget.unselectAll();
-            $widget.select(id);
+            var id = $table.getSelectedId();
+            $table.unselectAll();
+            $table.select(id);
         }
         return 0;
     }
@@ -2365,6 +2479,8 @@
     var FSM = {
         "event_list": [
             "EV_LOAD_DATA",
+            "EV_UPDATE_DATA",
+            "EV_DELETE_DATA",
             "EV_CLEAR_DATA",
             "EV_GET_DATA",
             "EV_GET_CHECKED_DATA",
@@ -2387,7 +2503,7 @@
             "EV_NEXT_RECORD",
             "EV_NEXT_PAGE",
             "EV_LAST_RECORD",
-            "EV_RECORD_BY_IDX",
+            "EV_RECORD_BY_INDEX",
             "EV_RECORD_BY_ID",
             "EV_PAGE",
             "EV_REBUILD_TABLE",
@@ -2405,6 +2521,8 @@
             "ST_IDLE":
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
+                ["EV_UPDATE_DATA",              ac_update_data,             undefined],
+                ["EV_DELETE_DATA",              ac_delete_data,             undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
                 ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
@@ -2421,7 +2539,7 @@
                 ["EV_NEXT_RECORD",              ac_next_record,             undefined],
                 ["EV_NEXT_PAGE",                ac_next_page,               undefined],
                 ["EV_LAST_RECORD",              ac_last_record,             undefined],
-                ["EV_RECORD_BY_IDX",            ac_record_by_idx,           undefined],
+                ["EV_RECORD_BY_INDEX",          ac_record_by_index,         undefined],
                 ["EV_RECORD_BY_ID",             ac_record_by_id,            undefined],
                 ["EV_PAGE",                     ac_page,                    undefined],
                 ["EV_REBUILD_TABLE",            ac_rebuild_table,           undefined],

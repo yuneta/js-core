@@ -219,7 +219,7 @@
         if(treedb_name == self.config.treedb_name &&
                 topic_name == self.config.topic_name) {
             self.config.gobj_formtable.gobj_send_event(
-                "EV_LOAD_DATA",
+                "EV_UPDATE_DATA",
                 is_object(node)?[node]:node,
                 self
             );
@@ -488,6 +488,7 @@
             {
                 __service__: self.config.treedb_name,
                 __filter__: {
+                    "treedb_name": self.config.treedb_name,
                     "topic_name": self.config.topic_name
                 }
             },
@@ -498,6 +499,7 @@
             {
                 __service__: self.config.treedb_name,
                 __filter__: {
+                    "treedb_name": self.config.treedb_name,
                     "topic_name": self.config.topic_name
                 }
             },
