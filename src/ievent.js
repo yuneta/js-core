@@ -245,7 +245,6 @@ DEBUG: {
     function send_identity_card(self)
     {
         var kw = {
-            "realm_name": "",
             "yuno_role": self.yuno.yuno_role,
             "yuno_name": self.yuno.yuno_name,
             "yuno_alias": "",
