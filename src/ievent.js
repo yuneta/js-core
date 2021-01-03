@@ -5,7 +5,6 @@ DEBUG: {
     "realm_name": "",
     "yuno_role": "Mobile",
     "yuno_name": "mobile",
-    "yuno_alias": "",
     "yuno_version": "1.0.0",
     "yuno_release": "1.0.0",
     "yuneta_version": "4.5.0",
@@ -247,7 +246,7 @@ DEBUG: {
         var kw = {
             "yuno_role": self.yuno.yuno_role,
             "yuno_name": self.yuno.yuno_name,
-            "yuno_alias": "",
+            "yuno_tag": "",
             "yuno_version": self.yuno.yuno_version,
             "yuno_release": self.yuno.yuno_version,
             "yuneta_version": "4.5.0",
