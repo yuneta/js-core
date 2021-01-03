@@ -246,7 +246,6 @@ DEBUG: {
         var kw = {
             "yuno_role": self.yuno.yuno_role,
             "yuno_name": self.yuno.yuno_name,
-            "yuno_tag": "",
             "yuno_version": self.yuno.yuno_version,
             "yuno_release": self.yuno.yuno_version,
             "yuneta_version": "4.5.0",
