@@ -1441,16 +1441,13 @@
         for(var i=0; i<cols.length; i++) {
             var col = cols[i];
             var flag = col.flag;
-            var is_writable = elm_in_list("writable", flag);
             var is_hook = elm_in_list("hook", flag);
             var is_fkey = elm_in_list("fkey", flag);
-            if(is_writable) {
-                if(is_hook) {
-                    hooks.push(col);
-                }
-                if(is_fkey) {
-                    fkeys.push(col);
-                }
+            if(is_hook) {
+                hooks.push(col);
+            }
+            if(is_fkey) {
+                fkeys.push(col);
             }
         }
 
@@ -1610,39 +1607,12 @@
             var fkeys = cell.value.record[col.id];
 
             if(fkeys) {
-                if(is_string(fkeys)) {
-                    if(col.type != "string") {
-                        log_warning("fkey type must be string: " + JSON.stringify(fkeys));
-                    }
-                    var fkey = fkeys;
-                    if(!empty_string(fkey)) {
-                        draw_link(self, topic_name, fkey_port_cell, fkey);
-                    }
-
-                } else if(is_array(fkeys)) {
-                    if(!(col.type != "array" || col.type != "list")) {
-                        log_warning("fkey type must be array: " + JSON.stringify(fkeys));
-                    }
-
+                if(is_array(fkeys)) {
                     for(var j=0; j<fkeys.length; j++) {
-                        var fkey = fkeys[j];
-                        if(!empty_string(fkey)) {
-                            draw_link(self, topic_name, fkey_port_cell, fkey);
-                        }
+                        draw_link(self, topic_name, col, fkey_port_cell, fkeys[j]);
                     }
-                } else if(is_object(fkeys)) {
-                    if(!(col.type != "object" || col.type != "dict")) {
-                        log_warning("fkey type must be array: " + JSON.stringify(fkeys));
-                    }
-
-                    for(var fkey in fkeys) {
-                        if(!empty_string(fkey)) {
-                            draw_link(self, topic_name, fkey_port_cell, fkey);
-                        }
-                    }
-
                 } else {
-                    log_error("fkey type unsupported: " + JSON.stringify(fkeys));
+                    log_error("fkey type unsupported1: " + JSON.stringify(fkeys));
                 }
             }
         }
@@ -1667,18 +1637,91 @@
     }
 
     /************************************************************
+     *  fkey can be:
+     *
+     *      "$id"
+     *
+     *      "$topic_name^$id^$hook_name
+     *
+     *      {
+     *          topic_name: $topic_name,
+     *          id: $id,
+     *          hook_name: $hook_name
+     *      }
+     *
+     ************************************************************/
+    function decoder_fkey(col, fkey)
+    {
+        if(is_string(fkey)) {
+            if(fkey.indexOf("^") == -1) {
+                // "$id"
+                var fkey_desc = col.fkey;
+                if(json_object_size(fkey_desc)!=1) {
+                    log_error("bad fkey 1: " + JSON.stringify(fkey));
+                    return null;
+                }
+
+                for(var k in fkey_desc) {
+                    var topic_name = k;
+                    var hook_name = fkey_desc[k];
+                    break;
+                }
+
+                return {
+                    topic_name: topic_name,
+                    id: fkey,
+                    hook_name: hook_name
+                };
+
+            } else {
+                // "$topic_name^$id^$hook_name
+                var tt = ref.split("^");
+                if(tt.length != 3) {
+                    log_error("bad fkey 1: " + JSON.stringify(fkey));
+                    return null;
+                }
+                return {
+                    topic_name: tt[0],
+                    id: tt[1],
+                    hook_name: tt[2]
+                };
+            }
+
+        } else if(is_object(fkey)) {
+            return {
+                topic_name: fkey.topic_name,
+                id: fkey.id,
+                hook_name: fkey.hook_name
+            };
+
+        } else {
+            log_error("bad fkey 1: " + JSON.stringify(fkey));
+            return null;
+        }
+    }
+
+    /************************************************************
      *  Draw link
      ************************************************************/
-    function draw_link(self, source_topic_name, fkey_port_cell, ref)
+    function draw_link(
+        self,
+        source_topic_name,
+        source_col,
+        fkey_port_cell,
+        fkey
+    )
     {
         var graph = self.config._mxgraph;
         var model = graph.model;
 
         try {
-            var tt = ref.split("^");
-            var target_topic_name = tt[0];
-            var target_topic_id = tt[1];
-            var target_hook = tt[2];
+            fkey = decoder_fkey(source_col, fkey);
+            if(!fkey) {
+                return;
+            }
+            var target_topic_name = fkey.topic_name;
+            var target_topic_id = fkey.id;
+            var target_hook = fkey.hook_name;
 
             var target_cell_name = build_cell_name(
                 self, target_topic_name, target_topic_id
@@ -1694,7 +1737,8 @@
             );
             var target_port_cell = model.getCell(target_port_name);
 
-            var cell_id = fkey_port_cell.id + " ==> " + target_port_name; // HACK "==>" repeated
+            // HACK "==>" repeated
+            var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
             var link_cell = model.getCell(cell_id);
             if(!link_cell) {
                 graph.insertEdge(
@@ -1738,7 +1782,7 @@
                     tosave_green: false
                 },
                 40, 40,             // x,y
-                250, 200,           // width,height
+                210, 130,           // width,height TODO a configuración
                 schema.topic_name,  // style
                 false               // relative
             );
@@ -1913,7 +1957,6 @@
             model.endUpdate();
         }
 
-
         return 0;
     }
 
@@ -2068,17 +2111,17 @@
             parent_cell = target_cell;
         }
 
-        var parent = parent_cell.value.topic_name + "^";
-            parent += parent_cell.value.topic_id + "^";
-            parent += parent_cell.value.col.id
+        var parent_ref = parent_cell.value.topic_name + "^";
+            parent_ref += parent_cell.value.topic_id + "^";
+            parent_ref += parent_cell.value.col.id
 
-        var child = child_cell.value.topic_name + "^";
-            child += child_cell.value.topic_id;
+        var child_ref = child_cell.value.topic_name + "^";
+            child_ref += child_cell.value.topic_id;
 
         var kw_unlink = {
             treedb_name: self.config.treedb_name,
-            parent: parent,
-            child: child,
+            parent_ref: parent_ref,
+            child_ref: child_ref,
             cell_id: cell.id
         };
 
@@ -2519,20 +2562,21 @@
                     return -1;
                 }
 
-                var future_cell_id = child_cell.id + " ==> " + parent_cell.id; // HACK "==>" repeated
+                // HACK "==>" repeated
+                var future_cell_id = child_cell.id + " ==> " + parent_cell.id;
                 model.setValue(cell, future_cell_id);
 
-                var parent = parent_cell.value.topic_name + "^";
-                    parent += parent_cell.value.topic_id + "^";
-                    parent += parent_cell.value.col.id
+                var parent_ref = parent_cell.value.topic_name + "^";
+                    parent_ref += parent_cell.value.topic_id + "^";
+                    parent_ref += parent_cell.value.col.id
 
-                var child = child_cell.value.topic_name + "^";
-                    child += child_cell.value.topic_id;
+                var child_ref = child_cell.value.topic_name + "^";
+                    child_ref += child_cell.value.topic_id;
 
                 var kw_link = {
                     treedb_name: self.config.treedb_name,
-                    parent: parent,
-                    child: child,
+                    parent_ref: parent_ref,
+                    child_ref: child_ref,
                     cell_id: cell.id
                 };
 
