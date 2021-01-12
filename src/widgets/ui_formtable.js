@@ -1029,6 +1029,9 @@
             var is_hook = elm_in_list("hook", flag);
             var is_fkey = elm_in_list("fkey", flag);
             var is_enum = elm_in_list("enum", flag);
+            if(is_hook || is_fkey) {
+                is_writable = true;
+            }
 
             switch(mode) {
                 case "create":
@@ -1363,61 +1366,6 @@
     }
 
     /********************************************
-     *  Format of fkey ref: topic_name^topic_id^hook_name
-     *  Return
-     *      {
-     *          topic_name:
-     *          id:
-     *          hook_name:
-     *      }
-     ********************************************/
-    function split_fkey_ref(self, col, fkey_ref)
-    {
-        var tt = fkey_ref.split('^');
-        if(tt.length != 3) {
-            log_error(self.topic_name + ": Bad pkey ref: " + ref);
-            log_error(col);
-            return {
-                topic_name: "",
-                id: "",
-                hook_name: ""
-            }
-        } else {
-            return {
-                topic_name: tt[0],
-                id: tt[1],
-                hook_name: tt[2]
-            }
-        }
-    }
-
-    /********************************************
-     *  Format of hook ref: topic_name^topic_id
-     *  Return
-     *      {
-     *          topic_name:
-     *          id:
-     *      }
-     ********************************************/
-    function split_hook_ref(self, col, hook_ref)
-    {
-        var tt = hook_ref.split('^');
-        if(tt.length != 2) {
-            log_error(self.topic_name + ": Bad pkey ref: " + ref);
-            log_error(col);
-            return {
-                topic_name: "",
-                id: ""
-            }
-        } else {
-            return {
-                topic_name: tt[0],
-                id: tt[1]
-            }
-        }
-    }
-
-    /********************************************
      *
      ********************************************/
     function get_fkey_options(self, col)
@@ -1561,26 +1509,26 @@
                 var new_value = [];
                 if(value) {
                     if(is_string(value)) {
-                        var hook_splitted_ref = split_hook_ref(self, col, value);
-                        if(hook_splitted_ref.id) {
-                            new_value.push(hook_splitted_ref.id);
+                        var hook = decoder_hook(col, value);
+                        if(hook) {
+                            new_value.push(hook.id);
                         }
                     } else if(is_array(value)) {
                         for(var i=0; i<value.length; i++) {
-                            var hook_splitted_ref = split_hook_ref(self, col, value[i]);
-                            if(hook_splitted_ref.id) {
-                                new_value.push(hook_splitted_ref.id);
+                            var hook = decoder_hook(col, value[i]);
+                            if(hook) {
+                                new_value.push(hook.id);
                             }
                         }
                     } else if(is_object(value)) {
                         for(var k in value) {
-                            var hook_splitted_ref = split_hook_ref(self, col, k);
-                            if(hook_splitted_ref.id) {
-                                new_value.push(hook_splitted_ref.id);
+                            var hook = decoder_hook(self, col, k);
+                            if(hook) {
+                                new_value.push(hook.id);
                             }
                         }
                     } else {
-                        log_error("hook type unknown");
+                        log_error("hook type unsupported 2");
                         log_error(col);
                         log_error(value);
                     }
@@ -1594,28 +1542,19 @@
                 var new_value = [];
                 if(value) {
                     if(is_string(value)) {
-                        var fkey_splitted_ref = split_fkey_ref(self, col, value);
-                        if(fkey_splitted_ref.id) {
-                            new_value.push(fkey_splitted_ref.id);
+                        var fkey = decoder_fkey(col, value);
+                        if(fkey) {
+                            new_value.push(fkey); // TODO ? .id);
                         }
                     } else if(is_array(value)) {
                         for(var i=0; i<value.length; i++) {
-                            var fkey_splitted_ref = split_fkey_ref(self, col, value[i]);
-                            if(fkey_splitted_ref.id) {
-                                new_value.push(fkey_splitted_ref.id);
-                            }
-                        }
-                    } else if(is_object(value)) {
-                        for(var k in value) {
-                            var fkey_splitted_ref = split_fkey_ref(self, col, k);
-                            if(fkey_splitted_ref.id) {
-                                new_value.push(fkey_splitted_ref.id);
+                            var fkey = decoder_fkey(col, value[i]);
+                            if(fkey) {
+                                new_value.push(fkey); // TODO ? .id);
                             }
                         }
                     } else {
-                        log_error("fkey type unknown");
-                        log_error(col);
-                        log_error(value);
+                        log_error("fkey type unsupported: " + JSON.stringify(value));
                     }
                 }
 
@@ -2030,7 +1969,10 @@
                 {
                     topic_name: self.config.topic_name,
                     is_topic_schema: self.config.is_topic_schema,
-                    record: new_kw
+                    record: new_kw,
+                    options: {
+                        "autolink": true
+                    }
                 }
             );
             //$form.save(); update asynchronously by backend

@@ -1607,12 +1607,14 @@
             var fkeys = cell.value.record[col.id];
 
             if(fkeys) {
-                if(is_array(fkeys)) {
+                if(is_string(fkeys)) {
+                    draw_link(self, topic_name, col, fkey_port_cell, fkeys);
+                } else if(is_array(fkeys)) {
                     for(var j=0; j<fkeys.length; j++) {
                         draw_link(self, topic_name, col, fkey_port_cell, fkeys[j]);
                     }
                 } else {
-                    log_error("fkey type unsupported1: " + JSON.stringify(fkeys));
+                    log_error("fkey type unsupported: " + JSON.stringify(fkeys));
                 }
             }
         }
@@ -1634,70 +1636,6 @@
             return cols[cold_id];
         }
         return null;
-    }
-
-    /************************************************************
-     *  fkey can be:
-     *
-     *      "$id"
-     *
-     *      "$topic_name^$id^$hook_name
-     *
-     *      {
-     *          topic_name: $topic_name,
-     *          id: $id,
-     *          hook_name: $hook_name
-     *      }
-     *
-     ************************************************************/
-    function decoder_fkey(col, fkey)
-    {
-        if(is_string(fkey)) {
-            if(fkey.indexOf("^") == -1) {
-                // "$id"
-                var fkey_desc = col.fkey;
-                if(json_object_size(fkey_desc)!=1) {
-                    log_error("bad fkey 1: " + JSON.stringify(fkey));
-                    return null;
-                }
-
-                for(var k in fkey_desc) {
-                    var topic_name = k;
-                    var hook_name = fkey_desc[k];
-                    break;
-                }
-
-                return {
-                    topic_name: topic_name,
-                    id: fkey,
-                    hook_name: hook_name
-                };
-
-            } else {
-                // "$topic_name^$id^$hook_name
-                var tt = ref.split("^");
-                if(tt.length != 3) {
-                    log_error("bad fkey 1: " + JSON.stringify(fkey));
-                    return null;
-                }
-                return {
-                    topic_name: tt[0],
-                    id: tt[1],
-                    hook_name: tt[2]
-                };
-            }
-
-        } else if(is_object(fkey)) {
-            return {
-                topic_name: fkey.topic_name,
-                id: fkey.id,
-                hook_name: fkey.hook_name
-            };
-
-        } else {
-            log_error("bad fkey 1: " + JSON.stringify(fkey));
-            return null;
-        }
     }
 
     /************************************************************
@@ -2260,6 +2198,7 @@
      *      topic_name,
      *      is_topic_schema,
      *      record
+     *      options
      *      + cell_id (vertex cell id)
      *  }
      ********************************************/
@@ -2275,6 +2214,7 @@
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
             record: kw.record,
+            options: kw.options,
             cell_id: cell_id
         };
 
