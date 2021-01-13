@@ -1585,6 +1585,91 @@
     }
 
     /************************************************************
+     *  Clear links
+     ************************************************************/
+    function clear_links(self, cell)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.model;
+
+        var topic_name = cell.value.schema.topic_name;
+        var topic_id = cell.value.record.id;
+
+        var cols = cell.value.schema.cols;
+        for(var i=0; i<cols.length; i++) {
+            var col = cols[i];
+            if(!col.fkey) {
+                continue;
+            }
+
+            var fkey_port_name = build_fkey_port_id(self, topic_name, topic_id, col);
+            var fkey_port_cell = model.getCell(fkey_port_name);
+            var fkeys = cell.value.record[col.id];
+
+            if(fkeys) {
+                if(is_string(fkeys)) {
+                    clear_link(self, topic_name, col, fkey_port_cell, fkeys);
+                } else if(is_array(fkeys)) {
+                    for(var j=0; j<fkeys.length; j++) {
+                        clear_link(self, topic_name, col, fkey_port_cell, fkeys[j]);
+                    }
+                } else {
+                    log_error("fkey type unsupported: " + JSON.stringify(fkeys));
+                }
+            }
+        }
+    }
+
+    /************************************************************
+     *  Clear link
+     ************************************************************/
+    function clear_link(
+        self,
+        source_topic_name,
+        source_col,
+        fkey_port_cell,
+        fkey
+    )
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.model;
+
+        try {
+            fkey = decoder_fkey(source_col, fkey);
+            if(!fkey) {
+                return;
+            }
+            var target_topic_name = fkey.topic_name;
+            var target_topic_id = fkey.id;
+            var target_hook = fkey.hook_name;
+
+            var target_cell_name = build_cell_name(
+                self, target_topic_name, target_topic_id
+            );
+            var target_cell = model.getCell(target_cell_name);
+            var targer_hook_col = get_col(target_cell.value.schema.cols, target_hook);
+
+            var target_port_name = build_hook_port_id(
+                self,
+                target_topic_name,
+                target_topic_id,
+                targer_hook_col
+            );
+            var target_port_cell = model.getCell(target_port_name);
+
+            // HACK "==>" repeated
+            var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
+            var link_cell = model.getCell(cell_id);
+            if(link_cell) {
+                graph.removeCells([link_cell]);
+            }
+
+        } catch (e) {
+            log_error(e);
+        }
+    }
+
+    /************************************************************
      *  Draw links
      ************************************************************/
     function draw_links(self, cell)
@@ -1865,6 +1950,7 @@
                 var model = graph.getModel();
                 var cell = model.getCell(cell_id);
 
+                clear_links(self, cell);
                 update_topic_cell(self, cell, schema, data);
                 draw_links(self, cell);
 
