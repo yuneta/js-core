@@ -1944,12 +1944,11 @@
 
             if(cell_id) {
                 /*--------------------------------------------*
-                *  Updating cell (editing or user creating)
-                *--------------------------------------------*/
+                 *  Updating cell (editing or user creating)
+                 *--------------------------------------------*/
                 var graph = self.config._mxgraph;
                 var model = graph.getModel();
                 var cell = model.getCell(cell_id);
-
                 clear_links(self, cell);
                 update_topic_cell(self, cell, schema, data);
                 draw_links(self, cell);
@@ -2000,6 +1999,19 @@
                 get_layer(self),    // parent
                 true                // selectGroups
             );
+
+            /*
+             *  Borra los formtable de celda abiertos
+             */
+            var cells = graph.getSelectionCells();
+            for(var i=0; i<cells.length; i++) {
+                var cell = cells[i];
+                if(cell.value.gobj_cell_formtable) {
+                    __yuno__.gobj_destroy(cell.value.gobj_cell_formtable);
+                    cell.value.gobj_cell_formtable = 0;
+                }
+            }
+
             graph.removeCells();
 
         } catch (e) {
@@ -2076,7 +2088,7 @@
         model.beginUpdate();
         try {
             if(!cell.value.cell_name) {
-                // new vertex in progress, delete
+                // new vertex in progress, delete formtable of cell
                 if(cell.value.gobj_cell_formtable) {
                     __yuno__.gobj_destroy(cell.value.gobj_cell_formtable);
                     cell.value.gobj_cell_formtable = 0;
@@ -2133,6 +2145,19 @@
             child_cell = target_cell;
         } else if(target_cell.value.hook) {
             parent_cell = target_cell;
+        }
+
+        /*
+         *  Quita los formtable abiertos de las cell,
+         *  no puedo actualizar los links en la formtable
+         */
+        if(parent_cell.parent.value.gobj_cell_formtable) {
+            __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
+            parent_cell.parent.value.gobj_cell_formtable = 0;
+        }
+        if(child_cell.parent.value.gobj_cell_formtable) {
+            __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
+            child_cell.parent.value.gobj_cell_formtable = 0;
         }
 
         var parent_ref = parent_cell.value.topic_name + "^";
@@ -2586,6 +2611,19 @@
                     graph.removeCells([cell]);
                     log_warning(t("links must be between fkey and hook port"));
                     return -1;
+                }
+
+                /*
+                 *  Quita los formtable abiertos de las cell,
+                 *  no puedo actualizar los links en la formtable
+                 */
+                if(parent_cell.parent.value.gobj_cell_formtable) {
+                    __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
+                    parent_cell.parent.value.gobj_cell_formtable = 0;
+                }
+                if(child_cell.parent.value.gobj_cell_formtable) {
+                    __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
+                    child_cell.parent.value.gobj_cell_formtable = 0;
                 }
 
                 // HACK "==>" repeated
