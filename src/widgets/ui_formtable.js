@@ -1760,6 +1760,8 @@
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);
 
+        $table.unselectAll();
+
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
