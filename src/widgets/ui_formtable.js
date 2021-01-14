@@ -1760,19 +1760,11 @@
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);
 
-        $table.unselectAll();
+        $table.unselectAll(); // HACK important, to update the form in the select below.
 
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
-
-//                 if(self.config.current_mode == "update") {
-//                     var $form_update = $$(build_name(self, "update_form"));
-//                     $form_update.parse(new_data)
-//                 } else if(self.config.current_mode == "create") {
-//                     var $form_create = $$(build_name(self, "create_form"));
-//                     $form_create.parse(new_data);
-//                 }
             }
         } else if(data.length > 1) {
             if(self.config.last_selected_id) {
