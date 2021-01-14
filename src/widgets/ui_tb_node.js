@@ -430,7 +430,7 @@
                 treedb_name: self.config.treedb_name,
                 topic_name: self.config.topic_name,
                 cols: null, // later, when arriving data
-                global_data: true,
+                global_data: true,  // TODO REMOVE when tb_treedb is done
                 is_topic_schema: false,
                 with_checkbox: false,
                 with_textfilter: true,
