@@ -2151,14 +2151,14 @@
          *  Quita los formtable abiertos de las cell,
          *  no puedo actualizar los links en la formtable
          */
-        if(parent_cell.parent.value.gobj_cell_formtable) {
-            __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
-            parent_cell.parent.value.gobj_cell_formtable = 0;
-        }
-        if(child_cell.parent.value.gobj_cell_formtable) {
-            __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
-            child_cell.parent.value.gobj_cell_formtable = 0;
-        }
+//         if(parent_cell.parent.value.gobj_cell_formtable) {
+//             __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
+//             parent_cell.parent.value.gobj_cell_formtable = 0;
+//         }
+//         if(child_cell.parent.value.gobj_cell_formtable) {
+//             __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
+//             child_cell.parent.value.gobj_cell_formtable = 0;
+//         }
 
         var parent_ref = parent_cell.value.topic_name + "^";
             parent_ref += parent_cell.value.topic_id + "^";
@@ -2171,10 +2171,14 @@
             treedb_name: self.config.treedb_name,
             parent_ref: parent_ref,
             child_ref: child_ref,
-            cell_id: cell.id
+            options: {
+                // "list-dict": true TODO
+            },
+            link_cell_id: cell.id,
+            child_cell_id: child_cell.parent.id
         };
 
-        // Wait to EV_NODE_DELETED to delete cell
+        // Wait to EV_NODES_UNLINKED to delete cell
         self.gobj_publish_event("EV_UNLINK_RECORDS", kw_unlink, self);
 
         return 0;
@@ -2617,14 +2621,14 @@
                  *  Quita los formtable abiertos de las cell,
                  *  no puedo actualizar los links en la formtable
                  */
-                if(parent_cell.parent.value.gobj_cell_formtable) {
-                    __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
-                    parent_cell.parent.value.gobj_cell_formtable = 0;
-                }
-                if(child_cell.parent.value.gobj_cell_formtable) {
-                    __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
-                    child_cell.parent.value.gobj_cell_formtable = 0;
-                }
+//                 if(parent_cell.parent.value.gobj_cell_formtable) {
+//                     __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
+//                     parent_cell.parent.value.gobj_cell_formtable = 0;
+//                 }
+//                 if(child_cell.parent.value.gobj_cell_formtable) {
+//                     __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
+//                     child_cell.parent.value.gobj_cell_formtable = 0;
+//                 }
 
                 // HACK "==>" repeated
                 var future_cell_id = child_cell.id + " ==> " + parent_cell.id;
@@ -2641,9 +2645,14 @@
                     treedb_name: self.config.treedb_name,
                     parent_ref: parent_ref,
                     child_ref: child_ref,
-                    cell_id: cell.id
+                    options: {
+                        // "list-dict": true TODO
+                    },
+                    link_cell_id: cell.id,
+                    child_cell_id: child_cell.parent.id
                 };
 
+                // Wait to EV_NODES_LINKED to fix cell
                 self.gobj_publish_event("EV_LINK_RECORDS", kw_link, self);
             }
         }
