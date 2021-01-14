@@ -219,7 +219,7 @@
         if(treedb_name == self.config.treedb_name &&
                 topic_name == self.config.topic_name) {
             self.config.gobj_formtable.gobj_send_event(
-                "EV_UPDATE_DATA",
+                "EV_LOAD_DATA",
                 is_object(node)?[node]:node,
                 self
             );

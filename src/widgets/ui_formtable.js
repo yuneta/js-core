@@ -1795,64 +1795,6 @@
     }
 
     /********************************************
-     *  Data modified by other than this
-     ********************************************/
-    function ac_update_data(self, event, kw, src)
-    {
-        var data = kw;
-        if(!is_array(data)) {
-            log_error("FormTable, data MUST be an array");
-            trace_msg(data);
-            return -1;
-        }
-
-        var $table = $$(build_name(self, "list_table"));
-
-        if(self.config.with_webix_id) {
-            // HACK change id by id_, in webix id is key primary, in yuneta id can be repeated.
-            for(var i=0; i<data.length; i++) {
-                data[i]["id_"] = data[i].id;
-                delete data[i]["id"];
-            }
-        }
-
-        var new_data = [];
-        for(var i=0; i<data.length; i++) {
-            var record = data[i];
-            new_data.push(record2frontend(self, record));
-        }
-        $table.parse(new_data);
-
-        self.config.total = $table.count();
-        $$(build_name(self, "total")).setValue(self.config.total);
-
-        if(data.length == 1) {
-            if(!self.config.with_webix_id) {
-                var id = $table.getSelectedId();
-                if(id == data[0].id) {
-                    if(self.config.current_mode == "update") {
-                        var $form_update = $$(build_name(self, "update_form"));
-                        $form_update.parse(new_data)
-                    }
-                }
-            }
-        }
-
-        /*
-         *  Register as global data if
-         */
-        if(self.config.global_data) {
-            treedb_register_data(
-                self.config.treedb_name,
-                self.config.topic_name,
-                $table.serialize(true) // TODO  global data fuera de la table
-            );
-        }
-
-        return 0;
-    }
-
-    /********************************************
      *
      ********************************************/
     function ac_delete_data(self, event, kw, src)
@@ -2421,7 +2363,6 @@
     var FSM = {
         "event_list": [
             "EV_LOAD_DATA",
-            "EV_UPDATE_DATA",
             "EV_DELETE_DATA",
             "EV_CLEAR_DATA",
             "EV_GET_DATA",
@@ -2463,7 +2404,6 @@
             "ST_IDLE":
             [
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
-                ["EV_UPDATE_DATA",              ac_update_data,             undefined],
                 ["EV_DELETE_DATA",              ac_delete_data,             undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
