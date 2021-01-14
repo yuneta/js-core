@@ -2826,34 +2826,7 @@
      ********************************************/
     function ac_rebuild_panel(self, event, kw, src)
     {
-        if(!self.config.is_pinhold_window) {
-            /*
-             *  If it's a container panel:
-             *      Get current index,
-             *      remove UI from parent,
-             *      re-build UI,
-             *      add UI to parent with same idx.
-             */
-            var idx = self.config.$container_parent.index(self.config.$ui);
-            if(idx < 0) {
-                return -1;
-            }
-            var visible = self.parent.config.views_opened?
-                self.parent.config.views_opened[self.name]:true;
-            self.config.$container_parent.removeView(self.config.$ui);
-        }
-
         rebuild(self);
-
-        if(!self.config.is_pinhold_window) {
-            self.config.$container_parent.addView(self.config.$ui, idx);
-            if(visible) {
-                self.config.$ui.show();
-            } else {
-                self.config.$ui.hide();
-            }
-        }
-
         return 0;
     }
 
