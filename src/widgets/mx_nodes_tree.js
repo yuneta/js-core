@@ -56,8 +56,7 @@
         //////////////// Particular Attributes //////////////////
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
-        topics_name: null,  // topics_name editing
-        graph_styles: null,
+        topics: null,  // topics editing
 
         locked: false, // TODO dejalo en true inicialmente
         fitted: false,
@@ -1012,13 +1011,23 @@
          */
         configureStylesheet(graph);
 
-        for(var style_name in self.config.graph_styles) {
-            var style = self.config.graph_styles[style_name];
-            create_graph_style(
-                graph,
-                style_name,
-                style
-            );
+
+        /*
+         *  Create own styles
+         */
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
+            var graph_styles = topic.graph_styles;
+
+            for(var style_name in graph_styles) {
+                var style = graph_styles[style_name];
+                create_graph_style(
+                    graph,
+                    topic_name + "_" + style_name,
+                    style
+                );
+            }
         }
 
         /*
@@ -1403,9 +1412,16 @@
         var style = "";
 
         for(var k in col.hook) {
-            if(elm_in_list(k, self.config.topics_name)) {
-                return k + "_hook";
+            //return k + "_hook"; // TODO no será directamente asi?
+            for(var i=0; i<self.config.topics.length; i++) {
+                var topic = self.config.topics[i];
+                if(k == topic.topic_name) {
+                    return k + "_hook"; // TODO no será directamente co
+                }
             }
+//             if(elm_in_list(k, self.config.topics_name)) { TODO No tenia mucho sentido
+//                 return k + "_hook";
+//             }
         }
 
         return style;
@@ -1808,7 +1824,7 @@
                 },
                 40, 40,             // x,y
                 210, 130,           // width,height TODO a configuración
-                schema.topic_name,  // style
+                schema.topic_name + "_node",  // style
                 false               // relative
             );
             cell.setConnectable(false);
@@ -1840,7 +1856,7 @@
                 },
                 x, y,               // x,y
                 width, height,      // width,height
-                schema.topic_name,  // style
+                schema.topic_name + "_node",  // style
                 false               // relative
             );
             cell.setConnectable(false);
@@ -2036,8 +2052,10 @@
          *  Update topics_name menu
          */
         var topics = [];
-        for(var i=0; i<self.config.topics_name.length; i++) {
-            var topic_name = self.config.topics_name[i];
+
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
             var desc = self.config.descs[topic_name];
             if(!desc) {
                 log_error("DESC of " + topic_name + " Not found");
@@ -2478,20 +2496,25 @@
     /********************************************
      *
      ********************************************/
-    function ac_save_red(self, event, kw, src)
-    {
-        // TODO
-
-        return 0;
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function ac_run_node(self, event, kw, src)
     {
-        // TODO
-
+        var cell = kw.cell;
+        if(!cell) {
+            return -1;
+        }
+        if(cell.isVertex()) {
+            if(cell.value && cell.value.schema) {
+                // It's a topic node cell
+                var kw_cell = {
+                    treedb_name: self.config.treedb_name,
+                    topic_name: cell.value.schema.topic_name,
+                    is_topic_schema: false,
+                    record: cell.value.record,
+                    cell_id: cell.id
+                }
+                self.gobj_publish_event("EV_RUN_NODE", kw_cell, self);
+            }
+        }
         return 0;
     }
 
@@ -2858,6 +2881,7 @@
             "EV_UPDATE_RECORD: output",
             "EV_LINK_RECORDS: output",
             "EV_UNLINK_RECORDS: output",
+            "EV_RUN_NODE: output",
 
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
@@ -2867,9 +2891,6 @@
             "EV_NODES_UNLINKED",
             "EV_SHOW_CELL_DATA_FORM",
             "EV_SHOW_CELL_DATA_JSON",
-
-            "EV_SAVE_RED",
-            "EV_RUN_NODE",
 
             "EV_MX_CLICK",
             "EV_MX_SELECTION_CHANGE",
@@ -2908,7 +2929,6 @@
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
 
-                ["EV_SAVE_RED",                 ac_save_red,                undefined],
                 ["EV_RUN_NODE",                 ac_run_node,                undefined],
 
                 ["EV_MX_CLICK",                 ac_mx_click,                undefined],
