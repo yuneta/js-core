@@ -1192,46 +1192,46 @@
                 /*--------------------------*
                  *  Red/Green Save button
                  *--------------------------*/
-                if(cell.value.tosave_red) {
-                    var overlay_instance = new mxCellOverlay(
-                        self.config.image_save_red,
-                        "Fix to save data", // tooltip
-                        mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
-                        mxConstants.ALIGN_TOP,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                        new mxPoint(0*offsx - offsy, -offsy), // offset
-                        "pointer" // cursor
-                    );
-                    graph.addCellOverlay(cell, overlay_instance);
-                    overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                        self.gobj_send_event(
-                            "EV_SAVE_RED",
-                            {
-                                cell: cell
-                            },
-                            self
-                        );
-                    });
-                } else if(cell.value.tosave_green) {
-                    var overlay_instance = new mxCellOverlay(
-                        self.config.image_save_green,
-                        "Save data", // tooltip
-                        mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
-                        mxConstants.ALIGN_TOP, // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                        new mxPoint(0*offsx - offsy, -offsy), // offset
-                        "pointer" // cursor
-                    );
-                    graph.addCellOverlay(cell, overlay_instance);
-                    overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                        var topic = evt2.getProperty('cell').value;
-                        self.gobj_send_event(
-                            "EV_SAVE_GREEN",
-                            {
-                                cell: cell
-                            },
-                            self
-                        );
-                    });
-                }
+//                 if(cell.value.tosave_red) {
+//                     var overlay_instance = new mxCellOverlay(
+//                         self.config.image_save_red,
+//                         "Fix to save data", // tooltip
+//                         mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+//                         mxConstants.ALIGN_TOP,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+//                         new mxPoint(0*offsx - offsy, -offsy), // offset
+//                         "pointer" // cursor
+//                     );
+//                     graph.addCellOverlay(cell, overlay_instance);
+//                     overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+//                         self.gobj_send_event(
+//                             "EV_SAVE_RED",
+//                             {
+//                                 cell: cell
+//                             },
+//                             self
+//                         );
+//                     });
+//                 } else if(cell.value.tosave_green) {
+//                     var overlay_instance = new mxCellOverlay(
+//                         self.config.image_save_green,
+//                         "Save data", // tooltip
+//                         mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+//                         mxConstants.ALIGN_TOP, // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+//                         new mxPoint(0*offsx - offsy, -offsy), // offset
+//                         "pointer" // cursor
+//                     );
+//                     graph.addCellOverlay(cell, overlay_instance);
+//                     overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+//                         var topic = evt2.getProperty('cell').value;
+//                         self.gobj_send_event(
+//                             "EV_SAVE_GREEN",
+//                             {
+//                                 cell: cell
+//                             },
+//                             self
+//                         );
+//                     });
+//                 }
 
                 /*--------------------------*
                  *  Delete button
@@ -1591,6 +1591,11 @@
     {
         var graph = self.config._mxgraph;
         var model = graph.model;
+
+        if(!cell.value.record) {
+            // Virgin node
+            return;
+        }
 
         var topic_name = cell.value.schema.topic_name;
         var topic_id = cell.value.record.id;
@@ -2503,17 +2508,18 @@
             return -1;
         }
         if(cell.isVertex()) {
-            if(cell.value && cell.value.schema) {
-                // It's a topic node cell
-                var kw_cell = {
-                    treedb_name: self.config.treedb_name,
-                    topic_name: cell.value.schema.topic_name,
-                    is_topic_schema: false,
-                    record: cell.value.record,
-                    cell_id: cell.id
-                }
-                self.gobj_publish_event("EV_MX_VERTEX_CLICKED", kw_cell, self);
-            }
+// De momento no los publico
+//             if(cell.value && cell.value.schema) {
+//                 // It's a topic node cell
+//                 var kw_cell = {
+//                     treedb_name: self.config.treedb_name,
+//                     topic_name: cell.value.schema.topic_name,
+//                     is_topic_schema: false,
+//                     record: cell.value.record,
+//                     cell_id: cell.id
+//                 }
+//                 self.gobj_publish_event("EV_MX_VERTEX_CLICKED", kw_cell, self);
+//             }
         } else {
 //             if(cell.value && cell.value.schema) {
 //                 // It's a topic node cell
