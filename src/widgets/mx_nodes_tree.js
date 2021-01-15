@@ -18,8 +18,7 @@
         cell_name: null,        // cell id: treedb_name`topic_name^record_id, null in new records
         schema: schema,         // Schema of topic
         record: null,           // Data of node
-        tosave_red: true,       // Pending to save with not fixed errors
-        tosave_green: false     // Pending to save with good data
+        tosave_red: true        // Pending to save with not fixed errors
     },
 
  *
@@ -1048,18 +1047,6 @@
                         "height='" +
                         self.config.top_overlay_icon_size +
                         "'>"
-                    } else if(cell.value.tosave_green) {
-                        t += "<input " +
-                        "style='cursor:default' " +
-                        "type='image' src='" +
-                        "/static/app/images/yuneta/save_green.svg" +
-                        "' alt='Save data' " +
-                        "width='" +
-                        self.config.top_overlay_icon_size +
-                        "' " +
-                        "height='" +
-                        self.config.top_overlay_icon_size +
-                        "'>"
                     }
                     return t;
                 }
@@ -1188,50 +1175,6 @@
                         );
                     });
                 }
-
-                /*--------------------------*
-                 *  Red/Green Save button
-                 *--------------------------*/
-//                 if(cell.value.tosave_red) {
-//                     var overlay_instance = new mxCellOverlay(
-//                         self.config.image_save_red,
-//                         "Fix to save data", // tooltip
-//                         mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
-//                         mxConstants.ALIGN_TOP,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-//                         new mxPoint(0*offsx - offsy, -offsy), // offset
-//                         "pointer" // cursor
-//                     );
-//                     graph.addCellOverlay(cell, overlay_instance);
-//                     overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-//                         self.gobj_send_event(
-//                             "EV_SAVE_RED",
-//                             {
-//                                 cell: cell
-//                             },
-//                             self
-//                         );
-//                     });
-//                 } else if(cell.value.tosave_green) {
-//                     var overlay_instance = new mxCellOverlay(
-//                         self.config.image_save_green,
-//                         "Save data", // tooltip
-//                         mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
-//                         mxConstants.ALIGN_TOP, // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-//                         new mxPoint(0*offsx - offsy, -offsy), // offset
-//                         "pointer" // cursor
-//                     );
-//                     graph.addCellOverlay(cell, overlay_instance);
-//                     overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-//                         var topic = evt2.getProperty('cell').value;
-//                         self.gobj_send_event(
-//                             "EV_SAVE_GREEN",
-//                             {
-//                                 cell: cell
-//                             },
-//                             self
-//                         );
-//                     });
-//                 }
 
                 /*--------------------------*
                  *  Delete button
