@@ -19,6 +19,7 @@
         schema: schema,         // Schema of topic
         record: null,           // Data of node
         tosave_red: true        // Pending to save with not fixed errors
+        torun_node: true        // Publish event when click
     },
 
  *
@@ -69,7 +70,7 @@
         image_data_in_memory: null,
         image_data_on_moving: null,
         image_save_red: null,
-        image_save_green: null,
+        image_run: null,
         image_delete: null,
         image_collapsed: null,
         image_expanded: null,
@@ -217,8 +218,8 @@
             '/static/app/images/yuneta/sequence.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
-        self.config.image_save_green = new mxImage(
-            '/static/app/images/yuneta/save_green.svg',
+        self.config.image_run = new mxImage(
+            '/static/app/images/yuneta/instance_running.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
         self.config.image_save_red = new mxImage(
@@ -1115,7 +1116,7 @@
     /************************************************************
      *
      ************************************************************/
-    function add_overlays(self, graph, cell)
+    function add_class_overlays(self, graph, cell)
     {
         var model = graph.getModel();
         model.beginUpdate();
@@ -1244,6 +1245,59 @@
                         );
                     });
                 }
+            }
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function add_state_overlays(self, graph, cell)
+    {
+        var model = graph.getModel();
+        model.beginUpdate();
+        try {
+            var offsy = self.config.top_overlay_icon_size/1.5;
+            var offsx = self.config.top_overlay_icon_size + 5;
+
+            if(cell.isVertex() && cell.value && cell.value.schema) {
+                /*--------------------------------------*
+                 *          Topics
+                 *--------------------------------------*/
+
+                /*--------------------------*
+                 *  Play button
+                 *--------------------------*/
+                if(!cell.value.tosave_red) {
+                    var overlay_instance = new mxCellOverlay(
+                        self.config.image_run,
+                        "Run Node", // tooltip
+                        mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+                        mxConstants.ALIGN_TOP,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                        new mxPoint(-1*offsx, 2*offsy), // offset
+                        "pointer" // cursor
+                    );
+                    graph.addCellOverlay(cell, overlay_instance);
+                    overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+                        self.gobj_send_event(
+                            "EV_RUN_NODE",
+                            {
+                                cell: cell
+                            },
+                            self
+                        );
+                    });
+                }
+
+            } else if(cell.isEdge()) {
+                /*--------------------------------------*
+                 *          Links
+                 *--------------------------------------*/
             }
 
         } catch (e) {
@@ -1750,7 +1804,7 @@
                     schema: schema,
                     record: null,
                     tosave_red: true,
-                    tosave_green: false
+                    torun_node: false
                 },
                 40, 40,             // x,y
                 210, 130,           // width,height TODO a configuración
@@ -1782,7 +1836,7 @@
                     schema: schema,
                     record: record,
                     tosave_red: false,
-                    tosave_green: false
+                    torun_node: false
                 },
                 x, y,               // x,y
                 width, height,      // width,height
@@ -1821,7 +1875,7 @@
             cell.value.schema = schema; // DANGER if schema has changed?
             cell.value.record = record;
             cell.value.tosave_red = false;
-            cell.value.tosave_green = false;
+            cell.value.torun_node = false;
 
         } else {
             /*---------------------------------------------------------*
@@ -1842,7 +1896,7 @@
             cell.value.schema = schema;  // DANGER if schema has changed?
             cell.value.record = record;
             cell.value.tosave_red = false;
-            cell.value.tosave_green = false;
+            cell.value.torun_node = false;
 
             graph.removeSelectionCell(cell); // To remove overlays icons
 
@@ -1882,7 +1936,8 @@
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
-        var model = self.config._mxgraph.getModel();
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
 
         model.beginUpdate();
         try {
@@ -1894,8 +1949,6 @@
                 /*--------------------------------------------*
                  *  Updating cell (editing or user creating)
                  *--------------------------------------------*/
-                var graph = self.config._mxgraph;
-                var model = graph.getModel();
                 var cell = model.getCell(cell_id);
                 clear_links(self, cell);
                 update_topic_cell(self, cell, schema, data);
@@ -1909,6 +1962,7 @@
                 for(var i=0; i<data.length; i++) {
                     var record = data[i];
                     var cell = create_topic_cell(self, schema, record);
+                    add_state_overlays(self, graph, cell);
                     cells.push(cell);
                 }
 
@@ -2434,7 +2488,7 @@
     /********************************************
      *
      ********************************************/
-    function ac_save_green(self, event, kw, src)
+    function ac_run_node(self, event, kw, src)
     {
         // TODO
 
@@ -2498,6 +2552,7 @@
                 for (var i = 0; i < cells_removed.length; i++) {
                     var cell = cells_removed[i];
                     graph.removeCellOverlays(cell); // Delete all previous overlays
+                    add_state_overlays(self, graph, cell);
                 }
             }
         } catch (e) {
@@ -2510,7 +2565,8 @@
                 for (var i = 0; i < cells_added.length; i++) {
                     var cell = cells_added[i];
                     graph.removeCellOverlays(cell); // Delete all previous overlays
-                    add_overlays(self, graph, cell);
+                    add_state_overlays(self, graph, cell);
+                    add_class_overlays(self, graph, cell);
                 }
             }
         } catch (e) {
@@ -2813,7 +2869,7 @@
             "EV_SHOW_CELL_DATA_JSON",
 
             "EV_SAVE_RED",
-            "EV_SAVE_GREEN",
+            "EV_RUN_NODE",
 
             "EV_MX_CLICK",
             "EV_MX_SELECTION_CHANGE",
@@ -2853,7 +2909,7 @@
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
 
                 ["EV_SAVE_RED",                 ac_save_red,                undefined],
-                ["EV_SAVE_GREEN",               ac_save_green,              undefined],
+                ["EV_RUN_NODE",                 ac_run_node,                undefined],
 
                 ["EV_MX_CLICK",                 ac_mx_click,                undefined],
                 ["EV_MX_SELECTION_CHANGE",      ac_selection_change,        undefined],
