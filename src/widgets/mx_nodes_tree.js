@@ -19,7 +19,7 @@
         schema: schema,         // Schema of topic
         record: null,           // Data of node
         tosave_red: true        // Pending to save with not fixed errors
-        torun_node: true        // Publish event when click
+        torun_node: true        // Publish event EV_RUN_NODE when click
     },
 
  *
@@ -1282,7 +1282,7 @@
                 /*--------------------------*
                  *  Play button
                  *--------------------------*/
-                if(!cell.value.tosave_red) {
+                if(cell.value.torun_node) {
                     var overlay_instance = new mxCellOverlay(
                         self.config.image_run,
                         "Run Node", // tooltip
@@ -1412,19 +1412,23 @@
         var style = "";
 
         for(var k in col.hook) {
-            //return k + "_hook"; // TODO no será directamente asi?
-            for(var i=0; i<self.config.topics.length; i++) {
-                var topic = self.config.topics[i];
-                if(k == topic.topic_name) {
-                    return k + "_hook"; // TODO no será directamente co
-                }
-            }
-//             if(elm_in_list(k, self.config.topics_name)) { TODO No tenia mucho sentido
-//                 return k + "_hook";
-//             }
+            return k + "_hook"; // TODO no será directamente asi?
         }
 
         return style;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_torun_node(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.run_event;
+            }
+        }
     }
 
     /********************************************
@@ -1808,6 +1812,8 @@
         var model = graph.model;
         var cell = null;
 
+        var torun_node = get_torun_node(self, schema.topic_name);
+
         if(!record) {
             /*---------------------------------------------*
              *  Creating new empty cell from user design
@@ -1820,7 +1826,7 @@
                     schema: schema,
                     record: null,
                     tosave_red: true,
-                    torun_node: false
+                    torun_node: torun_node
                 },
                 40, 40,             // x,y
                 210, 130,           // width,height TODO a configuración
@@ -1852,7 +1858,7 @@
                     schema: schema,
                     record: record,
                     tosave_red: false,
-                    torun_node: false
+                    torun_node: torun_node
                 },
                 x, y,               // x,y
                 width, height,      // width,height
@@ -1891,7 +1897,6 @@
             cell.value.schema = schema; // DANGER if schema has changed?
             cell.value.record = record;
             cell.value.tosave_red = false;
-            cell.value.torun_node = false;
 
         } else {
             /*---------------------------------------------------------*
@@ -1912,7 +1917,6 @@
             cell.value.schema = schema;  // DANGER if schema has changed?
             cell.value.record = record;
             cell.value.tosave_red = false;
-            cell.value.torun_node = false;
 
             graph.removeSelectionCell(cell); // To remove overlays icons
 
