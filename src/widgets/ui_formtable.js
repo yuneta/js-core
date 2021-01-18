@@ -1441,7 +1441,12 @@
                 new_record[field_name] = col2frontend(col, value);
             } else {
                 if(field_name.substring(0, 2) != "__") { // pass metadata
-                    log_error("No col def for " + field_name);
+                    // Se da tambien en
+                    if(!(self.config.is_topic_schema &&
+                        (field_name == "fkey" || field_name == "hook"))
+                    ) {
+                        log_error("No col def for '" + field_name + "'");
+                    }
                 }
             }
         }
