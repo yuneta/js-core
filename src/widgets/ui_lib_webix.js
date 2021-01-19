@@ -25,7 +25,7 @@
             name: "multicombo2",
             $init:function(config) {
                 if(config.options) {
-                    config.options = __duplicate__(config.options);
+                    //config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {
@@ -55,7 +55,7 @@
             name: "combo2",
             $init:function(config) {
                 if(config.options) {
-                    config.options = __duplicate__(config.options);
+                    //config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {
@@ -73,7 +73,7 @@
             name: "multiselect2",
             $init:function(config) {
                 if(config.options) {
-                    config.options = __duplicate__(config.options);
+                    //config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {
@@ -103,7 +103,7 @@
             name: "select2",
             $init:function(config) {
                 if(config.options) {
-                    config.options = __duplicate__(config.options);
+                    //config.options = __duplicate__(config.options);
                 }
             },
             setValue: function(value) {

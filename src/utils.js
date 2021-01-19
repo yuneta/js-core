@@ -1424,11 +1424,11 @@
                         value: list[i]
                     });
                 } else if(is_object(v)) {
-                    var vv = __duplicate__(v);
-                    if(!kw_has_key(vv, field_id)) {
+                    var vv = {}; //__duplicate__(v);
+                    if(!kw_has_key(v, field_id)) {
                         log_error("list2options(): object without field id: " + field_id);
                     }
-                    if(!kw_has_key(vv, field_value)) {
+                    if(!kw_has_key(v, field_value)) {
                         log_error("list2options(): object without field value: " + field_value);
                     }
                     vv["id"] = v[field_id];

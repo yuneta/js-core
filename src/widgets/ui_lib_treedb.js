@@ -3,6 +3,23 @@
  *
  *          Treedb common helpers
  *
+ *  - El treedb center se registra,
+ *  - Los formtable con treedb_name
+ *      se subcriben masivamente a las tablas de los hooks y fkeys.
+ *  - Los hook se subscriben a todos las modificaciones-z de los hijos,
+ *    ( solo de los create y delete realmente, solo se necesita el id del que existe)
+ *    en cada una redefinirán sus option2list, así un padre puede cortar el link.
+ *    pero puede ser un proceso lento.
+ *  - Los fkeys se subscriben a todas las modificaciones de los padres,
+ *    realmente solo se necesita a las creaciones y deletes de los registros de la tabla,
+ *    updates y link/unlink le da igual. Con cada publicación redefinirán sus option2list.
+ *  OJO con los unsubscribe!! necesarios!
+ *
+ *  El formtable publicará los eventos: CREATE_NODE, DELETE_NODE, UPDATE_NODE
+ *  en el UPDATE_NODE irá un reseteo/creación de los links.
+ *  OJO que un link/unlink implica un update de dos nodos, el padre y el hijo. Quién primero?
+ *
+ *
  *  Version
  *  -------
  *  1.0     Initial release
