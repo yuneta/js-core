@@ -4,8 +4,10 @@
  *          Treedb common helpers
  *
  *  - El treedb center se registra,
+ *
  *  - Los formtable con treedb_name
  *      se subcriben masivamente a las tablas de los hooks y fkeys.
+ *
  *  - Los hook se subscriben a todos las modificaciones-z de los hijos,
  *    ( solo de los create y delete realmente, solo se necesita el id del que existe)
  *    en cada una redefinirán sus option2list, así un padre puede cortar el link.
@@ -39,10 +41,76 @@
     /********************************************
      *
      ********************************************/
-    function treedb_register_data(treedb_name, topic_name, data)
+    function treedb_register_formtable(treedb_name, topic_name, gobj_formtable)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        treedb[topic_name] = data; // Se supone que es un array global que no cambia
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+        kw_set_dict_value(topic, "gobj_formtable", gobj_formtable);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_unregister_formtable(treedb_name, topic_name)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+        kw_set_dict_value(topic, "gobj_formtable", null);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_register_nodes(treedb_name, topic_name, nodes)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+
+        kw_set_dict_value(topic, "nodes", kwid_new_dict(nodes));
+
+        // TODO update formtables registered
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_register_new_node(treedb_name, topic_name, node)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
+
+        kw_set_dict_value(nodes, node.id, node);
+
+        // TODO update formtables registered
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_register_update_node(treedb_name, topic_name, node)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
+
+        kw_set_dict_value(nodes, node.id, node);
+
+        // TODO update formtables registered
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_register_del_node(treedb_name, topic_name, node)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
+        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
+
+        delete nodes[node.id];
+
+        // TODO update formtables registered
     }
 
     /********************************************
@@ -51,7 +119,8 @@
     function treedb_list_nodes(treedb_name, topic_name)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, false);
-        return kw_get_dict_value(treedb, topic_name, [], false);
+        var topic = kw_get_dict_value(treedb, topic_name, {}, false);
+        return kw_get_dict_value(topic, "nodes", [], false);
     }
 
     /************************************************************
@@ -205,8 +274,14 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.treedb_register_data = treedb_register_data;
+    exports.treedb_register_formtable = treedb_register_formtable;
+    exports.treedb_unregister_formtable = treedb_unregister_formtable;
+    exports.treedb_register_nodes = treedb_register_nodes;
+    exports.treedb_register_new_node = treedb_register_new_node;
+    exports.treedb_register_update_node = treedb_register_update_node;
+    exports.treedb_register_del_node = treedb_register_del_node;
     exports.treedb_list_nodes = treedb_list_nodes;
+
     exports.decoder_fkey = decoder_fkey;
     exports.decoder_hook = decoder_hook;
 

@@ -676,11 +676,11 @@
         return _kw_match_simple(kw, jn_filter, 0);
     }
 
-    /*
+    /*************************************************************
         Being `kw` a row's list or list of dicts [{},...],
         return a new list of incref (clone) kw filtering the rows by `jn_filter` (where),
         If match_fn is 0 then kw_match_simple is used.
-     */
+     *************************************************************/
     function kw_collect(kw, jn_filter, match_fn)
     {
         if(!kw) {
@@ -710,7 +710,7 @@
         return kw_new;
     }
 
-    /*
+    /*************************************************************
         Utility for databases.
         Being `ids` a:
 
@@ -735,8 +735,8 @@
                 ...
             ]
 
-        return a list of all ids (all duplicated items)
-    */
+        return a list of all ids
+    *************************************************************/
     function kwid_get_ids(ids)
     {
         if(!ids) {
@@ -793,10 +793,10 @@
         return new_ids;
     }
 
-    /*
+    /*************************************************************
         Utility for databases.
         Return TRUE if `id` is in the list/dict/str `ids`
-     */
+     *************************************************************/
     function kwid_match_id(ids, id)
     {
         if(is_null(ids) || !id) {
@@ -836,7 +836,7 @@
         return false;
     }
 
-    /*
+    /*************************************************************
         Utility for databases.
         Being `kw` a:
             - list of strings [s,...]
@@ -846,7 +846,7 @@
         and matching the ids.
         If match_fn is 0 then kw_match_simple is used.
         NOTE Using JSON_INCREF/JSON_DECREF HACK
-     */
+     *************************************************************/
     function kwid_collect(kw, ids, jn_filter, match_fn)
     {
         if(!kw) {
@@ -897,11 +897,45 @@
         return kw_new;
     }
 
-    /*
+    /*************************************************************
+        Utility for databases.
+        Return a new dict from a "dict of records" or "list of records"
+        WARNING the "id" of a dict's record is hardcorded to their key.
+        Convention:
+            - all arrays are list of records (dicts) with "id" field as primary key
+            - delimiter is '`' and '.'
+        If path is empty then use kw
+     *************************************************************/
+    function kwid_new_dict(kw, path)
+    {
+        var new_dict = {};
+        if(!empty_string(path)) {
+            kw = _kw_search_path(kw, path);
+        }
+        if(is_object(kw)) {
+            new_dict = kw;
+
+        } else if(is_array(kw)) {
+            for(var i=0; i<kw.length; i++) {
+                var kv = kw[i];
+                var id = kw_get_str(kv, "id", null, false);
+                if(!empty_string(id)) {
+                    new_dict[id] = kv;
+                }
+            }
+
+        } else {
+            log_error("kwid_new_dict: data type unknown");
+        }
+
+        return new_dict;
+    }
+
+    /*************************************************************
      *  From a dict,
      *  get a new dict with the same objects with only attributes in keylist
      *  keylist can be a [s,...] of {s:..., ...}
-     */
+     *************************************************************/
     function filter_dict(dict, keylist)
     {
         var new_dict = {};
@@ -922,10 +956,10 @@
         return new_dict;
     }
 
-    /*
+    /*************************************************************
      *  From a list of objects (dict_list),
      *  get a new list with the same objects with only attributes in keylist
-     */
+     *************************************************************/
     function filter_dictlist(dict_list, keylist)
     {
         var new_dictlist = [];
@@ -936,10 +970,10 @@
         return new_dictlist;
     }
 
-    /*
+    /*************************************************************
      *  From a list of objects (dict_list),
      *  get a new list with the value of the `key` attribute
-     */
+     *************************************************************/
     function filter_list(dict_list, key)
     {
         var new_list = [];
@@ -1309,10 +1343,7 @@
         if(!(kw === Object(kw))) {
             return -1;
         }
-        var v = kw[key];
-        if(v == undefined) {
-            kw[key] = value;
-        }
+        kw[path] = value;
         return 0;
     }
 
@@ -1424,7 +1455,7 @@
                         value: list[i]
                     });
                 } else if(is_object(v)) {
-                    var vv = {}; //__duplicate__(v);
+                    var vv = {};
                     if(!kw_has_key(v, field_id)) {
                         log_error("list2options(): object without field id: " + field_id);
                     }
@@ -1437,6 +1468,13 @@
                 } else {
                     log_error("list2options(): case1 not implemented");
                 }
+            }
+        } else if(is_object(list)) {
+            for(var k in list) {
+                options.push({
+                    id: k,
+                    value: k
+                });
             }
         } else {
             log_error("list2options(): case2 not implemented");
@@ -1804,9 +1842,10 @@
     exports.cmp_two_simple_json = cmp_two_simple_json;
     exports.kw_match_simple = kw_match_simple;
     exports.kw_collect = kw_collect;
+    exports.kwid_get_ids = kwid_get_ids;
     exports.kwid_match_id = kwid_match_id;
     exports.kwid_collect = kwid_collect;
-    exports.kwid_get_ids = kwid_get_ids;
+    exports.kwid_new_dict = kwid_new_dict;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
@@ -1827,6 +1866,7 @@
     exports.kw_get_int = kw_get_int;
     exports.kw_get_str = kw_get_str;
     exports.kw_get_dict_value = kw_get_dict_value;
+    exports.kw_set_dict_value = kw_set_dict_value;
     exports.get_unique_id = get_unique_id;
     exports.uuidv4 = uuidv4;
     exports.load_json_file = load_json_file;

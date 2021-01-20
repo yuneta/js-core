@@ -59,6 +59,20 @@
     }
 
     /********************************************
+     *
+     ********************************************/
+    function get_gobj_formtable(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.gobj_formtable;
+            }
+        }
+        return null;
+    }
+
+    /********************************************
      * TODO
      ********************************************/
     function send_command_to_treedb(self, command, service, topic_name, kw)
@@ -91,22 +105,27 @@
     /********************************************
      * TODO
      ********************************************/
-    function refresh_node(self)
+    function refresh_treedb(self)
     {
-        self.config.gobj_formtable.gobj_send_event(
-            "EV_CLEAR_DATA",
-            {
-            },
-            self
-        );
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
 
-        send_command_to_treedb(
-            self,
-            "nodes",
-            self.config.treedb_name,
-            self.config.topic_name,
-            {}
-        );
+            topic.gobj_formtable.gobj_send_event(
+                "EV_CLEAR_DATA",
+                {
+                },
+                self
+            );
+
+            send_command_to_treedb(
+                self,
+                "nodes",
+                self.config.treedb_name,
+                topic_name,
+                {}
+            );
+        }
     }
 
     /********************************************
@@ -147,6 +166,7 @@
         for(var i=0; i<self.config.topics.length; i++) {
             var topic = self.config.topics[i];
             var topic_name = topic.topic_name;
+            var label = topic.label;
 
             topic["gobj_formtable"] = __yuno__.gobj_create_unique(
                 build_name(self, topic_name + " formtable"),
@@ -159,9 +179,8 @@
                     },
 
                     treedb_name: self.config.treedb_name,
-                    topic_name: self.config.topic_name,
+                    topic_name: topic_name,
                     cols: null, // later, when arriving data
-                    global_data: true,  // TODO REMOVE when tb_treedb is done
                     is_topic_schema: false,
                     with_checkbox: false,
                     with_textfilter: true,
@@ -182,7 +201,7 @@
                         without_create_window_on_start: true
                     },
                     is_pinhold_window: true,
-                    window_title: self.config.topic_name,
+                    window_title: label,
                     window_image: "",
                     width: 950,
                     height: 600
@@ -281,7 +300,8 @@
             case "nodes":
                 if(result >= 0) {
                     self.config.schema = schema;
-                    self.config.gobj_formtable.gobj_send_event(
+                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
+                    gobj_formtable.gobj_send_event(
                         "EV_REBUILD_TABLE",
                         {
                             topic_name: schema.topic_name,
@@ -289,7 +309,14 @@
                         },
                         self
                     );
-                    self.config.gobj_formtable.gobj_send_event(
+
+                    treedb_register_nodes(
+                        self.config.treedb_name,
+                        schema.topic_name,
+                        data
+                    );
+
+                    gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
                         data,
                         self
@@ -299,24 +326,52 @@
 
             case "create-node":
                 if(result >= 0) {
-                    self.config.gobj_formtable.gobj_send_event(
+                    treedb_register_new_node(
+                        self.config.treedb_name,
+                        schema.topic_name,
+                        data
+                    );
+
+                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
+                    gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
-                        is_object(data)?[data]:data,
+                        [data],
                         self
                     );
                 }
                 break;
 
             case "update-node":
-                self.config.gobj_formtable.gobj_send_event(
-                    "EV_LOAD_DATA",
-                    is_object(data)?[data]:data,
-                    self
-                );
+                if(result >= 0) {
+                    treedb_register_update_node(
+                        self.config.treedb_name,
+                        schema.topic_name,
+                        data
+                    );
+
+                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
+                    gobj_formtable.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        [data],
+                        self
+                    );
+                }
                 break;
 
             case "delete-node":
                 if(result >= 0) {
+                    treedb_register_del_node(
+                        self.config.treedb_name,
+                        schema.topic_name,
+                        data
+                    );
+
+                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
+                    gobj_formtable.gobj_send_event(
+                        "EV_DELETE_DATA",
+                        [data],
+                        self
+                    );
                 }
                 break;
 
@@ -336,9 +391,9 @@
         var topic_name = kw_get_str(kw, "topic_name", "", 0);
         var node = kw_get_dict_value(kw, "node", null, 0);
 
-        if(treedb_name == self.config.treedb_name &&
-                topic_name == self.config.topic_name) {
-            self.config.gobj_formtable.gobj_send_event(
+        if(treedb_name == self.config.treedb_name) {
+            var gobj_formtable = get_gobj_formtable(self, topic_name);
+            gobj_formtable.gobj_send_event(
                 "EV_LOAD_DATA",
                 is_object(node)?[node]:node,
                 self
@@ -357,9 +412,9 @@
         var topic_name = kw_get_str(kw, "topic_name", "", 0);
         var node = kw_get_dict_value(kw, "node", null, 0);
 
-        if(treedb_name == self.config.treedb_name &&
-                topic_name == self.config.topic_name) {
-            self.config.gobj_formtable.gobj_send_event(
+        if(treedb_name == self.config.treedb_name) {
+            var gobj_formtable = get_gobj_formtable(self, topic_name);
+            gobj_formtable.gobj_send_event(
                 "EV_DELETE_DATA",
                 is_object(node)?[node]:node,
                 self
@@ -370,15 +425,17 @@
     }
 
     /********************************************
-     *
+     *  From formtable
      ********************************************/
     function ac_create_record(self, event, kw, src)
     {
+        var topic_name = src.gobj_read_attr("topic_name");
+
         send_command_to_treedb(
             self,
             "create-node",
             self.config.treedb_name,
-            self.config.topic_name,
+            topic_name,
             {
                 record: kw.record
             }
@@ -387,15 +444,17 @@
     }
 
     /********************************************
-     *
+     *  From formtable
      ********************************************/
     function ac_update_record(self, event, kw, src)
     {
+        var topic_name = src.gobj_read_attr("topic_name");
+
         send_command_to_treedb(
             self,
             "update-node",
             self.config.treedb_name,
-            self.config.topic_name,
+            topic_name,
             {
                 record: kw.record
 
@@ -405,15 +464,17 @@
     }
 
     /********************************************
-     *
+     *  From formtable
      ********************************************/
     function ac_delete_record(self, event, kw, src)
     {
+        var topic_name = src.gobj_read_attr("topic_name");
+
         send_command_to_treedb(
             self,
             "delete-node",
             self.config.treedb_name,
-            self.config.topic_name,
+            topic_name,
             {
                 filter: {
                     id: kw.record.id
@@ -424,20 +485,34 @@
     }
 
     /********************************************
-     *
+     *  From formtable, wants refresh
      ********************************************/
     function ac_refresh_table(self, event, kw, src)
     {
-        refresh_node(self);
+        send_command_to_treedb(
+            self,
+            "nodes",
+            self.config.treedb_name,
+            kw.topic_name,
+            {}
+        );
         return 0;
     }
 
     /********************************************
      *  From formtable,
      *  when window is destroying or minififying
+     *  kw
+     *      treedb_name
+     *      topic_name
+     *      {destroying: true}   Window destroying
+     *      {destroying: false}  Window minifying
      ********************************************/
     function ac_close_formtable(self, event, kw, src)
     {
+        if(kw.destroying) {
+            treedb_unregister_formtable(self.config.treedb_name, kw.topic_name);
+        }
         return 0;
     }
 
@@ -573,6 +648,7 @@
         var self = this;
 
         treedb_descs(self);
+        refresh_treedb(self);
     }
 
     /************************************************

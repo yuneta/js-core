@@ -52,7 +52,6 @@
         topic_name: null,
         schema: null,   // TODO change all users creating this to use cols, then remove schema
         cols: null,
-        global_data: false, // true for register data in treedb common
         webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
         list_mode_enabled: true,
@@ -1779,17 +1778,6 @@
             }
         }
 
-        /*
-         *  Register as global data if
-         */
-        if(self.config.global_data) {
-            treedb_register_data(
-                self.config.treedb_name,
-                self.config.topic_name,
-                $table.serialize(true) // TODO  global data fuera de la table
-            );
-        }
-
         return 0;
     }
 
@@ -1798,43 +1786,17 @@
      ********************************************/
     function ac_delete_data(self, event, kw, src)
     {
-        var data = kw;
-        if(!is_array(data)) {
-            log_error("FormTable, data MUST be an array");
-            trace_msg(data);
-            return -1;
-        }
-
         var $table = $$(build_name(self, "list_table"));
 
-        if(self.config.with_webix_id) {
-            // HACK change id by id_, in webix id is key primary, in yuneta id can be repeated.
-            for(var i=0; i<data.length; i++) {
-                data[i]["id_"] = data[i].id;
-                delete data[i]["id"];
-            }
-        }
+        var ids = kwid_get_ids(kw);
 
-        // TODO delete data
+        $table.remove(ids);
+        $table.unselectAll(); // HACK important, to update the form in the select below.
 
-        // TODO sync with form
+        self.gobj_send_event("EV_FIRST_RECORD", {}, self);
 
         self.config.total = $table.count();
         $$(build_name(self, "total")).setValue(self.config.total);
-
-        // TODO select previous deleted record?
-        self.gobj_send_event("EV_FIRST_RECORD", {}, self);
-
-        /*
-         *  Register as global data if
-         */
-        if(self.config.global_data) {
-            treedb_register_data(
-                self.config.treedb_name,
-                self.config.topic_name,
-                $table.serialize(true) // TODO  global data fuera de la table
-            );
-        }
 
         return 0;
     }
@@ -2259,6 +2221,8 @@
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
+        kw.treedb_name = self.config.treedb_name;
+        kw.topic_name = self.config.topic_name;
         self.gobj_publish_event(event, kw, self);
         return 0;
     }
@@ -2447,6 +2411,14 @@
         self.gobj_subscribe_event(null, null, subscriber);
 
         rebuild(self);
+
+        if(!empty_string(self.config.treedb_name)) {
+            treedb_register_formtable(
+                self.config.treedb_name,
+                self.config.topic_name,
+                self
+            );
+        }
     }
 
     /************************************************
