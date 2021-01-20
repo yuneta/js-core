@@ -2721,7 +2721,7 @@
                  *      + cell_id (vertex cell id)
                  *  }
                  */
-                __update_dict__(
+                __extend_dict__(
                     cell.value.record["_geometry"],
                     filter_dict(
                         cell.geometry,

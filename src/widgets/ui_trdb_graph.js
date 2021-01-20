@@ -1,0 +1,1100 @@
+/***********************************************************************
+ *          ui_trdb_graph.js
+ *
+ *          Treedb graph
+ *
+ *          Copyright (c) 2020 Niyamaka.
+ *          All Rights Reserved.
+ ***********************************************************************/
+(function (exports) {
+    'use strict';
+
+    /********************************************
+     *      Configuration (C attributes)
+     ********************************************/
+    var CONFIG = {
+        /*
+         *  Funciones que debe suministrar el padre
+         */
+        info_wait: function() {},
+        info_no_wait: function() {},
+
+        /*
+         *  gobj_remote_yuno: Remote yuno to ask data,
+         *  If it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
+         */
+        gobj_remote_yuno: null,
+
+        gobj_container: null,
+        gobj_nodes_tree: null,
+
+        treedb_name: null,
+        topics: [],
+
+        $ui: null,              // $ui from container
+
+        __writable_attrs__: [
+        ]
+    };
+
+
+
+
+            /***************************
+             *      Local Methods
+             ***************************/
+
+
+
+
+    /************************************************************
+     *   Build name
+     ************************************************************/
+    function build_name(self, name)
+    {
+        // We need unique names
+        if(empty_string(self.gobj_name())) {
+            if(!self._uuid_name) {
+                self._uuid_name = get_unique_id(self.gobj_gclass_name());
+            }
+            return self._uuid_name + "-" + name;
+        }
+        return self.gobj_escaped_short_name() + "-"+ name;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function build_toolbar(self, mode)
+    {
+        var elements = [
+            {
+                view:"button",
+                type: "icon",
+                icon: "fas fa-border-center-v",
+                autowidth: true,
+                hidden: true,
+                css: "webix_transparent btn_icon_toolbar_20",
+                tooltip: t("view mode: horizontal/vertical"),
+                label: t("view mode"),
+                click: function() {
+                    self.config.gobj_container.gobj_send_event(
+                        "EV_CHANGE_MODE",
+                        {
+                        },
+                        self
+                    );
+                    refresh_systems(self);
+                    if(self.config.gobj_container.gobj_read_attr("mode") == "horizontal") {
+                        this.define("icon", "fas fa-border-center-v");
+                    } else {
+                        this.define("icon", "fas fa-border-center-h");
+                    }
+                    this.refresh();
+                }
+            },
+            {
+                view: "button",
+                type: "icon",
+                icon: "fas fa-sync",
+                autowidth: true,
+                css: "webix_transparent icon_toolbar_16",
+                tooltip: t("refresh"),
+                label: t("refresh"),
+                click: function() {
+                    refresh_systems(self);
+                }
+            }
+        ];
+
+        var toolbar = {
+            view: "toolbar"
+            //css: "toolbar2color"
+        };
+        if(mode == "vertical") {
+            toolbar["width"] = 40;
+            toolbar["rows"] = elements;
+        } else {
+            toolbar["height"] = 40;
+            toolbar["cols"] = elements;
+        }
+        return toolbar;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_descs(self, treedb_name)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "descs";
+
+        var kw = {
+            service: treedb_name
+        }
+
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_nodes(self, treedb_name, topic_name, options)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "nodes";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_create_node(self, treedb_name, topic_name, record, options, cell_id)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "create-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+        msg_write_MIA_key(kw, "__cell_id__", cell_id);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_update_node(self, treedb_name, topic_name, record, options, cell_id)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "update-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+        msg_write_MIA_key(kw, "__cell_id__", cell_id);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_delete_node(self, treedb_name, topic_name, record, options, cell_id)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "delete-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+        msg_write_MIA_key(kw, "__cell_id__", cell_id);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_link_nodes(
+        self,
+        treedb_name,
+        parent_ref,
+        child_ref,
+        options,
+        link_cell_id,
+        child_cell_id
+    )
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "link-nodes";
+
+        var kw = {
+            service: treedb_name,
+            parent_ref: parent_ref,
+            child_ref: child_ref,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__command__", command);
+        msg_write_MIA_key(kw, "__link_cell_id__", link_cell_id);
+        msg_write_MIA_key(kw, "__child_cell_id__", child_cell_id);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_unlink_nodes(
+        self,
+        treedb_name,
+        parent_ref,
+        child_ref,
+        options,
+        link_cell_id,
+        child_cell_id
+    )
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "unlink-nodes";
+
+        var kw = {
+            service: treedb_name,
+            parent_ref: parent_ref,
+            child_ref: child_ref,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__command__", command);
+        msg_write_MIA_key(kw, "__link_cell_id__", link_cell_id);
+        msg_write_MIA_key(kw, "__child_cell_id__", child_cell_id);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function refresh_systems(self)
+    {
+        self.config.gobj_nodes_tree.gobj_send_event(
+            "EV_CLEAR_DATA",
+            {
+            },
+            self
+        );
+
+        treedb_descs(self, self.config.treedb_name);
+
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
+
+            treedb_nodes(self,
+                self.config.treedb_name,
+                topic_name,
+                {
+                    // "list-dict": true TODO
+                }
+            );
+        }
+    }
+
+
+
+
+            /***************************
+             *      Actions
+             ***************************/
+
+
+
+
+    /********************************************
+     *  Remote response
+     ********************************************/
+    function ac_mt_command_answer(self, event, kw, src)
+    {
+        self.config.info_no_wait();
+
+        try {
+            var result = kw.result;
+            var comment = kw.comment;
+            var schema = kw.schema;
+            var data = kw.data;
+            var __md_iev__ = kw.__md_iev__;
+        } catch (e) {
+            log_error(e);
+            return;
+        }
+        if(result < 0) {
+            info_user_warning(comment);
+            // HACK don't return, pass errors when need it.
+        } else {
+            if(comment) {
+                // log_info(comment); No pintes
+            }
+        }
+
+        switch(__md_iev__.__command__) {
+            case "descs":
+                if(result >= 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_DESCS",
+                        data,
+                        self
+                    );
+                }
+                break;
+            case "nodes":
+                if(result >= 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        {
+                            schema: schema,
+                            data: data,
+                            cell_id: null
+                        },
+                        self
+                    );
+                }
+                break;
+
+            case "create-node":
+                if(result >= 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        {
+                            schema: schema,
+                            data: data,
+                            cell_id: __md_iev__.__cell_id__
+                        },
+                        self
+                    );
+                }
+                break;
+
+            case "update-node":
+                self.config.gobj_nodes_tree.gobj_send_event(
+                    "EV_LOAD_DATA",
+                    {
+                        schema: schema,
+                        data: data,
+                        cell_id: __md_iev__.__cell_id__
+                    },
+                    self
+                );
+                break;
+
+            case "delete-node":
+                if(result >= 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_NODE_DELETED",
+                        {
+                            result: result,
+                            cell_id: __md_iev__.__cell_id__
+                        },
+                        self
+                    );
+                }
+                break;
+
+            case "link-nodes":
+                self.config.gobj_nodes_tree.gobj_send_event(
+                    "EV_NODES_LINKED",
+                    {
+                        result: result,
+                        cell_id: __md_iev__.__link_cell_id__
+                    },
+                    self
+                );
+                if(result == 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        {
+                            schema: schema,
+                            data: data,
+                            cell_id: __md_iev__.__child_cell_id__
+                        },
+                        self
+                    );
+                }
+                break;
+
+            case "unlink-nodes":
+                self.config.gobj_nodes_tree.gobj_send_event(
+                    "EV_NODES_UNLINKED",
+                    {
+                        result: result,
+                        cell_id: __md_iev__.__link_cell_id__
+                    },
+                    self
+                );
+                if(result == 0) {
+                    self.config.gobj_nodes_tree.gobj_send_event(
+                        "EV_LOAD_DATA",
+                        {
+                            schema: schema,
+                            data: data,
+                            cell_id: __md_iev__.__child_cell_id__
+                        },
+                        self
+                    );
+                }
+                break;
+
+            default:
+                log_error(self.gobj_short_name() + " Command unknown: " + __md_iev__.__command__);
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
+    function ac_treedb_node_updated(self, event, kw, src)
+    {
+        var webix_msg = kw;
+
+        try {
+            var result = webix_msg.result;
+            var comment = webix_msg.comment;
+            var schema = webix_msg.schema;
+            var data = webix_msg.data;
+            var __md_iev__ = webix_msg.__md_iev__;
+        } catch (e) {
+            log_error(e);
+            return;
+        }
+        if(result < 0) {
+            info_user_warning(comment);
+            return;
+        } else {
+            if(comment) {
+                // log_info(comment); No pintes
+            }
+        }
+
+// TODO do subscription and process this publication, for all graphs in real time
+//         self.config.gobj_nodes_tree.gobj_send_event(
+//             "EV_LOAD_DATA",
+//             {
+//                 schema: schema,
+//                 is_object(data)?[data]:data,
+//                 cell_id: __md_iev__.__cell_id__ // TODO
+//             },
+//             self
+//         );
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
+    function ac_treedb_node_deleted(self, event, kw, src)
+    {
+        var webix_msg = kw;
+
+        try {
+            var result = webix_msg.result;
+            var comment = webix_msg.comment;
+            var schema = webix_msg.schema;
+            var data = webix_msg.data;
+            var __md_iev__ = webix_msg.__md_iev__;
+        } catch (e) {
+            log_error(e);
+            return;
+        }
+        if(result < 0) {
+            info_user_warning(comment);
+            return;
+        } else {
+            if(comment) {
+                // log_info(comment); No pintes
+            }
+        }
+
+// TODO do subscription and process this publication, for all graphs in real time
+//         self.config.gobj_nodes_tree.gobj_send_event(
+//             "EV_NODE_DELETED",
+//             {
+//                 result: result,
+//                 cell_id: __md_iev__.__cell_id__ // TODO
+//             },
+//             self
+//         );
+
+        return 0;
+    }
+
+    /********************************************
+     *  kw: {
+     *      treedb_name
+     *      topic_name,
+     *      is_topic_schema,
+     *      record
+     *      cell_id (vertex cell id)
+     *  }
+     ********************************************/
+    function ac_mx_vertex_clicked(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_mx_edge_clicked(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     *  Send to backend, speaking of node
+     ********************************************/
+    function ac_create_record(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var topic_name = kw.topic_name;
+        var options = kw.options || {};
+        var record = kw.record;
+        var cell_id = kw.cell_id;
+        var is_topic_schema = kw.is_topic_schema;
+
+        if(is_topic_schema) {
+            log_error("create_node of topic schema NOT IMPLEMENTED");
+            return;
+        }
+
+        return treedb_create_node(
+            self,
+            treedb_name,
+            topic_name,
+            record,
+            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            cell_id
+        );
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     *  Send to backend, speaking of node
+     ********************************************/
+    function ac_update_record(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        var options = kw.options || {};
+        var cell_id = kw.cell_id;
+        var is_topic_schema = kw.is_topic_schema;
+
+        if(is_topic_schema) {
+            log_error("update_node of topic schema NOT IMPLEMENTED");
+            return;
+        }
+
+        return treedb_update_node(
+            self,
+            treedb_name,
+            topic_name,
+            record,
+            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            cell_id
+        );
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     *  Send to backend, speaking of node
+     ********************************************/
+    function ac_delete_record(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        var options = kw.options || {};
+        var cell_id = kw.cell_id;
+        var is_topic_schema = kw.is_topic_schema;
+
+        if(is_topic_schema) {
+            log_error("delete_node of topic schema NOT IMPLEMENTED");
+            return;
+        }
+
+        return treedb_delete_node(
+            self,
+            treedb_name,
+            topic_name,
+            record,
+            options, //force: false TODO   pero debe venir de arriba??? como en update
+            cell_id
+        );
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     *  Send to backend, speaking of node
+     ********************************************/
+    function ac_link_records(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var parent_ref = kw.parent_ref;
+        var child_ref = kw.child_ref;
+        var options = kw.options || {};
+        var link_cell_id = kw.link_cell_id;
+        var child_cell_id = kw.child_cell_id;
+
+        return treedb_link_nodes(
+            self,
+            treedb_name,
+            parent_ref,
+            child_ref,
+            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            link_cell_id,
+            child_cell_id
+        );
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     *  Send to backend, speaking of node
+     ********************************************/
+    function ac_unlink_records(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var parent_ref = kw.parent_ref;
+        var child_ref = kw.child_ref;
+        var options = kw.options || {};
+        var link_cell_id = kw.link_cell_id;
+        var child_cell_id = kw.child_cell_id;
+
+        return treedb_unlink_nodes(
+            self,
+            treedb_name,
+            parent_ref,
+            child_ref,
+            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            link_cell_id,
+            child_cell_id
+        );
+    }
+
+    /********************************************
+     *  Message from Mx_nodes_tree
+     ********************************************/
+    function ac_run_node(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        var options = kw.options || {};
+        var cell_id = kw.cell_id;
+        var is_topic_schema = kw.is_topic_schema;
+
+        /*
+         *  TODO haz un enum
+         *  Visores available
+         *      "tranger"
+         *      "yuno"
+         *      "cli"
+         *
+         */
+        var url = record.url;
+        var dst_role = record.dst_role;
+        var dst_service = record.dst_service;
+        var dst_yuno = record.dst_yuno;
+        var viewer_engine = record.viewer_engine;
+
+        switch(viewer_engine) {
+            case "cli":
+                var name = "Agent CLI: " + url + " " + dst_role + " " + dst_service;
+                var gobj = __yuno__.gobj_find_unique_gobj(name);
+                if(!gobj) {
+                    gobj = self.yuno.gobj_create_unique(
+                        name,
+                        Ui_yuneta_cli,
+                        {
+                            is_pinhold_window: true,
+                            window_title: name,
+                            window_image: "/static/app/images/yuneta/topic_schema.svg",
+                            width: 800,
+                            height: 600,
+
+                            dst_role: dst_role,
+                            dst_service: dst_service,
+                            dst_yuno: dst_yuno,
+                            url: url
+                        },
+                        __yuno__.__pinhold__
+                    );
+                    gobj.gobj_start();
+                } else {
+                    gobj.gobj_send_event("EV_TOGGLE", {}, self);
+                }
+
+                break;
+
+            case "tranger":
+                var name = "Tranger Viewer: " + url + " " + dst_role + " " + dst_service;
+                var gobj = __yuno__.gobj_find_unique_gobj(name);
+                if(!gobj) {
+                    gobj = self.yuno.gobj_create_unique(
+                        name,
+                        Ui_tranger_viewer,
+                        {
+                            is_pinhold_window: true,
+                            window_title: name,
+                            window_image: "/static/app/images/yuneta/topic_schema.svg",
+                            width: 800,
+                            height: 600,
+
+                            dst_role: dst_role,
+                            dst_service: dst_service,
+                            dst_yuno: dst_yuno,
+                            url: url
+                        },
+                        __yuno__.__pinhold__
+                    );
+                    gobj.gobj_start();
+                } else {
+                    gobj.gobj_send_event("EV_TOGGLE", {}, self);
+                }
+                break;
+
+            case "yuno":
+                var name = "Yuno Viewer: " + url + " " + dst_role + " " + dst_service;
+                var gobj = __yuno__.gobj_find_unique_gobj(name);
+                if(!gobj) {
+                    gobj = self.yuno.gobj_create_unique(
+                        name,
+                        Ui_yuno_viewer,
+                        {
+                            is_pinhold_window: true,
+                            window_title: name,
+                            window_image: "/static/app/images/yuneta/topic_schema.svg",
+                            width: 800,
+                            height: 600,
+
+                            dst_role: dst_role,
+                            dst_service: dst_service,
+                            dst_yuno: dst_yuno,
+                            url: url
+                        },
+                        __yuno__.__pinhold__
+                    );
+                    gobj.gobj_start();
+                } else {
+                    gobj.gobj_send_event("EV_TOGGLE", {}, self);
+                }
+                break;
+
+            default:
+                log_error("viewer_engine unknown: " + viewer_engine);
+                break;
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_select(self, event, kw, src)
+    {
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_refresh(self, event, kw, src)
+    {
+
+        return 0;
+    }
+
+
+
+
+            /***************************
+             *      GClass/Machine
+             ***************************/
+
+
+
+
+    var FSM = {
+        "event_list": [
+            "EV_MT_COMMAND_ANSWER",
+            "EV_TREEDB_NODE_UPDATED",
+            "EV_TREEDB_NODE_DELETED",
+            "EV_MX_VERTEX_CLICKED",
+            "EV_MX_EDGE_CLICKED",
+            "EV_CREATE_RECORD",
+            "EV_DELETE_RECORD",
+            "EV_UPDATE_RECORD",
+            "EV_LINK_RECORDS",
+            "EV_UNLINK_RECORDS",
+            "EV_RUN_NODE",
+            "EV_SELECT",
+            "EV_REFRESH"
+        ],
+        "state_list": [
+            "ST_IDLE"
+        ],
+        "machine": {
+            "ST_IDLE":
+            [
+                ["EV_MT_COMMAND_ANSWER",        ac_mt_command_answer,           undefined],
+                ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,         undefined],
+                ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
+                ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],
+                ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,             undefined],
+                ["EV_CREATE_RECORD",            ac_create_record,               undefined],
+                ["EV_DELETE_RECORD",            ac_delete_record,               undefined],
+                ["EV_UPDATE_RECORD",            ac_update_record,               undefined],
+                ["EV_LINK_RECORDS",             ac_link_records,                undefined],
+                ["EV_UNLINK_RECORDS",           ac_unlink_records,              undefined],
+                ["EV_RUN_NODE",                 ac_run_node,                    undefined],
+
+                ["EV_SELECT",                   ac_select,                      undefined],
+                ["EV_REFRESH",                  ac_refresh,                     undefined]
+            ]
+        }
+    };
+
+    var Ui_trdb_graph = GObj.__makeSubclass__();
+    var proto = Ui_trdb_graph.prototype; // Easy access to the prototype
+    proto.__init__= function(name, kw) {
+        GObj.prototype.__init__.call(
+            this,
+            FSM,
+            CONFIG,
+            name,
+            "Ui_trdb_graph",
+            kw,
+            0
+        );
+        return this;
+    };
+    gobj_register_gclass(Ui_trdb_graph, "Ui_trdb_graph");
+
+
+
+
+            /***************************
+             *      Framework Methods
+             ***************************/
+
+
+
+
+    /************************************************
+     *      Framework Method create
+     ************************************************/
+    proto.mt_create = function(kw)
+    {
+        var self = this;
+
+        /*
+         *  Create container
+         */
+        self.config.gobj_container = self.yuno.gobj_create_unique(
+            build_name(self, "ct"),
+            Ui_container,
+            {
+                mode: "horizontal"
+            },
+            self
+        );
+        self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
+
+        /*
+         *  Add container toolbar
+         */
+        self.config.gobj_container.gobj_send_event(
+            "EV_ADD_TOOLBAR",
+            {
+                type: "container_right_toolbar",
+                toolbar: build_toolbar(self, "vertical")
+            },
+            self
+        );
+
+        /*
+         *  System Panel
+         */
+        self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
+            build_name(self, "systems-tree"),
+            Mx_nodes_tree,
+            {
+                info_wait: self.config.info_wait,
+                info_no_wait: self.config.info_no_wait,
+                ui_properties: {
+                    gravity: 1,
+                    minWidth: 300,
+                    minHeight: 300
+                },
+                panel_properties: {
+                    with_panel_top_toolbar: true,
+                    with_panel_title: t("Systems Tree"),
+                    with_panel_hidden_btn: false,
+                    with_panel_fullscreen_btn: true,
+                    with_panel_resize_btn: true
+                },
+                subscriber: self,
+                treedb_name: self.config.treedb_name,
+                topics: self.config.topics,
+                hook_port_position: "bottom",
+                fkey_port_position: "top"
+            },
+            self.config.gobj_container
+        );
+        self.config.gobj_nodes_tree.gobj_start();
+    }
+
+    /************************************************
+     *      Framework Method destroy
+     *      In this point, all childs
+     *      and subscriptions are already deleted.
+     ************************************************/
+    proto.mt_destroy = function()
+    {
+    }
+
+    /************************************************
+     *      Framework Method start
+     ************************************************/
+    proto.mt_start = function(kw)
+    {
+        var self = this;
+
+        if(self.config.gobj_remote_yuno) {
+            refresh_systems(self);
+        }
+    }
+
+    /************************************************
+     *      Framework Method stop
+     ************************************************/
+    proto.mt_stop = function(kw)
+    {
+        var self = this;
+    }
+
+
+    //=======================================================================
+    //      Expose the class via the global object
+    //=======================================================================
+    exports.Ui_trdb_graph = Ui_trdb_graph;
+
+})(this);
+
