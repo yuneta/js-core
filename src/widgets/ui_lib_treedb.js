@@ -12,10 +12,12 @@
  *    ( solo de los create y delete realmente, solo se necesita el id del que existe)
  *    en cada una redefinirán sus option2list, así un padre puede cortar el link.
  *    pero puede ser un proceso lento.
+ *
  *  - Los fkeys se subscriben a todas las modificaciones de los padres,
  *    realmente solo se necesita a las creaciones y deletes de los registros de la tabla,
  *    updates y link/unlink le da igual. Con cada publicación redefinirán sus option2list.
- *  OJO con los unsubscribe!! necesarios!
+ *
+ * OJO con los unsubscribe!! necesarios!
  *
  *  El formtable publicará los eventos: CREATE_NODE, DELETE_NODE, UPDATE_NODE
  *  en el UPDATE_NODE irá un reseteo/creación de los links.
@@ -44,8 +46,8 @@
     function treedb_register_formtable(treedb_name, topic_name, gobj_formtable)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-        kw_set_dict_value(topic, "gobj_formtable", gobj_formtable);
+        var gobjs = kw_get_dict_value(treedb, "gobjs", {}, true);
+        kw_set_dict_value(gobjs, gobj_formtable.name, gobj_formtable);
     }
 
     /********************************************
@@ -54,8 +56,8 @@
     function treedb_unregister_formtable(treedb_name, topic_name)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-        kw_set_dict_value(topic, "gobj_formtable", null);
+        var gobjs = kw_get_dict_value(treedb, "gobjs", {}, true);
+        delete gobjs[gobj_formtable.name];
     }
 
     /********************************************
@@ -64,11 +66,8 @@
     function treedb_register_nodes(treedb_name, topic_name, nodes)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-
-        kw_set_dict_value(topic, "nodes", kwid_new_dict(nodes));
-
-        // TODO update formtables registered
+        var data = kw_get_dict_value(treedb, "data", {}, true);
+        kw_set_dict_value(data, topic_name, kwid_new_dict(nodes));
     }
 
     /********************************************
@@ -77,12 +76,10 @@
     function treedb_register_update_node(treedb_name, topic_name, node)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
+        var data = kw_get_dict_value(treedb, "data", {}, true);
+        var topic_data = kw_get_dict_value(data, topic_name, {}, true);
 
-        kw_set_dict_value(nodes, node.id, node);
-
-        // TODO update formtables registered
+        kw_set_dict_value(topic_data, node.id, node);
     }
 
     /********************************************
@@ -91,22 +88,29 @@
     function treedb_register_del_node(treedb_name, topic_name, node)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
+        var data = kw_get_dict_value(treedb, "data", {}, true);
+        var topic_data = kw_get_dict_value(data, topic_name, {}, true);
 
-        delete nodes[node.id];
-
-        // TODO update formtables registered
+        delete topic_data[node.id];
     }
 
     /********************************************
-     *
+     *  Used by ui_treedb to update options
      ********************************************/
-    function treedb_list_nodes(treedb_name, topic_name)
+    function treedb_get_register(treedb_name)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, false);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, false);
-        return kw_get_dict_value(topic, "nodes", [], false);
+        return treedb;
+    }
+
+    /********************************************
+     *  Used by formtable to get combo options
+     ********************************************/
+    function treedb_get_topic_data(treedb_name, topic_name)
+    {
+        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, false);
+        var data = kw_get_dict_value(treedb, "data", {}, false);
+        return kw_get_dict_value(data, topic_name, {}, false);
     }
 
     /************************************************************
@@ -265,7 +269,8 @@
     exports.treedb_register_nodes = treedb_register_nodes;
     exports.treedb_register_update_node = treedb_register_update_node;
     exports.treedb_register_del_node = treedb_register_del_node;
-    exports.treedb_list_nodes = treedb_list_nodes;
+    exports.treedb_get_register = treedb_get_register;
+    exports.treedb_get_topic_data = treedb_get_topic_data;
 
     exports.decoder_fkey = decoder_fkey;
     exports.decoder_hook = decoder_hook;

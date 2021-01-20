@@ -1371,7 +1371,7 @@
     {
         for(var topic_name in col.fkey) {
             // HACK we work only with one fkey
-            var current_list = treedb_list_nodes(self.config.treedb_name, topic_name);
+            var current_list = treedb_get_topic_data(self.config.treedb_name, topic_name);
             return list2options(current_list, "id", "id");
         }
         log_error("No fkey options found" + STRING.stringify(col));
@@ -1385,7 +1385,7 @@
     {
         for(var topic_name in col.hook) {
             // HACK we work with only one hook
-            var current_list = treedb_list_nodes(self.config.treedb_name, topic_name);
+            var current_list = treedb_get_topic_data(self.config.treedb_name, topic_name);
             return list2options(current_list, "id", "id");
         }
         log_error("No hook options found" + STRING.stringify(col));
@@ -1835,6 +1835,35 @@
             });
         }
         return data;
+    }
+
+    /********************************************
+     *  Update options of combo,etc, fields
+     ********************************************/
+    function ac_update_options(self, event, kw, src)
+    {
+        var cols = self.config.cols;
+        if(!cols) {
+            cols = self.config.schema;
+        }
+
+        // redefine columns
+        var $table = $$(build_name(self, "list_table"));
+        $table.config.columns = cols2webix_table_cols(self, cols);
+        $table.refreshColumns();
+
+        // redefine elements
+        var eles = cols2webix_form_elements(self, cols, "create");
+        var $create_form = $$(build_name(self, "create_form"));
+        $create_form.define("elements", eles[0]);
+        $create_form.reconstruct();
+
+        var eles = cols2webix_form_elements(self, cols, "update");
+        var $update_form = $$(build_name(self, "update_form"));
+        $update_form.define("elements", eles[0]);
+        $update_form.reconstruct();
+
+        return 0;
     }
 
     /********************************************
@@ -2303,6 +2332,7 @@
             "EV_CLEAR_DATA",
             "EV_GET_DATA",
             "EV_GET_CHECKED_DATA",
+            "EV_UPDATE_OPTIONS",
 
             "EV_CREATE_RECORD: output",
             "EV_UPDATE_RECORD: output",
@@ -2344,6 +2374,7 @@
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
                 ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
+                ["EV_UPDATE_OPTIONS",           ac_update_options,          undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],

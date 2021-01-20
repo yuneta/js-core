@@ -395,7 +395,7 @@
     // Return length of dict
     function json_object_size(a)
     {
-        if(is_object) {
+        if(is_object(a)) {
             return Object.keys(a).length;
         }
         return 0;
