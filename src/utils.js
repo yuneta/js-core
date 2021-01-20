@@ -1469,11 +1469,12 @@
         var topics = kw_get_dict_value(jdb, "topics", null, 0);
         var topic = kw_get_dict_value(topics, topic_name, null, 0);
         if(!topic) {
-            log_error("Topic not found: " + topic_name);
+            log_error("jdb_update: topic not found: " + topic_name);
             return null;
         }
         if(empty_string(kw["id"])) {
-            log_error("Record without id: " + kw);
+            log_error("jdb_update: record without id: " + kw);
+            trace_msg(kw);
             return null;
         }
 
@@ -1522,11 +1523,12 @@
         var topics = kw_get_dict_value(jdb, "topics", null, 0);
         var topic = kw_get_dict_value(topics, topic_name, null, 0);
         if(!topic) {
-            log_error("Topic not found: " + topic_name);
+            log_error("jdb_delete: topic not found: " + topic_name);
             return null;
         }
         if(empty_string(kw["id"])) {
-            log_error("Record without id: " + kw);
+            log_error("jdb_delete: record without id: " + kw);
+            trace_msg(kw);
             return null;
         }
 
@@ -1572,7 +1574,7 @@
         var topics = kw_get_dict_value(jdb, "topics", null, 0);
         var topic = kw_get_dict_value(topics, topic_name, null, 0);
         if(!topic) {
-            log_error("Topic not found: " + topic_name);
+            log_error("jdb_get: topic not found: " + topic_name);
             return null;
         }
         return _jdb_get(topic, jdb.hook, id, true);
@@ -1586,7 +1588,7 @@
         var topics = kw_get_dict_value(jdb, "topics", null, 0);
         var topic = kw_get_dict_value(topics, topic_name, null, 0);
         if(!topic) {
-            log_error("Topic not found: " + topic_name);
+            log_error("jdb_get_by_idx: topic not found: " + topic_name);
             return null;
         }
         if(idx < topic.length)  {

@@ -70,17 +70,17 @@ webix.protoUI({
                     }
                     return null;
                 },
-                onEditable: function({path, field, value}) {
-                    return self.gobj_send_event(
-                        "JE_IS_FIELD_EDITABLE",
-                        {
-                            path: path,
-                            field: field,
-                            value: value
-                        },
-                        self
-                    );
-                },
+//                 onEditable: function({path, field, value}) {
+//                     return self.gobj_send_event(
+//                         "JE_IS_FIELD_EDITABLE",
+//                         {
+//                             path: path,
+//                             field: field,
+//                             value: value
+//                         },
+//                         self
+//                     );
+//                 },
                 onEvent: function(node, event) {
                     if(event.type=="click") {
                         self.gobj_send_event(
