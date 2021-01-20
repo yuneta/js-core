@@ -73,21 +73,24 @@
     }
 
     /********************************************
-     * TODO
+     *
      ********************************************/
-    function send_command_to_treedb(self, command, service, topic_name, kw)
+    function treedb_nodes(self, treedb_name, topic_name, options)
     {
         if(!self.config.gobj_remote_yuno) {
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
             return;
         }
-        if(service) {
-            kw.service = service;
+
+        var command = "nodes";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            options: options || {}
         }
-        if(topic_name) {
-            kw.topic_name = topic_name;
-            msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
         msg_write_MIA_key(kw, "__command__", command);
 
         self.config.info_wait();
@@ -103,7 +106,109 @@
     }
 
     /********************************************
-     * TODO
+     *
+     ********************************************/
+    function treedb_create_node(self, treedb_name, topic_name, record, options)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "create-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_update_node(self, treedb_name, topic_name, record, options)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "update-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function treedb_delete_node(self, treedb_name, topic_name, record, options)
+    {
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "delete-node";
+
+        var kw = {
+            service: treedb_name,
+            topic_name: topic_name,
+            record: record,
+            options: options || {}
+        }
+
+        msg_write_MIA_key(kw, "__topic_name__", topic_name);
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
+    }
+
+    /********************************************
+     *
      ********************************************/
     function refresh_treedb(self)
     {
@@ -118,9 +223,8 @@
                 self
             );
 
-            send_command_to_treedb(
+            treedb_nodes(
                 self,
-                "nodes",
                 self.config.treedb_name,
                 topic_name,
                 {}
@@ -326,12 +430,6 @@
 
             case "create-node":
                 if(result >= 0) {
-                    treedb_register_new_node(
-                        self.config.treedb_name,
-                        schema.topic_name,
-                        data
-                    );
-
                     var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
                     gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
@@ -343,12 +441,6 @@
 
             case "update-node":
                 if(result >= 0) {
-                    treedb_register_update_node(
-                        self.config.treedb_name,
-                        schema.topic_name,
-                        data
-                    );
-
                     var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
                     gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
@@ -360,12 +452,6 @@
 
             case "delete-node":
                 if(result >= 0) {
-                    treedb_register_del_node(
-                        self.config.treedb_name,
-                        schema.topic_name,
-                        data
-                    );
-
                     var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
                     gobj_formtable.gobj_send_event(
                         "EV_DELETE_DATA",
@@ -392,10 +478,16 @@
         var node = kw_get_dict_value(kw, "node", null, 0);
 
         if(treedb_name == self.config.treedb_name) {
+            treedb_register_update_node(
+                self.config.treedb_name,
+                topic_name,
+                node
+            );
+
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_LOAD_DATA",
-                is_object(node)?[node]:node,
+                [node],
                 self
             );
         }
@@ -413,10 +505,16 @@
         var node = kw_get_dict_value(kw, "node", null, 0);
 
         if(treedb_name == self.config.treedb_name) {
+            treedb_register_del_node(
+                self.config.treedb_name,
+                topic_name,
+                node
+            );
+
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_DELETE_DATA",
-                is_object(node)?[node]:node,
+                [node],
                 self
             );
         }
@@ -431,16 +529,13 @@
     {
         var topic_name = src.gobj_read_attr("topic_name");
 
-        send_command_to_treedb(
+        return treedb_create_node(
             self,
-            "create-node",
             self.config.treedb_name,
             topic_name,
-            {
-                record: kw.record
-            }
+            kw.record,
+            {} // "list-dict": true TODO
         );
-        return 0;
     }
 
     /********************************************
@@ -450,17 +545,13 @@
     {
         var topic_name = src.gobj_read_attr("topic_name");
 
-        send_command_to_treedb(
+        return treedb_update_node(
             self,
-            "update-node",
             self.config.treedb_name,
             topic_name,
-            {
-                record: kw.record
-
-            }
+            kw.record,
+            {} // "list-dict": true TODO
         );
-        return 0;
     }
 
     /********************************************
@@ -470,18 +561,15 @@
     {
         var topic_name = src.gobj_read_attr("topic_name");
 
-        send_command_to_treedb(
+        return treedb_delete_node(
             self,
-            "delete-node",
             self.config.treedb_name,
             topic_name,
+            kw.record,
             {
-                filter: {
-                    id: kw.record.id
-                }
+                force: true
             }
         );
-        return 0;
     }
 
     /********************************************
@@ -489,13 +577,13 @@
      ********************************************/
     function ac_refresh_table(self, event, kw, src)
     {
-        send_command_to_treedb(
+        treedb_nodes(
             self,
-            "nodes",
             self.config.treedb_name,
             kw.topic_name,
             {}
         );
+
         return 0;
     }
 

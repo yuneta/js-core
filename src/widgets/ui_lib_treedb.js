@@ -74,20 +74,6 @@
     /********************************************
      *
      ********************************************/
-    function treedb_register_new_node(treedb_name, topic_name, node)
-    {
-        var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
-        var topic = kw_get_dict_value(treedb, topic_name, {}, true);
-        var nodes = kw_get_dict_value(topic, "nodes", {}, true);
-
-        kw_set_dict_value(nodes, node.id, node);
-
-        // TODO update formtables registered
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function treedb_register_update_node(treedb_name, topic_name, node)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
@@ -277,7 +263,6 @@
     exports.treedb_register_formtable = treedb_register_formtable;
     exports.treedb_unregister_formtable = treedb_unregister_formtable;
     exports.treedb_register_nodes = treedb_register_nodes;
-    exports.treedb_register_new_node = treedb_register_new_node;
     exports.treedb_register_update_node = treedb_register_update_node;
     exports.treedb_register_del_node = treedb_register_del_node;
     exports.treedb_list_nodes = treedb_list_nodes;
