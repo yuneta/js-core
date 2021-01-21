@@ -471,7 +471,7 @@
         switch(__md_iev__.__command__) {
             case "descs":
                 if(result >= 0) {
-                    self.config.descs = data; // TODO
+                    self.config.descs = data;
                     process_descs(self);
                 }
                 break;
@@ -607,13 +607,16 @@
     function ac_create_record(self, event, kw, src)
     {
         var topic_name = src.gobj_read_attr("topic_name");
+        var record = kw.record;
+        var options= kw.options || {}
+        options["list-dict"] = true;
 
         return treedb_create_node(
             self,
             self.config.treedb_name,
             topic_name,
-            kw.record,
-            {} // "list-dict": true TODO
+            record,
+            options
         );
     }
 
@@ -623,13 +626,17 @@
     function ac_update_record(self, event, kw, src)
     {
         var topic_name = src.gobj_read_attr("topic_name");
+        var record = kw.record;
+        var options= kw.options || {}
+        options["list-dict"] = true;
+        options["autolink"] = true;
 
         return treedb_update_node(
             self,
             self.config.treedb_name,
             topic_name,
-            kw.record,
-            {} // "list-dict": true TODO
+            record,
+            options
         );
     }
 
@@ -639,15 +646,16 @@
     function ac_delete_record(self, event, kw, src)
     {
         var topic_name = src.gobj_read_attr("topic_name");
+        var record = kw.record;
+        var options= kw.options || {}
+        options["force"] = true;
 
         return treedb_delete_node(
             self,
             self.config.treedb_name,
             topic_name,
-            kw.record,
-            {
-                force: true
-            }
+            record,
+            options
         );
     }
 
@@ -656,11 +664,14 @@
      ********************************************/
     function ac_refresh_table(self, event, kw, src)
     {
+        var options= kw.options || {}
+        options["list-dict"] = true;
+
         treedb_nodes(
             self,
             self.config.treedb_name,
             kw.topic_name,
-            {}
+            options
         );
 
         return 0;

@@ -1683,6 +1683,7 @@
         switch(col.type) {
             case "string":
                 // TODO check if widget is not multi select
+                refs = "";
                 if(value.length > 0) {
                     var v = value[0];
                     if(!empty_string(v)) {
@@ -1692,8 +1693,8 @@
                 break;
             case "object":
             case "dict":
+                refs = {};
                 if(value.length > 0) {
-                    refs = {};
                     for(var i=0; i<value.length; i++) {
                         var v = value[i];
                         if(!empty_string(v)) {
@@ -1704,8 +1705,8 @@
                 break;
             case "array":
             case "list":
+                refs = [];
                 if(value.length > 0) {
-                    refs = [];
                     for(var i=0; i<value.length; i++) {
                         var v = value[i];
                         if(!empty_string(v)) {
@@ -1901,10 +1902,7 @@
                 {
                     topic_name: self.config.topic_name,
                     is_topic_schema: self.config.is_topic_schema,
-                    record: new_kw,
-                    options: {
-                        "autolink": true
-                    }
+                    record: new_kw
                 }
             );
             //$form.save(); update asynchronously by backend

@@ -399,7 +399,7 @@
                 self.config.treedb_name,
                 topic_name,
                 {
-                    // "list-dict": true TODO
+                    "list-dict": true
                 }
             );
         }
@@ -679,7 +679,7 @@
             treedb_name,
             topic_name,
             record,
-            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            {"list-dict": true},
             cell_id
         );
     }
@@ -707,7 +707,7 @@
             treedb_name,
             topic_name,
             record,
-            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            {"list-dict": true},
             cell_id
         );
     }
@@ -735,7 +735,7 @@
             treedb_name,
             topic_name,
             record,
-            options, //force: false TODO   pero debe venir de arriba??? como en update
+            {"force": false},
             cell_id
         );
     }
@@ -758,7 +758,7 @@
             treedb_name,
             parent_ref,
             child_ref,
-            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            {"list-dict": true},
             link_cell_id,
             child_cell_id
         );
@@ -782,7 +782,7 @@
             treedb_name,
             parent_ref,
             child_ref,
-            options, // "list-dict": true TODO   pero debe venir de arriba??? como en update
+            {"list-dict": true},
             link_cell_id,
             child_cell_id
         );
