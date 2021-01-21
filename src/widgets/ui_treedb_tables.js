@@ -1,7 +1,11 @@
 /***********************************************************************
- *          ui_treedb.js
+ *          ui_treedb_tables.js
  *
- *          Treedb
+ *          Treedb table
+ *          Gestión de los topics del treedb mediante formtables globales.
+ *
+ *          Mantiene actualizadas tablas globales
+ *          de los `topics` del `treedb_name` configurados.
  *
  *          Copyright (c) 2021 Niyamaka.
  *          All Rights Reserved.
@@ -758,21 +762,21 @@
         }
     };
 
-    var Ui_treedb = GObj.__makeSubclass__();
-    var proto = Ui_treedb.prototype; // Easy access to the prototype
+    var Ui_treedb_tables = GObj.__makeSubclass__();
+    var proto = Ui_treedb_tables.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_treedb",
+            "Ui_treedb_tables",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_treedb, "Ui_treedb");
+    gobj_register_gclass(Ui_treedb_tables, "Ui_treedb_tables");
 
 
 
@@ -826,6 +830,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_treedb = Ui_treedb;
+    exports.Ui_treedb_tables = Ui_treedb_tables;
 
 })(this);

@@ -1,7 +1,9 @@
 /***********************************************************************
- *          ui_trdb_graph.js
+ *          ui_treedb_graph.js
  *
  *          Treedb graph
+ *          Gestión de los `topics` del `treedb_name` configurado
+ *          mediante grafos con mxgraph.
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
@@ -971,21 +973,21 @@
         }
     };
 
-    var Ui_trdb_graph = GObj.__makeSubclass__();
-    var proto = Ui_trdb_graph.prototype; // Easy access to the prototype
+    var Ui_treedb_graph = GObj.__makeSubclass__();
+    var proto = Ui_treedb_graph.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_trdb_graph",
+            "Ui_treedb_graph",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_trdb_graph, "Ui_trdb_graph");
+    gobj_register_gclass(Ui_treedb_graph, "Ui_treedb_graph");
 
 
 
@@ -1094,7 +1096,7 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_trdb_graph = Ui_trdb_graph;
+    exports.Ui_treedb_graph = Ui_treedb_graph;
 
 })(this);
 
