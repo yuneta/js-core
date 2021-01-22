@@ -18,8 +18,6 @@
         cell_name: null,        // cell id: treedb_name`topic_name^record_id, null in new records
         schema: schema,         // Schema of topic
         record: null,           // Data of node
-        tosave_red: true        // Pending to save with not fixed errors
-        torun_node: true        // Publish event EV_RUN_NODE when click
     },
 
  *
@@ -1047,19 +1045,20 @@
 
                     var t = topic_name + "^<br/><b>" + id + "</b><br/>";
 
-                    if(cell.value.tosave_red) {
-                        t += "<input " +
-                        "style='cursor:default' " +
-                        "type='image' src='" +
-                        "/static/app/images/yuneta/save_red.svg" +
-                        "' alt='Fix data to save' " +
-                        "width='" +
-                        self.config.top_overlay_icon_size +
-                        "' " +
-                        "height='" +
-                        self.config.top_overlay_icon_size +
-                        "'>"
-                    }
+                    // Ejemplo de cómo poner un icono dentro de la cell
+                    //if(cell.value.tosave_red) {
+                    //    t += "<input " +
+                    //    "style='cursor:default' " +
+                    //    "type='image' src='" +
+                    //    "/static/app/images/yuneta/save_red.svg" +
+                    //    "' alt='Fix data to save' " +
+                    //    "width='" +
+                    //    self.config.top_overlay_icon_size +
+                    //    "' " +
+                    //    "height='" +
+                    //    self.config.top_overlay_icon_size +
+                    //    "'>"
+                    //}
                     return t;
                 }
             }
@@ -1505,7 +1504,7 @@
                  *-----------------------------*/
                 var cell_id = build_hook_port_id(self, topic_name, topic_id, col);
                 if(model.getCell(cell_id)) {
-                    log_error("Cell duplicated: " + cell_id);
+                    log_error("Hook cell duplicated: " + cell_id);
                 }
                 var hook_port = graph.insertVertex(
                     cell,                       // group
@@ -1571,7 +1570,7 @@
                  *-----------------------------*/
                 var cell_id = build_fkey_port_id(self, topic_name, topic_id, col);
                 if(model.getCell(cell_id)) {
-                    log_error("Cell duplicated: " + cell_id);
+                    log_error("Fkey cell duplicated: " + cell_id);
                 }
                 var fkey_port_cell = graph.insertVertex(
                     cell,                       // group
@@ -1805,8 +1804,7 @@
 
     /************************************************************
      *  Create topic cell,
-     *      - from backend (record not null) or
-     *      - new by user (record null)
+     *      - from backend
      ************************************************************/
     function create_topic_cell(self, schema, record)
     {
@@ -1816,71 +1814,45 @@
 
         var torun_node = get_torun_node(self, schema.topic_name);
 
-        if(!record) {
-            /*---------------------------------------------*
-             *  Creating new empty cell from user design
-             *---------------------------------------------*/
-            cell = graph.insertVertex(
-                get_layer(self),        // group
-                uuidv4(),               // id, temporal if cell_name is null
-                {                       // value
-                    cell_name: null,
-                    schema: schema,
-                    record: null,
-                    tosave_red: true,
-                    torun_node: torun_node
-                },
-                40, 40,             // x,y
-                210, 130,           // width,height TODO a configuración
-                schema.topic_name + "_node",  // style
-                false               // relative
-            );
-            cell.setConnectable(false);
-            cell.geometry.alternateBounds = new mxRectangle(0, 0, 110, 70); // TODO a configuración
+        /*------------------------------------------*
+         *  Creating filled cell from backend data
+         *------------------------------------------*/
+        var geometry = record._geometry;
+        var x = kw_get_int(geometry, "x", 40, false);
+        var y = kw_get_int(geometry, "y", 40, false);
+        var width = kw_get_int(geometry, "width", 250, false);
+        var height = kw_get_int(geometry, "height", 200, false);
+        var cell_name = build_cell_name(self, schema.topic_name, record.id);
 
-        } else {
-            /*------------------------------------------*
-             *  Creating filled cell from backend data
-             *------------------------------------------*/
-            var geometry = record._geometry;
-            var x = kw_get_int(geometry, "x", 40, false);
-            var y = kw_get_int(geometry, "y", 40, false);
-            var width = kw_get_int(geometry, "width", 250, false);
-            var height = kw_get_int(geometry, "height", 200, false);
-            var cell_name = build_cell_name(self, schema.topic_name, record.id);
-
-            if(model.getCell(cell_name)) {
-                log_error("Cell duplicated: " + cell_name);
-            }
-            cell = graph.insertVertex(
-                get_layer(self),    // group
-                cell_name,          // id
-                {                   // value
-                    cell_name: cell_name,
-                    schema: schema,
-                    record: record,
-                    tosave_red: false,
-                    torun_node: torun_node
-                },
-                x, y,               // x,y
-                width, height,      // width,height
-                schema.topic_name + "_node",  // style
-                false               // relative
-            );
-            cell.setConnectable(false);
-            cell.geometry.alternateBounds = new mxRectangle(0, 0, 110, 70);
-            add_hook_fkey_ports(self, cell);
+        if(model.getCell(cell_name)) {
+            log_error("Cell duplicated: " + cell_name);
         }
+        cell = graph.insertVertex(
+            get_layer(self),    // group
+            cell_name,          // id
+            {                   // value
+                cell_name: cell_name,
+                schema: schema,
+                record: record,
+                torun_node: torun_node
+            },
+            x, y,               // x,y
+            width, height,      // width,height
+            schema.topic_name + "_node",  // style
+            false               // relative
+        );
+        cell.setConnectable(false);
+        cell.geometry.alternateBounds = new mxRectangle(0, 0, 110, 70);
+        add_hook_fkey_ports(self, cell);
 
         return cell;
     }
 
     /************************************************************
      *  Update topic cell
-     *      - from backend (record not null) or
-     *      - new by user (record null)
+     *      - from backend
      ************************************************************/
-    function update_topic_cell(self, cell, schema, record)
+    function update_topic_cell(self, cell, record)
     {
         var graph = self.config._mxgraph;
         var model = graph.model;
@@ -1889,45 +1861,10 @@
             log_error("What cell?");
         }
 
-        /*
-         *  value.cell_name to null indicates if it's a user new creating cell
-         */
-        if(cell.value.cell_name) {
-            /*---------------------------------*
-             *  Updating existing topic cell
-             *---------------------------------*/
-            cell.value.schema = schema; // DANGER if schema has changed?
-            cell.value.record = record;
-            cell.value.tosave_red = false;
-
-        } else {
-            /*---------------------------------------------------------*
-             *  A new cell from user editing is validated by backend
-             *  Update cell_name and cell_id
-             *---------------------------------------------------------*/
-            var cell_name = build_cell_name(self, schema.topic_name, record.id);
-
-            /*
-             *  WARNING changing cell id, re-insert cell in model
-             *  HACK see cellAdded in mxClient.js
-             */
-            delete model.cells[cell.getId()];
-            cell.setId(cell_name);
-            model.cells[cell.getId()] = cell;
-
-            cell.value.cell_name = cell_name;
-            cell.value.schema = schema;  // DANGER if schema has changed?
-            cell.value.record = record;
-            cell.value.tosave_red = false;
-
-            graph.removeSelectionCell(cell); // To remove overlays icons
-
-            if(cell.value.gobj_cell_formtable) {
-                // HACK reference cell <-> gobj_formtable
-                cell.value.gobj_cell_formtable.gobj_write_attr("user_data", cell_name);
-            }
-            add_hook_fkey_ports(self, cell);
-        }
+        /*---------------------------------*
+         *  Updating existing topic cell
+         *---------------------------------*/
+        cell.value.record = record;
 
         /*
          *  Update formtable if it's opened
@@ -1965,39 +1902,27 @@
         try {
             var schema = kw.schema;
             var data = kw.data;
-            var cell_id = kw.cell_id;
 
-            if(cell_id) {
-                /*--------------------------------------------*
-                 *  Updating cell (editing or user creating)
-                 *--------------------------------------------*/
-                var cell = model.getCell(cell_id);
-                clear_links(self, cell);
-                update_topic_cell(self, cell, schema, data);
-                draw_links(self, cell);
-
-            } else {
-                /*--------------------------------------------*
-                 *  Creating and loading cells from backend
-                 *--------------------------------------------*/
-                var cells = [];
-                for(var i=0; i<data.length; i++) {
-                    var record = data[i];
-                    var cell = create_topic_cell(self, schema, record);
-                    add_state_overlays(self, graph, cell);
-                    cells.push(cell);
-                }
-
-                for(var i=0; i<cells.length; i++) {
-                    var cell = cells[i];
-                    clear_links(self, cell);
-                    draw_links(self, cell);
-                }
-                if(self.config.collapsed) {
-                    collapse_edition(self, self.config.collapsed);
-                }
-                execute_layout(self);
+            /*--------------------------------------------*
+             *  Creating and loading cells from backend
+             *--------------------------------------------*/
+            var cells = [];
+            for(var i=0; i<data.length; i++) {
+                var record = data[i];
+                var cell = create_topic_cell(self, schema, record);
+                add_state_overlays(self, graph, cell);
+                cells.push(cell);
             }
+
+            for(var i=0; i<cells.length; i++) {
+                var cell = cells[i];
+                clear_links(self, cell);
+                draw_links(self, cell);
+            }
+            if(self.config.collapsed) {
+                collapse_edition(self, self.config.collapsed);
+            }
+            execute_layout(self);
 
         } catch (e) {
             log_error(e);
@@ -2076,6 +2001,90 @@
         }
         // Fuera, se crea de una formtable
         //$$(build_name(self, "create_menu")).parse(topics);
+
+        return 0;
+    }
+
+    /********************************************
+     *  From parent, ack to create record
+     *              (mine or from others)
+     ********************************************/
+    function ac_node_created(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+
+        model.beginUpdate();
+        try {
+            var cell = create_topic_cell(self, kw.schema, kw.node);
+            add_state_overlays(self, graph, cell);
+            draw_links(self, cell);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  From parent, ack to update record
+     *              (mine or from others)
+     ********************************************/
+    function ac_node_updated(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+
+        var cell_name = build_cell_name(self, kw.topic_name, kw.node.id);
+        var cell = model.getCell(cell_name);
+        if(!cell) {
+            log_error("ac_node_updated: cell not found");
+            return -1;
+        }
+
+        model.beginUpdate();
+        try {
+            clear_links(self, cell);
+            update_topic_cell(self, cell, kw.node)
+            draw_links(self, cell);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  From parent, ack to delete record
+     *              (mine or from others)
+     ********************************************/
+    function ac_node_deleted(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+
+        var cell_name = build_cell_name(self, kw.topic_name, kw.node.id);
+        var cell = model.getCell(cell_name);
+        if(!cell) {
+            log_error("ac_node_deleted: cell not found");
+            return -1;
+        }
+
+        model.beginUpdate();
+        try {
+            graph.removeCells([cell]);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
 
         return 0;
     }
@@ -2185,115 +2194,11 @@
         var kw_unlink = {
             treedb_name: self.config.treedb_name,
             parent_ref: parent_ref,
-            child_ref: child_ref,
-            options: {
-                // "list-dict": true TODO
-            },
-            link_cell_id: cell.id,
-            child_cell_id: child_cell.parent.id
+            child_ref: child_ref
         };
 
-        // Wait to EV_NODES_UNLINKED to delete cell
+        // Wait to EV_NODE_UPDATED to delete cell
         self.gobj_publish_event("EV_UNLINK_RECORDS", kw_unlink, self);
-
-        return 0;
-    }
-
-    /********************************************
-     *  From parent, ack to delete record
-     ********************************************/
-    function ac_node_deleted(self, event, kw, src)
-    {
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        var result = kw.result;
-        if(result != 0) {
-            return -1;
-        }
-
-        var cell = null;
-        if(kw.cell_id) {
-            cell = model.getCell(kw.cell_id);
-        } else {
-            var cell_name = build_cell_name(self, kw.topic_name, kw.id);
-            cell = model.getCell(cell_name);
-        }
-        if(!cell) {
-            log_error("ac_node_deleted: cell not found");
-            return -1;
-        }
-
-        model.beginUpdate();
-        try {
-            if(result >= 0) {
-                graph.removeCells([cell]);
-            }
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  From parent, ack to link records
-     ********************************************/
-    function ac_nodes_linked(self, event, kw, src)
-    {
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        var result = kw.result;
-
-        model.beginUpdate();
-        try {
-            var cell = model.getCell(kw.cell_id);
-
-            if(result < 0) {
-                // operation failed, remove edge
-                graph.removeCells([cell]);
-            } else {
-                /*
-                 *  WARNING changing cell id, re-insert cell in model
-                 *  HACK see cellAdded in mxClient.js
-                 */
-                delete model.cells[cell.getId()];
-                cell.setId(cell.value);
-                model.cells[cell.getId()] = cell;
-            }
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  From parent, ack to unlink records
-     ********************************************/
-    function ac_nodes_unlinked(self, event, kw, src)
-    {
-        var graph = self.config._mxgraph;
-        var model = graph.getModel();
-        var cell = model.getCell(kw.cell_id);
-        var result = kw.result;
-
-        model.beginUpdate();
-        try {
-            if(result >= 0) {
-                graph.removeCells([cell]);
-            }
-
-        } catch (e) {
-            log_error(e);
-        } finally {
-            model.endUpdate();
-        }
 
         return 0;
     }
@@ -2654,9 +2559,8 @@
                     return -1;
                 }
 
-                // HACK "==>" repeated
-                var future_cell_id = child_cell.id + " ==> " + parent_cell.id;
-                model.setValue(cell, future_cell_id);
+                // Remove, Wait to EV_NODE_UPDATED to create cell
+                graph.removeCells([cell]);
 
                 var parent_ref = parent_cell.value.topic_name + "^";
                     parent_ref += parent_cell.value.topic_id + "^";
@@ -2668,15 +2572,10 @@
                 var kw_link = {
                     treedb_name: self.config.treedb_name,
                     parent_ref: parent_ref,
-                    child_ref: child_ref,
-                    options: {
-                        // "list-dict": true TODO
-                    },
-                    link_cell_id: cell.id,
-                    child_cell_id: child_cell.parent.id
+                    child_ref: child_ref
                 };
 
-                // Wait to EV_NODES_LINKED to fix cell
+                // Wait to EV_NODE_UPDATED to fix cell
                 self.gobj_publish_event("EV_LINK_RECORDS", kw_link, self);
             }
         }
@@ -2875,6 +2774,9 @@
             "EV_LOAD_DATA",
             "EV_CLEAR_DATA",
             "EV_DESCS",
+            "EV_NODE_CREATED",
+            "EV_NODE_UPDATED",
+            "EV_NODE_DELETED",
 
             "EV_MX_VERTEX_CLICKED: output",
             "EV_MX_EDGE_CLICKED: output",
@@ -2888,9 +2790,6 @@
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
             "EV_DELETE_EDGE",
-            "EV_NODE_DELETED",
-            "EV_NODES_LINKED",
-            "EV_NODES_UNLINKED",
             "EV_SHOW_CELL_DATA_FORM",
             "EV_SHOW_CELL_DATA_JSON",
 
@@ -2918,13 +2817,13 @@
                 ["EV_LOAD_DATA",                ac_load_data,               undefined],
                 ["EV_CLEAR_DATA",               ac_clear_data,              undefined],
                 ["EV_DESCS",                    ac_descs,                   undefined],
+                ["EV_NODE_CREATED",             ac_node_created,            undefined],
+                ["EV_NODE_UPDATED",             ac_node_updated,            undefined],
+                ["EV_NODE_DELETED",             ac_node_deleted,            undefined],
 
                 ["EV_CREATE_VERTEX",            ac_create_vertex,           undefined],
                 ["EV_DELETE_VERTEX",            ac_delete_vertex,           undefined],
                 ["EV_DELETE_EDGE",              ac_delete_edge,             undefined],
-                ["EV_NODE_DELETED",             ac_node_deleted,            undefined],
-                ["EV_NODES_LINKED",             ac_nodes_linked,            undefined],
-                ["EV_NODES_UNLINKED",           ac_nodes_unlinked,          undefined],
 
                 ["EV_SHOW_CELL_DATA_FORM",      ac_show_cell_data_form,     undefined],
                 ["EV_SHOW_CELL_DATA_JSON",      ac_show_cell_data_json,     undefined],

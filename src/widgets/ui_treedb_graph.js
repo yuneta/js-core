@@ -72,31 +72,6 @@
     {
         var elements = [
             {
-                view:"button",
-                type: "icon",
-                icon: "fas fa-border-center-v",
-                autowidth: true,
-                hidden: true,
-                css: "webix_transparent btn_icon_toolbar_20",
-                tooltip: t("view mode: horizontal/vertical"),
-                label: t("view mode"),
-                click: function() {
-                    self.config.gobj_container.gobj_send_event(
-                        "EV_CHANGE_MODE",
-                        {
-                        },
-                        self
-                    );
-                    refresh_systems(self);
-                    if(self.config.gobj_container.gobj_read_attr("mode") == "horizontal") {
-                        this.define("icon", "fas fa-border-center-v");
-                    } else {
-                        this.define("icon", "fas fa-border-center-h");
-                    }
-                    this.refresh();
-                }
-            },
-            {
                 view: "button",
                 type: "icon",
                 icon: "fas fa-sync",
@@ -208,7 +183,6 @@
 
         msg_write_MIA_key(kw, "__topic_name__", topic_name);
         msg_write_MIA_key(kw, "__command__", command);
-        msg_write_MIA_key(kw, "__cell_id__", cell_id);
 
         self.config.info_wait();
 
@@ -243,7 +217,6 @@
 
         msg_write_MIA_key(kw, "__topic_name__", topic_name);
         msg_write_MIA_key(kw, "__command__", command);
-        msg_write_MIA_key(kw, "__cell_id__", cell_id);
 
         self.config.info_wait();
 
@@ -278,7 +251,6 @@
 
         msg_write_MIA_key(kw, "__topic_name__", topic_name);
         msg_write_MIA_key(kw, "__command__", command);
-        msg_write_MIA_key(kw, "__cell_id__", cell_id);
 
         self.config.info_wait();
 
@@ -518,86 +490,11 @@
                 break;
 
             case "create-node":
-                //if(result >= 0) {
-                //    self.config.gobj_nodes_tree.gobj_send_event(
-                //        "EV_LOAD_DATA",
-                //        {
-                //            schema: schema,
-                //            data: data,
-                //            cell_id: __md_iev__.__cell_id__
-                //        },
-                //        self
-                //    );
-                //}
-                break;
-
             case "update-node":
-                //self.config.gobj_nodes_tree.gobj_send_event(
-                //    "EV_LOAD_DATA",
-                //    {
-                //        schema: schema,
-                //        data: data,
-                //        cell_id: __md_iev__.__cell_id__
-                //    },
-                //    self
-                //);
-                break;
-
             case "delete-node":
-                //if(result >= 0) {
-                //    self.config.gobj_nodes_tree.gobj_send_event(
-                //        "EV_NODE_DELETED",
-                //        {
-                //            result: result,
-                //            cell_id: __md_iev__.__cell_id__
-                //        },
-                //        self
-                //    );
-                //}
-                break;
-
             case "link-nodes":
-                //self.config.gobj_nodes_tree.gobj_send_event(
-                //    "EV_NODES_LINKED",
-                //    {
-                //        result: result,
-                //        cell_id: __md_iev__.__link_cell_id__
-                //    },
-                //    self
-                //);
-                //if(result == 0) {
-                //    self.config.gobj_nodes_tree.gobj_send_event(
-                //        "EV_LOAD_DATA",
-                //        {
-                //            schema: schema,
-                //            data: data,
-                //            cell_id: __md_iev__.__child_cell_id__
-                //        },
-                //        self
-                //    );
-                //}
-                break;
-
             case "unlink-nodes":
-                //self.config.gobj_nodes_tree.gobj_send_event(
-                //    "EV_NODES_UNLINKED",
-                //    {
-                //        result: result,
-                //        cell_id: __md_iev__.__link_cell_id__
-                //    },
-                //    self
-                //);
-                //if(result == 0) {
-                //    self.config.gobj_nodes_tree.gobj_send_event(
-                //        "EV_LOAD_DATA",
-                //        {
-                //            schema: schema,
-                //            data: data,
-                //            cell_id: __md_iev__.__child_cell_id__
-                //        },
-                //        self
-                //    );
-                //}
+                // Don't process by here, all with subscribed events.
                 break;
 
             default:
@@ -615,7 +512,6 @@
         var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
         var topic_name = kw_get_str(kw, "topic_name", "", 0);
         var node = kw_get_dict_value(kw, "node", null, 0);
-        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
@@ -625,11 +521,11 @@
         var schema = self.config.descs[topic_name];
 
         self.config.gobj_nodes_tree.gobj_send_event(
-            "EV_LOAD_DATA",
+            "EV_NODE_CREATED",
             {
                 schema: schema,
-                data: [node],
-                cell_id: null
+                topic_name: topic_name,
+                node: node
             },
             self
         );
@@ -645,21 +541,17 @@
         var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
         var topic_name = kw_get_str(kw, "topic_name", "", 0);
         var node = kw_get_dict_value(kw, "node", null, 0);
-        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
             return 0;
         }
 
-        var schema = self.config.descs[topic_name];
-
         self.config.gobj_nodes_tree.gobj_send_event(
-            "EV_LOAD_DATA",
+            "EV_NODE_UPDATED",
             {
-                schema: schema,
-                data: [node],
-                cell_id: null
+                topic_name: topic_name,
+                node: node
             },
             self
         );
@@ -675,7 +567,6 @@
         var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
         var topic_name = kw_get_str(kw, "topic_name", "", 0);
         var node = kw_get_dict_value(kw, "node", null, 0);
-        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
@@ -686,9 +577,7 @@
             "EV_NODE_DELETED",
             {
                 topic_name: topic_name,
-                id: node.id,
-                result: 0,
-                cell_id: null
+                node: node
             },
             self
         );
