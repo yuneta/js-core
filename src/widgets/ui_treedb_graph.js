@@ -26,12 +26,13 @@
          *  If it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
          */
         gobj_remote_yuno: null,
+        treedb_name: null,
+        topics: null,
+        descs: null,
 
         gobj_container: null,
         gobj_nodes_tree: null,
 
-        treedb_name: null,
-        topics: [],
 
         $ui: null,              // $ui from container
 
@@ -405,6 +406,55 @@
         }
     }
 
+    /************************************************************
+     *
+     ************************************************************/
+    function process_descs(self)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic_name = self.config.topics[i].topic_name;
+            var desc = self.config.descs[topic_name];
+            if(!desc) {
+                log_error("topic desc unknown: " + topic_name);
+                continue;
+            }
+
+            self.config.gobj_remote_yuno.gobj_subscribe_event(
+                "EV_TREEDB_NODE_CREATED",
+                {
+                    __service__: self.config.treedb_name,
+                    __filter__: {
+                        "treedb_name": self.config.treedb_name,
+                        "topic_name": topic_name
+                    }
+                },
+                self
+            );
+            self.config.gobj_remote_yuno.gobj_subscribe_event(
+                "EV_TREEDB_NODE_UPDATED",
+                {
+                    __service__: self.config.treedb_name,
+                    __filter__: {
+                        "treedb_name": self.config.treedb_name,
+                        "topic_name": topic_name
+                    }
+                },
+                self
+            );
+            self.config.gobj_remote_yuno.gobj_subscribe_event(
+                "EV_TREEDB_NODE_DELETED",
+                {
+                    __service__: self.config.treedb_name,
+                    __filter__: {
+                        "treedb_name": self.config.treedb_name,
+                        "topic_name": topic_name
+                    }
+                },
+                self
+            );
+        }
+    }
+
 
 
 
@@ -444,6 +494,8 @@
         switch(__md_iev__.__command__) {
             case "descs":
                 if(result >= 0) {
+                    self.config.descs = data;
+                    process_descs(self);
                     self.config.gobj_nodes_tree.gobj_send_event(
                         "EV_DESCS",
                         data,
@@ -466,86 +518,86 @@
                 break;
 
             case "create-node":
-                if(result >= 0) {
-                    self.config.gobj_nodes_tree.gobj_send_event(
-                        "EV_LOAD_DATA",
-                        {
-                            schema: schema,
-                            data: data,
-                            cell_id: __md_iev__.__cell_id__
-                        },
-                        self
-                    );
-                }
+                //if(result >= 0) {
+                //    self.config.gobj_nodes_tree.gobj_send_event(
+                //        "EV_LOAD_DATA",
+                //        {
+                //            schema: schema,
+                //            data: data,
+                //            cell_id: __md_iev__.__cell_id__
+                //        },
+                //        self
+                //    );
+                //}
                 break;
 
             case "update-node":
-                self.config.gobj_nodes_tree.gobj_send_event(
-                    "EV_LOAD_DATA",
-                    {
-                        schema: schema,
-                        data: data,
-                        cell_id: __md_iev__.__cell_id__
-                    },
-                    self
-                );
+                //self.config.gobj_nodes_tree.gobj_send_event(
+                //    "EV_LOAD_DATA",
+                //    {
+                //        schema: schema,
+                //        data: data,
+                //        cell_id: __md_iev__.__cell_id__
+                //    },
+                //    self
+                //);
                 break;
 
             case "delete-node":
-                if(result >= 0) {
-                    self.config.gobj_nodes_tree.gobj_send_event(
-                        "EV_NODE_DELETED",
-                        {
-                            result: result,
-                            cell_id: __md_iev__.__cell_id__
-                        },
-                        self
-                    );
-                }
+                //if(result >= 0) {
+                //    self.config.gobj_nodes_tree.gobj_send_event(
+                //        "EV_NODE_DELETED",
+                //        {
+                //            result: result,
+                //            cell_id: __md_iev__.__cell_id__
+                //        },
+                //        self
+                //    );
+                //}
                 break;
 
             case "link-nodes":
-                self.config.gobj_nodes_tree.gobj_send_event(
-                    "EV_NODES_LINKED",
-                    {
-                        result: result,
-                        cell_id: __md_iev__.__link_cell_id__
-                    },
-                    self
-                );
-                if(result == 0) {
-                    self.config.gobj_nodes_tree.gobj_send_event(
-                        "EV_LOAD_DATA",
-                        {
-                            schema: schema,
-                            data: data,
-                            cell_id: __md_iev__.__child_cell_id__
-                        },
-                        self
-                    );
-                }
+                //self.config.gobj_nodes_tree.gobj_send_event(
+                //    "EV_NODES_LINKED",
+                //    {
+                //        result: result,
+                //        cell_id: __md_iev__.__link_cell_id__
+                //    },
+                //    self
+                //);
+                //if(result == 0) {
+                //    self.config.gobj_nodes_tree.gobj_send_event(
+                //        "EV_LOAD_DATA",
+                //        {
+                //            schema: schema,
+                //            data: data,
+                //            cell_id: __md_iev__.__child_cell_id__
+                //        },
+                //        self
+                //    );
+                //}
                 break;
 
             case "unlink-nodes":
-                self.config.gobj_nodes_tree.gobj_send_event(
-                    "EV_NODES_UNLINKED",
-                    {
-                        result: result,
-                        cell_id: __md_iev__.__link_cell_id__
-                    },
-                    self
-                );
-                if(result == 0) {
-                    self.config.gobj_nodes_tree.gobj_send_event(
-                        "EV_LOAD_DATA",
-                        {
-                            schema: schema,
-                            data: data,
-                            cell_id: __md_iev__.__child_cell_id__
-                        },
-                        self
-                    );
-                }
+                //self.config.gobj_nodes_tree.gobj_send_event(
+                //    "EV_NODES_UNLINKED",
+                //    {
+                //        result: result,
+                //        cell_id: __md_iev__.__link_cell_id__
+                //    },
+                //    self
+                //);
+                //if(result == 0) {
+                //    self.config.gobj_nodes_tree.gobj_send_event(
+                //        "EV_LOAD_DATA",
+                //        {
+                //            schema: schema,
+                //            data: data,
+                //            cell_id: __md_iev__.__child_cell_id__
+                //        },
+                //        self
+                //    );
+                //}
                 break;
 
             default:
@@ -558,39 +610,59 @@
     /********************************************
      *  Remote subscription response
      ********************************************/
+    function ac_treedb_node_created(self, event, kw, src)
+    {
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
+
+        if(treedb_name != self.config.treedb_name) {
+            log_error("It's not my treedb_name: " + treedb_name);
+            return 0;
+        }
+
+        var schema = self.config.descs[topic_name];
+
+        self.config.gobj_nodes_tree.gobj_send_event(
+            "EV_LOAD_DATA",
+            {
+                schema: schema,
+                data: [node],
+                cell_id: null
+            },
+            self
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
     function ac_treedb_node_updated(self, event, kw, src)
     {
-        var webix_msg = kw;
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
 
-        try {
-            var result = webix_msg.result;
-            var comment = webix_msg.comment;
-            var schema = webix_msg.schema;
-            var data = webix_msg.data;
-            var __md_iev__ = webix_msg.__md_iev__;
-        } catch (e) {
-            log_error(e);
-            return;
-        }
-        if(result < 0) {
-            info_user_warning(comment);
-            return;
-        } else {
-            if(comment) {
-                // log_info(comment); No pintes
-            }
+        if(treedb_name != self.config.treedb_name) {
+            log_error("It's not my treedb_name: " + treedb_name);
+            return 0;
         }
 
-// TODO do subscription and process this publication, for all graphs in real time
-//         self.config.gobj_nodes_tree.gobj_send_event(
-//             "EV_LOAD_DATA",
-//             {
-//                 schema: schema,
-//                 is_object(data)?[data]:data,
-//                 cell_id: __md_iev__.__cell_id__ // TODO
-//             },
-//             self
-//         );
+        var schema = self.config.descs[topic_name];
+
+        self.config.gobj_nodes_tree.gobj_send_event(
+            "EV_LOAD_DATA",
+            {
+                schema: schema,
+                data: [node],
+                cell_id: null
+            },
+            self
+        );
 
         return 0;
     }
@@ -600,36 +672,26 @@
      ********************************************/
     function ac_treedb_node_deleted(self, event, kw, src)
     {
-        var webix_msg = kw;
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+        var treedb_graph = kw_get_str(kw, "treedb_graph", "", 0);
 
-        try {
-            var result = webix_msg.result;
-            var comment = webix_msg.comment;
-            var schema = webix_msg.schema;
-            var data = webix_msg.data;
-            var __md_iev__ = webix_msg.__md_iev__;
-        } catch (e) {
-            log_error(e);
-            return;
-        }
-        if(result < 0) {
-            info_user_warning(comment);
-            return;
-        } else {
-            if(comment) {
-                // log_info(comment); No pintes
-            }
+        if(treedb_name != self.config.treedb_name) {
+            log_error("It's not my treedb_name: " + treedb_name);
+            return 0;
         }
 
-// TODO do subscription and process this publication, for all graphs in real time
-//         self.config.gobj_nodes_tree.gobj_send_event(
-//             "EV_NODE_DELETED",
-//             {
-//                 result: result,
-//                 cell_id: __md_iev__.__cell_id__ // TODO
-//             },
-//             self
-//         );
+        self.config.gobj_nodes_tree.gobj_send_event(
+            "EV_NODE_DELETED",
+            {
+                topic_name: topic_name,
+                id: node.id,
+                result: 0,
+                cell_id: null
+            },
+            self
+        );
 
         return 0;
     }
@@ -936,6 +998,7 @@
     var FSM = {
         "event_list": [
             "EV_MT_COMMAND_ANSWER",
+            "EV_TREEDB_NODE_CREATED",
             "EV_TREEDB_NODE_UPDATED",
             "EV_TREEDB_NODE_DELETED",
             "EV_MX_VERTEX_CLICKED",
@@ -956,6 +1019,7 @@
             "ST_IDLE":
             [
                 ["EV_MT_COMMAND_ANSWER",        ac_mt_command_answer,           undefined],
+                ["EV_TREEDB_NODE_CREATED",      ac_treedb_node_created,         undefined],
                 ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,         undefined],
                 ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
                 ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],

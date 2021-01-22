@@ -30,7 +30,6 @@
         gobj_remote_yuno: null,
         treedb_name: null,
         topics: null,
-
         descs: null,
 
         __writable_attrs__: [
@@ -335,6 +334,17 @@
             }
 
             self.config.gobj_remote_yuno.gobj_subscribe_event(
+                "EV_TREEDB_NODE_CREATED",
+                {
+                    __service__: self.config.treedb_name,
+                    __filter__: {
+                        "treedb_name": self.config.treedb_name,
+                        "topic_name": topic_name
+                    }
+                },
+                self
+            );
+            self.config.gobj_remote_yuno.gobj_subscribe_event(
                 "EV_TREEDB_NODE_UPDATED",
                 {
                     __service__: self.config.treedb_name,
@@ -546,6 +556,35 @@
     /********************************************
      *  Remote subscription response
      ********************************************/
+    function ac_treedb_node_created(self, event, kw, src)
+    {
+        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        var topic_name = kw_get_str(kw, "topic_name", "", 0);
+        var node = kw_get_dict_value(kw, "node", null, 0);
+
+        if(treedb_name == self.config.treedb_name) {
+            treedb_register_update_node(
+                self.config.treedb_name,
+                topic_name,
+                node
+            );
+
+            var gobj_formtable = get_gobj_formtable(self, topic_name);
+            gobj_formtable.gobj_send_event(
+                "EV_LOAD_DATA",
+                [node],
+                self
+            );
+
+            update_options(self, topic_name);
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Remote subscription response
+     ********************************************/
     function ac_treedb_node_updated(self, event, kw, src)
     {
         var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
@@ -688,9 +727,6 @@
      ********************************************/
     function ac_close_formtable(self, event, kw, src)
     {
-        if(kw.destroying) {
-            treedb_unregister_formtable(self.config.treedb_name, kw.topic_name);
-        }
         return 0;
     }
 
@@ -741,6 +777,7 @@
     var FSM = {
         "event_list": [
             "EV_MT_COMMAND_ANSWER",
+            "EV_TREEDB_NODE_CREATED",
             "EV_TREEDB_NODE_UPDATED",
             "EV_TREEDB_NODE_DELETED",
             "EV_CREATE_RECORD",
@@ -759,6 +796,7 @@
             "ST_IDLE":
             [
                 ["EV_MT_COMMAND_ANSWER",    ac_mt_command_answer,   undefined],
+                ["EV_TREEDB_NODE_CREATED",  ac_treedb_node_created, undefined],
                 ["EV_TREEDB_NODE_UPDATED",  ac_treedb_node_updated, undefined],
                 ["EV_TREEDB_NODE_DELETED",  ac_treedb_node_deleted, undefined],
                 ["EV_CREATE_RECORD",        ac_create_record,       undefined],

@@ -53,11 +53,15 @@
     /********************************************
      *
      ********************************************/
-    function treedb_unregister_formtable(treedb_name, topic_name)
+    function treedb_unregister_formtable(treedb_name, topic_name, gobj_formtable)
     {
         var treedb = kw_get_dict_value(treedb_register, treedb_name, {}, true);
         var gobjs = kw_get_dict_value(treedb, "gobjs", {}, true);
-        delete gobjs[gobj_formtable.name];
+        if(kw_has_key(gobjs, gobj_formtable.name)) {
+            delete gobjs[gobj_formtable.name];
+        } else {
+            log_error("treedb_unregister_formtable() gobj not found: " + gobj_formtable.name);
+        }
     }
 
     /********************************************

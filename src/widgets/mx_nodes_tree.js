@@ -284,28 +284,29 @@
         /*---------------------------------------*
          *      Menu for create nodes
          *---------------------------------------*/
-        webix.ui({
-            view: "popup",
-            id: build_name(self, "create_menu_popup"),
-            width: 200,
-            body: {
-                id: build_name(self, "create_menu"),
-                view: "menu",
-                layout: "y",
-                template: "#value#",
-                autoheight: true,
-                select: true,
-                click: function(id, e, node) {
-                    this.hide();
-                    self.gobj_send_event("EV_CREATE_VERTEX", {topic_name: id}, self);
-                }
-            },
-            on: {
-                "onShow": function(e) {
-                    $$(build_name(self, "create_menu")).unselectAll();
-                }
-            }
-        }).hide();
+// Fuera, se crea de una formtable
+//         webix.ui({
+//             view: "popup",
+//             id: build_name(self, "create_menu_popup"),
+//             width: 200,
+//             body: {
+//                 id: build_name(self, "create_menu"),
+//                 view: "menu",
+//                 layout: "y",
+//                 template: "#value#",
+//                 autoheight: true,
+//                 select: true,
+//                 click: function(id, e, node) {
+//                     this.hide();
+//                     self.gobj_send_event("EV_CREATE_VERTEX", {topic_name: id}, self);
+//                 }
+//             },
+//             on: {
+//                 "onShow": function(e) {
+//                     $$(build_name(self, "create_menu")).unselectAll();
+//                 }
+//             }
+//         }).hide();
 
         /*---------------------------------------*
          *      Bottom Toolbar
@@ -315,14 +316,15 @@
             height: 30,
             css: "toolbar2color",
             cols:[
-                {
-                    view:"button",
-                    type: "icon",
-                    icon: "fas fa-layer-plus",
-                    css: "webix_transparent icon_toolbar_16",
-                    label: t("create"),
-                    popup: build_name(self, "create_menu_popup")
-                },
+// Fuera, se crea de una formtable
+//                 {
+//                     view:"button",
+//                     type: "icon",
+//                     icon: "fas fa-layer-plus",
+//                     css: "webix_transparent icon_toolbar_16",
+//                     label: t("create"),
+//                     popup: build_name(self, "create_menu_popup")
+//                 },
                 {
                     view: "richselect",
                     id: build_name(self, "layout_options"),
@@ -1848,7 +1850,7 @@
             var cell_name = build_cell_name(self, schema.topic_name, record.id);
 
             if(model.getCell(cell_name)) {
-                log_error("Cell duplicated: " + cell_id);
+                log_error("Cell duplicated: " + cell_name);
             }
             cell = graph.insertVertex(
                 get_layer(self),    // group
@@ -1988,6 +1990,7 @@
 
                 for(var i=0; i<cells.length; i++) {
                     var cell = cells[i];
+                    clear_links(self, cell);
                     draw_links(self, cell);
                 }
                 if(self.config.collapsed) {
@@ -2071,7 +2074,8 @@
                 icon: "" // TODO
             });
         }
-        $$(build_name(self, "create_menu")).parse(topics);
+        // Fuera, se crea de una formtable
+        //$$(build_name(self, "create_menu")).parse(topics);
 
         return 0;
     }
@@ -2171,19 +2175,6 @@
             parent_cell = target_cell;
         }
 
-        /*
-         *  Quita los formtable abiertos de las cell,
-         *  no puedo actualizar los links en la formtable
-         */
-//         if(parent_cell.parent.value.gobj_cell_formtable) {
-//             __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
-//             parent_cell.parent.value.gobj_cell_formtable = 0;
-//         }
-//         if(child_cell.parent.value.gobj_cell_formtable) {
-//             __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
-//             child_cell.parent.value.gobj_cell_formtable = 0;
-//         }
-
         var parent_ref = parent_cell.value.topic_name + "^";
             parent_ref += parent_cell.value.topic_id + "^";
             parent_ref += parent_cell.value.col.id
@@ -2215,8 +2206,22 @@
     {
         var graph = self.config._mxgraph;
         var model = graph.getModel();
-        var cell = model.getCell(kw.cell_id);
         var result = kw.result;
+        if(result != 0) {
+            return -1;
+        }
+
+        var cell = null;
+        if(kw.cell_id) {
+            cell = model.getCell(kw.cell_id);
+        } else {
+            var cell_name = build_cell_name(self, kw.topic_name, kw.id);
+            cell = model.getCell(cell_name);
+        }
+        if(!cell) {
+            log_error("ac_node_deleted: cell not found");
+            return -1;
+        }
 
         model.beginUpdate();
         try {
@@ -2649,19 +2654,6 @@
                     return -1;
                 }
 
-                /*
-                 *  Quita los formtable abiertos de las cell,
-                 *  no puedo actualizar los links en la formtable
-                 */
-//                 if(parent_cell.parent.value.gobj_cell_formtable) {
-//                     __yuno__.gobj_destroy(parent_cell.parent.value.gobj_cell_formtable);
-//                     parent_cell.parent.value.gobj_cell_formtable = 0;
-//                 }
-//                 if(child_cell.parent.value.gobj_cell_formtable) {
-//                     __yuno__.gobj_destroy(child_cell.parent.value.gobj_cell_formtable);
-//                     child_cell.parent.value.gobj_cell_formtable = 0;
-//                 }
-
                 // HACK "==>" repeated
                 var future_cell_id = child_cell.id + " ==> " + parent_cell.id;
                 model.setValue(cell, future_cell_id);
@@ -2721,8 +2713,14 @@
                  *      + cell_id (vertex cell id)
                  *  }
                  */
+                var _geometry = kw_get_dict_value(
+                    cell.value.record,
+                    "_geometry",
+                    {},
+                    true
+                );
                 __extend_dict__(
-                    cell.value.record["_geometry"],
+                    _geometry,
                     filter_dict(
                         cell.geometry,
                         ["x", "y"]
@@ -2942,7 +2940,7 @@
                 ["EV_MX_RESIZECELLS",           ac_mx_resizecells,          undefined],
                 ["EV_MX_CONNECTCELL",           ac_mx_connectcell,          undefined],
 
-                ["EV_CLOSE_WINDOW",             ac_close_window,         undefined],
+                ["EV_CLOSE_WINDOW",             ac_close_window,            undefined],
                 ["EV_TOGGLE",                   ac_toggle,                  undefined],
                 ["EV_SHOW",                     ac_show,                    undefined],
                 ["EV_HIDE",                     ac_hide,                    undefined],

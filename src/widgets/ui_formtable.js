@@ -1632,6 +1632,8 @@
             case "blob":
                 if(!empty_string(value)) {
                     value = JSON.parse(value);
+                } else {
+                    value = {};
                 }
                 break;
 
@@ -1850,19 +1852,31 @@
 
         // redefine columns
         var $table = $$(build_name(self, "list_table"));
-        $table.config.columns = cols2webix_table_cols(self, cols);
-        $table.refreshColumns();
+        if($table) {
+            $table.config.columns = cols2webix_table_cols(self, cols);
+            $table.refreshColumns();
+        } else {
+            log_error("$table not found: " + build_name(self, "list_table"));
+        }
 
         // redefine elements
         var eles = cols2webix_form_elements(self, cols, "create");
         var $create_form = $$(build_name(self, "create_form"));
-        $create_form.define("elements", eles[0]);
-        $create_form.reconstruct();
+        if($create_form) {
+            $create_form.define("elements", eles[0]);
+            $create_form.reconstruct();
+        } else {
+            log_error("$form create not found: " + build_name(self, "create_form"));
+        }
 
         var eles = cols2webix_form_elements(self, cols, "update");
         var $update_form = $$(build_name(self, "update_form"));
-        $update_form.define("elements", eles[0]);
-        $update_form.reconstruct();
+        if($update_form) {
+            $update_form.define("elements", eles[0]);
+            $update_form.reconstruct();
+        } else {
+            log_error("$form update not found: " + build_name(self, "update_form"));
+        }
 
         return 0;
     }
@@ -2458,6 +2472,14 @@
     proto.mt_destroy = function()
     {
         var self = this;
+
+        if(!empty_string(self.config.treedb_name)) {
+            treedb_unregister_formtable(
+                self.config.treedb_name,
+                self.config.topic_name,
+                self
+            );
+        }
         if(self.config.$ui) {
             self.config.$ui.destructor();
             self.config.$ui = 0;
