@@ -295,7 +295,7 @@
                     with_top_title: true,
                     with_footer: true,
                     with_navigation_toolbar: true,
-                    hide_private_fields: false, // TODO TEST dejalo en true, para probar el json
+                    hide_private_fields: true,
                     update_mode_enabled: true,
                     create_mode_enabled: true,
                     delete_mode_enabled: true,
@@ -515,36 +515,9 @@
                 break;
 
             case "create-node":
-                if(result >= 0) {
-                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
-                    gobj_formtable.gobj_send_event(
-                        "EV_LOAD_DATA",
-                        [data],
-                        self
-                    );
-                }
-                break;
-
             case "update-node":
-                if(result >= 0) {
-                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
-                    gobj_formtable.gobj_send_event(
-                        "EV_LOAD_DATA",
-                        [data],
-                        self
-                    );
-                }
-                break;
-
             case "delete-node":
-                if(result >= 0) {
-                    var gobj_formtable = get_gobj_formtable(self, schema.topic_name);
-                    gobj_formtable.gobj_send_event(
-                        "EV_DELETE_DATA",
-                        [data],
-                        self
-                    );
-                }
+                // Don't process by here, process on subscribed events.
                 break;
 
             default:
@@ -627,13 +600,12 @@
                 topic_name,
                 node
             );
-
             update_options(self, topic_name); // This before load data
 
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_DELETE_DATA",
-                [node],
+                node,
                 self
             );
         }
@@ -650,14 +622,23 @@
         var record = kw.record;
         var options= kw.options || {}
         options["list-dict"] = true;
+        options["create"] = true;
+        options["autolink"] = true;
 
-        return treedb_create_node(
+        return treedb_update_node(
             self,
             self.config.treedb_name,
             topic_name,
             record,
             options
         );
+        //return treedb_create_node(
+        //    self,
+        //    self.config.treedb_name,
+        //    topic_name,
+        //    record,
+        //    options
+        //);
     }
 
     /********************************************

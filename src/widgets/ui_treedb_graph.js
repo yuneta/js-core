@@ -494,7 +494,7 @@
             case "delete-node":
             case "link-nodes":
             case "unlink-nodes":
-                // Don't process by here, all with subscribed events.
+                // Don't process by here, process on subscribed events.
                 break;
 
             default:

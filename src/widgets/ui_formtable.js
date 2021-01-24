@@ -453,6 +453,25 @@
                     click: function() {
                         self.gobj_send_event("EV_UNDO_RECORD", {}, self);
                     }
+                },
+                {
+                    view: "icon",
+                    id: build_name(self, "delete_record"),
+                    icon: "fas fa-trash-alt",
+                    css: "webix_transparent icon_toolbar_24",
+                    tooltip: t("delete record"),
+                    click: function() {
+                        webix.confirm(
+                            {
+                                title: t("delete record"),
+                                text: t("are you sure"),
+                                type:"confirm-warning"
+                            }).then(function(result) {
+                                var $form = $$(build_name(self, "update_form"));
+                                self.gobj_send_event("EV_DELETE_RECORD", $form.getValues(), self);
+                            }
+                        );
+                    }
                 }
             ]
         };
@@ -1743,7 +1762,7 @@
 
 
     /********************************************
-     *
+     *  From external
      ********************************************/
     function ac_load_data(self, event, kw, src)
     {
@@ -1792,21 +1811,30 @@
     }
 
     /********************************************
-     *
+     *  From external
      ********************************************/
     function ac_delete_data(self, event, kw, src)
     {
         var $table = $$(build_name(self, "list_table"));
 
-        var ids = kwid_get_ids(kw);
-
-        $table.remove(ids);
         $table.unselectAll(); // HACK important, to update the form in the select below.
 
-        self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+        var idx = $table.getIndexById(kw.id);
+        if(idx >= 0) {
+            $table.remove(kw.id);
 
-        self.config.total = $table.count();
-        $$(build_name(self, "total")).setValue(self.config.total);
+            self.config.total = $table.count();
+            $$(build_name(self, "total")).setValue(self.config.total);
+
+            if(idx >= self.config.total) {
+                idx = self.config.total - 1;
+            }
+            var id = $table.getIdByIndex(idx);
+            $table.select(id);
+            $table.showItem(id);
+        } else {
+            log_error("delete_data: record not found " + kw.id);
+        }
 
         return 0;
     }
@@ -1889,7 +1917,7 @@
     }
 
     /********************************************
-     *
+     *  From internal toolbar
      ********************************************/
     var update_check_invalid_fields = false;
     function ac_update_record(self, event, kw, src)
@@ -1936,7 +1964,42 @@
     }
 
     /********************************************
-     *
+     *  From internal toolbar
+     ********************************************/
+    function ac_delete_record(self, event, kw, src)
+    {
+        var $form = $$(build_name(self, "update_form"));
+        var btn = $$(build_name(self, "update_record"));
+        webix.html.removeCss(btn.getNode(), "icon_color_submmit");
+        btn = $$(build_name(self, "undo_record"));
+        webix.html.removeCss(btn.getNode(), "icon_color_cancel");
+        var new_kw = filter_dict(kw, self.config._writable_fields);
+
+        if(self.config.with_webix_id) {
+            new_kw["id"] = kw["id_"];
+            delete new_kw["id_"];
+        }
+
+        try {
+            new_kw = record2backend(self, new_kw);
+        } catch (e) {
+            log_warning(e);
+            return -1;
+        }
+
+        self.gobj_publish_event(
+            "EV_DELETE_RECORD",
+            {
+                topic_name: self.config.topic_name,
+                is_topic_schema: self.config.is_topic_schema,
+                record: new_kw
+            }
+        );
+        return 0;
+    }
+
+    /********************************************
+     *  From internal toolbar
      ********************************************/
     function ac_undo_record(self, event, kw, src)
     {
@@ -1953,6 +2016,7 @@
         if(id) {
             $table.unselectAll();
             $table.select(id);
+            $table.showItem(id);
         }
         var btn = $$(build_name(self, "update_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_submmit");
@@ -1963,7 +2027,7 @@
     }
 
     /********************************************
-     *
+     *  From internal toolbar
      ********************************************/
     var create_check_invalid_fields = false;
     function ac_create_record(self, event, kw, src)
@@ -2013,7 +2077,7 @@
     }
 
     /********************************************
-     *
+     *  From internal toolbar
      ********************************************/
     function ac_discard_record(self, event, kw, src)
     {
@@ -2031,7 +2095,7 @@
         btn = $$(build_name(self, "discard_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_cancel");
 
-        // TODO refresh
+        // need refresh?
         return 0;
     }
 
@@ -2080,6 +2144,7 @@
         var id = $table.getFirstId();
         if(id) {
             $table.select(id);
+            $table.showItem(id);
         }
 
         return 0;
@@ -2109,6 +2174,7 @@
         var id = $table.getPrevId($table.getSelectedId());
         if(id) {
             $table.select(id);
+            $table.showItem(id);
         }
         return 0;
     }
@@ -2122,6 +2188,7 @@
         var id = $table.getNextId($table.getSelectedId());
         if(id) {
             $table.select(id);
+            $table.showItem(id);
         }
         return 0;
     }
@@ -2150,6 +2217,7 @@
         var id = $table.getLastId();
         if(id) {
             $table.select(id);
+            $table.showItem(id);
         }
         return 0;
     }
@@ -2170,6 +2238,7 @@
             var id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
+            $table.showItem(id);
         }
         return 0;
     }
@@ -2213,6 +2282,7 @@
             var id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
+            $table.showItem(id);
         }
         return 0;
     }
@@ -2395,8 +2465,9 @@
                 ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
                 ["EV_UPDATE_OPTIONS",           ac_update_options,          undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
-                ["EV_CREATE_RECORD",            ac_create_record,           undefined],
+                ["EV_DELETE_RECORD",            ac_delete_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
+                ["EV_CREATE_RECORD",            ac_create_record,           undefined],
                 ["EV_DISCARD_RECORD",           ac_discard_record,          undefined],
                 ["EV_LIST_MODE",                ac_list_mode,               undefined],
                 ["EV_UPDATE_MODE",              ac_update_mode,             undefined],
