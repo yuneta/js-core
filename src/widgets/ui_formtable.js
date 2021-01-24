@@ -73,6 +73,7 @@
         with_footer: true,
         with_select: true,
         with_multiselect: false,
+        with_table_editable: false, // FUTURE de momento datatable no editable (solo en form)
         with_keyboard_navigation: true,
         with_resizeColumn: true,
         with_resizeRow: false,
@@ -505,7 +506,7 @@
             footer: self.config.with_footer,
             select: self.config.with_select,
             multiselect: self.config.with_multiselect,
-            editable: false, // FUTURE de momento datatable no editable (solo en form)
+            editable: self.config.with_table_editable,
             navigation: self.config.with_keyboard_navigation,
             resizeColumn: self.config.with_resizeColumn,
             resizeRow: self.config.with_resizeRow,
@@ -849,7 +850,13 @@
                     webix_col["editor"] = "text";
                     break;
                 case "boolean":
-                    webix_col["template"] = "{common.checkbox()}";
+                    if(self.config.with_table_editable) {
+                        webix_col["template"] = "{common.checkbox()}";
+                        webix_col["checkValue"] = true;
+                        webix_col["uncheckValue"] = false;
+                    } else {
+                        webix_col["editor"] = "inline-checkbox";
+                    }
                     break;
                 case "blob":
                     webix_col["editor"] = "text";
