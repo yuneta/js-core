@@ -1,5 +1,5 @@
-jsYuneta
-========
+js-core
+=======
 
 Yuneta in javascript.
 
