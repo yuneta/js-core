@@ -504,12 +504,13 @@
                         self
                     );
 
+                    update_options(self, schema.topic_name); // This before load data
+
                     gobj_formtable.gobj_send_event(
                         "EV_LOAD_DATA",
                         data,
                         self
                     );
-                    update_options(self, schema.topic_name);
                 }
                 break;
 
@@ -569,14 +570,14 @@
                 node
             );
 
+            update_options(self, topic_name); // This before load data
+
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_LOAD_DATA",
                 [node],
                 self
             );
-
-            update_options(self, topic_name);
         }
 
         return 0;
@@ -598,14 +599,14 @@
                 node
             );
 
+            update_options(self, topic_name); // This before load data
+
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_LOAD_DATA",
                 [node],
                 self
             );
-
-            update_options(self, topic_name);
         }
 
         return 0;
@@ -627,14 +628,14 @@
                 node
             );
 
+            update_options(self, topic_name); // This before load data
+
             var gobj_formtable = get_gobj_formtable(self, topic_name);
             gobj_formtable.gobj_send_event(
                 "EV_DELETE_DATA",
                 [node],
                 self
             );
-
-            update_options(self, topic_name);
         }
 
         return 0;
