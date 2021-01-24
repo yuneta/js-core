@@ -1548,13 +1548,13 @@
                     if(is_string(value)) {
                         var fkey = decoder_fkey(col, value);
                         if(fkey) {
-                            new_value.push(fkey); // TODO ? .id);
+                            new_value.push(fkey.id);
                         }
                     } else if(is_array(value)) {
                         for(var i=0; i<value.length; i++) {
                             var fkey = decoder_fkey(col, value[i]);
                             if(fkey) {
-                                new_value.push(fkey); // TODO ? .id);
+                                new_value.push(fkey.id);
                             }
                         }
                     } else {
