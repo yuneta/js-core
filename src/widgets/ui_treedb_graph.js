@@ -1003,7 +1003,7 @@
                     with_panel_title: t("Systems Tree"),
                     with_panel_hidden_btn: false,
                     with_panel_fullscreen_btn: true,
-                    with_panel_resize_btn: true
+                    with_panel_resize_btn: false
                 },
                 subscriber: self,
                 treedb_name: self.config.treedb_name,

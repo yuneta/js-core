@@ -56,7 +56,7 @@
         treedb_name: null,  // treedb editing
         topics: null,  // topics editing
 
-        locked: false, // TODO dejalo en true inicialmente
+        locked: true,
         fitted: false,
         collapsed: true,
         foldable_icon_size: 16,
@@ -378,29 +378,6 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: "",
-                    icon: self.config.collapsed? "far fa-plus-square":"far fa-minus-square",
-                    css: "webix_transparent icon_toolbar_16",
-                    maxWidth: 120,
-                    label: self.config.collapsed? t("expand"):t("collapse"),
-                    click: function() {
-                        if(self.config.collapsed) {
-                            self.config.collapsed = false;
-                            this.define("icon", "far fa-minus-square");
-                            this.define("label", t("collapse"));
-                        } else {
-                            self.config.collapsed = true;
-                            this.define("icon", "far fa-plus-square");
-                            this.define("label", t("expand"));
-                        }
-                        this.refresh();
-                        self.gobj_save_persistent_attrs();
-                        collapse_edition(self, self.config.collapsed);
-                    }
-                },
-                {
-                    view:"button",
-                    type: "icon",
                     icon: "far fa-search-plus",
                     css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
@@ -443,6 +420,29 @@
                             this.define("label", t("unlock vertices"));
                         }
                         this.refresh();
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "",
+                    icon: self.config.collapsed? "far fa-plus-square":"far fa-minus-square",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: self.config.collapsed? t("expand"):t("collapse"),
+                    click: function() {
+                        if(self.config.collapsed) {
+                            self.config.collapsed = false;
+                            this.define("icon", "far fa-minus-square");
+                            this.define("label", t("collapse"));
+                        } else {
+                            self.config.collapsed = true;
+                            this.define("icon", "far fa-plus-square");
+                            this.define("label", t("expand"));
+                        }
+                        this.refresh();
+                        self.gobj_save_persistent_attrs();
+                        collapse_edition(self, self.config.collapsed);
                     }
                 },
                 { view:"label", label: ""},
@@ -1880,6 +1880,16 @@
         return cell;
     }
 
+    /************************************************************
+     *  Update topic cell
+     *      - from backend
+     ************************************************************/
+    function update_geometry(self, cell, geometry)
+    {
+        var graph = self.config._mxgraph;
+        graph.resizeCell1(cell, geometry, false);
+    }
+
 
 
 
@@ -2048,7 +2058,8 @@
         model.beginUpdate();
         try {
             clear_links(self, cell);
-            update_topic_cell(self, cell, kw.node)
+            update_topic_cell(self, cell, kw.node);
+            update_geometry(self, cell, kw.node._geometry);
             draw_links(self, cell);
 
         } catch (e) {
