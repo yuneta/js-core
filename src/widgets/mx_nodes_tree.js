@@ -404,27 +404,6 @@
                 {
                     view:"button",
                     type: "icon",
-                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
-                    css: "webix_transparent icon_toolbar_16",
-                    autosize: true,
-                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
-                    click: function() {
-                        var graph = self.config._mxgraph;
-                        if(graph.isCellsLocked()) {
-                            unlock_graph(self, graph);
-                            this.define("icon", "far fa-lock-open-alt");
-                            this.define("label", t("lock vertices"));
-                        } else {
-                            lock_graph(self, graph);
-                            this.define("icon", "far fa-lock-alt");
-                            this.define("label", t("unlock vertices"));
-                        }
-                        this.refresh();
-                    }
-                },
-                {
-                    view:"button",
-                    type: "icon",
                     icon: "",
                     icon: self.config.collapsed? "far fa-plus-square":"far fa-minus-square",
                     css: "webix_transparent icon_toolbar_16",
@@ -443,6 +422,27 @@
                         this.refresh();
                         self.gobj_save_persistent_attrs();
                         collapse_edition(self, self.config.collapsed);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: self.config.locked? "far fa-lock-alt":"far fa-lock-open-alt",
+                    css: "webix_transparent icon_toolbar_16",
+                    autosize: true,
+                    label: self.config.locked? t("unlock vertices"):t("lock vertices"),
+                    click: function() {
+                        var graph = self.config._mxgraph;
+                        if(graph.isCellsLocked()) {
+                            unlock_graph(self, graph);
+                            this.define("icon", "far fa-lock-open-alt");
+                            this.define("label", t("lock vertices"));
+                        } else {
+                            lock_graph(self, graph);
+                            this.define("icon", "far fa-lock-alt");
+                            this.define("label", t("unlock vertices"));
+                        }
+                        this.refresh();
                     }
                 },
                 { view:"label", label: ""},
@@ -2326,7 +2326,7 @@
             with_footer: true,
             with_navigation_toolbar: true,
             without_refresh: true,
-            hide_private_fields: false, // TODO TEST dejalo en true, para probar el json
+            hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",
             update_mode_enabled: cell_name?true:false,
