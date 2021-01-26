@@ -594,7 +594,6 @@
             });
         }
         self.config.$ui.gobj = self;
-        // $$("cmenu").attachTo($$(build_name(self, "mx_tree"))); TODO
 
         if(self.config.ui_properties) {
             self.config.$ui.define(self.config.ui_properties);
@@ -1880,6 +1879,25 @@
         return cell;
     }
 
+    /************************************************************
+     *  Update topic cell
+     *      - from backend
+     ************************************************************/
+    function update_geometry(self, cell, geometry)
+    {
+        var graph = self.config._mxgraph;
+        graph.resizeCell(cell, geometry, false);
+    }
+
+    /************************************************************
+     *  Is it a response message from my action?
+     ************************************************************/
+    function its_me(self, kw)
+    {
+        // TODO
+        return false;
+    }
+
 
 
 
@@ -2049,6 +2067,12 @@
         try {
             clear_links(self, cell);
             update_topic_cell(self, cell, kw.node);
+            if(!its_me(self, kw)) {
+                // TODO como pinto updates de otros, pero el mio
+                // porque volverá a publicar otro update que nos volverá a llega:
+                //      INFINITE LOOP!
+                // No retroalimentes: update_geometry(self, cell, kw.node._geometry);
+            }
             draw_links(self, cell);
 
         } catch (e) {
@@ -2587,9 +2611,6 @@
      ********************************************/
     function ac_mx_connectcell(self, event, kw, src)
     {
-        //TODO
-        log_error("TODO");
-        trace_msg(kw);
         return 0;
     }
 
