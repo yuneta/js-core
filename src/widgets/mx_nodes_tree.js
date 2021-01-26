@@ -1880,16 +1880,6 @@
         return cell;
     }
 
-    /************************************************************
-     *  Update topic cell
-     *      - from backend
-     ************************************************************/
-    function update_geometry(self, cell, geometry)
-    {
-        var graph = self.config._mxgraph;
-        graph.resizeCell1(cell, geometry, false);
-    }
-
 
 
 
@@ -2059,7 +2049,6 @@
         try {
             clear_links(self, cell);
             update_topic_cell(self, cell, kw.node);
-            update_geometry(self, cell, kw.node._geometry);
             draw_links(self, cell);
 
         } catch (e) {
