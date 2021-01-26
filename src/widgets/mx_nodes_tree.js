@@ -52,6 +52,7 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
+        uuid: null, // to publish and avod feedback loops
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
         topics: null,  // topics editing
@@ -2639,6 +2640,10 @@
                     {},
                     true
                 );
+                if(!is_object(_geometry)) {
+                    _geometry = {};
+                    kw_set_dict_value(cell.value.record, "_geometry", _geometry);
+                }
                 __extend_dict__(
                     _geometry,
                     filter_dict(
@@ -2651,7 +2656,11 @@
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
                     record: cell.value.record,
-                    cell_id: cell.id
+                    cell_id: cell.id,
+                    to_publish: {
+                        __origin__: self.config.uuid,
+                        __transaction__: get_unique_id("tr")
+                    }
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
@@ -2693,7 +2702,11 @@
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
                     record: cell.value.record,
-                    cell_id: cell.id
+                    cell_id: cell.id,
+                    to_publish: {
+                        __origin__: self.config.uuid,
+                        __transaction__: get_unique_id("tr")
+                    }
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
@@ -2905,6 +2918,8 @@
         var self = this;
 
         load_icons(self);
+
+        self.config.uuid = get_unique_id("me");
 
         var subscriber = self.gobj_read_attr("subscriber");
         if(!subscriber)

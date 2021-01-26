@@ -491,6 +491,8 @@
                     click: function() {
                         var $new = $$(build_name(self, "create_form"));
                         self.gobj_send_event("EV_CREATE_RECORD", $new.getValues(), self);
+                        //$form.clearValidation();
+                        //$form.clear();
                     }
                 },
                 {
@@ -500,19 +502,7 @@
                     css: "webix_transparent icon_toolbar_24",
                     tooltip: t("discard record"),
                     click: function() {
-                        var $new = $$(build_name(self, "create_form"));
-                        var changed = $new.isDirty();
-                        if(changed) {
-                            webix.confirm(
-                                {
-                                    title: t("discard record"),
-                                    text: t("are you sure"),
-                                    type:"confirm-warning"
-                                }).then(function(result) {
-                                    self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
-                                }
-                            );
-                        }
+                        self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
                     }
                 }
             ]

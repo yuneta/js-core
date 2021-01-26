@@ -199,7 +199,7 @@
     /********************************************
      *
      ********************************************/
-    function treedb_update_node(self, treedb_name, topic_name, record, options, cell_id)
+    function treedb_update_node(self, treedb_name, topic_name, record, options, cell_id, to_publish)
     {
         if(!self.config.gobj_remote_yuno) {
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
@@ -217,6 +217,9 @@
 
         msg_write_MIA_key(kw, "__topic_name__", topic_name);
         msg_write_MIA_key(kw, "__command__", command);
+        if(to_publish) {
+            msg_write_MIA_key(kw, "__to_publish__", to_publish);
+        }
 
         self.config.info_wait();
 
@@ -547,6 +550,12 @@
             return 0;
         }
 
+//         if(its_me) TODO
+//         {
+//             __origin__: self.config.uuid,
+//             __transaction__: get_unique_id("tr");
+//         }
+
         self.config.gobj_nodes_tree.gobj_send_event(
             "EV_NODE_UPDATED",
             {
@@ -647,6 +656,7 @@
         var options = kw.options || {};
         var cell_id = kw.cell_id;
         var is_topic_schema = kw.is_topic_schema;
+        var to_publish = kw.to_publish;
 
         if(is_topic_schema) {
             log_error("update_node of topic schema NOT IMPLEMENTED");
@@ -659,7 +669,8 @@
             topic_name,
             record,
             {"list-dict": true},
-            cell_id
+            cell_id,
+            to_publish
         );
     }
 
