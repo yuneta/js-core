@@ -1831,7 +1831,9 @@
             }
             var id = $table.getIdByIndex(idx);
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         } else {
             log_error("delete_data: record not found " + kw.id);
         }
@@ -2016,7 +2018,9 @@
         if(id) {
             $table.unselectAll();
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         }
         var btn = $$(build_name(self, "update_record"));
         webix.html.removeCss(btn.getNode(), "icon_color_submmit");
@@ -2144,7 +2148,9 @@
         var id = $table.getFirstId();
         if(id) {
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         }
 
         return 0;
@@ -2174,7 +2180,9 @@
         var id = $table.getPrevId($table.getSelectedId());
         if(id) {
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         }
         return 0;
     }
@@ -2188,7 +2196,9 @@
         var id = $table.getNextId($table.getSelectedId());
         if(id) {
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         }
         return 0;
     }
@@ -2217,7 +2227,9 @@
         var id = $table.getLastId();
         if(id) {
             $table.select(id);
-            $table.showItem(id);
+            if($table.isVisible()) {
+                $table.showItem(id);
+            }
         }
         return 0;
     }
@@ -2233,11 +2245,12 @@
         if(idx >= 0 && idx < self.config.total) {
             var id = $table.getIdByIndex(idx);
             $table.select(id);
-            $table.showItem(id);
         } else {
             var id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
+        }
+        if($table.isVisible()) {
             $table.showItem(id);
         }
         return 0;
@@ -2259,7 +2272,9 @@
         } else {
             $table.select(id);
         }
-        $table.showItem(id);
+        if($table.isVisible()) {
+            $table.showItem(id);
+        }
         return 0;
     }
 
@@ -2277,11 +2292,12 @@
             var id = $table.getIdByIndex(idx);
             self.config.page = page;
             $table.select(id);
-            $table.showItem(id);
         } else {
             var id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
+        }
+        if($table.isVisible()) {
             $table.showItem(id);
         }
         return 0;
