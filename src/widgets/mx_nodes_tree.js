@@ -2657,7 +2657,7 @@
                     is_topic_schema: false,
                     record: cell.value.record,
                     cell_id: cell.id,
-                    to_publish: {
+                    __echo__: {
                         __origin__: self.config.uuid,
                         __transaction__: get_unique_id("tr")
                     }
@@ -2703,7 +2703,7 @@
                     is_topic_schema: false,
                     record: cell.value.record,
                     cell_id: cell.id,
-                    to_publish: {
+                    __echo__: {
                         __origin__: self.config.uuid,
                         __transaction__: get_unique_id("tr")
                     }
