@@ -53,6 +53,8 @@
 
         //////////////// Particular Attributes //////////////////
         uuid: null, // to publish and avod feedback loops
+        lock_publish_geometry: false,
+
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
         topics: null,  // topics editing
@@ -1886,8 +1888,19 @@
      ************************************************************/
     function update_geometry(self, cell, geometry)
     {
-        var graph = self.config._mxgraph;
-        graph.resizeCell(cell, geometry, false);
+        self.config.lock_publish_geometry = true;
+        var __origin__ = kw_get_str(geometry, "__origin__", "", false);
+        if(__origin__ != self.config.uuid) {
+            /*
+             *  pinto updates de otros, pero no el mio
+             *  porque volverá a publicar otro update que nos volverá a llegar:
+             *      INFINITE LOOP!
+             * No retroalimentes
+             */
+            var graph = self.config._mxgraph;
+            graph.resizeCell(cell, geometry, false);
+        }
+        self.config.lock_publish_geometry = false;
     }
 
     /************************************************************
@@ -2068,12 +2081,7 @@
         try {
             clear_links(self, cell);
             update_topic_cell(self, cell, kw.node);
-            if(!its_me(self, kw)) {
-                // TODO como pinto updates de otros, pero el mio
-                // porque volverá a publicar otro update que nos volverá a llega:
-                //      INFINITE LOOP!
-                // No retroalimentes: update_geometry(self, cell, kw.node._geometry);
-            }
+            update_geometry(self, cell, kw.node._geometry);
             draw_links(self, cell);
 
         } catch (e) {
@@ -2620,8 +2628,10 @@
      ********************************************/
     function ac_mx_movecells(self, event, kw, src)
     {
+        if(self.config.lock_publish_geometry) {
+            return 0;
+        }
         var cells = kw.cells;
-
         for(var i=0; i<cells.length; i++) {
             var cell = cells[i];
             if(cell.value.cell_name) {
@@ -2678,8 +2688,11 @@
      ********************************************/
     function ac_mx_resizecells(self, event, kw, src)
     {
-        var cells = kw.cells;
+        if(self.config.lock_publish_geometry) {
+            return 0;
+        }
 
+        var cells = kw.cells;
         for(var i=0; i<cells.length; i++) {
             var cell = cells[i];
             if(cell.isCollapsed()) {
@@ -2696,7 +2709,7 @@
                  *  }
                  */
 
-                var _geometry = = filter_dict(
+                var _geometry = filter_dict(
                     cell.geometry,
                     ["x", "y", "width", "height"]
                 );
