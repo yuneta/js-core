@@ -743,6 +743,12 @@
         } finally {
             model.endUpdate();
         }
+        if(collapse) {
+            // Colapsado no puede resize
+            graph.setCellsResizable(false);
+        } else {
+            graph.setCellsResizable(true);
+        }
     }
 
     /********************************************
