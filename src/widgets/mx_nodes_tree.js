@@ -1896,7 +1896,7 @@
     {
         self.config.lock_publish_geometry = true;
         var __origin__ = kw_get_str(geometry, "__origin__", "", false);
-        if(__origin__ != self.config.uuid) {
+        if(__origin__ && __origin__ != self.config.uuid) {
             /*
              *  pinto updates de otros, pero no el mio
              *  porque volverá a publicar otro update que nos volverá a llegar:
@@ -2664,7 +2664,7 @@
                     _geometry,
                     filter_dict(
                         cell.geometry,
-                        ["x", "y"]
+                        ["x", "y", "width", "height"]
                     )
                 );
                 __extend_dict__(
