@@ -2651,16 +2651,19 @@
                         ["x", "y"]
                     )
                 );
+                __extend_dict__(
+                    _geometry,
+                    {
+                        __origin__: self.config.uuid
+                    }
+                );
+
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
                     record: cell.value.record,
-                    cell_id: cell.id,
-                    __echo__: {
-                        __origin__: self.config.uuid,
-                        __transaction__: get_unique_id("tr")
-                    }
+                    cell_id: cell.id
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
@@ -2693,20 +2696,24 @@
                  *  }
                  */
 
-                cell.value.record["_geometry"] = filter_dict(
+                var _geometry = = filter_dict(
                     cell.geometry,
                     ["x", "y", "width", "height"]
                 );
+                __extend_dict__(
+                    _geometry,
+                    {
+                        __origin__: self.config.uuid
+                    }
+                );
+                kw_set_dict_value(cell.value.record, "_geometry", _geometry);
+
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
                     record: cell.value.record,
-                    cell_id: cell.id,
-                    __echo__: {
-                        __origin__: self.config.uuid,
-                        __transaction__: get_unique_id("tr")
-                    }
+                    cell_id: cell.id
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
