@@ -2265,6 +2265,11 @@
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
             record: kw.record,
+            options: {
+                list_dict: true,
+                create: true,
+                autolink: true
+            },
             cell_id: cell_id
         };
 
@@ -2273,7 +2278,7 @@
             ["x", "y", "width", "height"]
         );
 
-        self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
+        self.gobj_publish_event("EV_UPDATE_RECORD", kw_create, self);
 
         return 0;
     }
@@ -2286,7 +2291,6 @@
      *      topic_name,
      *      is_topic_schema,
      *      record
-     *      options
      *      + cell_id (vertex cell id)
      *  }
      ********************************************/
@@ -2302,7 +2306,10 @@
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
             record: kw.record,
-            options: kw.options,
+            options: {
+                list_dict: true,
+                autolink: true
+            },
             cell_id: cell_id
         };
 

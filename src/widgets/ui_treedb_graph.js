@@ -372,7 +372,7 @@
                 self.config.treedb_name,
                 topic_name,
                 {
-                    "list-dict": true
+                    "list_dict": true
                 }
             );
         }
@@ -636,7 +636,7 @@
             treedb_name,
             topic_name,
             record,
-            {"list-dict": true},
+            options,
             cell_id
         );
     }
@@ -664,7 +664,7 @@
             treedb_name,
             topic_name,
             record,
-            {"list-dict": true},
+            options,
             cell_id
         );
     }
@@ -715,7 +715,7 @@
             treedb_name,
             parent_ref,
             child_ref,
-            {"list-dict": true},
+            {"list_dict": true},
             link_cell_id,
             child_cell_id
         );
@@ -739,7 +739,7 @@
             treedb_name,
             parent_ref,
             child_ref,
-            {"list-dict": true},
+            {"list_dict": true},
             link_cell_id,
             child_cell_id
         );

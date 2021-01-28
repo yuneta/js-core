@@ -621,7 +621,7 @@
         var topic_name = src.gobj_read_attr("topic_name");
         var record = kw.record;
         var options= kw.options || {}
-        options["list-dict"] = true;
+        options["list_dict"] = true;
         options["create"] = true;
         options["autolink"] = true;
 
@@ -649,7 +649,7 @@
         var topic_name = src.gobj_read_attr("topic_name");
         var record = kw.record;
         var options= kw.options || {}
-        options["list-dict"] = true;
+        options["list_dict"] = true;
         options["autolink"] = true;
 
         return treedb_update_node(
@@ -686,7 +686,7 @@
     function ac_refresh_table(self, event, kw, src)
     {
         var options= kw.options || {}
-        options["list-dict"] = true;
+        options["list_dict"] = true;
 
         treedb_nodes(
             self,
