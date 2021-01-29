@@ -523,6 +523,19 @@
             fixedRowHeight: self.config.with_fixedRowHeight,
             drag: self.config.with_drag? "source":false,
             gobj: self, // HACK needed for factory. Available in config.gobj
+
+            onClick: {
+                "hook-class": function(event, id, node) {
+                    var dtable = this;
+                    webix.confirm("Are you sure, to delete this?", function(action) {
+                        if(action === true) {
+                            dtable.remove(id.row)
+                            // here this refers to window.
+                        }
+                    });
+                }
+            },
+
             on: {
                 onCheck: function(rowId, colId, state){
                     var $table = $$(build_name(self, "list_table"));
@@ -1269,22 +1282,33 @@
                                     width: self.config.form_label_width,
                                     label: t(tranger_col.header)
                                 },
-                                {
-                                    view: "button",
-                                    type: "icon",
-                                    icon: "fas fa-eye",
-                                    css: "webix_transparent icon_toolbar_16",
-                                    tooltip: t("click to view") + " " + t(tranger_col.header),
-                                    width: 50,
-                                    click: function() {
-                                        //self.gobj_send_event("EV_FIRST_RECORD", {}, self);
-                                    }
-                                },
+//                                 {
+//                                     view: "button",
+//                                     type: "icon",
+//                                     icon: "fas fa-eye",
+//                                     css: "webix_transparent icon_toolbar_16",
+//                                     tooltip: t("click to view") + " " + t(tranger_col.header),
+//                                     width: 50,
+//                                     click: function() {
+//                                         //self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+//                                     }
+//                                 },
                                 {
                                     view: "label",
                                     name: id,
                                     width: 120,
-                                    label: ""
+                                    label: "",
+                                    on: {
+                                        onItemClick: function(event, id, node) {
+                                            var dtable = this;
+                                            webix.confirm("Are you sure, to delete this?", function(action) {
+                                                if(action === true) {
+                                                    dtable.remove(id.row)
+                                                    // here this refers to window.
+                                                }
+                                            });
+                                        }
+                                    }
                                 },
                                 {}
                             ]
@@ -1552,7 +1576,8 @@
             case "hook":    // Convert data from backend to frontend
                 var items = json_size(value);
                 if(items > 0) {
-                    value = "[&nbsp;<u>" + items + "</u>&nbsp;]";
+                    value = "<span class='webix_icon fas fa-eye hook-class'></span>";
+                    value += "&nbsp;&nbsp;[&nbsp;<u>" + items + "</u>&nbsp;]";
                 } else {
                     value = "";
                 }
