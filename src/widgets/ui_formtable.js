@@ -1282,33 +1282,17 @@
                                     width: self.config.form_label_width,
                                     label: t(tranger_col.header)
                                 },
-//                                 {
-//                                     view: "button",
-//                                     type: "icon",
-//                                     icon: "fas fa-eye",
-//                                     css: "webix_transparent icon_toolbar_16",
-//                                     tooltip: t("click to view") + " " + t(tranger_col.header),
-//                                     width: 50,
-//                                     click: function() {
-//                                         //self.gobj_send_event("EV_FIRST_RECORD", {}, self);
-//                                     }
-//                                 },
                                 {
                                     view: "label",
                                     name: id,
                                     width: 120,
                                     label: "",
-                                    on: {
-                                        onItemClick: function(event, id, node) {
-                                            var dtable = this;
-                                            webix.confirm("Are you sure, to delete this?", function(action) {
-                                                if(action === true) {
-                                                    dtable.remove(id.row)
-                                                    // here this refers to window.
-                                                }
-                                            });
-                                        }
-                                    }
+                                    popup: "account_menu_popup"
+//                                     on: {
+//                                         onItemClick: function(id, e) {
+//                                             trace_msg(this.data.name);
+//                                         }
+//                                     }
                                 },
                                 {}
                             ]
