@@ -399,15 +399,16 @@
             var cols = desc.cols;
             for(var i=0; i<cols.length; i++) {
                 var col = cols[i];
-                if(kw_has_key(col, "hook")) {
-                    for(var k in col.hook) {
-                        if(k == updated_topic_name) {
-                            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
-                            t[col.id] = true;
-                            //trace_msg("update " + topic_name + ", hook " + col.id);
-                        }
-                    }
-                }
+                // Hooks no van a usar multiselect
+                //if(kw_has_key(col, "hook")) {
+                //    for(var k in col.hook) {
+                //        if(k == updated_topic_name) {
+                //            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
+                //            t[col.id] = true;
+                //            //trace_msg("update " + topic_name + ", hook " + col.id);
+                //        }
+                //    }
+                //}
                 if(kw_has_key(col, "fkey")) {
                     for(var k in col.fkey) {
                         if(k == updated_topic_name) {

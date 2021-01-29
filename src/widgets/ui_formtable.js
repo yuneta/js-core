@@ -52,6 +52,7 @@
         topic_name: null,
         schema: null,   // TODO change all users creating this to use cols, then remove schema
         cols: null,
+        form_label_width: 140,
         webix_datatable_id: null,   // webix public id of datatable
         is_topic_schema: false, // will be added to published events
         list_mode_enabled: true,
@@ -563,7 +564,7 @@
                         scroll:true,
                         elementsConfig: {
                             labelAlign:"left",
-                            labelWidth: 140
+                            labelWidth: self.config.form_label_width
                         },
                         elements: [],
                         on: {
@@ -593,7 +594,7 @@
                         scroll:true,
                         elementsConfig: {
                             labelAlign:"left",
-                            labelWidth: 140
+                            labelWidth: self.config.form_label_width
                         },
                         elements: [],
                         on: {
@@ -907,9 +908,6 @@
                     break;
 
                 case "hook":    // definition of webix DATATABLE col
-                    webix_col["optionslist"] = true;
-                    webix_col["editor"] = "multiselect";
-                    webix_col["options"] = get_hook_options(self, tranger_col);
                     break;
 
                 case "fkey":    // definition of webix DATATABLE col
@@ -1239,18 +1237,6 @@
                     }
                     break;
 
-                case "hook":    // Definition of webix FORM element
-                    webix_element = {
-                        view: "multiselect2",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        // TODO si lo dejamos editar hay que manejar los link/unlink
-                        readonly: true, // is_writable?false:true,
-                        options: get_hook_options(self, tranger_col)
-                    };
-                    break;
-
                 case "fkey":    // Definition of webix FORM element
                     webix_element = {
                         view: "multicombo2",
@@ -1265,10 +1251,48 @@
                     }
                     break;
 
+                case "hook":
+                    // set below, only in update form
+                    break;
                 default:
                     log_error("col type unknown 2: " + type);
                     break;
             }
+
+            if(mode == "update") {
+                switch(type) {
+                    case "hook":    // Definition of webix FORM element
+                        webix_element = {
+                            cols: [
+                                {
+                                    view: "label",
+                                    width: self.config.form_label_width,
+                                    label: t(tranger_col.header)
+                                },
+                                {
+                                    view: "button",
+                                    type: "icon",
+                                    icon: "fas fa-eye",
+                                    css: "webix_transparent icon_toolbar_16",
+                                    tooltip: t("click to view") + " " + t(tranger_col.header),
+                                    width: 50,
+                                    click: function() {
+                                        //self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+                                    }
+                                },
+                                {
+                                    view: "label",
+                                    name: id,
+                                    width: 120,
+                                    label: ""
+                                },
+                                {}
+                            ]
+                        };
+                        break;
+                }
+            }
+
             if(webix_element) {
                 webix_elements.push(webix_element);
             }
@@ -1526,36 +1550,12 @@
                 break;
 
             case "hook":    // Convert data from backend to frontend
-                var new_value = [];
-                if(value) {
-                    if(is_string(value)) {
-                        var hook = decoder_hook(col, value);
-                        if(hook) {
-                            new_value.push(hook.id);
-                        }
-                    } else if(is_array(value)) {
-                        for(var i=0; i<value.length; i++) {
-                            var hook = decoder_hook(col, value[i]);
-                            if(hook) {
-                                new_value.push(hook.id);
-                            }
-                        }
-                    } else if(is_object(value)) {
-                        for(var k in value) {
-                            var hook = decoder_hook(self, col, k);
-                            if(hook) {
-                                new_value.push(hook.id);
-                            }
-                        }
-                    } else {
-                        log_error("hook type unsupported 2");
-                        log_error(col);
-                        log_error(value);
-                    }
+                var items = json_size(value);
+                if(items > 0) {
+                    value = "[&nbsp;<u>" + items + "</u>&nbsp;]";
+                } else {
+                    value = "";
                 }
-
-                value = new_value;
-
                 break;
 
             case "fkey":    // Convert data from backend to frontend
@@ -1671,7 +1671,6 @@
                 break;
 
             case "hook":    // Convert data from frontend to backend
-                // TODO de momento no dejamos editar los hook, habría que manejar los link/unlink
                 value = null;
                 break;
 

@@ -392,12 +392,29 @@
     /************************************************************
      *
      ************************************************************/
-    // Return length of dict
     function json_object_size(a)
     {
         if(is_object(a)) {
             return Object.keys(a).length;
         }
+        return 0;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function json_size(a)
+    {
+        if(is_object(a)) {
+            return Object.keys(a).length;
+        } else if(is_array(a)) {
+            return a.length;
+        } else if(is_string(a)) {
+            return 0;
+        } else {
+            return 0;
+        }
+
         return 0;
     }
 
@@ -1831,6 +1848,7 @@
     exports.strncmp = strncmp;
     exports.is_object = is_object;
     exports.json_object_size = json_object_size;
+    exports.json_size = json_size;
     exports.is_array = is_array;
     exports.is_string = is_string;
     exports.is_number = is_number;
