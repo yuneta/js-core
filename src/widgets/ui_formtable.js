@@ -83,6 +83,7 @@
 
         _writable_fields: null, // automatic built
 
+        current_id: null,
         last_selected_id: null,
         page_size: 0,
         page: 0,            // current page
@@ -525,14 +526,15 @@
             gobj: self, // HACK needed for factory. Available in config.gobj
 
             onClick: {
-                "hook-class": function(event, id, node) {
-                    var dtable = this;
-                    webix.confirm("Are you sure, to delete this?", function(action) {
-                        if(action === true) {
-                            dtable.remove(id.row)
-                            // here this refers to window.
-                        }
-                    });
+                "hook-class": function(e, id, node) {
+                    // XXX
+                    var kw_hook = {
+                        x: e.x,
+                        y: e.y,
+                        id: id.row,
+                        hook_name: id.column
+                    };
+                    self.gobj_send_event("EV_SHOW_HOOK_DATA", kw_hook, self);
                 }
             },
 
@@ -1287,12 +1289,21 @@
                                     name: id,
                                     width: 120,
                                     label: "",
-                                    popup: "account_menu_popup"
-//                                     on: {
-//                                         onItemClick: function(id, e) {
-//                                             trace_msg(this.data.name);
-//                                         }
-//                                     }
+                                    //popup: "account_menu_popup"
+                                    on: {
+                                        onItemClick: function(id, e) {
+                                            // XXX
+                                            var kw_hook = {
+                                                x: e.x,
+                                                y: e.y,
+                                                id: self.config.current_id,
+                                                hook_name: this.data.name
+                                            };
+                                            self.gobj_send_event(
+                                                "EV_SHOW_HOOK_DATA", kw_hook, self
+                                            );
+                                        }
+                                    }
                                 },
                                 {}
                             ]
@@ -1358,6 +1369,7 @@
         var id = $table.getSelectedId();
         var idx = $table.getIndexById(id);
         self.config.record_idx = idx + 1;
+        self.config.current_id = id.id;
         $$(build_name(self, "record_idx")).setValue(self.config.record_idx);
 
         if(self.config.page_size>0) {
@@ -1917,6 +1929,14 @@
     }
 
     /********************************************
+     *
+     ********************************************/
+    function ac_show_hook_data(self, event, kw, src)
+    {
+        trace_msg(kw);
+    }
+
+    /********************************************
      *  From internal toolbar
      ********************************************/
     var update_check_invalid_fields = false;
@@ -2444,6 +2464,7 @@
             "EV_ROW_CHECKED: output",
             "EV_CLOSE_WINDOW: output",
 
+            "EV_SHOW_HOOK_DATA",
             "EV_UNDO_RECORD",
             "EV_DISCARD_RECORD",
             "EV_LIST_MODE",
@@ -2478,6 +2499,7 @@
                 ["EV_GET_DATA",                 ac_get_data,                undefined],
                 ["EV_GET_CHECKED_DATA",         ac_get_checked_data,        undefined],
                 ["EV_UPDATE_OPTIONS",           ac_update_options,          undefined],
+                ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,          undefined],
                 ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
                 ["EV_DELETE_RECORD",            ac_delete_record,           undefined],
                 ["EV_UNDO_RECORD",              ac_undo_record,             undefined],
