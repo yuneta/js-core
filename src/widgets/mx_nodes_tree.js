@@ -2618,6 +2618,9 @@
      ********************************************/
     function ac_mx_connectcell(self, event, kw, src)
     {
+        // TODO I don't know how to disable moving a link.
+        // While refresh to clean the action
+        trace_msg(kw);
         return 0;
     }
 

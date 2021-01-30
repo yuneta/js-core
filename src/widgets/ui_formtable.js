@@ -1933,6 +1933,11 @@
      ********************************************/
     function ac_show_hook_data(self, event, kw, src)
     {
+        var x = kw.x;
+        var y = kw.y;
+        var hook_name = kw.hook_name;
+        var id = kw.id;
+
         // TODO
         trace_msg(kw);
     }
