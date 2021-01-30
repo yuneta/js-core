@@ -117,6 +117,14 @@
         return kw_get_dict_value(data, topic_name, {}, false);
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function treedb_hook_data_size(value)
+    {
+        return json_size(value);
+    }
+
     /************************************************************
      *  fkey can be:
      *
@@ -274,6 +282,7 @@
     exports.treedb_register_del_node = treedb_register_del_node;
     exports.treedb_get_register = treedb_get_register;
     exports.treedb_get_topic_data = treedb_get_topic_data;
+    exports.treedb_hook_data_size = treedb_hook_data_size;
 
     exports.decoder_fkey = decoder_fkey;
     exports.decoder_hook = decoder_hook;

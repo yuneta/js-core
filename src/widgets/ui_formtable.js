@@ -1570,7 +1570,7 @@
                 break;
 
             case "hook":    // Convert data from backend to frontend
-                var items = json_size(value);
+                var items = treedb_hook_data_size(value);
                 if(items > 0) {
                     value = "<span class='webix_icon fas fa-eye hook-class'></span>";
                     value += "&nbsp;&nbsp;[&nbsp;<u>" + items + "</u>&nbsp;]";
