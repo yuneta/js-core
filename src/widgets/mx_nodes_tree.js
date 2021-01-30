@@ -317,7 +317,7 @@
             height: 30,
             css: "toolbar2color",
             cols:[
-// Fuera, se crea de una formtable
+// Fuera, se crea desde una formtable
 //                 {
 //                     view:"button",
 //                     type: "icon",
@@ -2180,8 +2180,7 @@
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record,
-                    cell_id: cell.id
+                    record: cell.value.record
                 };
                 self.gobj_publish_event("EV_DELETE_RECORD", kw_delete, self);
             }
@@ -2264,13 +2263,7 @@
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
-            record: kw.record,
-            options: {
-                list_dict: true,
-                create: true,
-                autolink: true
-            },
-            cell_id: cell_id
+            record: kw.record
         };
 
         kw_create.record["_geometry"] = filter_dict(
@@ -2278,7 +2271,7 @@
             ["x", "y", "width", "height"]
         );
 
-        self.gobj_publish_event("EV_UPDATE_RECORD", kw_create, self);
+        self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
 
         return 0;
     }
@@ -2305,12 +2298,7 @@
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
-            record: kw.record,
-            options: {
-                list_dict: true,
-                autolink: true
-            },
-            cell_id: cell_id
+            record: kw.record
         };
 
         kw_update.record["_geometry"] = filter_dict(
@@ -2469,8 +2457,7 @@
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record,
-                    cell_id: cell.id
+                    record: cell.value.record
                 }
                 self.gobj_publish_event("EV_RUN_NODE", kw_cell, self);
             }
@@ -2495,8 +2482,7 @@
 //                     treedb_name: self.config.treedb_name,
 //                     topic_name: cell.value.schema.topic_name,
 //                     is_topic_schema: false,
-//                     record: cell.value.record,
-//                     cell_id: cell.id
+//                     record: cell.value.record
 //                 }
 //                 self.gobj_publish_event("EV_MX_VERTEX_CLICKED", kw_cell, self);
 //             }
@@ -2507,8 +2493,7 @@
 //                     treedb_name: self.config.treedb_name,
 //                     topic_name: cell.value.schema.topic_name,
 //                     is_topic_schema: false,
-//                     record: cell.value.record,
-//                     cell_id: cell.id
+//                     record: cell.value.record
 //                 }
 //                 self.gobj_publish_event("EV_MX_EDGE_CLICKED", kw_cell, self);
 //             }
@@ -2685,8 +2670,7 @@
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record,
-                    cell_id: cell.id
+                    record: cell.value.record
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
@@ -2738,8 +2722,7 @@
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record,
-                    cell_id: cell.id
+                    record: cell.value.record
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);

@@ -215,6 +215,10 @@
      ********************************************/
     function refresh_treedb(self)
     {
+        var options = {
+            list_dict: true
+        };
+
         for(var i=0; i<self.config.topics.length; i++) {
             var topic = self.config.topics[i];
             var topic_name = topic.topic_name;
@@ -230,7 +234,7 @@
                 self,
                 self.config.treedb_name,
                 topic_name,
-                {}
+                options
             );
         }
     }
@@ -615,47 +619,56 @@
     }
 
     /********************************************
-     *  From formtable
+     *  Event from formtable
+     *  kw: {
+     *      topic_name,
+     *      is_topic_schema,
+     *      record
+     *  }
      ********************************************/
     function ac_create_record(self, event, kw, src)
     {
+        var treedb_name = self.config.treedb_name;
         var topic_name = src.gobj_read_attr("topic_name");
         var record = kw.record;
-        var options= kw.options || {}
-        options["list_dict"] = true;
-        options["create"] = true;
-        options["autolink"] = true;
 
-        return treedb_update_node(
+        var options = {
+            list_dict: true,
+            create: true,
+            autolink: true
+        };
+
+        return treedb_update_node( // HACK use the powerful update_node
             self,
-            self.config.treedb_name,
+            treedb_name,
             topic_name,
             record,
             options
         );
-        //return treedb_create_node(
-        //    self,
-        //    self.config.treedb_name,
-        //    topic_name,
-        //    record,
-        //    options
-        //);
     }
 
     /********************************************
-     *  From formtable
+     *  Event from formtable
+     *  kw: {
+     *      topic_name,
+     *      is_topic_schema,
+     *      record
+     *  }
      ********************************************/
     function ac_update_record(self, event, kw, src)
     {
+        var treedb_name = self.config.treedb_name;
         var topic_name = src.gobj_read_attr("topic_name");
         var record = kw.record;
-        var options= kw.options || {}
-        options["list_dict"] = true;
-        options["autolink"] = true;
+
+        var options = {
+            list_dict: true,
+            autolink: true
+        };
 
         return treedb_update_node(
             self,
-            self.config.treedb_name,
+            treedb_name,
             topic_name,
             record,
             options
@@ -663,18 +676,25 @@
     }
 
     /********************************************
-     *  From formtable
+     *  Event from formtable
+     *  kw: {
+     *      topic_name,
+     *      is_topic_schema,
+     *      record
+     *  }
      ********************************************/
     function ac_delete_record(self, event, kw, src)
     {
+        var treedb_name = self.config.treedb_name;
         var topic_name = src.gobj_read_attr("topic_name");
         var record = kw.record;
-        var options= kw.options || {}
-        options["force"] = true;
+        var options = {
+            force: true
+        };
 
         return treedb_delete_node(
             self,
-            self.config.treedb_name,
+            treedb_name,
             topic_name,
             record,
             options
@@ -682,12 +702,17 @@
     }
 
     /********************************************
-     *  From formtable, wants refresh
+     *  Event from formtable
+     *  kw: {
+     *      topic_name,
+     *      is_topic_schema
+     *  }
      ********************************************/
     function ac_refresh_table(self, event, kw, src)
     {
-        var options= kw.options || {}
-        options["list_dict"] = true;
+        var options = {
+            list_dict: true
+        };
 
         treedb_nodes(
             self,

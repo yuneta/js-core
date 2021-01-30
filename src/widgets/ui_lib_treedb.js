@@ -122,6 +122,13 @@
      ********************************************/
     function treedb_hook_data_size(value)
     {
+        if(is_array(value) && json_size(value)==1) {
+            var o = value[0];
+            if(kw_has_key(o, "size")) {
+                return o.size;
+            }
+            return 1;
+        }
         return json_size(value);
     }
 

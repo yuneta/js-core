@@ -80,7 +80,7 @@
                 tooltip: t("refresh"),
                 label: t("refresh"),
                 click: function() {
-                    refresh_systems(self);
+                    refresh_treedb(self);
                 }
             }
         ];
@@ -165,7 +165,7 @@
     /********************************************
      *
      ********************************************/
-    function treedb_create_node(self, treedb_name, topic_name, record, options, cell_id)
+    function treedb_create_node(self, treedb_name, topic_name, record, options)
     {
         if(!self.config.gobj_remote_yuno) {
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
@@ -199,7 +199,7 @@
     /********************************************
      *
      ********************************************/
-    function treedb_update_node(self, treedb_name, topic_name, record, options, cell_id)
+    function treedb_update_node(self, treedb_name, topic_name, record, options)
     {
         if(!self.config.gobj_remote_yuno) {
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
@@ -233,7 +233,7 @@
     /********************************************
      *
      ********************************************/
-    function treedb_delete_node(self, treedb_name, topic_name, record, options, cell_id)
+    function treedb_delete_node(self, treedb_name, topic_name, record, options)
     {
         if(!self.config.gobj_remote_yuno) {
             log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
@@ -272,9 +272,7 @@
         treedb_name,
         parent_ref,
         child_ref,
-        options,
-        link_cell_id,
-        child_cell_id
+        options
     )
     {
         if(!self.config.gobj_remote_yuno) {
@@ -292,8 +290,6 @@
         }
 
         msg_write_MIA_key(kw, "__command__", command);
-        msg_write_MIA_key(kw, "__link_cell_id__", link_cell_id);
-        msg_write_MIA_key(kw, "__child_cell_id__", child_cell_id);
 
         self.config.info_wait();
 
@@ -315,9 +311,7 @@
         treedb_name,
         parent_ref,
         child_ref,
-        options,
-        link_cell_id,
-        child_cell_id
+        options
     )
     {
         if(!self.config.gobj_remote_yuno) {
@@ -335,8 +329,6 @@
         }
 
         msg_write_MIA_key(kw, "__command__", command);
-        msg_write_MIA_key(kw, "__link_cell_id__", link_cell_id);
-        msg_write_MIA_key(kw, "__child_cell_id__", child_cell_id);
 
         self.config.info_wait();
 
@@ -353,7 +345,7 @@
     /********************************************
      *
      ********************************************/
-    function refresh_systems(self)
+    function refresh_treedb(self)
     {
         self.config.gobj_nodes_tree.gobj_send_event(
             "EV_CLEAR_DATA",
@@ -364,6 +356,10 @@
 
         treedb_descs(self, self.config.treedb_name);
 
+        var options = {
+            list_dict: true
+        };
+
         for(var i=0; i<self.config.topics.length; i++) {
             var topic = self.config.topics[i];
             var topic_name = topic.topic_name;
@@ -371,9 +367,7 @@
             treedb_nodes(self,
                 self.config.treedb_name,
                 topic_name,
-                {
-                    "list_dict": true
-                }
+                options
             );
         }
     }
@@ -481,8 +475,7 @@
                         "EV_LOAD_DATA",
                         {
                             schema: schema,
-                            data: data,
-                            cell_id: null
+                            data: data
                         },
                         self
                     );
@@ -597,7 +590,6 @@
      *      topic_name,
      *      is_topic_schema,
      *      record
-     *      cell_id (vertex cell id)
      *  }
      ********************************************/
     function ac_mx_vertex_clicked(self, event, kw, src)
@@ -621,23 +613,20 @@
     {
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
-        var options = kw.options || {};
         var record = kw.record;
-        var cell_id = kw.cell_id;
-        var is_topic_schema = kw.is_topic_schema;
 
-        if(is_topic_schema) {
-            log_error("create_node of topic schema NOT IMPLEMENTED");
-            return;
-        }
+        var options = {
+            list_dict: true,
+            create: true,
+            autolink: true
+        };
 
-        return treedb_create_node(
+        return treedb_update_node( // HACK use the powerful update_node
             self,
             treedb_name,
             topic_name,
             record,
-            options,
-            cell_id
+            options
         );
     }
 
@@ -650,22 +639,18 @@
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
         var record = kw.record;
-        var options = kw.options || {};
-        var cell_id = kw.cell_id;
-        var is_topic_schema = kw.is_topic_schema;
 
-        if(is_topic_schema) {
-            log_error("update_node of topic schema NOT IMPLEMENTED");
-            return;
-        }
+        var options = {
+            list_dict: true,
+            autolink: true
+        };
 
         return treedb_update_node(
             self,
             treedb_name,
             topic_name,
             record,
-            options,
-            cell_id
+            options
         );
     }
 
@@ -678,22 +663,16 @@
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
         var record = kw.record;
-        var options = kw.options || {};
-        var cell_id = kw.cell_id;
-        var is_topic_schema = kw.is_topic_schema;
-
-        if(is_topic_schema) {
-            log_error("delete_node of topic schema NOT IMPLEMENTED");
-            return;
-        }
+        var options = {
+            force: false // que se borre por partes, primero los link
+        };
 
         return treedb_delete_node(
             self,
             treedb_name,
             topic_name,
             record,
-            {"force": false},
-            cell_id
+            options
         );
     }
 
@@ -706,18 +685,16 @@
         var treedb_name = kw.treedb_name;
         var parent_ref = kw.parent_ref;
         var child_ref = kw.child_ref;
-        var options = kw.options || {};
-        var link_cell_id = kw.link_cell_id;
-        var child_cell_id = kw.child_cell_id;
+        var options = {
+            list_dict: true
+        };
 
         return treedb_link_nodes(
             self,
             treedb_name,
             parent_ref,
             child_ref,
-            {"list_dict": true},
-            link_cell_id,
-            child_cell_id
+            options
         );
     }
 
@@ -730,18 +707,16 @@
         var treedb_name = kw.treedb_name;
         var parent_ref = kw.parent_ref;
         var child_ref = kw.child_ref;
-        var options = kw.options || {};
-        var link_cell_id = kw.link_cell_id;
-        var child_cell_id = kw.child_cell_id;
+        var options = {
+            list_dict: true
+        };
 
         return treedb_unlink_nodes(
             self,
             treedb_name,
             parent_ref,
             child_ref,
-            {"list_dict": true},
-            link_cell_id,
-            child_cell_id
+            options
         );
     }
 
@@ -754,7 +729,6 @@
         var topic_name = kw.topic_name;
         var record = kw.record;
         var options = kw.options || {};
-        var cell_id = kw.cell_id;
         var is_topic_schema = kw.is_topic_schema;
 
         /*
@@ -1039,7 +1013,7 @@
         var self = this;
 
         if(self.config.gobj_remote_yuno) {
-            refresh_systems(self);
+            refresh_treedb(self);
         }
     }
 
