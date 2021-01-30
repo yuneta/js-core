@@ -540,12 +540,6 @@
             return 0;
         }
 
-//         if(its_me) TODO
-//         {
-//             __origin__: self.config.uuid,
-//             __transaction__: get_unique_id("tr");
-//         }
-
         self.config.gobj_nodes_tree.gobj_send_event(
             "EV_NODE_UPDATED",
             {
