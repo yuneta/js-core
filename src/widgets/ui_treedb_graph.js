@@ -579,6 +579,15 @@
     }
 
     /********************************************
+     *
+     ********************************************/
+    function ac_refresh_treedb(self, event, kw, src)
+    {
+        refresh_treedb(self);
+        return 0;
+    }
+
+    /********************************************
      *  kw: {
      *      treedb_name
      *      topic_name,
@@ -849,6 +858,7 @@
             "EV_TREEDB_NODE_CREATED",
             "EV_TREEDB_NODE_UPDATED",
             "EV_TREEDB_NODE_DELETED",
+            "EV_REFRESH_TREEDB",
             "EV_MX_VERTEX_CLICKED",
             "EV_MX_EDGE_CLICKED",
             "EV_CREATE_RECORD",
@@ -870,6 +880,7 @@
                 ["EV_TREEDB_NODE_CREATED",      ac_treedb_node_created,         undefined],
                 ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,         undefined],
                 ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
+                ["EV_REFRESH_TREEDB",           ac_refresh_treedb,              undefined],
                 ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],
                 ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,             undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,               undefined],

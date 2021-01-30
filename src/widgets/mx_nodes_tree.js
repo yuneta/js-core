@@ -2644,9 +2644,10 @@
      ********************************************/
     function ac_mx_connectcell(self, event, kw, src)
     {
-        // TODO I don't know how to disable moving a link.
+        //  I don't know how to disable moving a link.
         // While refresh to clean the action
-        trace_msg(kw);
+
+        self.gobj_publish_event("EV_REFRESH_TREEDB", {}, self);
         return 0;
     }
 
@@ -2696,7 +2697,7 @@
 
                 var options = {
                     list_dict: true,
-                    autolink: false // HACK state of record unknown
+                    autolink: false
                 };
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
@@ -2752,7 +2753,7 @@
 
                 var options = {
                     list_dict: true,
-                    autolink: false // HACK state of record unknown
+                    autolink: false
                 };
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
@@ -2873,6 +2874,7 @@
             "EV_LINK_RECORDS: output",
             "EV_UNLINK_RECORDS: output",
             "EV_RUN_NODE: output",
+            "EV_REFRESH_TREEDB: output",
 
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
