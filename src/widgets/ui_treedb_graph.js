@@ -608,14 +608,9 @@
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
         var record = kw.record;
+        var options = kw.options || {};
 
-        var options = {
-            list_dict: true,
-            create: true,
-            autolink: true
-        };
-
-        return treedb_update_node( // HACK use the powerful update_node
+        return treedb_create_node(
             self,
             treedb_name,
             topic_name,
@@ -633,11 +628,7 @@
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
         var record = kw.record;
-
-        var options = {
-            list_dict: true,
-            autolink: true
-        };
+        var options = kw.options || {};
 
         return treedb_update_node(
             self,
@@ -657,9 +648,7 @@
         var treedb_name = kw.treedb_name;
         var topic_name = kw.topic_name;
         var record = kw.record;
-        var options = {
-            force: false // que se borre por partes, primero los link
-        };
+        var options = kw.options || {};
 
         return treedb_delete_node(
             self,
@@ -679,9 +668,7 @@
         var treedb_name = kw.treedb_name;
         var parent_ref = kw.parent_ref;
         var child_ref = kw.child_ref;
-        var options = {
-            list_dict: true
-        };
+        var options = kw.options || {};
 
         return treedb_link_nodes(
             self,
@@ -701,9 +688,7 @@
         var treedb_name = kw.treedb_name;
         var parent_ref = kw.parent_ref;
         var child_ref = kw.child_ref;
-        var options = {
-            list_dict: true
-        };
+        var options = kw.options || {};
 
         return treedb_unlink_nodes(
             self,

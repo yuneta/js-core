@@ -2176,11 +2176,17 @@
                     __yuno__.gobj_destroy(cell.value.gobj_cell_formtable);
                     cell.value.gobj_cell_formtable = 0;
                 }
+
+                var options = {
+                    force: false // que se borre por partes, primero los link
+                };
+
                 var kw_delete = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record
+                    record: cell.value.record,
+                    options: options
                 };
                 self.gobj_publish_event("EV_DELETE_RECORD", kw_delete, self);
             }
@@ -2229,10 +2235,14 @@
         var child_ref = child_cell.value.topic_name + "^";
             child_ref += child_cell.value.topic_id;
 
+        var options = {
+            list_dict: true
+        };
         var kw_unlink = {
             treedb_name: self.config.treedb_name,
             parent_ref: parent_ref,
-            child_ref: child_ref
+            child_ref: child_ref,
+            options: options
         };
 
         // Wait to EV_NODE_UPDATED to delete cell
@@ -2249,7 +2259,6 @@
      *      is_topic_schema,
      *      record
      *      + treedb_name
-     *      + cell_id (vertex cell id)
      *  }
      ********************************************/
     function ac_create_record(self, event, kw, src)
@@ -2259,11 +2268,18 @@
         var cell_id = src.gobj_read_attr("user_data"); // HACK reference cell <-> gobj_formtable
         var cell = model.getCell(cell_id);
 
+        var options = {
+            list_dict: true,
+            create: true,
+            autolink: true
+        };
+
         var kw_create = {
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
-            record: kw.record
+            record: kw.record,
+            options: options
         };
 
         kw_create.record["_geometry"] = filter_dict(
@@ -2271,7 +2287,8 @@
             ["x", "y", "width", "height"]
         );
 
-        self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
+        // HACK use the powerful update_node
+        self.gobj_publish_event("EV_UPDATE_RECORD", kw_create, self);
 
         return 0;
     }
@@ -2284,7 +2301,6 @@
      *      topic_name,
      *      is_topic_schema,
      *      record
-     *      + cell_id (vertex cell id)
      *  }
      ********************************************/
     function ac_update_record(self, event, kw, src)
@@ -2294,11 +2310,17 @@
         var cell_id = src.gobj_read_attr("user_data"); // HACK reference cell <-> gobj_formtable
         var cell = model.getCell(cell_id);
 
+        var options = {
+            list_dict: true,
+            autolink: true
+        };
+
         var kw_update = {
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
             is_topic_schema: kw.is_topic_schema,
-            record: kw.record
+            record: kw.record,
+            options: options
         };
 
         kw_update.record["_geometry"] = filter_dict(
@@ -2600,10 +2622,14 @@
                 var child_ref = child_cell.value.topic_name + "^";
                     child_ref += child_cell.value.topic_id;
 
+                var options = {
+                    list_dict: true
+                };
                 var kw_link = {
                     treedb_name: self.config.treedb_name,
                     parent_ref: parent_ref,
-                    child_ref: child_ref
+                    child_ref: child_ref,
+                    options: options
                 };
 
                 // Wait to EV_NODE_UPDATED to fix cell
@@ -2642,7 +2668,6 @@
                  *      topic_name,
                  *      is_topic_schema,
                  *      record
-                 *      + cell_id (vertex cell id)
                  *  }
                  */
                 var _geometry = kw_get_dict_value(
@@ -2669,11 +2694,16 @@
                     }
                 );
 
+                var options = {
+                    list_dict: true,
+                    autolink: false // HACK state of record unknown
+                };
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record
+                    record: cell.value.record,
+                    options: options
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
@@ -2705,7 +2735,6 @@
                  *      topic_name,
                  *      is_topic_schema,
                  *      record
-                 *      + cell_id (vertex cell id)
                  *  }
                  */
 
@@ -2721,11 +2750,16 @@
                 );
                 kw_set_dict_value(cell.value.record, "_geometry", _geometry);
 
+                var options = {
+                    list_dict: true,
+                    autolink: false // HACK state of record unknown
+                };
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
                     is_topic_schema: false,
-                    record: cell.value.record
+                    record: cell.value.record,
+                    options: options
                 };
 
                 self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
