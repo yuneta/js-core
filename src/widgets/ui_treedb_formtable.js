@@ -1,5 +1,5 @@
 /***********************************************************************
- *          ui_formtable.js
+ *          ui_treedb_formtable.js
  *
  *          Mix "Container Panel" & "Pinhold Window"
  *
@@ -333,7 +333,7 @@
                         labelPosition: "top",
                         css: "small_input small_label",
                         on: {
-                            onChange(newVal, oldVal) {
+                            onChange: function(newVal, oldVal) {
                                 newVal = Number(newVal);
                                 if(self.config.record_idx != newVal) {
                                     self.gobj_send_event(
@@ -356,7 +356,7 @@
                         labelPosition: "top",
                         css: "small_input small_label",
                         on: {
-                            onChange(newVal, oldVal) {
+                            onChange: function(newVal, oldVal) {
                                 newVal = Number(newVal);
                                 if(self.config.page != newVal) {
                                     self.gobj_send_event("EV_PAGE", {page:newVal}, self);
@@ -391,7 +391,7 @@
                         labelPosition: "top",
                         css: "small_input small_label",
                         on: {
-                            onChange(newVal, oldVal) {
+                            onChange: function(newVal, oldVal) {
                                 newVal = Number(newVal);
                                 if(self.config.page_size != newVal) {
                                     self.config.page_size = newVal;
@@ -2551,21 +2551,21 @@
         }
     };
 
-    var Ui_formtable = GObj.__makeSubclass__();
-    var proto = Ui_formtable.prototype; // Easy access to the prototype
+    var Ui_treedb_formtable = GObj.__makeSubclass__();
+    var proto = Ui_treedb_formtable.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_formtable",
+            "Ui_treedb_formtable",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_formtable, "Ui_formtable");
+    gobj_register_gclass(Ui_treedb_formtable, "Ui_treedb_formtable");
 
 
 
@@ -2647,7 +2647,7 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_formtable = Ui_formtable;
+    exports.Ui_treedb_formtable = Ui_treedb_formtable;
 
 })(this);
 

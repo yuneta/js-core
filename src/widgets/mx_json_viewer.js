@@ -148,7 +148,7 @@
                     value: self.config.layout_selected,
                     label: "",
                     on: {
-                        onChange(newVal, oldVal) {
+                        onChange: function(newVal, oldVal) {
                             var cur_layout = kwid_collect(
                                 self.config.layout_options,
                                 newVal,

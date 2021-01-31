@@ -336,7 +336,7 @@
                     value: self.config.layout_selected,
                     label: "",
                     on: {
-                        onChange(newVal, oldVal) {
+                        "onChange": function(newVal, oldVal) {
                             var cur_layout = kwid_collect(
                                 self.config.layout_options,
                                 newVal,
@@ -2419,14 +2419,14 @@
         if(cell_name) {
             gobj_cell_formtable = __yuno__.gobj_create_unique(
                 name,
-                Ui_formtable,
+                Ui_treedb_formtable,
                 kw_formtable,
                 __yuno__.__pinhold__
             );
         } else {
             gobj_cell_formtable = __yuno__.gobj_create(
                 name,
-                Ui_formtable,
+                Ui_treedb_formtable,
                 kw_formtable,
                 __yuno__.__pinhold__
             );

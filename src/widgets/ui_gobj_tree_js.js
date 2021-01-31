@@ -470,7 +470,7 @@
          */
         self.config.gobj_attrs = self.yuno.gobj_create_unique(
             self.name + ".tb",
-            Ui_formtable,
+            Ui_treedb_formtable,
             {
                 ui_properties: {
                     gravity: 2,
