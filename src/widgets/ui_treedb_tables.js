@@ -24,6 +24,11 @@
         info_no_wait: function() {},
 
         /*
+         *  GClass Manager/Viewer of hook data
+         */
+        gclass_hook_data: null,
+
+        /*
          *  gobj_remote_yuno: Remote yuno to ask data,
          *  If it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
          */
@@ -403,16 +408,6 @@
             var cols = desc.cols;
             for(var i=0; i<cols.length; i++) {
                 var col = cols[i];
-                // Hooks no van a usar multiselect
-                //if(kw_has_key(col, "hook")) {
-                //    for(var k in col.hook) {
-                //        if(k == updated_topic_name) {
-                //            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
-                //            t[col.id] = true;
-                //            //trace_msg("update " + topic_name + ", hook " + col.id);
-                //        }
-                //    }
-                //}
                 if(kw_has_key(col, "fkey")) {
                     for(var k in col.fkey) {
                         if(k == updated_topic_name) {
@@ -725,8 +720,9 @@
     }
 
     /********************************************
-     *  Event from formtable
+     *  Event from Mx_nodes_tree
      *  kw: {
+     *      treedb_name
      *      parent_topic_name,
      *      child_topic_name,
      *      child_field_name,
@@ -745,8 +741,29 @@
         var x = kw.x;
         var y = kw.y;
 
-        trace_msg(kw);
-        // TODO
+        if(!self.config.gclass_hook_data) {
+            trace_msg(kw);
+            return 0;
+        }
+
+        var name = "Table Hook>" + treedb_name + ">" +
+            parent_topic_name + ">" +
+            child_topic_name + ">" +
+            child_field_name + ">" +
+            child_field_value;
+        var gobj = __yuno__.gobj_find_unique_gobj(name);
+        if(!gobj) {
+            gobj = self.yuno.gobj_create_unique(
+                name,
+                self.config.gclass_hook_data,
+                kw,
+                self
+            );
+            gobj.gobj_start();
+        } else {
+            gobj.gobj_send_event("EV_TOGGLE", {}, self);
+        }
+
         return 0;
     }
 
