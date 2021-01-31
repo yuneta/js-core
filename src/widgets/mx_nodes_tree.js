@@ -938,7 +938,7 @@
         // Multiple connections between the same pair of vertices.
         graph.setMultigraph(false);
 
-        if(0) { // TODO TEST
+        if(0) {
             // Removes cells when [DELETE] is pressed
             var keyHandler = new mxKeyHandler(graph);
             keyHandler.bindKey(46, function(evt) {
@@ -1421,7 +1421,7 @@
         var style = "";
 
         for(var k in col.hook) {
-            return k + "_hook"; // TODO no será directamente asi?
+            return k + "_hook";
         }
 
         return style;
@@ -1925,15 +1925,6 @@
             graph.resizeCell(cell, geometry, false);
         }
         self.config.lock_publish_geometry = false;
-    }
-
-    /************************************************************
-     *  Is it a response message from my action?
-     ************************************************************/
-    function its_me(self, kw)
-    {
-        // TODO
-        return false;
     }
 
 
