@@ -738,8 +738,8 @@
         var child_topic_name = kw.child_topic_name;
         var child_field_name = kw.child_field_name;
         var child_field_value = kw.child_field_value;
-        var x = kw.x;
-        var y = kw.y;
+        var click_x = kw.click_x;
+        var click_y = kw.click_y;
 
         if(!self.config.gclass_hook_data_viewer) {
             trace_msg(kw);

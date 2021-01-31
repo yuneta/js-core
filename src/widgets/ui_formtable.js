@@ -529,8 +529,8 @@
                 "hook-class": function(e, id, node) {
                     // XXX
                     var kw_hook = {
-                        x: e.x,
-                        y: e.y,
+                        click_x: e.x,
+                        click_y: e.y,
                         id: id.row,
                         hook_name: id.column
                     };
@@ -1294,8 +1294,8 @@
                                         onItemClick: function(id, e) {
                                             // XXX
                                             var kw_hook = {
-                                                x: e.x,
-                                                y: e.y,
+                                                click_x: e.x,
+                                                click_y: e.y,
                                                 id: self.config.current_id,
                                                 hook_name: this.data.name
                                             };
@@ -1933,8 +1933,8 @@
      ********************************************/
     function ac_show_hook_data(self, event, kw, src)
     {
-        var x = kw.x;
-        var y = kw.y;
+        var click_x = kw.click_x;
+        var click_y = kw.click_y;
         var hook_name = kw.hook_name;
         var id = kw.id;
 
@@ -1949,8 +1949,8 @@
             child_topic_name: child_topic_name,
             child_field_name: child_field_name,
             child_field_value: id,
-            x: x,
-            y: y
+            click_x: click_x,
+            click_y: click_y
         };
 
         return self.gobj_publish_event("EV_SHOW_HOOK_DATA", kw_hook, self);
