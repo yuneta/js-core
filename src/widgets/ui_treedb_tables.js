@@ -26,7 +26,7 @@
         /*
          *  GClass Manager/Viewer of hook data
          */
-        gclass_hook_data: null,
+        gclass_hook_data_viewer: null,
 
         /*
          *  gobj_remote_yuno: Remote yuno to ask data,
@@ -741,7 +741,7 @@
         var x = kw.x;
         var y = kw.y;
 
-        if(!self.config.gclass_hook_data) {
+        if(!self.config.gclass_hook_data_viewer) {
             trace_msg(kw);
             return 0;
         }
@@ -755,9 +755,9 @@
         if(!gobj) {
             gobj = self.yuno.gobj_create_unique(
                 name,
-                self.config.gclass_hook_data,
+                self.config.gclass_hook_data_viewer,
                 kw,
-                self
+                __yuno__.__pinhold__
             );
             gobj.gobj_start();
         } else {
