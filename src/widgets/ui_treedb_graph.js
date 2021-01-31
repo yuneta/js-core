@@ -588,23 +588,59 @@
     }
 
     /********************************************
+     *  Event from Mx_nodes_tree
+     *  kw: {
+     *      parent_topic_name,
+     *      child_topic_name,
+     *      child_field_name,
+     *      child_field_value,
+     *      x,
+     *      y
+     *  }
+     ********************************************/
+    function ac_show_hook_data(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var parent_topic_name = kw.parent_topic_name;
+        var child_topic_name = kw.child_topic_name;
+        var child_field_name = kw.child_field_name;
+        var child_field_value = kw.child_field_value;
+        var x = kw.x;
+        var y = kw.y;
+
+        trace_msg(kw);
+        // TODO
+        return 0;
+    }
+
+    /********************************************
+     *  Event from Mx_nodes_tree
      *  kw: {
      *      treedb_name
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *  }
      ********************************************/
     function ac_mx_vertex_clicked(self, event, kw, src)
     {
+        //trace_msg(kw);
         return 0;
     }
 
     /********************************************
-     *
+     *  Event from Mx_nodes_tree
+     *  kw: {
+     *      child_topic_name,
+     *      child_topic_id,
+     *      child_fkey,
+     *      parent_topic_name,
+     *      parent_topic_id,
+     *      parent_hook
+     * }
      ********************************************/
     function ac_mx_edge_clicked(self, event, kw, src)
     {
+        //trace_msg(kw);
         return 0;
     }
 
@@ -859,6 +895,7 @@
             "EV_TREEDB_NODE_UPDATED",
             "EV_TREEDB_NODE_DELETED",
             "EV_REFRESH_TREEDB",
+            "EV_SHOW_HOOK_DATA",
             "EV_MX_VERTEX_CLICKED",
             "EV_MX_EDGE_CLICKED",
             "EV_CREATE_RECORD",
@@ -881,6 +918,7 @@
                 ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,         undefined],
                 ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
                 ["EV_REFRESH_TREEDB",           ac_refresh_treedb,              undefined],
+                ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,              undefined],
                 ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],
                 ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,             undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,               undefined],

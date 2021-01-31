@@ -1769,13 +1769,23 @@
         var model = graph.model;
 
         try {
-            fkey = decoder_fkey(source_col, fkey);
-            if(!fkey) {
+            var source_fkey = decoder_fkey(source_col, fkey_port_cell.id);
+            if(!source_fkey) {
+                log_error("What f*?");
                 return;
             }
-            var target_topic_name = fkey.topic_name;
-            var target_topic_id = fkey.id;
-            var target_hook = fkey.hook_name;
+            var source_topic_name = source_fkey.topic_name;
+            var source_topic_id = source_fkey.id;
+            var source_fkey = source_fkey.hook_name;
+
+            var target_fkey = decoder_fkey(source_col, fkey);
+            if(!target_fkey) {
+                log_error("What f*?");
+                return;
+            }
+            var target_topic_name = target_fkey.topic_name;
+            var target_topic_id = target_fkey.id;
+            var target_hook = target_fkey.hook_name;
 
             var target_cell_name = build_cell_name(
                 self, target_topic_name, target_topic_id
@@ -1795,10 +1805,18 @@
             var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
             var link_cell = model.getCell(cell_id);
             if(!link_cell) {
+                var cell_value = {
+                    child_topic_name: source_topic_name,
+                    child_topic_id: source_topic_id,
+                    child_fkey: source_fkey,
+                    parent_topic_name: target_topic_name,
+                    parent_topic_id: target_topic_id,
+                    parent_hook: target_hook
+                }
                 graph.insertEdge(
                     get_layer(self),                // group
                     cell_id,                        // id
-                    cell_id,                        // value
+                    cell_value,                     // value
                     fkey_port_cell,                 // source
                     target_port_cell,               // target
                     source_topic_name + "_arrow"    // style
@@ -2184,7 +2202,6 @@
                 var kw_delete = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    is_topic_schema: false,
                     record: cell.value.record,
                     options: options
                 };
@@ -2334,6 +2351,22 @@
     }
 
     /********************************************
+     *
+     ********************************************/
+    function ac_show_hook_data(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var parent_topic_name = kw.parent_topic_name;
+        var child_topic_name = kw.child_topic_name;
+        var child_field_name = kw.child_field_name;
+        var child_field_value = kw.child_field_value;
+        var x = kw.x;
+        var y = kw.y;
+
+        return self.gobj_publish_event("EV_SHOW_HOOK_DATA", kw, self);
+    }
+
+    /********************************************
      *  Show formtable to edit record, from here
      ********************************************/
     function ac_show_cell_data_form(self, event, kw, src)
@@ -2478,7 +2511,6 @@
                 var kw_cell = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    is_topic_schema: false,
                     record: cell.value.record
                 }
                 self.gobj_publish_event("EV_RUN_NODE", kw_cell, self);
@@ -2497,28 +2529,19 @@
             return -1;
         }
         if(cell.isVertex()) {
-// De momento no los publico
-//             if(cell.value && cell.value.schema) {
-//                 // It's a topic node cell
-//                 var kw_cell = {
-//                     treedb_name: self.config.treedb_name,
-//                     topic_name: cell.value.schema.topic_name,
-//                     is_topic_schema: false,
-//                     record: cell.value.record
-//                 }
-//                 self.gobj_publish_event("EV_MX_VERTEX_CLICKED", kw_cell, self);
-//             }
+            if(cell.value && cell.value.schema) {
+                // It's a topic node cell
+                var kw_cell = {
+                    treedb_name: self.config.treedb_name,
+                    topic_name: cell.value.schema.topic_name,
+                    record: cell.value.record
+                }
+                self.gobj_publish_event("EV_MX_VERTEX_CLICKED", kw_cell, self);
+            }
         } else {
-//             if(cell.value && cell.value.schema) {
-//                 // It's a topic node cell
-//                 var kw_cell = {
-//                     treedb_name: self.config.treedb_name,
-//                     topic_name: cell.value.schema.topic_name,
-//                     is_topic_schema: false,
-//                     record: cell.value.record
-//                 }
-//                 self.gobj_publish_event("EV_MX_EDGE_CLICKED", kw_cell, self);
-//             }
+            if(cell.value) {
+                self.gobj_publish_event("EV_MX_EDGE_CLICKED", cell.value, self);
+            }
         }
         return 0;
     }
@@ -2663,14 +2686,6 @@
         for(var i=0; i<cells.length; i++) {
             var cell = cells[i];
             if(cell.value.cell_name) {
-                /*
-                 *  kw: {
-                 *      + treedb_name
-                 *      topic_name,
-                 *      is_topic_schema,
-                 *      record
-                 *  }
-                 */
                 var _geometry = kw_get_dict_value(
                     cell.value.record,
                     "_geometry",
@@ -2702,7 +2717,6 @@
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    is_topic_schema: false,
                     record: cell.value.record,
                     options: options
                 };
@@ -2730,15 +2744,6 @@
                 continue;
             }
             if(cell.value.cell_name) {
-                /*
-                 *  kw: {
-                 *      + treedb_name
-                 *      topic_name,
-                 *      is_topic_schema,
-                 *      record
-                 *  }
-                 */
-
                 var _geometry = filter_dict(
                     cell.geometry,
                     ["x", "y", "width", "height"]
@@ -2758,7 +2763,6 @@
                 var kw_update = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    is_topic_schema: false,
                     record: cell.value.record,
                     options: options
                 };
@@ -2875,6 +2879,7 @@
             "EV_UNLINK_RECORDS: output",
             "EV_RUN_NODE: output",
             "EV_REFRESH_TREEDB: output",
+            "EV_SHOW_HOOK_DATA: output",
 
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
@@ -2914,6 +2919,7 @@
                 ["EV_DELETE_VERTEX",            ac_delete_vertex,           undefined],
                 ["EV_DELETE_EDGE",              ac_delete_edge,             undefined],
 
+                ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,          undefined],
                 ["EV_SHOW_CELL_DATA_FORM",      ac_show_cell_data_form,     undefined],
                 ["EV_SHOW_CELL_DATA_JSON",      ac_show_cell_data_json,     undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,           undefined],

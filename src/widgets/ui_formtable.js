@@ -1938,8 +1938,22 @@
         var hook_name = kw.hook_name;
         var id = kw.id;
 
-        // TODO
-        trace_msg(kw);
+        var col = get_schema_col(self, hook_name);
+        var hook_desc = col.hook;
+        var child_topic_name = Object.keys(hook_desc)[0];
+        var child_field_name = hook_desc[child_topic_name];
+
+        var kw_hook = {
+            treedb_name: self.config.treedb_name,
+            parent_topic_name: self.config.topic_name,
+            child_topic_name: child_topic_name,
+            child_field_name: child_field_name,
+            child_field_value: id,
+            x: x,
+            y: y
+        };
+
+        return self.gobj_publish_event("EV_SHOW_HOOK_DATA", kw_hook, self);
     }
 
     /********************************************
@@ -2469,8 +2483,8 @@
             "EV_REFRESH_TABLE: output",
             "EV_ROW_CHECKED: output",
             "EV_CLOSE_WINDOW: output",
+            "EV_SHOW_HOOK_DATA: output",
 
-            "EV_SHOW_HOOK_DATA",
             "EV_UNDO_RECORD",
             "EV_DISCARD_RECORD",
             "EV_LIST_MODE",

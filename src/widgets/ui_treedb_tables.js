@@ -725,6 +725,32 @@
     }
 
     /********************************************
+     *  Event from formtable
+     *  kw: {
+     *      parent_topic_name,
+     *      child_topic_name,
+     *      child_field_name,
+     *      child_field_value,
+     *      x,
+     *      y
+     *  }
+     ********************************************/
+    function ac_show_hook_data(self, event, kw, src)
+    {
+        var treedb_name = kw.treedb_name;
+        var parent_topic_name = kw.parent_topic_name;
+        var child_topic_name = kw.child_topic_name;
+        var child_field_name = kw.child_field_name;
+        var child_field_value = kw.child_field_value;
+        var x = kw.x;
+        var y = kw.y;
+
+        trace_msg(kw);
+        // TODO
+        return 0;
+    }
+
+    /********************************************
      *  From formtable,
      *  when window is destroying or minififying
      *  kw
@@ -792,6 +818,7 @@
             "EV_UPDATE_RECORD",
             "EV_DELETE_RECORD",
             "EV_REFRESH_TABLE",
+            "EV_SHOW_HOOK_DATA",
             "EV_CLOSE_WINDOW",
             "EV_GET_TOPIC_FORMTABLE",
             "EV_SELECT",
@@ -811,6 +838,7 @@
                 ["EV_UPDATE_RECORD",        ac_update_record,       undefined],
                 ["EV_DELETE_RECORD",        ac_delete_record,       undefined],
                 ["EV_REFRESH_TABLE",        ac_refresh_table,       undefined],
+                ["EV_SHOW_HOOK_DATA",       ac_show_hook_data,      undefined],
                 ["EV_CLOSE_WINDOW",         ac_close_formtable,     undefined],
                 ["EV_GET_TOPIC_FORMTABLE",  ac_get_topic_formtable, undefined],
                 ["EV_SELECT",               ac_select,              undefined],
