@@ -527,14 +527,16 @@
 
             onClick: {
                 "hook-class": function(e, id, node) {
-                    // XXX
-                    var kw_hook = {
-                        click_x: e.x,
-                        click_y: e.y,
-                        id: id.row,
-                        hook_name: id.column
-                    };
-                    self.gobj_send_event("EV_SHOW_HOOK_DATA", kw_hook, self);
+                    var record = this.getItem(id);
+                    if(record[id.column]) {
+                        var kw_hook = {
+                            click_x: e.x,
+                            click_y: e.y,
+                            id: id.row,
+                            hook_name: id.column
+                        };
+                        self.gobj_send_event("EV_SHOW_HOOK_DATA", kw_hook, self);
+                    }
                 }
             },
 
@@ -1289,19 +1291,19 @@
                                     name: id,
                                     width: 120,
                                     label: "",
-                                    //popup: "account_menu_popup"
                                     on: {
                                         onItemClick: function(id, e) {
-                                            // XXX
-                                            var kw_hook = {
-                                                click_x: e.x,
-                                                click_y: e.y,
-                                                id: self.config.current_id,
-                                                hook_name: this.data.name
-                                            };
-                                            self.gobj_send_event(
-                                                "EV_SHOW_HOOK_DATA", kw_hook, self
-                                            );
+                                            if(this.data.value) {
+                                                var kw_hook = {
+                                                    click_x: e.x,
+                                                    click_y: e.y,
+                                                    id: self.config.current_id,
+                                                    hook_name: this.data.name
+                                                };
+                                                self.gobj_send_event(
+                                                    "EV_SHOW_HOOK_DATA", kw_hook, self
+                                                );
+                                            }
                                         }
                                     }
                                 },

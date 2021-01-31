@@ -2342,7 +2342,7 @@
     }
 
     /********************************************
-     *
+     *  Event from formtable
      ********************************************/
     function ac_show_hook_data(self, event, kw, src)
     {
