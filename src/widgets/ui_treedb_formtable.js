@@ -424,6 +424,49 @@
                                 }
                             );
                         }
+                    },
+                    {
+                        view:"button",
+                        type: "icon",
+                        icon: "fas fa-folder-tree",
+                        css: "webix_transparent icon_toolbar_16",
+                        maxWidth: 120,
+                        label: t("Json"),
+                        click: function() {
+                            var n = "Json Formtable Inside: " + self.name;
+                            var gobj_je = __yuno__.gobj_find_unique_gobj(n);
+                            if(!gobj_je) {
+                                gobj_je = __yuno__.gobj_create_unique(
+                                    n,
+                                    Je_viewer,
+                                    {
+                                        window_title: n,
+                                        width: 900,
+                                        height: 600
+                                    },
+                                    __yuno__.__pinhold__
+                                );
+                                gobj_je.gobj_start();
+                            }
+                            gobj_je.gobj_send_event(
+                                "EV_SHOW",
+                                {},
+                                self
+                            );
+                            gobj_je.gobj_send_event(
+                                "EV_CLEAR_DATA",
+                                {},
+                                self
+                            );
+                            var $table = $$(build_name(self, "list_table"));
+                            gobj_je.gobj_send_event(
+                                "EV_LOAD_DATA",
+                                {
+                                    data: $table.serialize(true)
+                                },
+                                self
+                            );
+                        }
                     }
                 ]
             }
