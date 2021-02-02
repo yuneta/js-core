@@ -250,6 +250,9 @@
         if($$(build_name(self, "create_menu_popup"))) {
             $$(build_name(self, "create_menu_popup")).destructor();
         }
+        if($$(build_name(self, "cell_menu_popup"))) {
+            $$(build_name(self, "cell_menu_popup")).destructor();
+        }
 
         if(self.config.$ui) {
             self.config.$ui.destructor();
@@ -325,27 +328,22 @@
                 autoheight: true,
                 select: true,
                 data: [
-                    {id: 1, value: "Extend size"}
+                    {id: "EV_EXTEND_SIZE", value: "Extend size"}
                 ],
                 click: function(id, e, node) {
                     this.hide();
-                    switch(id) {
-                        case 1:
-                            self.gobj_send_event(
-                                "EV_EXTEND_SIZE",
-                                {
-                                    topic_name: id
-
-                                },
-                                self
-                            );
-                            break;
-                    }
+                    self.gobj_send_event(
+                        id,
+                        {
+                            cell: $$(build_name(self, "cell_menu_popup")).cell
+                        },
+                        self
+                    );
                 }
             },
             on: {
                 "onShow": function(e) {
-                    //$$(build_name(self, "cell_menu")).unselectAll();
+                    $$(build_name(self, "cell_menu")).unselectAll();
                 }
             }
         }).hide();
@@ -376,6 +374,17 @@
                     label: t("reorder"),
                     click: function() {
                         reordena_graph(self);
+                    }
+                },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-save",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("save"),
+                    click: function() {
+                        save_graph(self);
                     }
                 },
                 {
@@ -2052,6 +2061,58 @@
         self.config.lock_publish_geometry = false;
     }
 
+
+    /************************************************************
+     *
+     ************************************************************/
+    function is_node_cell(cell)
+    {
+        if(!cell.value.schema) {
+            return false;
+        }
+        var topic_name = cell.value.schema.topic_name;
+        if(cell.style != topic_name + "_node") {
+            return false;
+        }
+        return true;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function get_node_cells(self, topic_name)
+    {
+        var graph = self.config._mxgraph;
+        var node_cells = [];
+
+        graph.selectCells(
+            true,               // vertices
+            false,              // edges
+            get_layer(self),    // parent
+            true                // selectGroups
+        );
+
+        var cells = graph.getSelectionCells();
+        for(var i=0; i<cells.length; i++) {
+            var cell = cells[i];
+            if(!is_node_cell(cell)) {
+                continue;
+            }
+            if(topic_name) {
+                if(cell.value.schema.topic_name == topic_name) {
+                    node_cells.push(cell);
+                }
+            } else {
+                // All
+                node_cells.push(cell);
+            }
+        }
+
+        graph.clearSelection();
+
+        return node_cells;
+    }
+
     /************************************************************
      *
      ************************************************************/
@@ -2070,23 +2131,10 @@
             });
         }
 
-        graph.selectCells(
-            true,               // vertices
-            false,              // edges
-            get_layer(self),    // parent
-            true                // selectGroups
-        );
-
-        var cells = graph.getSelectionCells();
+        var cells = get_node_cells(self);
         for(var i=0; i<cells.length; i++) {
             var cell = cells[i];
-            if(!cell.value.schema) {
-                continue;
-            }
             var topic_name = cell.value.schema.topic_name;
-            if(cell.style != topic_name + "_node") {
-                continue;
-            }
 
             var level = null;
             for(var j=0; j<levels.length; j++) {
@@ -2133,8 +2181,6 @@
                 model.setGeometry(cell, geo);
             }
         }
-
-        graph.clearSelection();
     }
 
     /************************************************************
@@ -2157,6 +2203,55 @@
             model.endUpdate();
         }
     }
+
+    /************************************************************
+     *  Save graph
+     ************************************************************/
+    function save_graph(self)
+    {
+        var cells = get_node_cells(self);
+        for(var i=0; i<cells.length; i++) {
+            var cell = cells[i];
+
+            var _geometry = kw_get_dict_value(
+                cell.value.record,
+                "_geometry",
+                {},
+                true
+            );
+            if(!is_object(_geometry)) {
+                _geometry = {};
+                kw_set_dict_value(cell.value.record, "_geometry", _geometry);
+            }
+            __extend_dict__(
+                _geometry,
+                filter_dict(
+                    cell.geometry,
+                    ["x", "y", "width", "height"]
+                )
+            );
+            __extend_dict__(
+                _geometry,
+                {
+                    __origin__: self.config.uuid
+                }
+            );
+
+            var options = {
+                list_dict: true,
+                autolink: false
+            };
+            var kw_update = {
+                treedb_name: self.config.treedb_name,
+                topic_name: cell.value.schema.topic_name,
+                record: cell.value.record,
+                options: options
+            };
+
+            self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
+        }
+    }
+
 
 
 
@@ -2747,16 +2842,64 @@
      ********************************************/
     function ac_popup_menu(self, event, kw, src)
     {
-        if(self.config.locked) {
-            return 0;
-        }
         var cell = kw.cell;
+        var evt = kw.evt;
+
         if(!cell) {
             return -1;
         }
+        if(self.config.locked) {
+            return 0;
+        }
+        var $popup = $$(build_name(self, "cell_menu_popup"));
+        $popup.cell = cell;
+        $popup.show(
+        {
+            x: evt.x,
+            y: evt.y
+        });
+
         if(cell.isVertex()) {
         } else {
         }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_extend_size(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.model;
+
+        var orig_cell = kw.cell;
+        if(!orig_cell) {
+            return -1;
+        }
+        if(!is_node_cell(orig_cell)) {
+            return -1;
+        }
+        var topic_name = orig_cell.value.schema.topic_name;
+        var width = orig_cell.geometry.width;
+        var height = orig_cell.geometry.height;
+
+        model.beginUpdate();
+        try {
+            var cells = get_node_cells(self, topic_name);
+            for(var i=0; i<cells.length; i++) {
+                var cell = cells[i];
+                var geo = graph.getCellGeometry(cell).clone();
+                geo.width = width;
+                geo.height = height;
+                model.setGeometry(cell, geo);
+            }
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+
         return 0;
     }
 
@@ -3142,6 +3285,7 @@
             "EV_SHOW_CELL_DATA_FORM",
             "EV_SHOW_CELL_DATA_JSON",
             "EV_POPUP_MENU",
+            "EV_EXTEND_SIZE",
 
             "EV_MX_CLICK",
             "EV_MX_DOUBLECLICK",
@@ -3185,6 +3329,7 @@
                 ["EV_RUN_NODE",                 ac_run_node,                undefined],
 
                 ["EV_POPUP_MENU",               ac_popup_menu,              undefined],
+                ["EV_EXTEND_SIZE",              ac_extend_size,             undefined],
                 ["EV_MX_CLICK",                 ac_mx_click,                undefined],
                 ["EV_MX_DOUBLECLICK",           ac_mx_double_click,         undefined],
                 ["EV_MX_SELECTION_CHANGE",      ac_selection_change,        undefined],
