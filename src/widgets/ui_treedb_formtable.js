@@ -80,6 +80,7 @@
         with_resizeRow: false,
         with_fixedRowHeight: true,
         without_refresh: false,
+        without_json_viewers: false,
 
         _writable_fields: null, // automatic built
 
@@ -430,7 +431,7 @@
                         type: "icon",
                         icon: "fas fa-folder-tree",
                         css: "webix_transparent icon_toolbar_16",
-                        hidden: __yuno__.developer?false:true,
+                        hidden: self.config.without_json_viewers?true:false,
                         maxWidth: 80,
                         label: t("Cols"),
                         click: function() {
@@ -474,7 +475,7 @@
                         type: "icon",
                         icon: "fas fa-folder-tree",
                         css: "webix_transparent icon_toolbar_16",
-                        hidden: __yuno__.developer?false:true,
+                        hidden: self.config.without_json_viewers?true:false,
                         maxWidth: 80,
                         label: t("Data"),
                         click: function() {

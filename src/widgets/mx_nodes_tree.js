@@ -82,6 +82,8 @@
         hook_port_cy: 20,
         fkey_port_cx: 20,
         fkey_port_cy: 20,
+        cell_cx_sep: 100,
+        cell_cy_sep: 100,
 
         layout_options: [
             {
@@ -326,6 +328,17 @@
 //                     label: t("create"),
 //                     popup: build_name(self, "create_menu_popup")
 //                 },
+                {
+                    view:"button",
+                    type: "icon",
+                    icon: "far fa-send-back",
+                    css: "webix_transparent icon_toolbar_16",
+                    maxWidth: 120,
+                    label: t("reorder"),
+                    click: function() {
+                        reordena_graph(self);
+                    }
+                },
                 {
                     view: "richselect",
                     id: build_name(self, "layout_options"),
@@ -988,7 +1001,6 @@
             return true;
         };
 
-
         /*
          *  Foldable
          */
@@ -1018,7 +1030,6 @@
          *  Set stylesheet options
          */
         configureStylesheet(graph);
-
 
         /*
          *  Create own styles
@@ -1129,6 +1140,28 @@
                 self
             );
         });
+
+        /*
+         *  Context menu
+         */
+        graph.popupMenuHandler.factoryMethod = function(menu, cell, evt) {
+            if(cell.vertex) {
+                menu.addItem('First vertex option', null, function() {
+                    alert('This is the first option of vertex ');
+                });
+                menu.addItem('Second vertex option', null, function() {
+                    alert('This is the second option of vertex ');
+                });
+            }
+            //if(cell.edge) {
+            //    menu.addItem('First edge option', null, function() {
+            //        alert('This is the first option of edge ');
+            //    });
+            //    menu.addItem('Second edge option', null, function() {
+            //        alert('This is the second option of edge ');
+            //    });
+            //}
+        }
     }
 
     /************************************************************
@@ -1436,6 +1469,58 @@
             var topic = self.config.topics[i];
             if(topic_name == topic.topic_name) {
                 return topic.run_event;
+            }
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_default_cx(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.default_cx;
+            }
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_default_cy(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.default_cy;
+            }
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_default_alt_cx(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.default_alt_cx;
+            }
+        }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_default_alt_cy(self, topic_name)
+    {
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            if(topic_name == topic.topic_name) {
+                return topic.default_alt_cy;
             }
         }
     }
@@ -1846,8 +1931,18 @@
         var geometry = record._geometry;
         var x = kw_get_int(geometry, "x", 40, false);
         var y = kw_get_int(geometry, "y", 40, false);
-        var width = kw_get_int(geometry, "width", 250, false);
-        var height = kw_get_int(geometry, "height", 200, false);
+        var width = kw_get_int(
+            geometry,
+            "width",
+            get_default_cx(self, schema.topic_name),
+            false
+        );
+        var height = kw_get_int(
+            geometry,
+            "height",
+            get_default_cy(self, schema.topic_name),
+            false
+        );
         var cell_name = build_cell_name(self, schema.topic_name, record.id);
 
         if(model.getCell(cell_name)) {
@@ -1868,7 +1963,12 @@
             false               // relative
         );
         cell.setConnectable(false);
-        cell.geometry.alternateBounds = new mxRectangle(0, 0, 110, 70);
+        cell.geometry.alternateBounds = new mxRectangle(
+            0,
+            0,
+            get_default_alt_cx(self, schema.topic_name),
+            get_default_alt_cy(self, schema.topic_name),
+        );
         add_hook_fkey_ports(self, cell);
 
         return cell;
@@ -1925,6 +2025,112 @@
             graph.resizeCell(cell, geometry, false);
         }
         self.config.lock_publish_geometry = false;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function set_positions(self, graph, model)
+    {
+        var levels = [];
+
+        for(var i=0; i<self.config.topics.length; i++) {
+            levels.push({
+                topic_name: self.config.topics[i].topic_name,
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                cells: []
+            });
+        }
+
+        graph.selectCells(
+            true,               // vertices
+            false,              // edges
+            get_layer(self),    // parent
+            true                // selectGroups
+        );
+
+        var cells = graph.getSelectionCells();
+        for(var i=0; i<cells.length; i++) {
+            var cell = cells[i];
+            if(!cell.value.schema) {
+                continue;
+            }
+            var topic_name = cell.value.schema.topic_name;
+            if(cell.style != topic_name + "_node") {
+                continue;
+            }
+
+            var level = null;
+            for(var j=0; j<levels.length; j++) {
+                if(levels[j].topic_name == topic_name) {
+                    level = levels[j];
+                    break;
+                }
+            }
+
+            // Set the level cx/cy with the bigger cell
+            level.width = Math.max(level.width, cell.geometry.width);
+            level.height = Math.max(level.height, cell.geometry.height);
+            level.cells.push(cell);
+        }
+
+        for(var i=0; i<levels.length; i++) {
+            var level = levels[i];
+
+            // Set the level cx/cy with the bigger group
+            for(var j=0; j<level.cells.length; j++) {
+                var cell = level.cells[j];
+                level.width = Math.max(level.width, cell.geometry.width);
+                level.height = Math.max(level.height, cell.geometry.height);
+            }
+            if(i==0) {
+                level.y = 60;
+            } else {
+                level.y = levels[i-1].y + levels[i-1].height + self.config.cell_cy_sep;
+            }
+            for(var j=0; j<level.cells.length; j++) {
+                var cell = level.cells[j];
+                if(j==0) {
+                    level.x = 0;
+                    if(i>0) {
+                        level.x += self.config.cell_cy_sep*2;
+                    }
+                } else {
+                    level.x += level.cells[j-1].geometry.width;
+                    level.x += self.config.cell_cx_sep;
+                }
+                var geo = graph.getCellGeometry(cell).clone();
+                geo.x = level.x;
+                geo.y = level.y;
+                model.setGeometry(cell, geo);
+            }
+        }
+
+        graph.clearSelection();
+    }
+
+    /************************************************************
+     *  Reordena graph, layout como el de mx_json_viewer
+     ************************************************************/
+    function reordena_graph(self)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+
+        model.beginUpdate();
+        try {
+            set_positions(self, graph, model);
+
+            graph.view.setTranslate(graph.border, graph.border);
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
     }
 
 
@@ -2712,7 +2918,8 @@
                     options: options
                 };
 
-                self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
+                // Don't save cells individually, Save all with button
+                //self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
             }
         }
 
@@ -2758,7 +2965,8 @@
                     options: options
                 };
 
-                self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
+                // Don't save cells individually, Save all with button
+                //self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
             }
         }
 
