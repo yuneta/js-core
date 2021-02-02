@@ -312,6 +312,45 @@
 //         }).hide();
 
         /*---------------------------------------*
+         *      Menu for create nodes
+         *---------------------------------------*/
+        webix.ui({
+            view: "popup",
+            id: build_name(self, "cell_menu_popup"),
+            width: 200,
+            body: {
+                view: "menu",
+                id: build_name(self, "cell_menu"),
+                layout: "y",
+                autoheight: true,
+                select: true,
+                data: [
+                    {id: 1, value: "Extend size"}
+                ],
+                click: function(id, e, node) {
+                    this.hide();
+                    switch(id) {
+                        case 1:
+                            self.gobj_send_event(
+                                "EV_EXTEND_SIZE",
+                                {
+                                    topic_name: id
+
+                                },
+                                self
+                            );
+                            break;
+                    }
+                }
+            },
+            on: {
+                "onShow": function(e) {
+                    //$$(build_name(self, "cell_menu")).unselectAll();
+                }
+            }
+        }).hide();
+
+        /*---------------------------------------*
          *      Bottom Toolbar
          *---------------------------------------*/
         var bottom_toolbar = {
@@ -526,6 +565,7 @@
 
         var mx_events = [
             mxEvent.CLICK,
+            mxEvent.DOUBLE_CLICK,
             mxEvent.MOVE_CELLS,
             mxEvent.RESIZE_CELLS,
             mxEvent.ADD_CELLS,
@@ -1145,22 +1185,7 @@
          *  Context menu
          */
         graph.popupMenuHandler.factoryMethod = function(menu, cell, evt) {
-            if(cell.vertex) {
-                menu.addItem('First vertex option', null, function() {
-                    alert('This is the first option of vertex ');
-                });
-                menu.addItem('Second vertex option', null, function() {
-                    alert('This is the second option of vertex ');
-                });
-            }
-            //if(cell.edge) {
-            //    menu.addItem('First edge option', null, function() {
-            //        alert('This is the first option of edge ');
-            //    });
-            //    menu.addItem('Second edge option', null, function() {
-            //        alert('This is the second option of edge ');
-            //    });
-            //}
+            self.gobj_send_event("EV_POPUP_MENU", {cell: cell, evt: evt}, self);
         }
     }
 
@@ -2346,6 +2371,7 @@
     /********************************************
      *  Create a cell vertex of topic node
      *  From popup menu
+     *  WARNING not used
      ********************************************/
     function ac_create_vertex(self, event, kw, src)
     {
@@ -2719,6 +2745,24 @@
     /********************************************
      *
      ********************************************/
+    function ac_popup_menu(self, event, kw, src)
+    {
+        if(self.config.locked) {
+            return 0;
+        }
+        var cell = kw.cell;
+        if(!cell) {
+            return -1;
+        }
+        if(cell.isVertex()) {
+        } else {
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_mx_click(self, event, kw, src)
     {
         var cell = kw.cell;
@@ -2739,6 +2783,18 @@
             if(cell.value) {
                 self.gobj_publish_event("EV_MX_EDGE_CLICKED", cell.value, self);
             }
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_mx_double_click(self, event, kw, src)
+    {
+        var cell = kw.cell;
+        if(!cell) {
+            return -1;
         }
         return 0;
     }
@@ -3085,8 +3141,10 @@
             "EV_DELETE_EDGE",
             "EV_SHOW_CELL_DATA_FORM",
             "EV_SHOW_CELL_DATA_JSON",
+            "EV_POPUP_MENU",
 
             "EV_MX_CLICK",
+            "EV_MX_DOUBLECLICK",
             "EV_MX_SELECTION_CHANGE",
             "EV_MX_ADDCELLS",
             "EV_MX_MOVECELLS",
@@ -3126,7 +3184,9 @@
 
                 ["EV_RUN_NODE",                 ac_run_node,                undefined],
 
+                ["EV_POPUP_MENU",               ac_popup_menu,              undefined],
                 ["EV_MX_CLICK",                 ac_mx_click,                undefined],
+                ["EV_MX_DOUBLECLICK",           ac_mx_double_click,         undefined],
                 ["EV_MX_SELECTION_CHANGE",      ac_selection_change,        undefined],
                 ["EV_MX_ADDCELLS",              ac_mx_addcells,             undefined],
                 ["EV_MX_MOVECELLS",             ac_mx_movecells,            undefined],
