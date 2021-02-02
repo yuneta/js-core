@@ -373,7 +373,16 @@
                     maxWidth: 120,
                     label: t("reorder"),
                     click: function() {
-                        reordena_graph(self);
+                        webix.confirm(
+                            {
+                                title: t("warning"),
+                                text: t("are you sure"),
+                                type:"confirm-warning"
+                            }).then(function(result) {
+                                reordena_graph(self);
+                            }
+                        );
+
                     }
                 },
                 {
