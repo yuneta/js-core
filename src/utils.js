@@ -1823,6 +1823,31 @@
         }
     }
 
+    /*
+     * Converts a string to a bool.
+     *
+     * This conversion will:
+     *
+     *  - match 'true', 'on', or '1' as true.
+     *  - ignore all white-space padding
+     *  - ignore capitalization (case).
+     *
+     * '  tRue  ','ON', and '1   ' will all evaluate as true.
+     *
+     */
+    function parseBoolean(s)
+    {
+        if(is_number(s)) {
+            return Boolean(s);
+        }
+
+        // will match one and only one of the string 'true','1', or 'on' rerardless
+        // of capitalization and regardless off surrounding white-space.
+        //
+        regex=/^\s*(true|1|on)\s*$/i
+
+        return regex.test(s);
+    }
 
     //=======================================================================
     //      Expose the class via the global object
@@ -1908,5 +1933,6 @@
     exports.kw_get_local_storage_value = kw_get_local_storage_value;
     exports.kw_set_local_storage_value = kw_set_local_storage_value;
     exports.kw_remove_local_storage_value = kw_remove_local_storage_value;
+    exports.parseBoolean = parseBoolean;
 
 })(this);

@@ -401,6 +401,9 @@
             return;
         }
 
+        /*
+         *  Collect tables to update
+         */
         var reg = treedb_get_register(self.config.treedb_name);
         var tables2update = {};
         for(var topic_name in self.config.descs) {

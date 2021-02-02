@@ -430,10 +430,55 @@
                         type: "icon",
                         icon: "fas fa-folder-tree",
                         css: "webix_transparent icon_toolbar_16",
-                        maxWidth: 120,
-                        label: t("Json"),
+                        hidden: __yuno__.developer?false:true,
+                        maxWidth: 80,
+                        label: t("Cols"),
                         click: function() {
-                            var n = "Json Formtable Inside: " + self.name;
+                            var n = "Json Cols: " + self.name;
+                            var gobj_je = __yuno__.gobj_find_unique_gobj(n);
+                            if(!gobj_je) {
+                                gobj_je = __yuno__.gobj_create_unique(
+                                    n,
+                                    Je_viewer,
+                                    {
+                                        window_title: n,
+                                        width: 900,
+                                        height: 600
+                                    },
+                                    __yuno__.__pinhold__
+                                );
+                                gobj_je.gobj_start();
+                            }
+                            gobj_je.gobj_send_event(
+                                "EV_SHOW",
+                                {},
+                                self
+                            );
+                            gobj_je.gobj_send_event(
+                                "EV_CLEAR_DATA",
+                                {},
+                                self
+                            );
+                            var $table = $$(build_name(self, "list_table"));
+                            gobj_je.gobj_send_event(
+                                "EV_LOAD_DATA",
+                                {
+                                    data: self.config.cols
+                                },
+                                self
+                            );
+                        }
+                    },
+                    {
+                        view:"button",
+                        type: "icon",
+                        icon: "fas fa-folder-tree",
+                        css: "webix_transparent icon_toolbar_16",
+                        hidden: __yuno__.developer?false:true,
+                        maxWidth: 80,
+                        label: t("Data"),
+                        click: function() {
+                            var n = "Json Data: " + self.name;
                             var gobj_je = __yuno__.gobj_find_unique_gobj(n);
                             if(!gobj_je) {
                                 gobj_je = __yuno__.gobj_create_unique(
@@ -1710,6 +1755,7 @@
                 value = parseFloat(value);
                 break;
             case "boolean":
+                value = parseBoolean(value);
                 break;
             case "blob":
                 if(!empty_string(value)) {
@@ -1853,6 +1899,8 @@
         if(data.length == 1) {
             if(!self.config.with_webix_id) {
                 self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
+            } else {
+                self.gobj_send_event("EV_FIRST_RECORD", {}, self);
             }
         } else if(data.length > 1) {
             if(self.config.last_selected_id) {
@@ -1969,6 +2017,9 @@
         } else {
             log_error("$form update not found: " + build_name(self, "update_form"));
         }
+
+        // Hemos destruido esquema y por lo tanto los datos, restáuralos
+        self.gobj_send_event("EV_UNDO_RECORD", {}, self);
 
         return 0;
     }

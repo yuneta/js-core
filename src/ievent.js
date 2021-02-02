@@ -46,6 +46,7 @@ DEBUG: {
         remote_yuno_name: null,         // confirmed remote yuno names
         remote_yuno_role: null,
         remote_yuno_service: null,
+        required_services: null,
 
         inside_on_open: false,  // avoid duplicates, no subscriptions while in on_open,
                                 // will send in resend_subscriptions
@@ -255,7 +256,7 @@ DEBUG: {
             "user_agent": navigator.userAgent,
             "launch_id" : 0,
             "yuno_startdate" : "", // TODO
-            "required_services": []
+            "required_services": self.config.required_services
         };
         /*
          *      __REQUEST__ __MESSAGE__
