@@ -290,7 +290,7 @@
                 select: true,
                 click: function(id, e, node) {
                     this.hide();
-                    self.gobj_send_event("EV_SHOW_TREEDB_TOPIC", {topic_name: id}, self);
+                    self.gobj_publish_event("EV_SHOW_TREEDB_TOPIC", {topic_name: id}, self);
                 }
             },
             on: {
@@ -346,9 +346,9 @@
                     view:"button",
                     type: "icon",
                     hidden: self.config.with_treedb_tables?false:true,
-                    icon: "fas fa-layer-plus",
+                    icon: "fal fa-table",
                     css: "webix_transparent icon_toolbar_16",
-                    label: t("create"),
+                    label: t("topics"),
                     popup: build_name(self, "topics_menu_popup")
                 },
                 {

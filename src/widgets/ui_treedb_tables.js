@@ -268,6 +268,9 @@
             var topic = self.config.topics[i];
             var topic_name = topic.topic_name;
             var label = topic.label;
+            if(!label) {
+                label = topic.topic_name;
+            }
 
             topic["gobj_formtable"] = __yuno__.gobj_create_unique(
                 build_name(self, topic_name + " formtable"),

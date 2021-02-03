@@ -40,6 +40,7 @@
 
         gobj_container: null,
         gobj_nodes_tree: null,
+        gobj_treedb_tables: null,
 
 
         $ui: null,              // $ui from container
@@ -630,6 +631,24 @@
 
     /********************************************
      *  Event from Mx_nodes_tree
+     ********************************************/
+    function ac_show_treedb_topic(self, event, kw, src)
+    {
+        var topic_name = kw.topic_name;
+        var gobj_topic_formtable = self.config.gobj_treedb_tables.gobj_send_event(
+            "EV_GET_TOPIC_FORMTABLE",
+            {
+                topic_name: topic_name
+            },
+            self
+        );
+        gobj_topic_formtable.gobj_send_event("EV_TOGGLE", {}, self);
+
+        return 0;
+    }
+
+    /********************************************
+     *  Event from Mx_nodes_tree
      *  kw: {
      *      treedb_name
      *      topic_name,
@@ -803,6 +822,7 @@
             "EV_TREEDB_NODE_DELETED",
             "EV_REFRESH_TREEDB",
             "EV_SHOW_HOOK_DATA",
+            "EV_SHOW_TREEDB_TOPIC",
             "EV_MX_VERTEX_CLICKED",
             "EV_MX_EDGE_CLICKED",
             "EV_CREATE_RECORD",
@@ -826,6 +846,7 @@
                 ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
                 ["EV_REFRESH_TREEDB",           ac_refresh_treedb,              undefined],
                 ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,              undefined],
+                ["EV_SHOW_TREEDB_TOPIC",        ac_show_treedb_topic,           undefined],
                 ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],
                 ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,             undefined],
                 ["EV_CREATE_RECORD",            ac_create_record,               undefined],
@@ -905,7 +926,7 @@
         );
 
         /*
-         *  System Panel
+         *  Nodes tree panel
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
             build_name(self, "systems-tree"),
@@ -934,6 +955,27 @@
             },
             self.config.gobj_container
         );
+
+        /*
+         *  Treedb tables
+         */
+        if(self.config.with_treedb_tables) {
+            self.config.gobj_treedb_tables = self.yuno.gobj_create_unique(
+                build_name(self, "Topics"),
+                Ui_treedb_tables,
+                {
+                    subscriber: self,
+                    with_treedb_tables: self.config.with_treedb_tables,
+                    hook_data_viewer: Ui_hook_viewer_popup,
+                    gobj_remote_yuno: self.config.gobj_remote_yuno,
+                    treedb_name: self.config.treedb_name,
+                    topics: self.config.topics,
+                    info_wait: self.config.info_wait,
+                    info_no_wait: self.config.info_no_wait
+                },
+                self
+            );
+        }
     }
 
     /************************************************
@@ -953,6 +995,10 @@
         var self = this;
 
         self.config.gobj_nodes_tree.gobj_start();
+        if(self.config.gobj_treedb_tables) {
+            self.config.gobj_treedb_tables.gobj_start();
+        }
+
         if(self.config.gobj_remote_yuno) {
             refresh_treedb(self);
         }
