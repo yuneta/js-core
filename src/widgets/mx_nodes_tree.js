@@ -2693,7 +2693,7 @@
                 without_window_fullscreen_btn: false,   // Hide fullscreen button
                 without_window_close_btn: false,        // Hide minimize/destroy button
                 without_destroy_window_on_close: false, // No destroy window on close (hide)
-                without_create_window_on_start: true,   // Don't create window on start
+                with_create_window_on_start: false,     // Don't create window on start
             },
             is_pinhold_window: true,
             window_title: schema.topic_name,

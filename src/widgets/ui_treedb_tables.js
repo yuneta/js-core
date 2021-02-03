@@ -302,7 +302,7 @@
                         without_window_fullscreen_btn: false,
                         without_window_close_btn: false,
                         without_destroy_window_on_close: true,
-                        without_create_window_on_start: true
+                        with_create_window_on_start: false
                     },
                     is_pinhold_window: true,
                     window_title: label,

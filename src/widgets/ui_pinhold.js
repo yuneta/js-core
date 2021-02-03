@@ -10,7 +10,7 @@
         without_window_fullscreen_btn: false,   // true: Hide fullscreen button
         without_window_close_btn: false,        // true: Hide minimize/destroy button
         without_destroy_window_on_close: false, // true: No destroy window on close (hide)
-        without_create_window_on_start: false,  // true: Don't create window on start
+        with_create_window_on_start: false,     // true: Create window on start
  *
  *
  *  Version
@@ -498,8 +498,8 @@
                 gobj_name: src.gobj_name(),
                 gclass_name: src.gobj_gclass_name(),
                 window_image: kw.window_image,
-                without_create_window_on_start:
-                    src.config.window_properties.without_create_window_on_start?true:false
+                with_create_window_on_start:
+                    src.config.window_properties.with_create_window_on_start?true:false
             }
             src.gobj_save_persistent_attrs();
 
@@ -788,9 +788,9 @@
             var gclass_name = self.config.windows_pinpushed[key].gclass_name;
             var gobj_name = self.config.windows_pinpushed[key].gobj_name;
             var image = self.config.windows_pinpushed[key].window_image;
-            var no_create = self.config.windows_pinpushed[key].without_create_window_on_start;
+            var create = self.config.windows_pinpushed[key].with_create_window_on_start;
             var add = true;
-            if(!no_create) {
+            if(!create) {
                 try {
                     self.yuno.gobj_create_unique(
                         gobj_name,
