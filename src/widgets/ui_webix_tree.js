@@ -45,20 +45,6 @@
 
 
     /************************************************************
-     *   Build name
-     ************************************************************/
-    function build_name(self, name)
-    {
-        if(empty_string(self.gobj_name())) {
-            if(!self._uuid_name) {
-                self._uuid_name = get_unique_id(self.gobj_gclass_name());
-            }
-            return self._uuid_name + "-" + name;
-        }
-        return self.gobj_escaped_short_name() + "-" + name;
-    }
-
-    /************************************************************
      *   Rebuild
      ************************************************************/
     function rebuild(self)

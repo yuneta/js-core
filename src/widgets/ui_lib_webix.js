@@ -156,11 +156,68 @@
         }
     }
 
+    /************************************************************
+     *   Build name
+     ************************************************************/
+    function build_name(self, name)
+    {
+        // We need unique names
+        if(empty_string(self.gobj_name())) {
+            if(!self._uuid_name) {
+                self._uuid_name = get_unique_id(self.gobj_gclass_name());
+            }
+            return self._uuid_name + "-" + name;
+        }
+        return self.gobj_escaped_short_name() + "-" + name;
+    }
+
+    /************************************************************
+     *  Color green
+     ************************************************************/
+    function set_submmit_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_color_submmit");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_color_submmit");
+        }
+    }
+
+    /************************************************************
+     *  Color red
+     ************************************************************/
+    function set_cancel_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_color_cancel");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_color_cancel");
+        }
+    }
+
+    /************************************************************
+     *  Color orange
+     ************************************************************/
+    function set_active_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_color_active");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_color_active");
+        }
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
     exports.setup_webix = setup_webix;
-
+    exports.build_name = build_name;
+    exports.set_submmit_state = set_submmit_state;
+    exports.set_cancel_state = set_cancel_state;
+    exports.set_active_state = set_active_state;
 })(this);
 
 
