@@ -1321,9 +1321,9 @@
                     var overlay_instance = new mxCellOverlay(
                         self.config.image_run,
                         "Run Node", // tooltip
-                        mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
-                        mxConstants.ALIGN_TOP,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
-                        new mxPoint(-1*offsx, 2*offsy), // offset
+                        mxConstants.ALIGN_CENTER, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+                        mxConstants.ALIGN_MIDDLE,  // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                        new mxPoint(0*offsx, 2*offsy), // offset
                         "pointer" // cursor
                     );
                     graph.addCellOverlay(cell, overlay_instance);
