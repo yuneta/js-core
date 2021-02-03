@@ -16,6 +16,7 @@
      ********************************************/
     var CONFIG = {
         subscriber: null,       // Subscriber of published events, by default the parent.
+        with_treedb_tables: false,
 
         /*
          *  Funciones que debe suministrar el padre
@@ -26,7 +27,7 @@
         /*
          *  GClass Manager/Viewer of hook data
          */
-        gclass_hook_data_viewer: null,
+        hook_data_viewer: null,
 
         /*
          *  gobj_remote_yuno: Remote yuno to ask data,
@@ -601,7 +602,7 @@
         var click_x = kw.click_x;
         var click_y = kw.click_y;
 
-        if(!self.config.gclass_hook_data_viewer) {
+        if(!self.config.hook_data_viewer) {
             trace_msg(kw);
             return 0;
         }
@@ -615,7 +616,7 @@
         if(!gobj) {
             gobj = self.yuno.gobj_create_unique(
                 name,
-                self.config.gclass_hook_data_viewer,
+                self.config.hook_data_viewer,
                 kw,
                 __yuno__.__pinhold__
             );
@@ -912,6 +913,7 @@
             {
                 info_wait: self.config.info_wait,
                 info_no_wait: self.config.info_no_wait,
+                with_treedb_tables: self.config.with_treedb_tables,
                 ui_properties: {
                     gravity: 1,
                     minWidth: 300,
@@ -932,7 +934,6 @@
             },
             self.config.gobj_container
         );
-        self.config.gobj_nodes_tree.gobj_start();
     }
 
     /************************************************
@@ -951,6 +952,7 @@
     {
         var self = this;
 
+        self.config.gobj_nodes_tree.gobj_start();
         if(self.config.gobj_remote_yuno) {
             refresh_treedb(self);
         }

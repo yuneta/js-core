@@ -52,12 +52,13 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
-        uuid: null, // to publish and avod feedback loops
-        lock_publish_geometry: false,
-
+        with_treedb_tables: false,
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
         topics: null,  // topics editing
+
+        uuid: null, // to publish and avod feedback loops
+        lock_publish_geometry: false,
 
         locked: true,
         fitted: false,
@@ -233,8 +234,8 @@
      ************************************************************/
     function rebuild(self)
     {
-        if($$(build_name(self, "create_menu_popup"))) {
-            $$(build_name(self, "create_menu_popup")).destructor();
+        if($$(build_name(self, "topics_menu_popup"))) {
+            $$(build_name(self, "topics_menu_popup")).destructor();
         }
         if($$(build_name(self, "cell_menu_popup"))) {
             $$(build_name(self, "cell_menu_popup")).destructor();
@@ -274,31 +275,30 @@
          */
 
         /*---------------------------------------*
-         *      Menu for create nodes
+         *      Menu for treedb topics
          *---------------------------------------*/
-// Fuera, se crea de una formtable
-//         webix.ui({
-//             view: "popup",
-//             id: build_name(self, "create_menu_popup"),
-//             width: 200,
-//             body: {
-//                 id: build_name(self, "create_menu"),
-//                 view: "menu",
-//                 layout: "y",
-//                 template: "#value#",
-//                 autoheight: true,
-//                 select: true,
-//                 click: function(id, e, node) {
-//                     this.hide();
-//                     self.gobj_send_event("EV_CREATE_VERTEX", {topic_name: id}, self);
-//                 }
-//             },
-//             on: {
-//                 "onShow": function(e) {
-//                     $$(build_name(self, "create_menu")).unselectAll();
-//                 }
-//             }
-//         }).hide();
+        webix.ui({
+            view: "popup",
+            id: build_name(self, "topics_menu_popup"),
+            width: 200,
+            body: {
+                id: build_name(self, "topics_menu"),
+                view: "menu",
+                layout: "y",
+                template: "#value#",
+                autoheight: true,
+                select: true,
+                click: function(id, e, node) {
+                    this.hide();
+                    self.gobj_send_event("EV_SHOW_TREEDB_TOPIC", {topic_name: id}, self);
+                }
+            },
+            on: {
+                "onShow": function(e) {
+                    $$(build_name(self, "topics_menu")).unselectAll();
+                }
+            }
+        }).hide();
 
         /*---------------------------------------*
          *      Menu for create nodes
@@ -342,15 +342,15 @@
             height: 30,
             css: "toolbar2color",
             cols:[
-// Fuera, se crea desde una formtable
-//                 {
-//                     view:"button",
-//                     type: "icon",
-//                     icon: "fas fa-layer-plus",
-//                     css: "webix_transparent icon_toolbar_16",
-//                     label: t("create"),
-//                     popup: build_name(self, "create_menu_popup")
-//                 },
+                {
+                    view:"button",
+                    type: "icon",
+                    hidden: self.config.with_treedb_tables?false:true,
+                    icon: "fas fa-layer-plus",
+                    css: "webix_transparent icon_toolbar_16",
+                    label: t("create"),
+                    popup: build_name(self, "topics_menu_popup")
+                },
                 {
                     view:"button",
                     type: "icon",
@@ -2371,8 +2371,7 @@
                 icon: "" // TODO
             });
         }
-        // Fuera, se crea de una formtable
-        //$$(build_name(self, "create_menu")).parse(topics);
+        $$(build_name(self, "topics_menu")).parse(topics);
 
         return 0;
     }
@@ -3279,6 +3278,7 @@
             "EV_RUN_NODE: output",
             "EV_REFRESH_TREEDB: output",
             "EV_SHOW_HOOK_DATA: output",
+            "EV_SHOW_TREEDB_TOPIC: output",
 
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
