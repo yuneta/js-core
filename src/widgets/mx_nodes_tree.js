@@ -2689,7 +2689,7 @@
             delete_mode_enabled: cell_name?true:false,
 
             window_properties: {
-                without_window_pin_btn: true,           // Hide pin button
+                with_window_pin_btn: false,             // Hide pin button
                 without_window_fullscreen_btn: false,   // Hide fullscreen button
                 without_window_close_btn: false,        // Hide minimize/destroy button
                 without_destroy_window_on_close: false, // No destroy window on close (hide)

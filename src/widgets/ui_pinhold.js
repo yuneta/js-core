@@ -6,7 +6,7 @@
  *
  *  window_properties: all values are false by default
 
-        without_window_pin_btn: false,          // true: Hide pin button
+        with_window_pin_btn: false,             // true: Show pin button
         without_window_fullscreen_btn: false,   // true: Hide fullscreen button
         without_window_close_btn: false,        // true: Hide minimize/destroy button
         without_destroy_window_on_close: false, // true: No destroy window on close (hide)
@@ -857,7 +857,7 @@
             cols: [
                 {
                     view: "button",
-                    hidden: gobj_window.config.window_properties.without_window_pin_btn?true:false,
+                    hidden: gobj_window.config.window_properties.with_window_pin_btn?false:true,
                     type: "image",
                     width: 40,
                     image: gobj_window.config.pinpushed?

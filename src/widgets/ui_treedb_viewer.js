@@ -276,16 +276,17 @@
                 {
                     view:"button",
                     type: "icon",
+                    hidden: true,
                     icon: "far fa-question",
                     css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("help"),
                     click: function() {
-                        if($$(build_name(self, "help_window")).isVisible()) {
-                            $$(build_name(self, "help_window")).hide();
-                        } else {
-                            $$(build_name(self, "help_window")).show();
-                        }
+                        //if($$(build_name(self, "help_window")).isVisible()) {
+                        //    $$(build_name(self, "help_window")).hide();
+                        //} else {
+                        //    $$(build_name(self, "help_window")).show();
+                        //}
                     }
                 }
             ]
@@ -1120,17 +1121,11 @@
      ********************************************/
     function ac_run_node(self, event, kw, src)
     {
-        var treedb_name = kw.treedb_name;
-        var topic_name = kw.topic_name;
-        var record = kw.record;
-        var options = kw.options || {};
-        var is_topic_schema = kw.is_topic_schema;
-
-        var url = record.url;
-        var dst_role = record.dst_role;
-        var dst_service = record.dst_service;
-        var dst_yuno = record.dst_yuno;
-        var viewer_engine = record.viewer_engine;
+        var url = self.config.url;
+        var dst_role = self.config.dst_role;
+        var dst_service = self.config.dst_service;
+        var dst_yuno = self.config.dst_yuno;
+        var viewer_engine = "Ui_treedb_graph";
 
         var gclass = gobj_find_gclass(viewer_engine);
         if(!gclass) {

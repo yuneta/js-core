@@ -298,7 +298,7 @@
                     delete_mode_enabled: true,
 
                     window_properties: {
-                        without_window_pin_btn: false,
+                        with_window_pin_btn: true,
                         without_window_fullscreen_btn: false,
                         without_window_close_btn: false,
                         without_destroy_window_on_close: true,
