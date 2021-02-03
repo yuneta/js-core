@@ -376,7 +376,7 @@
                     view:"button",
                     id: build_name(self, "save_graph"),
                     type: "icon",
-                    icon: "far fa-save",
+                    icon: "fas fa-save",
                     css: "webix_transparent icon_toolbar_16",
                     maxWidth: 120,
                     label: t("save"),
