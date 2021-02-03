@@ -55,7 +55,7 @@
         with_treedb_tables: false,
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
-        topics: null,  // topics editing
+        topics: [],  // topics editing
 
         uuid: null, // to publish and avod feedback loops
         lock_publish_geometry: false,

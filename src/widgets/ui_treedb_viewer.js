@@ -1125,7 +1125,7 @@
         var dst_role = self.config.dst_role;
         var dst_service = self.config.dst_service;
         var dst_yuno = self.config.dst_yuno;
-        var viewer_engine = "Ui_treedb_graph";
+        var viewer_engine = "Ui_treedb_graph_new";
 
         var gclass = gobj_find_gclass(viewer_engine);
         if(!gclass) {
@@ -1144,6 +1144,7 @@
                     window_title: name,
                     window_image: "", // TODO /static/app/images/yuneta/topic_schema.svg",
 
+                    hook_data_viewer: Ui_hook_viewer_popup,
                     dst_role: dst_role,
                     dst_service: dst_service,
                     dst_yuno: dst_yuno,
