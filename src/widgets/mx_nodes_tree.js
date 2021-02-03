@@ -366,6 +366,7 @@
                                 type:"confirm-warning"
                             }).then(function(result) {
                                 reordena_graph(self);
+                                set_btn_submmit_state(self, "save_graph", true);
                             }
                         );
 
@@ -373,6 +374,7 @@
                 },
                 {
                     view:"button",
+                    id: build_name(self, "save_graph"),
                     type: "icon",
                     icon: "far fa-save",
                     css: "webix_transparent icon_toolbar_16",
@@ -380,6 +382,7 @@
                     label: t("save"),
                     click: function() {
                         save_graph(self);
+                        set_btn_submmit_state(self, "save_graph", false);
                     }
                 },
                 {
@@ -2308,6 +2311,8 @@
         var graph = self.config._mxgraph;
         var model = graph.getModel();
 
+        set_btn_submmit_state(self, "save_graph", false);
+
         model.beginUpdate();
         try {
             graph.selectCells(
@@ -3113,6 +3118,7 @@
 
                 // Don't save cells individually, Save all with button
                 //self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
+                set_btn_submmit_state(self, "save_graph", true);
             }
         }
 
@@ -3160,6 +3166,7 @@
 
                 // Don't save cells individually, Save all with button
                 //self.gobj_publish_event("EV_UPDATE_RECORD", kw_update, self);
+                set_btn_submmit_state(self, "save_graph", true);
             }
         }
 

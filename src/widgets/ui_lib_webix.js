@@ -174,7 +174,7 @@
     /************************************************************
      *  Color green
      ************************************************************/
-    function set_submmit_state(self, name, set)
+    function set_icon_submmit_state(self, name, set)
     {
         var btn = $$(build_name(self, name));
         if(set) {
@@ -187,7 +187,7 @@
     /************************************************************
      *  Color red
      ************************************************************/
-    function set_cancel_state(self, name, set)
+    function set_icon_cancel_state(self, name, set)
     {
         var btn = $$(build_name(self, name));
         if(set) {
@@ -200,7 +200,7 @@
     /************************************************************
      *  Color orange
      ************************************************************/
-    function set_active_state(self, name, set)
+    function set_icon_active_state(self, name, set)
     {
         var btn = $$(build_name(self, name));
         if(set) {
@@ -210,14 +210,56 @@
         }
     }
 
+    /************************************************************
+     *  Color green
+     ************************************************************/
+    function set_btn_submmit_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_btn_color_submmit");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_btn_color_submmit");
+        }
+    }
+
+    /************************************************************
+     *  Color red
+     ************************************************************/
+    function set_btn_cancel_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_btn_color_cancel");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_btn_color_cancel");
+        }
+    }
+
+    /************************************************************
+     *  Color orange
+     ************************************************************/
+    function set_btn_active_state(self, name, set)
+    {
+        var btn = $$(build_name(self, name));
+        if(set) {
+            webix.html.addCss(btn.getNode(), "icon_btn_color_active");
+        } else {
+            webix.html.removeCss(btn.getNode(), "icon_btn_color_active");
+        }
+    }
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
     exports.setup_webix = setup_webix;
     exports.build_name = build_name;
-    exports.set_submmit_state = set_submmit_state;
-    exports.set_cancel_state = set_cancel_state;
-    exports.set_active_state = set_active_state;
+    exports.set_icon_submmit_state = set_icon_submmit_state;
+    exports.set_icon_cancel_state = set_icon_cancel_state;
+    exports.set_icon_active_state = set_icon_active_state;
+    exports.set_btn_submmit_state = set_btn_submmit_state;
+    exports.set_btn_cancel_state = set_btn_cancel_state;
+    exports.set_btn_active_state = set_btn_active_state;
 })(this);
 
 
