@@ -811,8 +811,6 @@
                     is_pinhold_window: true,
                     window_title: name,
                     window_image: "", // TODO /static/app/images/yuneta/topic_schema.svg",
-                    width: 800,
-                    height: 600,
 
                     dst_role: dst_role,
                     dst_service: dst_service,
@@ -985,7 +983,7 @@
                 },
                 panel_properties: {
                     with_panel_top_toolbar: true,
-                    with_panel_title: t("Systems Tree"),
+                    with_panel_title: "Treedb " + self.config.treedb_name,
                     with_panel_hidden_btn: false,
                     with_panel_fullscreen_btn: true,
                     with_panel_resize_btn: false
