@@ -93,45 +93,6 @@
                 layout: function(layout_option, graph) {
                     return null;
                 }
-            },
-            {
-                id: "tree_layout",
-                value: "Compact Tree Layout",
-                layout: function(layout_option, graph) {
-                    // Enables automatic layout on the graph and installs
-                    // a tree layout for all groups who's children are
-                    // being changed, added or removed.
-                    var layout = new mxCompactTreeLayout(graph, false);
-                    layout.useBoundingBox = false;
-                    layout.edgeRouting = false;
-                    layout.levelDistance = 50;
-                    layout.nodeDistance = 30;
-                    return layout;
-                }
-            },
-            {
-                id: "herarchical_layout",
-                value: "Herarchical Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxHierarchicalLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "fastorganic_layout",
-                value: "FastOrganic Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxFastOrganicLayout(graph);
-                    return layout;
-                }
-            },
-            {
-                id: "circle_layout",
-                value: "Circle Layout",
-                layout: function(layout_option, graph) {
-                    var layout = new mxCircleLayout(graph);
-                    return layout;
-                }
             }
         ],
 

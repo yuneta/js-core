@@ -783,7 +783,50 @@
      ********************************************/
     function ac_run_node(self, event, kw, src)
     {
-        return self.gobj_publish_event(event, kw, self);
+        var treedb_name = kw.treedb_name;
+        var topic_name = kw.topic_name;
+        var record = kw.record;
+        var options = kw.options || {};
+        var is_topic_schema = kw.is_topic_schema;
+
+        var url = record.url;
+        var dst_role = record.dst_role;
+        var dst_service = record.dst_service;
+        var dst_yuno = record.dst_yuno;
+        var viewer_engine = record.viewer_engine;
+
+        var gclass = gobj_find_gclass(viewer_engine);
+        if(!gclass) {
+            log_error("Viewer engine (gclass) not found: " + viewer_engine);
+            return -1;
+        }
+
+        var name = viewer_engine + ">" + url + ">" + dst_role + ">" + dst_service;
+        var gobj = __yuno__.gobj_find_unique_gobj(name);
+        if(!gobj) {
+            gobj = __yuno__.gobj_create_unique(
+                name,
+                gclass,
+                {
+                    is_pinhold_window: true,
+                    window_title: name,
+                    window_image: "", // TODO /static/app/images/yuneta/topic_schema.svg",
+                    width: 800,
+                    height: 600,
+
+                    dst_role: dst_role,
+                    dst_service: dst_service,
+                    dst_yuno: dst_yuno,
+                    url: url
+                },
+                __yuno__.__pinhold__
+            );
+            gobj.gobj_start();
+        } else {
+            gobj.gobj_send_event("EV_TOGGLE", {}, self);
+        }
+
+        return 0;
     }
 
     /********************************************
@@ -830,7 +873,7 @@
             "EV_UPDATE_RECORD",
             "EV_LINK_RECORDS",
             "EV_UNLINK_RECORDS",
-            "EV_RUN_NODE: output",
+            "EV_RUN_NODE",
             "EV_SELECT",
             "EV_REFRESH"
         ],

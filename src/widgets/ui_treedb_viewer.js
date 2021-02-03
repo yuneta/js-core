@@ -1,5 +1,5 @@
 /***********************************************************************
- *          ui_treedb_services.js
+ *          ui_treedb_viewer.js
  *
  *          Mix "Container Panel" & "Pinhold Window"
  *
@@ -375,21 +375,21 @@
         }
     };
 
-    var Ui_treedb_services = GObj.__makeSubclass__();
-    var proto = Ui_treedb_services.prototype; // Easy access to the prototype
+    var Ui_treedb_viewer = GObj.__makeSubclass__();
+    var proto = Ui_treedb_viewer.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ui_treedb_services",
+            "Ui_treedb_viewer",
             kw,
             0
         );
         return this;
     };
-    gobj_register_gclass(Ui_treedb_services, "Ui_treedb_services");
+    gobj_register_gclass(Ui_treedb_viewer, "Ui_treedb_viewer");
 
 
 
@@ -455,7 +455,7 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ui_treedb_services = Ui_treedb_services;
+    exports.Ui_treedb_viewer = Ui_treedb_viewer;
 
 })(this);
 
