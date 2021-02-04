@@ -38,7 +38,7 @@
         height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
-       with_treedb_tables: true,
+        with_treedb_tables: true,
 
         /*
          *  Funciones que debe suministrar el padre
@@ -60,23 +60,16 @@
         topics: [],
         descs: [],
 
-        gobj_container: null,
+        gobj_window: null,
         gobj_nodes_tree: null,
         gobj_treedb_tables: null,
 
 
-        $ui: null,              // $ui from container
+        $ui: null,              // $ui from window
 
         //////////////////////////////////
         __writable_attrs__: [
             ////// Common /////
-            "window_title",
-            "window_image",
-            "left",
-            "top",
-            "width",
-            "height",
-            "pinpushed"
 
             ////// Particular /////
         ]
@@ -91,171 +84,6 @@
 
 
 
-
-    /************************************************************
-     *   Rebuild
-     ************************************************************/
-    function rebuild(self)
-    {
-        if(self.config.$ui) {
-            self.config.$ui.destructor();
-            self.config.$ui = 0;
-        }
-        build_webix(self);
-    }
-
-    /************************************************************
-     *   Webix UI
-     ************************************************************/
-    function build_webix(self)
-    {
-        /*---------------------------------------*
-         *      Particular UI code
-         *---------------------------------------*/
-        var row1 = {"template": "Container Panel Sample"};
-        var row2 = {"template": "Container Panel Sample"};
-        var row3 = {"template": "Container Panel Sample"};
-
-        /*----------------------------------------------------*
-         *                      UI
-         *  Common UI of Pinhold Window and Container Panel
-         *----------------------------------------------------*/
-        if(self.config.is_pinhold_window) {
-            /*-------------------------*
-             *      Pinhold Window
-             *-------------------------*/
-            self.config.$ui = webix.ui({
-                view: "window",
-                id: self.gobj_escaped_short_name(), // HACK can be a global gobj, use gclass_name+name
-                top: self.config.top,
-                left: self.config.left,
-                width: self.config.width,
-                height: self.config.height,
-                hidden: self.config.pinpushed?true:false,
-                move: true,
-                resize: true,
-                position: (self.config.left==0 && self.config.top==0)?"center":null,
-                head: get_pinhold_window_top_toolbar(self),
-                body: {
-                    id: build_name(self, "fullscreen"),
-                    ////////////////// REPEATED webix code /////////////////
-                    // WARNING Please, put your code outside, here only simple variable names
-                    rows: [
-                        row1,
-                        button,
-                        row2,
-                        row3,
-                    ]
-                    ////////////////// webix code /////////////////
-                },
-                on: {
-                    "onViewResize": function() {
-                        self.config.left = this.gobj.config.$ui.config.left;
-                        self.config.top = this.gobj.config.$ui.config.top;
-                        self.config.width = this.gobj.config.$ui.config.width;
-                        self.config.height = this.gobj.config.$ui.config.height;
-                        self.gobj_save_persistent_attrs();
-                    },
-                    "onViewMoveEnd": function() {
-                        self.config.left = this.gobj.config.$ui.config.left;
-                        self.config.top = this.gobj.config.$ui.config.top;
-                        self.config.width = this.gobj.config.$ui.config.width;
-                        self.config.height = this.gobj.config.$ui.config.height;
-                        self.gobj_save_persistent_attrs();
-                    }
-                }
-            });
-            self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
-
-        } else {
-            /*-------------------------*
-             *      Container Panel
-             *-------------------------*/
-            self.config.$ui = webix.ui({
-                id: self.gobj_name(),
-                ////////////////// REPEATED webix code /////////////////
-                // WARNING Please, put your code outside, here only simple variable names
-                rows: [
-                    get_container_panel_top_toolbar(self),
-                    row1,
-                    button,
-                    row2,
-                    row3,
-                ]
-                ////////////////// webix code /////////////////
-            });
-        }
-        self.config.$ui.gobj = self;
-
-        if(self.config.ui_properties) {
-            self.config.$ui.define(self.config.ui_properties);
-            if(self.config.$ui.refresh) {
-                self.config.$ui.refresh();
-            }
-        }
-
-        /*----------------------------------------------*
-         *  Inform of panel viewed to "Container Panel"
-         *----------------------------------------------*/
-        if(!self.config.is_pinhold_window) {
-            self.config.$ui.attachEvent("onViewShow", function() {
-                self.parent.gobj_send_event("EV_ON_VIEW_SHOW", self, self);
-            });
-        }
-
-        /*----------------------------------------------*
-         *  Set fullscreen ui in "Pinhold Window"
-         *----------------------------------------------*/
-        if(self.config.is_pinhold_window) {
-            self.config.$ui_fullscreen = $$(build_name(self, "fullscreen"));
-            automatic_resizing_cb(); // Adapt window size to device
-        }
-
-        /*---------------------------------------*
-         *   Automatic Resizing in "Pinhold Window"
-         *---------------------------------------*/
-        function automatic_resizing(gadget, window_width, window_height)
-        {
-            var $gadget = $$(gadget);
-            var new_width = -1;
-            var new_height = -1;
-            var new_x = $gadget.config.left;
-            var new_y = $gadget.config.top;
-
-            if($gadget.$width + new_x > window_width) {
-                new_width = window_width;
-                new_x = 0;
-            }
-            if($gadget.$height + new_y > window_height) {
-                new_height = window_height;
-                new_y = 0;
-            }
-
-            if(new_width < 0 && new_height < 0) {
-                return;
-            }
-
-            $gadget.config.width = new_width<0? $gadget.$width:new_width,
-            $gadget.config.height = new_height<0? $gadget.$height:new_height;
-            $gadget.resize();
-            $gadget.setPosition(new_x, new_y);
-        }
-
-        function automatic_resizing_cb()
-        {
-            var window_width = window.innerWidth-8;
-            var window_height = window.innerHeight-8;
-            automatic_resizing(self.gobj_escaped_short_name(), window_width, window_height);
-        }
-
-        if(self.config.is_pinhold_window) {
-            if(self.config.resizing_event_id) {
-                webix.eventRemove(self.config.resizing_event_id);
-                self.config.resizing_event_id = 0;
-            }
-            self.config.resizing_event_id = webix.event(window, "resize", automatic_resizing_cb);
-        }
-    }
 
     /********************************************
      *
@@ -1204,31 +1032,6 @@
         self.gobj_subscribe_event(null, null, subscriber);
 
         /*
-         *  Create container
-         */
-        self.config.gobj_container = self.yuno.gobj_create_unique(
-            build_name(self, "ct"),
-            Ui_container,
-            {
-                mode: "horizontal"
-            },
-            self
-        );
-        self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
-
-        /*
-         *  Add container toolbar
-         */
-        self.config.gobj_container.gobj_send_event(
-            "EV_ADD_TOOLBAR",
-            {
-                type: "container_right_toolbar",
-                toolbar: build_toolbar(self, "vertical")
-            },
-            self
-        );
-
-        /*
          *  Nodes tree panel
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
@@ -1237,7 +1040,7 @@
             {
                 info_wait: self.config.info_wait,
                 info_no_wait: self.config.info_no_wait,
-                is_pinhold_window: false,
+                is_pinhold_window: true,
                 with_treedb_tables: self.config.with_treedb_tables,
                 ui_properties: {
                     gravity: 1,
@@ -1257,8 +1060,10 @@
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
-            self.config.gobj_container
+            __yuno__.__pinhold__
         );
+
+        self.config.$ui = self.config.gobj_nodes_tree.gobj_read_attr("$ui");
 
         /*
          *  Treedb tables
@@ -1280,8 +1085,6 @@
                 self
             );
         }
-
-        rebuild(self);
     }
 
     /************************************************
@@ -1291,15 +1094,6 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-        var self = this;
-        if(self.config.$ui) {
-            self.config.$ui.destructor();
-            self.config.$ui = 0;
-        }
-        if(self.config.resizing_event_id) {
-            webix.eventRemove(self.config.resizing_event_id);
-            self.config.resizing_event_id = 0;
-        }
     }
 
     /************************************************

@@ -1140,7 +1140,7 @@
                 name,
                 gclass,
                 {
-                    is_pinhold_window: true,
+                    gobj_remote_yuno: self.config.iev,
                     window_title: name,
                     window_image: "", // TODO /static/app/images/yuneta/topic_schema.svg",
 
