@@ -21,21 +21,19 @@
      ********************************************/
     var CONFIG = {
         //////////////// WRAPPER Common Attributes //////////////////
+        is_pinhold_window:false,// CONF: Select default: window or container panel
+        panel_properties: {},   // CONF: creator can set "Container Panel" properties
+        window_properties: {},  // CONF: creator can set "Pinhold Window" properties
+        ui_properties: null,    // CONF: creator can set webix properties
+        window_image: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        window_title: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        left: 0,                // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        top: 0,                 // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        width: 600,             // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        height: 500,            // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+
+        $ui: null,              // HACK $ui from wrapped window/panel
         subscriber: null,       // Subscriber of published events, by default the parent.
-        is_pinhold_window: true,// By default it's a Pinhold window
-        panel_properties: {},   // creator can set "Container Panel" properties
-        window_properties: {},  // creator can set "Pinhold Window" properties
-
-        $ui: null,              // HACK $ui from window or from container
-
-
-
-        window_image: "",       // Used by pinhold_window_top_toolbar "Pinhold Window"
-        window_title: "",       // Used by pinhold_window_top_toolbar "Pinhold Window"
-        left: 0,                // Used by pinhold_window_top_toolbar "Pinhold Window"
-        top: 0,                 // Used by pinhold_window_top_toolbar "Pinhold Window"
-        width: 600,             // Used by pinhold_window_top_toolbar "Pinhold Window"
-        height: 500,            // Used by pinhold_window_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
         with_treedb_tables: true,
@@ -63,8 +61,6 @@
         gobj_window: null,
         gobj_nodes_tree: null,
         gobj_treedb_tables: null,
-
-
 
         //////////////////////////////////
         __writable_attrs__: [
@@ -853,14 +849,21 @@
     }
 
     /********************************************
-     *  NOT! Pinhold to inform of window close
-     *  HACK using not own $ui
-     *  $ui can be of container or of window
+     *  Can be from pinhold or others
+     *  - Pinhold to inform of window close
+     *      kw:
+     *      {destroying: true}   Window destroying
+     *      {destroying: false}  Window minifying
+     *
+     *  - Others:
+     *      Destroy self
+     *
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
-        // TODO publish if you want
-        // self.gobj_publish_event(event, kw, self);
+        if(src.gclass_name != "Ui_pinhold") {
+            __yuno__.gobj_destroy(self);
+        }
         return 0;
     }
 
@@ -1028,39 +1031,57 @@
             subscriber = self.gobj_parent();
         self.gobj_subscribe_event(null, null, subscriber);
 
+        var is_pinhold_window = self.config.is_pinhold_window;
+
+        if(!is_pinhold_window) {
+            /*
+             *  Create container
+             */
+            self.config.gobj_container = self.yuno.gobj_create_unique(
+                build_name(self, "ct"),
+                Ui_container,
+                {
+                    mode: "horizontal"
+                },
+                self
+            );
+        }
+
         /*
-         *  Nodes tree panel
+         *  Nodes tree
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
             build_name(self, "nodes-tree"),
             Mx_nodes_tree,
             {
+                is_pinhold_window: is_pinhold_window,
+                panel_properties: self.config.panel_properties,
+                window_properties: self.config.window_properties,
+                ui_properties: self.config.ui_properties,
+                window_image: self.config.window_image,
+                window_title: self.config.window_title,
+                left: self.config.left,
+                top: self.config.top,
+                width: self.config.width,
+                height: self.config.height,
+
                 info_wait: self.config.info_wait,
                 info_no_wait: self.config.info_no_wait,
-                is_pinhold_window: true,
-                with_treedb_tables: self.config.with_treedb_tables,
-                ui_properties: {
-                    gravity: 1,
-                    minWidth: 300,
-                    minHeight: 300
-                },
-                panel_properties: {
-                    with_panel_top_toolbar: true,
-                    with_panel_title: "Treedb " + self.config.treedb_name,
-                    with_panel_hidden_btn: false,
-                    with_panel_fullscreen_btn: true,
-                    with_panel_resize_btn: false
-                },
+
                 subscriber: self,
                 treedb_name: self.config.treedb_name,
                 topics: self.config.topics,
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
-            self // HACK using not own $ui, cannot be __pinhold__ child
+            is_pinhold_window? self:self.config.gobj_container
         );
 
-        self.config.$ui = self.config.gobj_nodes_tree.gobj_read_attr("$ui");
+        if(!is_pinhold_window) {
+            self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
+        } else {
+            self.config.$ui = self.config.gobj_nodes_tree.gobj_read_attr("$ui");
+        }
 
         /*
          *  Treedb tables

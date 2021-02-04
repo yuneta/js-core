@@ -1141,11 +1141,12 @@
                 name,
                 gclass,
                 {
-                    gobj_remote_yuno: self.config.iev,
+                    is_pinhold_window: true,
                     window_title: name,
                     window_image: "", // TODO /static/app/images/yuneta/topic_schema.svg",
 
                     hook_data_viewer: Ui_hook_viewer_popup,
+                    gobj_remote_yuno: self.config.iev,
                     dst_role: dst_role,
                     dst_service: dst_service,
                     dst_yuno: dst_yuno,
@@ -1170,8 +1171,6 @@
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
-        // TODO publish if you want
-        // self.gobj_publish_event(event, kw, self);
         return 0;
     }
 

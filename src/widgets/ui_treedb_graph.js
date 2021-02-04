@@ -62,40 +62,6 @@
     /********************************************
      *
      ********************************************/
-    function build_toolbar(self, mode)
-    {
-        var elements = [
-            {
-                view: "button",
-                type: "icon",
-                icon: "fas fa-sync",
-                autowidth: true,
-                css: "webix_transparent icon_toolbar_16",
-                tooltip: t("refresh"),
-                label: t("refresh"),
-                click: function() {
-                    refresh_treedb(self);
-                }
-            }
-        ];
-
-        var toolbar = {
-            view: "toolbar"
-            //css: "toolbar2color"
-        };
-        if(mode == "vertical") {
-            toolbar["width"] = 40;
-            toolbar["rows"] = elements;
-        } else {
-            toolbar["height"] = 40;
-            toolbar["cols"] = elements;
-        }
-        return toolbar;
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function treedb_descs(self, treedb_name)
     {
         if(!self.config.gobj_remote_yuno) {
@@ -955,18 +921,6 @@
         self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
 
         /*
-         *  Add container toolbar
-         */
-        self.config.gobj_container.gobj_send_event(
-            "EV_ADD_TOOLBAR",
-            {
-                type: "container_right_toolbar",
-                toolbar: build_toolbar(self, "vertical")
-            },
-            self
-        );
-
-        /*
          *  Nodes tree panel
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
@@ -976,6 +930,7 @@
                 info_wait: self.config.info_wait,
                 info_no_wait: self.config.info_no_wait,
                 with_treedb_tables: self.config.with_treedb_tables,
+                is_pinhold_window: false,
                 ui_properties: {
                     gravity: 1,
                     minWidth: 300,

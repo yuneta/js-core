@@ -35,7 +35,7 @@
      ********************************************/
     var CONFIG = {
         //////////////// Common Attributes //////////////////
-        is_pinhold_window:false,// CONF: Select default: window or container panel
+        is_pinhold_window:true, // CONF: Select default: window or container panel
         panel_properties: {},   // CONF: creator can set "Container Panel" properties
         window_properties: {},  // CONF: creator can set "Pinhold Window" properties
         ui_properties: null,    // CONF: creator can set webix properties
@@ -470,6 +470,19 @@
                     }
                 },
                 { view:"label", label: ""},
+
+                {
+                    view: "button",
+                    type: "icon",
+                    icon: "fas fa-sync",
+                    autowidth: true,
+                    css: "webix_transparent icon_toolbar_16",
+                    tooltip: t("refresh"),
+                    label: t("refresh"),
+                    click: function() {
+                        self.gobj_publish_event("EV_REFRESH_TREEDB", {}, self);
+                    }
+                },
 
                 {
                     view:"button",

@@ -441,6 +441,7 @@
             self.name + ".mx",
             Mx_webix_tree,
             {
+                is_pinhold_window: false,
                 ui_properties: {
                     gravity: 4,
                     minWidth: 300,
@@ -464,6 +465,7 @@
             self.name + ".tb",
             Ui_treedb_formtable,
             {
+                is_pinhold_window: false,
                 ui_properties: {
                     gravity: 2,
                     hidden:true,
@@ -495,6 +497,7 @@
             self.name + ".wt",
             Ui_webix_tree,
             {
+                is_pinhold_window: false,
                 ui_properties: {
                     gravity: 1,
                     hidden:true,
