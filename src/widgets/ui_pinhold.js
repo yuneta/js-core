@@ -16,6 +16,7 @@
  *  Version
  *  -------
  *  1.0     Initial release
+ *  1.1     Change attributes with_window_pin_btn,with_create_window_on_start
  *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.

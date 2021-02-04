@@ -35,21 +35,22 @@
      ********************************************/
     var CONFIG = {
         //////////////// Common Attributes //////////////////
-        subscriber: null,       // Subscriber of published events, by default the parent.
-        is_pinhold_window: false, // By default it's a Container Panel
-        panel_properties: {},   // creator can set "Container Panel" properties
-        window_properties: {},  // creator can set "Pinhold Window" properties
-        ui_properties: null,    // creator can set webix properties
+        is_pinhold_window:false,// CONF: Select default: window or container panel
+        panel_properties: {},   // CONF: creator can set "Container Panel" properties
+        window_properties: {},  // CONF: creator can set "Pinhold Window" properties
+        ui_properties: null,    // CONF: creator can set webix properties
+        window_image: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        window_title: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        left: 0,                // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        top: 0,                 // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        width: 600,             // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        height: 500,            // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+
         $ui: null,
+        subscriber: null,       // Subscriber of published events, by default the parent.
         $ui_fullscreen: null,   // Which part of window will be fullscreened "Pinhold Window"
-        resizing_event_id: null,// Used by pinhold_panel_top_toolbar "Pinhold Window"
-        pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window"
-        window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        left: 0,                // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        top: 0,                 // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        width: 600,             // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
+        resizing_event_id: null,// Used for automatic_resizing by window
+        pinpushed: false,       // Used by pinhold_window_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
         with_treedb_tables: false,
@@ -3136,6 +3137,12 @@
     /********************************************
      *  From formtable,
      *  when window is destroying or minififying
+     *
+     *  Pinhold to inform of window close
+     *  Publish
+     *  kw
+     *      {destroying: true}   Window destroying
+     *      {destroying: false}  Window minifying
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
@@ -3145,7 +3152,9 @@
         var cell = model.getCell(cell_id);
 
         if(kw.destroying) {
-            cell.value.gobj_cell_formtable = 0;
+            if(cell) {
+                cell.value.gobj_cell_formtable = 0;
+            }
         }
 
         return 0;

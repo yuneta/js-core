@@ -970,7 +970,7 @@
          *  Nodes tree panel
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
-            build_name(self, "systems-tree"),
+            build_name(self, "nodes-tree"),
             Mx_nodes_tree,
             {
                 info_wait: self.config.info_wait,

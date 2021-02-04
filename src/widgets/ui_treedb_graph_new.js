@@ -1,7 +1,7 @@
 /***********************************************************************
  *          ui_treedb_graph_new.js
  *
- *          Mix "Container Panel" & "Pinhold Window"
+ *          WARNING HACK Wrapper on (Mix "Container Panel" & "Pinhold Window")
  *
  *          Manage treedb topics with mxgraph
  *
@@ -20,22 +20,22 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
-        //////////////// Common Attributes //////////////////
+        //////////////// WRAPPER Common Attributes //////////////////
         subscriber: null,       // Subscriber of published events, by default the parent.
         is_pinhold_window: true,// By default it's a Pinhold window
         panel_properties: {},   // creator can set "Container Panel" properties
         window_properties: {},  // creator can set "Pinhold Window" properties
-        ui_properties: null,    // creator can set webix properties
-        $ui: null,
-        $ui_fullscreen: null,   // Which part of window will be fullscreened "Pinhold Window"
-        resizing_event_id: null,// Used by pinhold_panel_top_toolbar "Pinhold Window"
-        pinpushed: false,       // Handle by pinhold top toobar "Pinhold Window"
-        window_image: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        window_title: "",       // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        left: 0,                // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        top: 0,                 // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        width: 600,             // Used by pinhold_panel_top_toolbar "Pinhold Window"
-        height: 500,            // Used by pinhold_panel_top_toolbar "Pinhold Window"
+
+        $ui: null,              // HACK $ui from window or from container
+
+
+
+        window_image: "",       // Used by pinhold_window_top_toolbar "Pinhold Window"
+        window_title: "",       // Used by pinhold_window_top_toolbar "Pinhold Window"
+        left: 0,                // Used by pinhold_window_top_toolbar "Pinhold Window"
+        top: 0,                 // Used by pinhold_window_top_toolbar "Pinhold Window"
+        width: 600,             // Used by pinhold_window_top_toolbar "Pinhold Window"
+        height: 500,            // Used by pinhold_window_top_toolbar "Pinhold Window"
 
         //////////////// Particular Attributes //////////////////
         with_treedb_tables: true,
@@ -65,7 +65,6 @@
         gobj_treedb_tables: null,
 
 
-        $ui: null,              // $ui from window
 
         //////////////////////////////////
         __writable_attrs__: [
@@ -854,11 +853,9 @@
     }
 
     /********************************************
-     *  Pinhold to inform of window close
-     *  Publish
-     *  kw
-     *      {destroying: true}   Window destroying
-     *      {destroying: false}  Window minifying
+     *  NOT! Pinhold to inform of window close
+     *  HACK using not own $ui
+     *  $ui can be of container or of window
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
@@ -1035,7 +1032,7 @@
          *  Nodes tree panel
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
-            build_name(self, "systems-tree"),
+            build_name(self, "nodes-tree"),
             Mx_nodes_tree,
             {
                 info_wait: self.config.info_wait,
@@ -1060,7 +1057,7 @@
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
-            __yuno__.__pinhold__
+            self // HACK using not own $ui, cannot be __pinhold__ child
         );
 
         self.config.$ui = self.config.gobj_nodes_tree.gobj_read_attr("$ui");
