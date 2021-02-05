@@ -185,7 +185,11 @@ DEBUG: {
             }
         }
 
-        self.websocket.send(msg);
+        try {
+            self.websocket.send(msg);
+        } catch (e) {
+            log_error(self.gobj_short_name() + ": " + e);
+        }
         return 0;
     }
 
@@ -376,8 +380,14 @@ DEBUG: {
         log_debug('Websocket closed: ' + url); // TODO que no se vea en prod
 
         if(self.websocket) {
-            if(self.websocket.close) {
-                self.websocket.close();
+            try {
+                if(self.websocket.close) {
+                    self.websocket.close();
+                } else if(self.websocket.websocket.close) {
+                    self.websocket.websocket.close();
+                }
+            } catch (e) {
+                log_error(e);
             }
             self.websocket = null;
         }
@@ -412,8 +422,16 @@ DEBUG: {
     function ac_timeout_disconnected(self, event, kw, src)
     {
         if(self.websocket) {
-            if(self.websocket.close) {
-                self.websocket.close();
+            try {
+                if(self.websocket.close) {
+                    self.websocket.close();
+                } else if(self.websocket.websocket.close) {
+                    self.websocket.websocket.close();
+                } else {
+                    trace_msg("What fuck*! websocket.close?");
+                }
+            } catch (e) {
+                log_error(e);
             }
             self.websocket = null;
         }
@@ -452,8 +470,16 @@ DEBUG: {
         var result = kw_get_int(kw, "result", -1);
         if(result < 0) {
             if(self.websocket) {
-                if(self.websocket.close) {
-                    self.websocket.close();
+                try {
+                    if(self.websocket.close) {
+                        self.websocket.close();
+                    } else if(self.websocket.websocket.close) {
+                        self.websocket.websocket.close();
+                    } else {
+                        trace_msg("What fuck*! websocket.close?");
+                    }
+                } catch (e) {
+                    log_error(e);
                 }
                 self.websocket = null;
             }
@@ -731,9 +757,20 @@ DEBUG: {
         var self = this;
         self.clear_timeout();
         if(self.websocket) {
-            send_goodbye(self, 'stopped by user');
-            if(self.websocket.close) {
-                self.websocket.close();
+            try {
+                //send_goodbye(self, 'stopped by user');
+                // HACK send_goodbye puede haber cerrado websocket
+                if(self.websocket) {
+                    if(self.websocket.close) {
+                        self.websocket.close();
+                    } else if(self.websocket.websocket.close) {
+                        self.websocket.websocket.close();
+                    } else {
+                        trace_msg("What fuck*! websocket.close?");
+                    }
+                }
+            } catch (e) {
+                log_error(e);
             }
             self.websocket = null;
         }

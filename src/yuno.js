@@ -272,7 +272,7 @@
         }
         if (this.config.trace_creation) {
             var gclass_name = gobj.gclass_name || '';
-            log_debug("<========== CREATED  " + gclass_name + ':' + name);
+            log_debug("<========== CREATED  " + gclass_name + "^" + name);
         }
         return gobj;
     };
@@ -324,11 +324,11 @@
             return;
         }
         if (this.config.trace_creation) {
-            log_debug("<========== DESTROYING " + gobj.name);
+            log_debug("<========== DESTROYING " + gobj.gclass_name + "^" + gobj.name);
         }
         if (gobj._destroyed) {
             // Already deleted
-            log_debug("<========== ALREADY DESTROYED! " + gobj.name);
+            log_debug("<========== ALREADY DESTROYED! " + gobj.gclass_name + "^" + gobj.name);
             return;
         }
         if(gobj.gobj_is_running()) {

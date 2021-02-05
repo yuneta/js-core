@@ -369,6 +369,7 @@
                 }
                 self.config.topics.push({topic_name: topic_name});
             }
+            create_topics_formtable(self);
         }
 
         /*
@@ -917,7 +918,9 @@
     {
         var self = this;
 
-        create_topics_formtable(self);
+        if(!self.config.auto_topics) {
+            create_topics_formtable(self);
+        }
     }
 
     /************************************************
