@@ -1149,6 +1149,8 @@
                     hook_data_viewer: Ui_hook_viewer_popup,
                     gobj_remote_yuno: self.config.iev,
                     treedb_name: cell.id,
+                    with_treedb_tables: true,
+                    auto_topics: true
 
                     // Esto es si fuera para un viewer con conexión autonoma (iev)
                     //dst_role: dst_role,

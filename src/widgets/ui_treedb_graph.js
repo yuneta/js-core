@@ -36,7 +36,8 @@
         subscriber: null,       // Subscriber of published events, by default the parent.
 
         //////////////// Particular Attributes //////////////////
-        with_treedb_tables: true,
+        with_treedb_tables: false,
+        auto_topics: false,
 
         /*
          *  Funciones que debe suministrar el padre
@@ -368,23 +369,7 @@
             },
             self
         );
-
-        treedb_descs(self, self.config.treedb_name);
-
-        var options = {
-            list_dict: true
-        };
-
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
-            var topic_name = topic.topic_name;
-
-            treedb_nodes(self,
-                self.config.treedb_name,
-                topic_name,
-                options
-            );
-        }
+        treedb_descs(self, self.config.treedb_name)
     }
 
     /************************************************************
@@ -392,6 +377,21 @@
      ************************************************************/
     function process_descs(self)
     {
+        /*
+         *  Auto topics
+         */
+        if(json_size(self.config.topics)==0 && self.config.auto_topics) {
+            for(var topic_name in self.config.descs) {
+                if(topic_name.substring(0, 2) == "__") {
+                    continue;
+                }
+                self.config.topics.push({topic_name: topic_name});
+            }
+        }
+
+        /*
+         *  Subcribe events
+         */
         for(var i=0; i<self.config.topics.length; i++) {
             var topic_name = self.config.topics[i].topic_name;
             var desc = self.config.descs[topic_name];
@@ -432,6 +432,32 @@
                     }
                 },
                 self
+            );
+        }
+
+        /*
+         *  Get data
+         */
+        refresh_data(self);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function refresh_data(self)
+    {
+        var options = {
+            list_dict: true
+        };
+
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
+
+            treedb_nodes(self,
+                self.config.treedb_name,
+                topic_name,
+                options
             );
         }
     }
@@ -1074,6 +1100,7 @@
                 subscriber: self,
                 treedb_name: self.config.treedb_name,
                 topics: self.config.topics,
+                auto_topics: self.config.auto_topics,
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
@@ -1100,6 +1127,7 @@
                     gobj_remote_yuno: self.config.gobj_remote_yuno,
                     treedb_name: self.config.treedb_name,
                     topics: self.config.topics,
+                    auto_topics: self.config.auto_topics,
                     info_wait: self.config.info_wait,
                     info_no_wait: self.config.info_no_wait
                 },
@@ -1129,9 +1157,7 @@
             self.config.gobj_treedb_tables.gobj_start();
         }
 
-        if(self.config.gobj_remote_yuno) {
-            refresh_treedb(self);
-        }
+        refresh_treedb(self);
     }
 
     /************************************************

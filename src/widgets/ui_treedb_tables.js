@@ -35,6 +35,7 @@
         gobj_remote_yuno: null,
         treedb_name: null,
         topics: null,
+        auto_topics: false,
         descs: null,
 
         __writable_attrs__: [
@@ -203,35 +204,6 @@
     /********************************************
      *
      ********************************************/
-    function refresh_treedb(self)
-    {
-        var options = {
-            list_dict: true
-        };
-
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
-            var topic_name = topic.topic_name;
-
-            topic.gobj_formtable.gobj_send_event(
-                "EV_CLEAR_DATA",
-                {
-                },
-                self
-            );
-
-            treedb_nodes(
-                self,
-                self.config.treedb_name,
-                topic_name,
-                options
-            );
-        }
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function treedb_descs(self)
     {
         if(!self.config.gobj_remote_yuno) {
@@ -317,11 +289,34 @@
         }
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function refresh_treedb(self)
+    {
+        treedb_descs(self, self.config.treedb_name)
+    }
+
     /************************************************************
      *
      ************************************************************/
     function process_descs(self)
     {
+        /*
+         *  Auto topics
+         */
+        if(json_size(self.config.topics)==0 && self.config.auto_topics) {
+            for(var topic_name in self.config.descs) {
+                if(topic_name.substring(0, 2) == "__") {
+                    continue;
+                }
+                self.config.topics.push({topic_name: topic_name});
+            }
+        }
+
+        /*
+         *  Subcribe events
+         */
         for(var i=0; i<self.config.topics.length; i++) {
             var topic_name = self.config.topics[i].topic_name;
             var desc = self.config.descs[topic_name];
@@ -362,6 +357,40 @@
                     }
                 },
                 self
+            );
+        }
+
+        /*
+         *  Get data
+         */
+        refresh_data(self);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function refresh_data(self)
+    {
+        var options = {
+            list_dict: true
+        };
+
+        for(var i=0; i<self.config.topics.length; i++) {
+            var topic = self.config.topics[i];
+            var topic_name = topic.topic_name;
+
+            topic.gobj_formtable.gobj_send_event(
+                "EV_CLEAR_DATA",
+                {
+                },
+                self
+            );
+
+            treedb_nodes(
+                self,
+                self.config.treedb_name,
+                topic_name,
+                options
             );
         }
     }
@@ -907,7 +936,6 @@
     {
         var self = this;
 
-        treedb_descs(self);
         refresh_treedb(self);
     }
 
