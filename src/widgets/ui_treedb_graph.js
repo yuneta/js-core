@@ -118,36 +118,6 @@
     /********************************************
      *
      ********************************************/
-    function treedb_descs(self, treedb_name)
-    {
-        if(!self.config.gobj_remote_yuno) {
-            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
-            return;
-        }
-
-        var command = "descs";
-
-        var kw = {
-            service: treedb_name
-        }
-
-        msg_write_MIA_key(kw, "__command__", command);
-
-        self.config.info_wait();
-
-        var ret = self.config.gobj_remote_yuno.gobj_command(
-            command,
-            kw,
-            self
-        );
-        if(ret) {
-            log_error(ret);
-        }
-    }
-
-    /********************************************
-     *
-     ********************************************/
     function treedb_nodes(self, treedb_name, topic_name, options)
     {
         if(!self.config.gobj_remote_yuno) {
@@ -361,15 +331,31 @@
     /********************************************
      *
      ********************************************/
-    function refresh_treedb(self)
+    function treedb_descs(self, treedb_name)
     {
-        self.config.gobj_nodes_tree.gobj_send_event(
-            "EV_CLEAR_DATA",
-            {
-            },
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "descs";
+
+        var kw = {
+            service: treedb_name
+        }
+
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
             self
         );
-        treedb_descs(self, self.config.treedb_name)
+        if(ret) {
+            log_error(ret);
+        }
     }
 
     /************************************************************
@@ -446,6 +432,13 @@
      ********************************************/
     function refresh_data(self)
     {
+        self.config.gobj_nodes_tree.gobj_send_event(
+            "EV_CLEAR_DATA",
+            {
+            },
+            self
+        );
+
         var options = {
             list_dict: true
         };
@@ -460,6 +453,17 @@
                 options
             );
         }
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function refresh_treedb(self)
+    {
+        /*
+         *  Get data
+         */
+        refresh_data(self);
     }
 
 
@@ -1157,7 +1161,7 @@
             self.config.gobj_treedb_tables.gobj_start();
         }
 
-        refresh_treedb(self);
+        treedb_descs(self, self.config.treedb_name)
     }
 
     /************************************************

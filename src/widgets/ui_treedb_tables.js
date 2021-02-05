@@ -201,33 +201,68 @@
         }
     }
 
-    /********************************************
+    /************************************************************
+     *  Update treedb tables options that have topic_name ref
      *
-     ********************************************/
-    function treedb_descs(self)
+     *  reg {
+     *      data: {
+     *          "$topic_name": {
+     *              "$id": {}
+     *           }
+     *      },
+     *
+     *      gobjs: {
+     *          "$gobj_unique_name":  "$gobj"
+     *      }
+     *  }
+     *
+     ************************************************************/
+    function update_options(self, updated_topic_name)
     {
-        if(!self.config.gobj_remote_yuno) {
-            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+        var data = treedb_get_topic_data(self.config.treedb_name, updated_topic_name)
+        if(json_object_size(data)==0) {
             return;
         }
 
-        var command = "descs";
-
-        var kw = {
-            service: self.config.treedb_name
+        /*
+         *  Collect tables to update
+         */
+        var reg = treedb_get_register(self.config.treedb_name);
+        var tables2update = {};
+        for(var topic_name in self.config.descs) {
+            var desc = self.config.descs[topic_name];
+            var cols = desc.cols;
+            for(var i=0; i<cols.length; i++) {
+                var col = cols[i];
+                if(kw_has_key(col, "fkey")) {
+                    for(var k in col.fkey) {
+                        if(k == updated_topic_name) {
+                            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
+                            t[col.id] = true;
+                            //trace_msg("update " + topic_name + ", fkey " + col.id);
+                        }
+                    }
+                }
+            }
         }
 
-        msg_write_MIA_key(kw, "__command__", command);
-
-        self.config.info_wait();
-
-        var ret = self.config.gobj_remote_yuno.gobj_command(
-            command,
-            kw,
-            self
-        );
-        if(ret) {
-            log_error(ret);
+        for(var topic_name in tables2update) {
+            var cols = tables2update[topic_name];
+            for(var gobj_name in reg.gobjs) {
+                var gobj = reg.gobjs[gobj_name];
+                if(topic_name != gobj.gobj_read_attr("topic_name")) {
+                    continue;
+                }
+                gobj.gobj_send_event(
+                    "EV_UPDATE_OPTIONS",
+                    {
+                        // No hace falta, se reconstruye entero
+                        //cols: cols,
+                        //data: data
+                    },
+                    self
+                );
+            }
         }
     }
 
@@ -292,9 +327,31 @@
     /********************************************
      *
      ********************************************/
-    function refresh_treedb(self)
+    function treedb_descs(self)
     {
-        treedb_descs(self, self.config.treedb_name)
+        if(!self.config.gobj_remote_yuno) {
+            log_error(self.gobj_short_name() + ": No gobj_remote_yuno defined");
+            return;
+        }
+
+        var command = "descs";
+
+        var kw = {
+            service: self.config.treedb_name
+        }
+
+        msg_write_MIA_key(kw, "__command__", command);
+
+        self.config.info_wait();
+
+        var ret = self.config.gobj_remote_yuno.gobj_command(
+            command,
+            kw,
+            self
+        );
+        if(ret) {
+            log_error(ret);
+        }
     }
 
     /************************************************************
@@ -395,69 +452,12 @@
         }
     }
 
-    /************************************************************
-     *  Update treedb tables options that have topic_name ref
+    /********************************************
      *
-     *  reg {
-     *      data: {
-     *          "$topic_name": {
-     *              "$id": {}
-     *           }
-     *      },
-     *
-     *      gobjs: {
-     *          "$gobj_unique_name":  "$gobj"
-     *      }
-     *  }
-     *
-     ************************************************************/
-    function update_options(self, updated_topic_name)
+     ********************************************/
+    function refresh_treedb(self)
     {
-        var data = treedb_get_topic_data(self.config.treedb_name, updated_topic_name)
-        if(json_object_size(data)==0) {
-            return;
-        }
-
-        /*
-         *  Collect tables to update
-         */
-        var reg = treedb_get_register(self.config.treedb_name);
-        var tables2update = {};
-        for(var topic_name in self.config.descs) {
-            var desc = self.config.descs[topic_name];
-            var cols = desc.cols;
-            for(var i=0; i<cols.length; i++) {
-                var col = cols[i];
-                if(kw_has_key(col, "fkey")) {
-                    for(var k in col.fkey) {
-                        if(k == updated_topic_name) {
-                            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
-                            t[col.id] = true;
-                            //trace_msg("update " + topic_name + ", fkey " + col.id);
-                        }
-                    }
-                }
-            }
-        }
-
-        for(var topic_name in tables2update) {
-            var cols = tables2update[topic_name];
-            for(var gobj_name in reg.gobjs) {
-                var gobj = reg.gobjs[gobj_name];
-                if(topic_name != gobj.gobj_read_attr("topic_name")) {
-                    continue;
-                }
-                gobj.gobj_send_event(
-                    "EV_UPDATE_OPTIONS",
-                    {
-                        // No hace falta, se reconstruye entero
-                        //cols: cols,
-                        //data: data
-                    },
-                    self
-                );
-            }
-        }
+        refresh_data(self);
     }
 
 
@@ -936,7 +936,7 @@
     {
         var self = this;
 
-        refresh_treedb(self);
+        treedb_descs(self)
     }
 
     /************************************************
