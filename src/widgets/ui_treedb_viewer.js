@@ -1122,11 +1122,12 @@
      ********************************************/
     function ac_run_node(self, event, kw, src)
     {
-        var url = self.config.url;
+        var cell = kw.cell;
+        var url = self.config.url; // Estos son datos of this connection
         var dst_role = self.config.dst_role;
         var dst_service = self.config.dst_service;
         var dst_yuno = self.config.dst_yuno;
-        var viewer_engine = "Ui_treedb_graph_new";
+        var viewer_engine = "Ui_treedb_graph";
 
         var gclass = gobj_find_gclass(viewer_engine);
         if(!gclass) {
@@ -1147,10 +1148,13 @@
 
                     hook_data_viewer: Ui_hook_viewer_popup,
                     gobj_remote_yuno: self.config.iev,
-                    dst_role: dst_role,
-                    dst_service: dst_service,
-                    dst_yuno: dst_yuno,
-                    url: url
+                    treedb_name: cell.id,
+
+                    // Esto es si fuera para un viewer con conexión autonoma (iev)
+                    //dst_role: dst_role,
+                    //dst_service: dst_service,
+                    //dst_yuno: dst_yuno,
+                    //url: url
                 },
                 __yuno__.__pinhold__
             );
@@ -1273,7 +1277,7 @@
                 ["EV_ON_CLOSE",                 ac_on_close,                undefined],
 
                 ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,       undefined],
-                ["EV_RUN_NODE",                 ac_run_node,                    undefined],
+                ["EV_RUN_NODE",                 ac_run_node,                undefined],
 
                 ["EV_CLOSE_WINDOW",             ac_close_window,            undefined],
                 ["EV_TOGGLE",                   ac_toggle,                  undefined],

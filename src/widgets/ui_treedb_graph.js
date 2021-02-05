@@ -1,11 +1,16 @@
 /***********************************************************************
- *          ui_treedb_graph.js
+ *          ui_treedb_graph_new.js
  *
- *          Treedb graph
- *          Gestión de los `topics` del `treedb_name` configurado
- *          mediante grafos con mxgraph.
+ *          NOTE Wrapper on (Mix "Container Panel" & "Pinhold Window")
  *
- *          Copyright (c) 2020 Niyamaka.
+ *          Manage treedb topics with mxgraph
+ *
+ *          HACK the parent MUST be a pinhold handler if the role is "Pinhold Window"
+ *               or MUST be a container if the role is "Container Panel"
+ *
+ *          HACK But you can redirect the output events to "subscriber" gobj
+ *
+ *          Copyright (c) 2021 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
@@ -15,8 +20,23 @@
      *      Configuration (C attributes)
      ********************************************/
     var CONFIG = {
+        //////////////// WRAPPER Common Attributes //////////////////
+        is_pinhold_window:false,// CONF: Select default: window or container panel
+        panel_properties: {},   // CONF: creator can set "Container Panel" properties
+        window_properties: {},  // CONF: creator can set "Pinhold Window" properties
+        ui_properties: null,    // CONF: creator can set webix properties
+        window_image: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        window_title: "",       // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        left: 0,                // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        top: 0,                 // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        width: 600,             // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+        height: 500,            // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
+
+        $ui: null,              // HACK $ui from wrapped window/panel
         subscriber: null,       // Subscriber of published events, by default the parent.
-        with_treedb_tables: false,
+
+        //////////////// Particular Attributes //////////////////
+        with_treedb_tables: true,
 
         /*
          *  Funciones que debe suministrar el padre
@@ -35,17 +55,18 @@
          */
         gobj_remote_yuno: null,
         treedb_name: null,
-        topics: null,
-        descs: null,
+        topics: [],
+        descs: [],
 
-        gobj_container: null,
+        gobj_window: null,
         gobj_nodes_tree: null,
         gobj_treedb_tables: null,
 
-
-        $ui: null,              // $ui from container
-
+        //////////////////////////////////
         __writable_attrs__: [
+            ////// Common /////
+
+            ////// Particular /////
         ]
     };
 
@@ -58,6 +79,40 @@
 
 
 
+
+    /********************************************
+     *
+     ********************************************/
+    function build_toolbar(self, mode)
+    {
+        var elements = [
+            {
+                view: "button",
+                type: "icon",
+                icon: "fas fa-sync",
+                autowidth: true,
+                css: "webix_transparent icon_toolbar_16",
+                tooltip: t("refresh"),
+                label: t("refresh"),
+                click: function() {
+                    refresh_treedb(self);
+                }
+            }
+        ];
+
+        var toolbar = {
+            view: "toolbar"
+            //css: "toolbar2color"
+        };
+        if(mode == "vertical") {
+            toolbar["width"] = 40;
+            toolbar["rows"] = elements;
+        } else {
+            toolbar["height"] = 40;
+            toolbar["cols"] = elements;
+        }
+        return toolbar;
+    }
 
     /********************************************
      *
@@ -794,20 +849,80 @@
     }
 
     /********************************************
+     *  Can be from pinhold or others
+     *  - Pinhold to inform of window close
+     *      kw:
+     *      {destroying: true}   Window destroying
+     *      {destroying: false}  Window minifying
+     *
+     *  - Others:
+     *      Destroy self
      *
      ********************************************/
-    function ac_select(self, event, kw, src)
+    function ac_close_window(self, event, kw, src)
     {
-
+        if(src.gclass_name != "Ui_pinhold") {
+            __yuno__.gobj_destroy(self);
+        }
         return 0;
     }
 
     /********************************************
      *
      ********************************************/
+    function ac_toggle(self, event, kw, src)
+    {
+        if(self.config.$ui.isVisible()) {
+            self.config.$ui.hide();
+        } else {
+            self.config.$ui.show();
+        }
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_show(self, event, kw, src)
+    {
+        self.config.$ui.show();
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_hide(self, event, kw, src)
+    {
+        self.config.$ui.hide();
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_select(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /*************************************************************
+     *  Refresh, order from container
+     *  provocado por entry/exit de fullscreen
+     *  o por redimensionamiento del panel, propio o de hermanos
+     *************************************************************/
     function ac_refresh(self, event, kw, src)
     {
+        return 0;
+    }
 
+    /********************************************
+     *  "Container Panel"
+     *  Order from container (parent): re-create
+     ********************************************/
+    function ac_rebuild_panel(self, event, kw, src)
+    {
+        rebuild(self);
         return 0;
     }
 
@@ -838,8 +953,13 @@
             "EV_LINK_RECORDS",
             "EV_UNLINK_RECORDS",
             "EV_RUN_NODE",
+            "EV_CLOSE_WINDOW",
+            "EV_TOGGLE",
+            "EV_SHOW",
+            "EV_HIDE",
             "EV_SELECT",
-            "EV_REFRESH"
+            "EV_REFRESH",
+            "EV_REBUILD_PANEL"
         ],
         "state_list": [
             "ST_IDLE"
@@ -847,24 +967,28 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_MT_COMMAND_ANSWER",        ac_mt_command_answer,           undefined],
-                ["EV_TREEDB_NODE_CREATED",      ac_treedb_node_created,         undefined],
-                ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,         undefined],
-                ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,         undefined],
-                ["EV_REFRESH_TREEDB",           ac_refresh_treedb,              undefined],
-                ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,              undefined],
-                ["EV_SHOW_TREEDB_TOPIC",        ac_show_treedb_topic,           undefined],
-                ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,           undefined],
-                ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,             undefined],
-                ["EV_CREATE_RECORD",            ac_create_record,               undefined],
-                ["EV_DELETE_RECORD",            ac_delete_record,               undefined],
-                ["EV_UPDATE_RECORD",            ac_update_record,               undefined],
-                ["EV_LINK_RECORDS",             ac_link_records,                undefined],
-                ["EV_UNLINK_RECORDS",           ac_unlink_records,              undefined],
-                ["EV_RUN_NODE",                 ac_run_node,                    undefined],
-
-                ["EV_SELECT",                   ac_select,                      undefined],
-                ["EV_REFRESH",                  ac_refresh,                     undefined]
+                ["EV_MT_COMMAND_ANSWER",        ac_mt_command_answer,       undefined],
+                ["EV_TREEDB_NODE_CREATED",      ac_treedb_node_created,     undefined],
+                ["EV_TREEDB_NODE_UPDATED",      ac_treedb_node_updated,     undefined],
+                ["EV_TREEDB_NODE_DELETED",      ac_treedb_node_deleted,     undefined],
+                ["EV_REFRESH_TREEDB",           ac_refresh_treedb,          undefined],
+                ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,          undefined],
+                ["EV_SHOW_TREEDB_TOPIC",        ac_show_treedb_topic,       undefined],
+                ["EV_MX_VERTEX_CLICKED",        ac_mx_vertex_clicked,       undefined],
+                ["EV_MX_EDGE_CLICKED",          ac_mx_edge_clicked,         undefined],
+                ["EV_CREATE_RECORD",            ac_create_record,           undefined],
+                ["EV_DELETE_RECORD",            ac_delete_record,           undefined],
+                ["EV_UPDATE_RECORD",            ac_update_record,           undefined],
+                ["EV_LINK_RECORDS",             ac_link_records,            undefined],
+                ["EV_UNLINK_RECORDS",           ac_unlink_records,          undefined],
+                ["EV_RUN_NODE",                 ac_run_node,                undefined],
+                ["EV_CLOSE_WINDOW",             ac_close_window,            undefined],
+                ["EV_TOGGLE",                   ac_toggle,                  undefined],
+                ["EV_SHOW",                     ac_show,                    undefined],
+                ["EV_HIDE",                     ac_hide,                    undefined],
+                ["EV_SELECT",                   ac_select,                  undefined],
+                ["EV_REFRESH",                  ac_refresh,                 undefined],
+                ["EV_REBUILD_PANEL",            ac_rebuild_panel,           undefined]
             ]
         }
     };
@@ -907,50 +1031,60 @@
             subscriber = self.gobj_parent();
         self.gobj_subscribe_event(null, null, subscriber);
 
-        /*
-         *  Create container
-         */
-        self.config.gobj_container = self.yuno.gobj_create_unique(
-            build_name(self, "ct"),
-            Ui_container,
-            {
-                mode: "horizontal"
-            },
-            self
-        );
-        self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
+        if(!self.config.treedb_name) {
+            log_error(self.name + " -> treedb_name not configured");
+        }
+        var is_pinhold_window = self.config.is_pinhold_window;
+
+        if(!is_pinhold_window) {
+            /*
+             *  Create container
+             */
+            self.config.gobj_container = self.yuno.gobj_create_unique(
+                build_name(self, "ct"),
+                Ui_container,
+                {
+                    mode: "horizontal"
+                },
+                self
+            );
+        }
 
         /*
-         *  Nodes tree panel
+         *  Nodes tree
          */
         self.config.gobj_nodes_tree = self.yuno.gobj_create_unique(
             build_name(self, "nodes-tree"),
             Mx_nodes_tree,
             {
+                is_pinhold_window: is_pinhold_window,
+                panel_properties: self.config.panel_properties,
+                window_properties: self.config.window_properties,
+                ui_properties: self.config.ui_properties,
+                window_image: self.config.window_image,
+                window_title: self.config.window_title,
+                left: self.config.left,
+                top: self.config.top,
+                width: self.config.width,
+                height: self.config.height,
+
                 info_wait: self.config.info_wait,
                 info_no_wait: self.config.info_no_wait,
-                with_treedb_tables: self.config.with_treedb_tables,
-                is_pinhold_window: false,
-                ui_properties: {
-                    gravity: 1,
-                    minWidth: 300,
-                    minHeight: 300
-                },
-                panel_properties: {
-                    with_panel_top_toolbar: true,
-                    with_panel_title: "Treedb " + self.config.treedb_name,
-                    with_panel_hidden_btn: false,
-                    with_panel_fullscreen_btn: true,
-                    with_panel_resize_btn: false
-                },
+
                 subscriber: self,
                 treedb_name: self.config.treedb_name,
                 topics: self.config.topics,
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
-            self.config.gobj_container
+            is_pinhold_window? self:self.config.gobj_container
         );
+
+        if(!is_pinhold_window) {
+            self.config.$ui = self.config.gobj_container.gobj_read_attr("$ui");
+        } else {
+            self.config.$ui = self.config.gobj_nodes_tree.gobj_read_attr("$ui");
+        }
 
         /*
          *  Treedb tables
@@ -1006,8 +1140,8 @@
     proto.mt_stop = function(kw)
     {
         var self = this;
-    }
 
+    }
 
     //=======================================================================
     //      Expose the class via the global object
