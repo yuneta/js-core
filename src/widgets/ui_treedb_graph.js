@@ -38,6 +38,7 @@
         //////////////// Particular Attributes //////////////////
         with_treedb_tables: false,
         auto_topics: false,
+        topics_style: [],
 
         /*
          *  Funciones que debe suministrar el padre
@@ -670,7 +671,7 @@
                 name,
                 self.config.hook_data_viewer,
                 kw,
-                __yuno__.__pinhold__
+                self
             );
             gobj.gobj_start();
         } else {
@@ -868,7 +869,7 @@
                     dst_yuno: dst_yuno,
                     url: url
                 },
-                __yuno__.__pinhold__
+                self
             );
             gobj.gobj_start();
         } else {
@@ -1104,6 +1105,7 @@
                 subscriber: self,
                 treedb_name: self.config.treedb_name,
                 topics: self.config.topics,
+                topics_style: self.config.topics_style,
                 auto_topics: self.config.auto_topics,
                 hook_port_position: "bottom",
                 fkey_port_position: "top"

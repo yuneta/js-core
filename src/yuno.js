@@ -221,12 +221,13 @@
             }
         }
 
-        if (this.config.trace_creation) {
-            log_debug("==========> CREATING " + name);
-        }
-
         var gobj = new gclass(name, kw);
         gobj.yuno = this;
+
+        if (this.config.trace_creation) {
+            var gclass_name = gobj.gclass_name || '';
+            log_debug("<========== CREATED  " + gclass_name + "^" + name);
+        }
 
         if(!gobj.gobj_load_persistent_attrs) {
             var msg = "Check GClass of '" + name + "': don't look a GClass";
@@ -269,10 +270,6 @@
         }
         if (parent && parent.mt_child_added) {
             parent.mt_child_added(gobj);
-        }
-        if (this.config.trace_creation) {
-            var gclass_name = gobj.gclass_name || '';
-            log_debug("<========== CREATED  " + gclass_name + "^" + name);
         }
         return gobj;
     };
@@ -324,7 +321,7 @@
             return;
         }
         if (this.config.trace_creation) {
-            log_debug("<========== DESTROYING " + gobj.gclass_name + "^" + gobj.name);
+            log_debug("<========== DESTROYD " + gobj.gclass_name + "^" + gobj.name);
         }
         if (gobj._destroyed) {
             // Already deleted

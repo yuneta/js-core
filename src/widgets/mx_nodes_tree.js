@@ -57,6 +57,7 @@
         descs: null,        // all treedb topic's desc
         treedb_name: null,  // treedb editing
         topics: [],  // topics editing
+        topics_style: [],
         auto_topics: false,
 
         uuid: null, // to publish and avod feedback loops
@@ -504,7 +505,7 @@
                                     width: 900,
                                     height: 600
                                 },
-                                __yuno__.__pinhold__
+                                self
                             );
                             gobj_je.gobj_start();
                         }
@@ -1057,8 +1058,8 @@
         /*
          *  Create own styles
          */
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             var topic_name = topic.topic_name;
             var graph_styles = topic.graph_styles;
 
@@ -1473,8 +1474,8 @@
      ********************************************/
     function get_torun_node(self, topic_name)
     {
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             if(topic_name == topic.topic_name) {
                 return topic.run_event;
             }
@@ -1486,8 +1487,8 @@
      ********************************************/
     function get_default_cx(self, topic_name)
     {
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             if(topic_name == topic.topic_name) {
                 return topic.default_cx;
             }
@@ -1499,8 +1500,8 @@
      ********************************************/
     function get_default_cy(self, topic_name)
     {
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             if(topic_name == topic.topic_name) {
                 return topic.default_cy;
             }
@@ -1512,8 +1513,8 @@
      ********************************************/
     function get_default_alt_cx(self, topic_name)
     {
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             if(topic_name == topic.topic_name) {
                 return topic.default_alt_cx;
             }
@@ -1525,8 +1526,8 @@
      ********************************************/
     function get_default_alt_cy(self, topic_name)
     {
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
             if(topic_name == topic.topic_name) {
                 return topic.default_alt_cy;
             }
@@ -2094,9 +2095,9 @@
     {
         var levels = [];
 
-        for(var i=0; i<self.config.topics.length; i++) {
+        for(var i=0; i<self.config.topics_style.length; i++) {
             levels.push({
-                topic_name: self.config.topics[i].topic_name,
+                topic_name: self.config.topics_style[i].topic_name,
                 x: 0,
                 y: 0,
                 width: 0,
@@ -2722,14 +2723,14 @@
                 name,
                 Ui_treedb_formtable,
                 kw_formtable,
-                __yuno__.__pinhold__
+                self
             );
         } else {
             gobj_cell_formtable = __yuno__.gobj_create(
                 name,
                 Ui_treedb_formtable,
                 kw_formtable,
-                __yuno__.__pinhold__
+                self
             );
         }
         cell.value.gobj_cell_formtable = gobj_cell_formtable;
@@ -2763,7 +2764,7 @@
                     width: 900,
                     height: 600
                 },
-                __yuno__.__pinhold__
+                self
             );
             gobj_je.gobj_start();
         }

@@ -433,7 +433,7 @@
                                         width: 900,
                                         height: 600
                                     },
-                                    __yuno__.__pinhold__
+                                    self
                                 );
                                 gobj_je.gobj_start();
                             }
@@ -477,7 +477,7 @@
                                         width: 900,
                                         height: 600
                                     },
-                                    __yuno__.__pinhold__
+                                    self
                                 );
                                 gobj_je.gobj_start();
                             }

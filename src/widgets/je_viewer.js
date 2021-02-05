@@ -123,7 +123,7 @@
                             {
                                 window_title: name
                             },
-                            __yuno__.__pinhold__
+                            self
                         );
                         gobj_mx_json_viewer.gobj_send_event(
                             "EV_LOAD_DATA",

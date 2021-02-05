@@ -1158,7 +1158,7 @@
                     //dst_yuno: dst_yuno,
                     //url: url
                 },
-                __yuno__.__pinhold__
+                self
             );
             gobj.gobj_start();
         } else {

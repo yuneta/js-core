@@ -317,7 +317,7 @@
                     width: 950,
                     height: 600
                 },
-                __yuno__.__pinhold__
+                self
             );
 
             topic["gobj_formtable"].gobj_start();
@@ -778,7 +778,7 @@
                 name,
                 self.config.hook_data_viewer,
                 kw,
-                __yuno__.__pinhold__
+                self
             );
             gobj.gobj_start();
         } else {

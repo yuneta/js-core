@@ -858,7 +858,7 @@
             cols: [
                 {
                     view: "button",
-                    hidden: gobj_window.config.window_properties.with_window_pin_btn?false:true,
+                    hidden: true, //gobj_window.config.window_properties.with_window_pin_btn?false:true,
                     type: "image",
                     width: 40,
                     image: gobj_window.config.pinpushed?
