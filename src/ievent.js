@@ -283,35 +283,6 @@ DEBUG: {
     }
 
     /********************************************
-     *      Send goodbye
-     ********************************************/
-    function send_goodbye(self, cause)
-    {
-        if(self.gobj_current_state() != "ST_SESSION") {
-            return;
-        }
-
-        var kw = {
-            "cause": cause
-        };
-        /*
-         *      __REQUEST__ __MESSAGE__
-         */
-        var jn_ievent_id = build_ievent_request(
-            self,
-            self.parent.name,
-            null
-        );
-        msg_iev_push_stack(
-            kw,
-            IEVENT_MESSAGE_AREA_ID,
-            jn_ievent_id   // owned
-        );
-
-        return send_static_iev(self, "EV_GOODBYE", kw);
-    }
-
-    /********************************************
      *  Create iev from data received
      *  on websocket connection
      ********************************************/
@@ -353,6 +324,30 @@ DEBUG: {
             kw
         );
         return iev;
+    }
+
+    /********************************************
+     *  Close websocket
+     ********************************************/
+    function close_websocket(self)
+    {
+        self.clear_timeout();
+        if(self.websocket) {
+            try {
+                if(self.websocket) {
+                    if(self.websocket.close) {
+                        self.websocket.close();
+                    } else if(self.websocket.websocket.close) {
+                        self.websocket.websocket.close();
+                    } else {
+                        trace_msg("What fuck*! websocket.close?");
+                    }
+                }
+            } catch (e) {
+                log_error(self.gobj_short_name() + ": close_websocket(): " + e);
+            }
+            // self.websocket = null; // HACK wait to on_close
+        }
     }
 
 
@@ -426,20 +421,7 @@ DEBUG: {
      ********************************************/
     function ac_timeout_disconnected(self, event, kw, src)
     {
-        if(self.websocket) {
-            try {
-                if(self.websocket.close) {
-                    self.websocket.close();
-                } else if(self.websocket.websocket.close) {
-                    self.websocket.websocket.close();
-                } else {
-                    trace_msg("What fuck*! websocket.close?");
-                }
-            } catch (e) {
-                log_error(self.gobj_short_name() + ": ac_timeout_disconnected(): " + e);
-            }
-            self.websocket = null;
-        }
+        close_websocket(self);
         if(self.gobj_is_running()) {
             self.websocket = setup_websocket(self);
         }
@@ -474,20 +456,7 @@ DEBUG: {
 
         var result = kw_get_int(kw, "result", -1);
         if(result < 0) {
-            if(self.websocket) {
-                try {
-                    if(self.websocket.close) {
-                        self.websocket.close();
-                    } else if(self.websocket.websocket.close) {
-                        self.websocket.websocket.close();
-                    } else {
-                        trace_msg("What fuck*! websocket.close?");
-                    }
-                } catch (e) {
-                    log_error(self.gobj_short_name() + ": ac_identity_card_ack(): " + e);
-                }
-                self.websocket = null;
-            }
+            close_websocket(self);
             self.gobj_publish_event(
                 'EV_IDENTITY_CARD_REFUSED',
                 {
@@ -760,25 +729,7 @@ DEBUG: {
     proto.mt_stop = function(kw)
     {
         var self = this;
-        self.clear_timeout();
-        if(self.websocket) {
-            try {
-                //send_goodbye(self, 'stopped by user');
-                // HACK send_goodbye puede haber cerrado websocket
-                if(self.websocket) {
-                    if(self.websocket.close) {
-                        self.websocket.close();
-                    } else if(self.websocket.websocket.close) {
-                        self.websocket.websocket.close();
-                    } else {
-                        trace_msg("What fuck*! websocket.close?");
-                    }
-                }
-            } catch (e) {
-                log_error(self.gobj_short_name() + ": mt_stop(): " + e);
-            }
-            self.websocket = null;
-        }
+        close_websocket(self);
     }
 
     /************************************************
