@@ -881,7 +881,7 @@
 
     /********************************************
      *  Can be from pinhold or others
-     *  - Pinhold to inform of window close
+     *  - Top toolbar informing of window close
      *      kw:
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying
@@ -892,9 +892,6 @@
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
-        if(src.gclass_name != "Ui_pinhold") {
-            __yuno__.gobj_destroy(self);
-        }
         return 0;
     }
 

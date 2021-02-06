@@ -113,6 +113,16 @@
     }
 
     /************************************************************
+     *  Extend array
+     ************************************************************/
+    function __extend_list__(destination, source) {
+        "use strict";
+        Array.prototype.push.apply(destination, source)
+        return destination;
+    }
+
+
+    /************************************************************
      *  Update a dict with another dict: ONLY missing items!! (NOT recursive)
      *  Like json_object_update_missing()
      ************************************************************/
@@ -1857,6 +1867,7 @@
     exports.json_object_update_existing = __update_dict__;
     exports.__extend_dict__ = __extend_dict__;
     exports.json_object_update = __extend_dict__;
+    exports.__extend_list__ = __extend_list__;
     exports.json_object_update_missing = json_object_update_missing;
     exports.array_real_length = array_real_length;
     exports.index_of_list = index_of_list;

@@ -101,7 +101,6 @@
             "top",
             "width",
             "height",
-            "pinpushed",
 
             ////// Particular /////
             "layout_selected"
@@ -334,7 +333,7 @@
                 move: true,
                 resize: true,
                 position: (self.config.left==0 && self.config.top==0)?"center":null,
-                head: get_pinhold_window_top_toolbar(self),
+                head: get_window_top_toolbar(self),
                 body: {
                     id: build_name(self, "fullscreen"),
                     ////////////////// REPEATED webix code /////////////////
@@ -1169,7 +1168,7 @@
     }
 
     /********************************************
-     *  Pinhold to inform of window close
+     *  Top toolbar informing of window close
      *  Publish
      *  kw
      *      {destroying: true}   Window destroying
