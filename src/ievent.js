@@ -188,7 +188,8 @@ DEBUG: {
         try {
             self.websocket.send(msg);
         } catch (e) {
-            log_error(self.gobj_short_name() + ": " + e);
+            log_error(self.gobj_short_name() + ": send_iev(): " + e);
+            log_error(msg);
         }
         return 0;
     }
@@ -286,6 +287,10 @@ DEBUG: {
      ********************************************/
     function send_goodbye(self, cause)
     {
+        if(self.gobj_current_state() != "ST_SESSION") {
+            return;
+        }
+
         var kw = {
             "cause": cause
         };
@@ -387,7 +392,7 @@ DEBUG: {
                     self.websocket.websocket.close();
                 }
             } catch (e) {
-                log_error(e);
+                log_error(self.gobj_short_name() + ": ac_on_close(): " + e);
             }
             self.websocket = null;
         }
@@ -431,7 +436,7 @@ DEBUG: {
                     trace_msg("What fuck*! websocket.close?");
                 }
             } catch (e) {
-                log_error(e);
+                log_error(self.gobj_short_name() + ": ac_timeout_disconnected(): " + e);
             }
             self.websocket = null;
         }
@@ -479,7 +484,7 @@ DEBUG: {
                         trace_msg("What fuck*! websocket.close?");
                     }
                 } catch (e) {
-                    log_error(e);
+                    log_error(self.gobj_short_name() + ": ac_identity_card_ack(): " + e);
                 }
                 self.websocket = null;
             }
@@ -572,7 +577,7 @@ DEBUG: {
          *  If state is not SESSION send self.
          *  Mainly process EV_IDENTITY_CARD_ACK
          *-----------------------------------------*/
-        if(!self.gobj_in_this_state('ST_SESSION')) {
+        if(!self.gobj_in_this_state("ST_SESSION")) {
             if(self.gobj_event_in_input_event_list(iev_event)) {
                 self.gobj_send_event(iev_event, iev_kw, self);
             } else {
@@ -770,7 +775,7 @@ DEBUG: {
                     }
                 }
             } catch (e) {
-                log_error(e);
+                log_error(self.gobj_short_name() + ": mt_stop(): " + e);
             }
             self.websocket = null;
         }
@@ -782,7 +787,7 @@ DEBUG: {
     proto.mt_stats = function(stats, kw, src)
     {
         var self = this;
-        if(self.gobj_current_state() != 'ST_SESSION') {
+        if(self.gobj_current_state() != "ST_SESSION") {
             return self.gobj_build_webix_answer(
                 self,
                 -1,
@@ -822,7 +827,7 @@ DEBUG: {
     proto.mt_command = function(command, kw, src)
     {
         var self = this;
-        if(self.gobj_current_state() != 'ST_SESSION') {
+        if(self.gobj_current_state() != "ST_SESSION") {
             return self.gobj_build_webix_answer(
                 self,
                 -1,
@@ -862,7 +867,7 @@ DEBUG: {
     proto.mt_inject_event = function(event, kw, src)
     {
         var self = this;
-        if(self.gobj_current_state() != 'ST_SESSION') {
+        if(self.gobj_current_state() != "ST_SESSION") {
             log_error("Not in session, ignore event: " + event);
             return -1;
         }
