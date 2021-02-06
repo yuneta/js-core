@@ -278,6 +278,10 @@
             if(!label) {
                 label = topic.topic_name;
             }
+            if(topic["gobj_formtable"]) {
+                log_error("gobj_formtable ALREADY created: "+ topic_name);
+                continue;
+            }
 
             topic["gobj_formtable"] = __yuno__.gobj_create_unique(
                 build_name(self, topic_name + " formtable"),
@@ -305,10 +309,9 @@
                     delete_mode_enabled: true,
 
                     window_properties: {
-                        with_window_pin_btn: true,
                         without_window_fullscreen_btn: false,
                         without_window_close_btn: false,
-                        without_destroy_window_on_close: true,
+                        without_destroy_window_on_close: self.config.auto_topics?false:true,
                         with_create_window_on_start: false
                     },
                     is_pinhold_window: true,
@@ -319,8 +322,9 @@
                 },
                 self
             );
-
-            topic["gobj_formtable"].gobj_start();
+            if(topic["gobj_formtable"]) {
+                topic["gobj_formtable"].gobj_start();
+            }
         }
     }
 
@@ -362,7 +366,8 @@
         /*
          *  Auto topics
          */
-        if(json_size(self.config.topics)==0 && self.config.auto_topics) {
+        if(self.config.auto_topics) {
+            self.config.topics = [];
             for(var topic_name in self.config.descs) {
                 if(topic_name.substring(0, 2) == "__") {
                     continue;

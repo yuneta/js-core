@@ -451,12 +451,14 @@
         /*
          *  Auto topics
          */
-        if(json_size(self.config.topics)==0 && self.config.auto_topics) {
-            for(var topic_name in self.config.descs) {
-                if(topic_name.substring(0, 2) == "__") {
-                    continue;
+        if(self.config.auto_topics) {
+            if(json_size(self.config.topics)==0) {
+                for(var topic_name in self.config.descs) {
+                    if(topic_name.substring(0, 2) == "__") {
+                        continue;
+                    }
+                    self.config.topics.push({topic_name: topic_name});
                 }
-                self.config.topics.push({topic_name: topic_name});
             }
         }
 
@@ -518,6 +520,34 @@
                 },
                 self
             );
+        }
+
+        /*
+         *  Treedb tables on auto_topics
+         */
+        if(self.config.auto_topics) {
+            if(self.config.with_treedb_tables) {
+                if(self.config.gobj_treedb_tables) {
+                    log_error("gobj_treedb_tables ALREADY created");
+                }
+                self.config.gobj_treedb_tables = self.yuno.gobj_create_unique(
+                    build_name(self, "Topics"),
+                    Ui_treedb_tables,
+                    {
+                        subscriber: self,
+                        with_treedb_tables: self.config.with_treedb_tables,
+                        auto_topics: self.config.auto_topics,
+                        hook_data_viewer: Ui_hook_viewer_popup,
+                        gobj_remote_yuno: self.config.gobj_remote_yuno,
+                        treedb_name: self.config.treedb_name,
+                        topics: self.config.topics,
+                        info_wait: self.config.info_wait,
+                        info_no_wait: self.config.info_no_wait
+                    },
+                    self
+                );
+                self.config.gobj_treedb_tables.gobj_start();
+            }
         }
 
         /*
@@ -792,7 +822,12 @@
             },
             self
         );
-        gobj_topic_formtable.gobj_send_event("EV_TOGGLE", {}, self);
+
+        if(gobj_topic_formtable) {
+            gobj_topic_formtable.gobj_send_event("EV_TOGGLE", {}, self);
+        } else {
+            log_error("Topic Formtable not found: " + topic_name);
+        }
 
         return 0;
     }
@@ -1200,7 +1235,7 @@
                 treedb_name: self.config.treedb_name,
                 topics: self.config.topics,
                 topics_style: self.config.topics_style,
-                auto_topics: self.config.auto_topics,
+                with_treedb_tables: self.config.with_treedb_tables,
                 hook_port_position: "bottom",
                 fkey_port_position: "top"
             },
@@ -1214,25 +1249,27 @@
         }
 
         /*
-         *  Treedb tables
+         *  Treedb tables at start
          */
         if(self.config.with_treedb_tables) {
-            self.config.gobj_treedb_tables = self.yuno.gobj_create_unique(
-                build_name(self, "Topics"),
-                Ui_treedb_tables,
-                {
-                    subscriber: self,
-                    with_treedb_tables: self.config.with_treedb_tables,
-                    hook_data_viewer: Ui_hook_viewer_popup,
-                    gobj_remote_yuno: self.config.gobj_remote_yuno,
-                    treedb_name: self.config.treedb_name,
-                    topics: self.config.topics,
-                    auto_topics: self.config.auto_topics,
-                    info_wait: self.config.info_wait,
-                    info_no_wait: self.config.info_no_wait
-                },
-                self
-            );
+            if(!self.config.auto_topics) {
+                self.config.gobj_treedb_tables = self.yuno.gobj_create_unique(
+                    build_name(self, "Topics"),
+                    Ui_treedb_tables,
+                    {
+                        subscriber: self,
+                        with_treedb_tables: self.config.with_treedb_tables,
+                        auto_topics: self.config.auto_topics,
+                        hook_data_viewer: Ui_hook_viewer_popup,
+                        gobj_remote_yuno: self.config.gobj_remote_yuno,
+                        treedb_name: self.config.treedb_name,
+                        topics: self.config.topics,
+                        info_wait: self.config.info_wait,
+                        info_no_wait: self.config.info_no_wait
+                    },
+                    self
+                );
+            }
         }
     }
 

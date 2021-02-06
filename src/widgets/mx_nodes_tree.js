@@ -58,7 +58,6 @@
         treedb_name: null,  // treedb editing
         topics: [],  // topics editing
         topics_style: [],
-        auto_topics: false,
 
         uuid: null, // to publish and avod feedback loops
         lock_publish_geometry: false,
@@ -2708,7 +2707,6 @@
             delete_mode_enabled: cell_name?true:false,
 
             window_properties: {
-                with_window_pin_btn: false,             // Hide pin button
                 without_window_fullscreen_btn: false,   // Hide fullscreen button
                 without_window_close_btn: false,        // Hide minimize/destroy button
                 without_destroy_window_on_close: false, // No destroy window on close (hide)
