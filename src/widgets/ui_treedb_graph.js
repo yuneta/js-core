@@ -32,7 +32,7 @@
         width: 600,             // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
         height: 500,            // CONF: Used by pinhold_window_top_toolbar "Pinhold Window"
 
-        $ui: null,              // HACK $ui from wrapped window/panel
+        $ui: null,              // HACK $ui from wrapped window or panel
         subscriber: null,       // Subscriber of published events, by default the parent.
 
         //////////////// Particular Attributes //////////////////
@@ -85,35 +85,119 @@
     /********************************************
      *
      ********************************************/
-    function build_toolbar(self, mode)
+    function build_default_graph_topics_style(topics)
     {
-        var elements = [
+        var default_styles = [
             {
-                view: "button",
-                type: "icon",
-                icon: "fas fa-sync",
-                autowidth: true,
-                css: "webix_transparent icon_toolbar_16",
-                tooltip: t("refresh"),
-                label: t("refresh"),
-                click: function() {
-                    refresh_treedb(self);
-                }
+                node:
+                "html=1;strokeColor=DarkOrange;fillColor=#fff2cc;whiteSpace=wrap;shadow=0;strokeWidth=2;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;strokeColor=DarkOrange;fillColor=#fff2cc;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;strokeColor=DarkOrange;fillColor=#fff2cc;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=25;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=DarkOrange;"
+            },
+            {
+                node:
+                "ellipse;html=1;fillColor=#f8cecc;strokeColor=#b85450;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;fillColor=#f8cecc;strokeColor=#b85450;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;fillColor=#f8cecc;strokeColor=#b85450;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#b85450;"
+            },
+            {
+                node:
+                "ellipse;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#6c8ebf;"
+            },
+            {
+                node:
+                "ellipse;html=1;strokeColor=#82b366;fillColor=#d5e8d4;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;strokeColor=#82b366;fillColor=#d5e8d4;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;strokeColor=#82b366;fillColor=#d5e8d4;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#82b366;"
+            },
+            {
+                node:
+                "ellipse;html=1;fillColor=#f5f5f5;strokeColor=#666666;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;fillColor=#f5f5f5;strokeColor=#666666;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;fillColor=#f5f5f5;strokeColor=#666666;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#666666;"
+            },
+            {
+                node:
+                "ellipse;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;fillColor=#e1d5e7;strokeColor=#9673a6;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#9673a6;"
+            },
+            {
+                node:
+                "ellipse;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;whiteSpace=wrap;shadow=0;spacingLeft=10;spacingTop=5;fontSize=12;verticalAlign=top;spacingTop=20;opacity=60;",
+
+                hook:
+                "html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                fkey:
+                "ellipse;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=0;strokeWidth=2;fontSize=12;horizontal=0;labelPosition=center;verticalLabelPosition=bottom;align=center;spacingLeft=80;spacingTop=-5;opacity=60;",
+
+                arrow:
+                "edgeStyle=topToBottomEdgeStyle;html=1;rounded=1;curved=1;strokeWidth=2;strokeColor=#d79b00;"
             }
         ];
 
-        var toolbar = {
-            view: "toolbar"
-            //css: "toolbar2color"
-        };
-        if(mode == "vertical") {
-            toolbar["width"] = 40;
-            toolbar["rows"] = elements;
-        } else {
-            toolbar["height"] = 40;
-            toolbar["cols"] = elements;
+        var topics_style = [];
+
+        for(var i=0; i<topics.length && i<default_styles.length; i++) {
+            var topic_style = {
+                topic_name: topics[i].topic_name,
+                run_event: false,
+                default_cx: 200,
+                default_cy: 180,
+                default_alt_cx: 110,
+                default_alt_cy: 80,
+                graph_styles: default_styles[i]
+            };
+
+            topics_style.push(topic_style);
         }
-        return toolbar;
+
+        return topics_style;
     }
 
     /********************************************
@@ -417,6 +501,20 @@
                         "treedb_name": self.config.treedb_name,
                         "topic_name": topic_name
                     }
+                },
+                self
+            );
+        }
+
+        /*
+         *  Create default styles if not defined
+         */
+        if(json_size(self.config.topics_style)==0) {
+            self.config.topics_style = build_default_graph_topics_style(self.config.topics);
+            self.config.gobj_nodes_tree.gobj_send_event(
+                "EV_CREATE_GRAPH_STYLES",
+                {
+                    topics_style: self.config.topics_style,
                 },
                 self
             );

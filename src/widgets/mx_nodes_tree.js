@@ -2117,6 +2117,10 @@
                     break;
                 }
             }
+            if(!level) {
+                log_error("No level for topic_name: " + topic_name);
+                continue;
+            }
 
             // Set the level cx/cy with the bigger cell
             level.width = Math.max(level.width, cell.geometry.width);
@@ -3176,6 +3180,33 @@
     }
 
     /********************************************
+     *  Create graph styles
+     ********************************************/
+    function ac_create_graph_styles(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+
+        self.config.topics_style = kw.topics_style;
+
+        for(var i=0; i<self.config.topics_style.length; i++) {
+            var topic = self.config.topics_style[i];
+            var topic_name = topic.topic_name;
+            var graph_styles = topic.graph_styles;
+
+            for(var style_name in graph_styles) {
+                var style = graph_styles[style_name];
+                create_graph_style(
+                    graph,
+                    topic_name + "_" + style_name,
+                    style
+                );
+            }
+        }
+
+        return 0;
+    }
+
+    /********************************************
      *
      ********************************************/
     function ac_toggle(self, event, kw, src)
@@ -3281,6 +3312,7 @@
             "EV_MX_RESIZECELLS",
             "EV_MX_CONNECTCELL",
 
+            "EV_CREATE_GRAPH_STYLES",
             "EV_CLOSE_WINDOW: output",
             "EV_TOGGLE",
             "EV_SHOW",
@@ -3324,6 +3356,7 @@
                 ["EV_MX_RESIZECELLS",           ac_mx_resizecells,          undefined],
                 ["EV_MX_CONNECTCELL",           ac_mx_connectcell,          undefined],
 
+                ["EV_CREATE_GRAPH_STYLES",      ac_create_graph_styles,     undefined],
                 ["EV_CLOSE_WINDOW",             ac_close_window,            undefined],
                 ["EV_TOGGLE",                   ac_toggle,                  undefined],
                 ["EV_SHOW",                     ac_show,                    undefined],
