@@ -2469,7 +2469,6 @@
 
     /********************************************
      *  Top toolbar informing of window close
-     *  Publish
      *  kw
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying
@@ -2478,8 +2477,8 @@
     {
         kw.treedb_name = self.config.treedb_name;
         kw.topic_name = self.config.topic_name;
-        self.gobj_publish_event(event, kw, self);
-        return 0;
+
+        return self.gobj_publish_event(event, kw, self);
     }
 
     /********************************************

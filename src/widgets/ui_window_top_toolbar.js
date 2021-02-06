@@ -113,7 +113,10 @@
                         if(self.gobj_event_in_input_event_list("EV_CLOSE_WINDOW")) {
                             self.gobj_send_event("EV_CLOSE_WINDOW", {destroying:true}, self);
                         }
-                        __yuno__.gobj_destroy(self);
+                        if(!self._destroyed) {
+                            // Could be already destroyed in EV_CLOSE_WINDOW action event
+                            __yuno__.gobj_destroy(self);
+                        }
                     }
                 }
             }

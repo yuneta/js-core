@@ -880,18 +880,17 @@
     }
 
     /********************************************
-     *  Can be from pinhold or others
+     *  From wrapped $ui, destroy self
      *  - Top toolbar informing of window close
-     *      kw:
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying
-     *
-     *  - Others:
-     *      Destroy self
      *
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
+        if(self.config.is_pinhold_window) {
+            __yuno__.gobj_destroy(self);
+        }
         return 0;
     }
 

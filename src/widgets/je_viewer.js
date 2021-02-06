@@ -371,15 +371,12 @@
 
     /********************************************
      *  Top toolbar informing of window close
-     *  Publish
      *  kw
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying
      ********************************************/
     function ac_close_window(self, event, kw, src)
     {
-        // TODO publish if you want
-        // self.gobj_publish_event(event, kw, self);
         return 0;
     }
 

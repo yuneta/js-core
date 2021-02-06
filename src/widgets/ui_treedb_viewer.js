@@ -1169,7 +1169,6 @@
 
     /********************************************
      *  Top toolbar informing of window close
-     *  Publish
      *  kw
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying

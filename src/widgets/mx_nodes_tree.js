@@ -3153,7 +3153,6 @@
      *  when window is destroying or minififying
      *
      *  Top toolbar informing of window close
-     *  Publish
      *  kw
      *      {destroying: true}   Window destroying
      *      {destroying: false}  Window minifying
@@ -3170,7 +3169,9 @@
                 cell.value.gobj_cell_formtable = 0;
             }
         }
-
+        if(src == self) {
+            self.gobj_publish_event(event, kw, self);
+        }
         return 0;
     }
 
@@ -3280,7 +3281,7 @@
             "EV_MX_RESIZECELLS",
             "EV_MX_CONNECTCELL",
 
-            "EV_CLOSE_WINDOW",
+            "EV_CLOSE_WINDOW: output",
             "EV_TOGGLE",
             "EV_SHOW",
             "EV_HIDE",
