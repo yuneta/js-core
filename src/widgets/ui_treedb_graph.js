@@ -214,6 +214,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             options: options || {}
         }
@@ -247,6 +248,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -281,6 +283,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -315,6 +318,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -355,6 +359,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             parent_ref: parent_ref,
             child_ref: child_ref,
             options: options || {}
@@ -394,6 +399,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             parent_ref: parent_ref,
             child_ref: child_ref,
             options: options || {}
@@ -426,7 +432,8 @@
         var command = "descs";
 
         var kw = {
-            service: treedb_name
+            service: treedb_name,
+            treedb_name: treedb_name
         }
 
         msg_write_MIA_key(kw, "__command__", command);

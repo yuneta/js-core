@@ -80,6 +80,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             options: options || {}
         }
@@ -113,6 +114,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -147,6 +149,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -181,6 +184,7 @@
 
         var kw = {
             service: treedb_name,
+            treedb_name: treedb_name,
             topic_name: topic_name,
             record: record,
             options: options || {}
@@ -341,7 +345,8 @@
         var command = "descs";
 
         var kw = {
-            service: self.config.treedb_name
+            service: self.config.treedb_name,
+            treedb_name: self.config.treedb_name
         }
 
         msg_write_MIA_key(kw, "__command__", command);
