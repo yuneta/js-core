@@ -940,14 +940,6 @@
                 case "integer":
                     webix_col["editor"] = "text";
                     break;
-                case "object":
-                case "dict":
-                    webix_col["editor"] = "text";
-                    break;
-                case "array":
-                case "list":
-                    webix_col["editor"] = "text";
-                    break;
                 case "real":
                     webix_col["editor"] = "text";
                     break;
@@ -959,6 +951,14 @@
                     } else {
                         webix_col["editor"] = "inline-checkbox";
                     }
+                    break;
+                case "object":
+                case "dict":
+                    webix_col["editor"] = "text";
+                    break;
+                case "array":
+                case "list":
+                    webix_col["editor"] = "text";
                     break;
                 case "blob":
                     webix_col["editor"] = "text";
@@ -1215,28 +1215,6 @@
                         webix_element["invalidMessage"] = t("invalid number");
                     }
                     break;
-                case "object":
-                case "dict":
-                    webix_element = {
-                        view: "text",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        type: "text"
-                    };
-                    break;
-                case "array":
-                case "list":
-                    webix_element = {
-                        view: "text",
-                        name: id,
-                        label: t(tranger_col.header),
-                        css: "input_font_fijo",
-                        readonly: is_writable?false:true,
-                        type: "text"
-                    };
-                    break;
                 case "real":
                     webix_element = {
                         view: "text",
@@ -1265,6 +1243,38 @@
                     if(is_required) {
                         webix_element["required"] = true;
                     }
+                    break;
+                case "object":
+                case "dict":
+                    webix_element = {
+                        view: "text",
+                        name: id,
+                        label: t(tranger_col.header),
+                        css: "input_font_fijo",
+                        readonly: is_writable?false:true,
+                        type: "text"
+                    };
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
+                    webix_element["validate"] = rule_json;
+                    webix_element["invalidMessage"] = t("invalid json");
+                    break;
+                case "array":
+                case "list":
+                    webix_element = {
+                        view: "text",
+                        name: id,
+                        label: t(tranger_col.header),
+                        css: "input_font_fijo",
+                        readonly: is_writable?false:true,
+                        type: "text"
+                    };
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
+                    webix_element["validate"] = rule_json;
+                    webix_element["invalidMessage"] = t("invalid json");
                     break;
                 case "blob":
                     // TODO botón en campo del form para abrir js_editor
@@ -1613,15 +1623,17 @@
                 break;
             case "integer":
                 break;
-            case "object":
-            case "dict":
-                break;
-            case "array":
-            case "list":
-                break;
             case "real":
                 break;
             case "boolean":
+                break;
+            case "object":
+            case "dict":
+                value = JSON.stringify(value);
+                break;
+            case "array":
+            case "list":
+                value = JSON.stringify(value);
                 break;
             case "blob":
                 value = JSON.stringify(value);
@@ -1732,17 +1744,27 @@
             case "integer":
                 value = parseInt(value);
                 break;
-            case "object":
-            case "dict":
-                break;
-            case "array":
-            case "list":
-                break;
             case "real":
                 value = parseFloat(value);
                 break;
             case "boolean":
                 value = parseBoolean(value);
+                break;
+            case "object":
+            case "dict":
+                if(!empty_string(value)) {
+                    value = JSON.parse(value);
+                } else {
+                    value = {};
+                }
+                break;
+            case "array":
+            case "list":
+                if(!empty_string(value)) {
+                    value = JSON.parse(value);
+                } else {
+                    value = [];
+                }
                 break;
             case "blob":
                 if(!empty_string(value)) {
