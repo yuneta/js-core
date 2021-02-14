@@ -47,8 +47,8 @@
         hook_data_viewer: null,
 
         /*
-         *  gobj_remote_yuno: Remote yuno to ask data,
-         *  If it's not a connected service then you must suply ON_OPEN/ON_CLOSE events
+         *  gobj_remote_yuno: Remote yuno to ask data
+         *  Must be a connected service
          */
         gobj_remote_yuno: null,
         treedb_name: null,
