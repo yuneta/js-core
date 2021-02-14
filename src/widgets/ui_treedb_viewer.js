@@ -875,9 +875,9 @@
             IEvent,
             {
                 timeout_retry: 30,
-                remote_yuno_name: self.config.dst_yuno, //'',
-                remote_yuno_role: self.config.dst_role, //'yuneta_agent',
-                remote_yuno_service: self.config.dst_service, //'agent',
+                remote_yuno_name: self.config.dst_yuno,
+                remote_yuno_role: self.config.dst_role,
+                remote_yuno_service: self.config.dst_service,
                 jwt: __yuno__.__login__.config.jwt,
                 urls: [self.config.url]
             },
