@@ -5,12 +5,6 @@
  *
  *          Treedb's Nodes Tree Manager
  *
- *          HACK the parent MUST be a pinhold handler if the role is "Pinhold Window"
- *               or MUST be a container if the role is "Container Panel"
- *
- *          HACK But you can redirect the output events to "subscriber" gobj
- *
- *
  *
  *  Each Vertex Cell contains in his value a node of a treedb topic:
 

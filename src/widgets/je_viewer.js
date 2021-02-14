@@ -5,11 +5,6 @@
  *
  *          Viewer of json with jsoneditor
  *
- *          HACK the parent MUST be a pinhold handler if the role is "Pinhold Window"
- *               or MUST be a container if the role is "Container Panel"
- *
- *          HACK But you can redirect the output events to "subscriber" gobj
- *
  *          Copyright (c) 2020 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
