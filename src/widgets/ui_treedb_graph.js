@@ -1,5 +1,5 @@
 /***********************************************************************
- *          ui_treedb_graph_new.js
+ *          ui_treedb_graph.js
  *
  *          NOTE Wrapper on (Mix "Container Panel" & "Pinhold Window")
  *
