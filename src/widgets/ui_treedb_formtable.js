@@ -1394,6 +1394,8 @@
                             webix_element = {
                                 view: "datepicker",
                                 name: id,
+                                timepicker: true,
+                                editable: true,
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true
@@ -1407,6 +1409,8 @@
                             webix_element = {
                                 view: "datepicker",
                                 name: id,
+                                timepicker: true,
+                                editable: true,
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true
@@ -1424,7 +1428,7 @@
                         case "string":
                         case "integer":
                             webix_element = {
-                                view: "datepicker",
+                                view: "colorpicker",
                                 name: id,
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
@@ -1437,7 +1441,7 @@
                                 "' is invalid: " + real_type
                             );
                             webix_element = {
-                                view: "datepicker",
+                                view: "colorpicker",
                                 name: id,
                                 label: t(tranger_col.header),
                                 css: "input_font_fijo",
@@ -1729,9 +1733,9 @@
             type = "fkey";
         } else if(is_enum) {
             type = "enum";
-        } else if(is_enum) {
+        } else if(is_time) {
             type = "time";
-        } else if(is_enum) {
+        } else if(is_color) {
             type = "color";
         }
 
@@ -1779,10 +1783,18 @@
                 var real_type = col.type;
                 switch(real_type) {
                     case "string":
-                        // TODO
+                        if(value) {
+                            value = new Date(value);
+                        } else {
+                            value = null;
+                        }
                         break;
-                    case "int":
-                        // TODO
+                    case "integer":
+                        if(value) {
+                            value = new Date(value*1000);
+                        } else {
+                            value = null;
+                        }
                         break;
                     default:
                         log_error("col type unknown 4: " + real_type);
@@ -1798,7 +1810,7 @@
                     case "string":
                         // TODO
                         break;
-                    case "int":
+                    case "integer":
                         // TODO
                         break;
                     default:
@@ -1952,10 +1964,18 @@
                 var real_type = col.type;
                 switch(real_type) {
                     case "string":
-                        // TODO
+                        if(value && is_date(value)) {
+                            value = value.toISOString();
+                        } else {
+                            value = "";
+                        }
                         break;
                     case "integer":
-                        // TODO
+                        if(value && is_date(value)) {
+                            value = (value.getTime())/1000;
+                        } else {
+                            value = 0;
+                        }
                         break;
                     default:
                         log_error("col type unknown 7: " + real_type);
@@ -2275,6 +2295,7 @@
                 new_kw = record2backend(self, new_kw);
             } catch (e) {
                 log_warning(e);
+                throw e
                 return -1;
             }
 
@@ -2316,6 +2337,7 @@
             new_kw = record2backend(self, new_kw);
         } catch (e) {
             log_warning(e);
+            throw e
             return -1;
         }
 
@@ -2383,6 +2405,7 @@
                 new_kw = record2backend(self, new_kw);
             } catch (e) {
                 log_warning(e);
+                throw e
                 return -1;
             }
 

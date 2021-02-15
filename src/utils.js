@@ -473,6 +473,14 @@
     /************************************************************
      *
      ************************************************************/
+    // Return if a value is a null
+    function is_date(value) {
+        return value instanceof Date
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function empty_string(s)
     {
         "use strict";
@@ -1890,6 +1898,7 @@
     exports.is_number = is_number;
     exports.is_boolean = is_boolean;
     exports.is_null = is_null;
+    exports.is_date = is_date;
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
     exports.strcmp = strcmp;
