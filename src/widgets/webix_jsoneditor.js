@@ -54,7 +54,7 @@ webix.protoUI({
                     if (field === '__t__' || field === '__tm__' || field === 'tm' ||
                         field === 'from_t' || field === 'to_t' || field === 't' ||
                         field === 't_input' || field === 't_output' ||
-                        field === 'from_tm' || field === 'to_tm'
+                        field === 'from_tm' || field === 'to_tm' || field === 'time'
                     ) {
                         return true;
                     }
@@ -64,7 +64,7 @@ webix.protoUI({
                     if (field === '__t__' || field === '__tm__' || field === 'tm' ||
                         field === 'from_t' || field === 'to_t' || field === 't' ||
                         field === 't_input' || field === 't_output' ||
-                        field === 'from_tm' || field === 'to_tm'
+                        field === 'from_tm' || field === 'to_tm' || field === 'time'
                     ) {
                         return new Date(value*1000).toISOString();
                     }
