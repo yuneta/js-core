@@ -918,6 +918,7 @@
             var is_hook = elm_in_list("hook", flag);
             var is_fkey = elm_in_list("fkey", flag);
             var is_enum = elm_in_list("enum", flag);
+            var is_time = elm_in_list("time", flag);
 
             var type = tranger_col.type; // By default is basic type
             if(is_hook) {
@@ -926,6 +927,8 @@
                 type = "fkey";
             } else if(is_enum) {
                 type = "enum";
+            } else if(is_time) {
+                type = "time";
             }
 
             switch(type) {
@@ -990,6 +993,25 @@
                             webix_col["suggest"] = {
                                view:"checksuggest"
                             };
+                            break;
+                    }
+                    break;
+
+                case "time":
+                    var real_type = tranger_col.type;
+                    switch(real_type) {
+                        case "string":
+                            webix_col["editor"] = "date";
+                            break;
+                        case "integer":
+                            webix_col["editor"] = "date";
+                            break;
+                        default:
+                            log_error("table '" + self.config.topic_name +
+                                "' enum type of '" + tranger_col.id +
+                                "' is invalid: " + real_type
+                            );
+                            webix_col["editor"] = "date";
                             break;
                     }
                     break;
@@ -1129,6 +1151,7 @@
             var is_hook = elm_in_list("hook", flag);
             var is_fkey = elm_in_list("fkey", flag);
             var is_enum = elm_in_list("enum", flag);
+            var is_time = elm_in_list("time", flag);
             if(is_hook || is_fkey) {
                 is_writable = true;
             }
@@ -1159,6 +1182,8 @@
                 type = "fkey";
             } else if(is_enum) {
                 type = "enum";
+            } else if(is_time) {
+                type = "time";
             }
 
             switch(type) {
@@ -1326,6 +1351,38 @@
                                 css: "input_font_fijo",
                                 readonly: is_writable?false:true,
                                 options: list2options(enum_list)
+                            };
+                            break;
+                    }
+                    if(is_required) {
+                        webix_element["required"] = true;
+                    }
+                    break;
+
+                case "time":
+                    var real_type = tranger_col.type;
+                    switch(real_type) {
+                        case "string":
+                        case "integer":
+                            webix_element = {
+                                view: "datepicker",
+                                name: id,
+                                label: t(tranger_col.header),
+                                css: "input_font_fijo",
+                                readonly: is_writable?false:true
+                            };
+                            break;
+                        default:
+                            log_error("form '" + self.config.topic_name +
+                                "' enum type of '" + tranger_col.id +
+                                "' is invalid: " + real_type
+                            );
+                            webix_element = {
+                                view: "datepicker",
+                                name: id,
+                                label: t(tranger_col.header),
+                                css: "input_font_fijo",
+                                readonly: is_writable?false:true
                             };
                             break;
                     }
@@ -1603,6 +1660,7 @@
         var is_hook = elm_in_list("hook", flag);
         var is_fkey = elm_in_list("fkey", flag);
         var is_enum = elm_in_list("enum", flag);
+        var is_time = elm_in_list("time", flag);
 
         var type = col.type; // By default is basic type
         if(is_hook) {
@@ -1611,6 +1669,8 @@
             type = "fkey";
         } else if(is_enum) {
             type = "enum";
+        } else if(is_enum) {
+            type = "time";
         }
 
         switch(type) {
@@ -1653,6 +1713,23 @@
                 }
                 break;
 
+            case "time":
+                var real_type = col.type;
+                switch(real_type) {
+                    case "string":
+                        // TODO
+                        break;
+                    case "int":
+                        // TODO
+                        break;
+                    default:
+                        log_error("col type unknown 4: " + real_type);
+                        log_error(col);
+                        log_error(value);
+                        break;
+                }
+                break;
+
             case "hook":    // Convert data from backend to frontend
                 var items = treedb_hook_data_size(value);
                 if(items > 0) {
@@ -1688,7 +1765,7 @@
                 break;
 
             default:
-                log_error("col type unknown 4: " + type);
+                log_error("col type unknown 5: " + type);
                 log_error(col);
                 log_error(value);
                 break;
@@ -1723,6 +1800,7 @@
         var is_hook = elm_in_list("hook", flag);
         var is_fkey = elm_in_list("fkey", flag);
         var is_enum = elm_in_list("enum", flag);
+        var is_time = elm_in_list("time", flag);
 
         var type = col.type; // By default is basic type
         if(is_enum) {
@@ -1731,6 +1809,8 @@
             type = "hook";
         } else if(is_fkey) {
             type = "fkey";
+        } else if(is_time) {
+            type = "time";
         }
 
         switch(type) {
@@ -1781,7 +1861,22 @@
                     case "list":
                         break;
                     default:
-                        log_error("col type unknown 5: " + real_type);
+                        log_error("col type unknown 6: " + real_type);
+                        break;
+                }
+                break;
+
+            case "time":
+                var real_type = col.type;
+                switch(real_type) {
+                    case "string":
+                        // TODO
+                        break;
+                    case "integer":
+                        // TODO
+                        break;
+                    default:
+                        log_error("col type unknown 7: " + real_type);
                         break;
                 }
                 break;
@@ -1795,7 +1890,7 @@
                 break;
 
             default:
-                log_error("col type unknown 6: " + type);
+                log_error("col type unknown 8: " + type);
                 break;
         }
 
