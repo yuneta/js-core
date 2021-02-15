@@ -2693,6 +2693,7 @@
             with_footer: true,
             with_navigation_toolbar: true,
             without_refresh: true,
+            without_trash_button: true,
             hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",

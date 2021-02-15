@@ -77,6 +77,7 @@
         with_fixedRowHeight: true,
         without_refresh: false,
         without_json_viewers: false,
+        without_trash_button: false,
 
         _writable_fields: null, // automatic built
 
@@ -529,6 +530,7 @@
                 {
                     view: "icon",
                     id: build_name(self, "delete_record"),
+                    hidden: self.config.without_trash_button?true:false,
                     icon: "fas fa-trash-alt",
                     css: "webix_transparent icon_toolbar_24",
                     tooltip: t("delete record"),
