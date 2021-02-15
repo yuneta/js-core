@@ -1256,8 +1256,9 @@
                         webix_element["required"] = true;
                     }
                     if(is_writable) {
-                        webix_element["validate"] = webix.rules.isNumber;
-                        webix_element["invalidMessage"] = t("invalid number");
+                        // No lo uses, da por inválidos campos vacios
+                        //webix_element["validate"] = webix.rules.isNumber;
+                        //webix_element["invalidMessage"] = t("invalid number");
                     }
                     break;
                 case "real":
@@ -1273,8 +1274,9 @@
                         webix_element["required"] = true;
                     }
                     if(is_writable) {
-                        webix_element["validate"] = webix.rules.isNumber;
-                        webix_element["invalidMessage"] = t("invalid number");
+                        // No lo uses, da por inválidos campos vacios
+                        //webix_element["validate"] = webix.rules.isNumber;
+                        //webix_element["invalidMessage"] = t("invalid number");
                     }
                     break;
                 case "boolean":
@@ -1897,10 +1899,10 @@
             case "string":
                 break;
             case "integer":
-                value = parseInt(value);
+                value = parseInt(value) || 0;
                 break;
             case "real":
-                value = parseFloat(value);
+                value = parseFloat(value)  || 0.0;
                 break;
             case "boolean":
                 value = parseBoolean(value);
