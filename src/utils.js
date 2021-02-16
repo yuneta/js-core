@@ -203,6 +203,27 @@
     /************************************************************
      *
      ************************************************************/
+    function elms_in_list(elms, list) {
+        "use strict";
+        if(!list) {
+            throw "ERROR: elm_in_list() list empty";
+        }
+        if(!elms) {
+            throw "ERROR: elm_in_list() elm empty";
+        }
+
+        for(var i=0; i<elms.length; i++) {
+            var elm = elms[i];
+            if(elm_in_list(elm, list)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function index_in_list(list, elm) {
         "use strict";
         if(!list) {
@@ -1880,6 +1901,7 @@
     exports.array_real_length = array_real_length;
     exports.index_of_list = index_of_list;
     exports.elm_in_list = elm_in_list;
+    exports.elms_in_list = elms_in_list;
     exports.index_in_list = index_in_list;
     exports.delete_from_list = delete_from_list;
     exports.__strip__ = __strip__;
