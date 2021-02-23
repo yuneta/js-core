@@ -1140,6 +1140,7 @@
         } else {
             self.config.$ui.show();
         }
+        return self.config.$ui.isVisible();
     }
 
     /********************************************
@@ -1148,6 +1149,7 @@
     function ac_show(self, event, kw, src)
     {
         self.config.$ui.show();
+        return self.config.$ui.isVisible();
     }
 
     /********************************************
@@ -1156,6 +1158,7 @@
     function ac_hide(self, event, kw, src)
     {
         self.config.$ui.hide();
+        return self.config.$ui.isVisible();
     }
 
     /********************************************
