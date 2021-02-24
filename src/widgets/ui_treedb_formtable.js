@@ -77,6 +77,7 @@
         without_refresh: false,
         without_json_viewers: false,
         without_trash_button: false,
+        publish_row_selected: false,
 
         _writable_fields: null, // automatic built
 
@@ -1578,13 +1579,15 @@
             $$(build_name(self, "page")).setValue(self.config.page);
         }
 
-        self.gobj_publish_event(
-            "EV_ROW_SELECTED",
-            {
-                topic_name: self.config.topic_name,
-                id: id.id
-            }
-        );
+        if(self.config.publish_row_selected) {
+            self.gobj_publish_event(
+                "EV_ROW_SELECTED",
+                {
+                    topic_name: self.config.topic_name,
+                    id: id.id
+                }
+            );
+        }
     }
 
     /********************************************
