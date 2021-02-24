@@ -14,7 +14,7 @@
  *          Set initial mode
  *  1.4     Paging optional
  *
- *          Copyright (c) 2020 Niyamaka.
+ *          Copyright (c) 2020-2021 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
@@ -50,7 +50,6 @@
         cols: null,
         form_label_width: 140,
         webix_datatable_id: null,   // webix public id of datatable
-        is_topic_schema: false, // will be added to published events
         list_mode_enabled: true,
         update_mode_enabled: false,
         create_mode_enabled: false,
@@ -402,8 +401,7 @@
                             self.gobj_publish_event(
                                 "EV_REFRESH_TABLE",
                                 {
-                                    topic_name: self.config.topic_name,
-                                    is_topic_schema: self.config.is_topic_schema
+                                    topic_name: self.config.topic_name
                                 }
                             );
                         }
@@ -620,7 +618,6 @@
                         "EV_ROW_CHECKED",
                         {
                             topic_name: self.config.topic_name,
-                            is_topic_schema: self.config.is_topic_schema,
                             record: record,
                             checked: state
                         }
@@ -1692,7 +1689,7 @@
     }
 
     /********************************************
-     *  Convert from frontend to backend
+     *  Convert from backend to frontend
      ********************************************/
     function record2frontend(self, record)
     {
@@ -1702,15 +1699,6 @@
             var col = get_schema_col(self, field_name);
             if(col) {
                 new_record[field_name] = col2frontend(col, value);
-            } else {
-                if(field_name.substring(0, 2) != "__") { // pass metadata
-                    // Se da tambien en
-                    if(!(self.config.is_topic_schema &&
-                        (field_name == "fkey" || field_name == "hook"))
-                    ) {
-                        log_error("No col def for '" + field_name + "'");
-                    }
-                }
             }
         }
         return new_record;
