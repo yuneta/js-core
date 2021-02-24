@@ -1577,6 +1577,14 @@
             self.config.page = Math.floor(idx / self.config.page_size) + 1;
             $$(build_name(self, "page")).setValue(self.config.page);
         }
+
+        self.gobj_publish_event(
+            "EV_ROW_SELECTED",
+            {
+                topic_name: self.config.topic_name,
+                id: id.id
+            }
+        );
     }
 
     /********************************************
@@ -2786,6 +2794,7 @@
             "EV_DELETE_RECORD: output",
             "EV_REFRESH_TABLE: output",
             "EV_ROW_CHECKED: output",
+            "EV_ROW_SELECTED: output",
             "EV_CLOSE_WINDOW: output",
             "EV_SHOW_HOOK_DATA: output",
 
