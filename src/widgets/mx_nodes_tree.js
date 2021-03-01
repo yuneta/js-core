@@ -69,6 +69,7 @@
         image_save_red: null,
         image_run: null,
         image_delete: null,
+        image_clone: null,
         image_collapsed: null,
         image_expanded: null,
 
@@ -173,6 +174,10 @@
         );
         self.config.image_delete = new mxImage(
             '/static/app/images/yuneta/delete.svg',
+            self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
+        );
+        self.config.image_clone = new mxImage(
+            '/static/app/images/yuneta/add_point.svg',
             self.config.top_overlay_icon_size, self.config.top_overlay_icon_size
         );
         self.config.image_collapsed = new mxImage(
@@ -1266,6 +1271,41 @@
                             }
                         );
                     });
+                }
+
+                /*--------------------------*
+                 *  Clone button
+                 *--------------------------*/
+                if(!self.config.locked) {
+                    var pinta = false;
+                    if(cell.value.schema) {
+                        var col = kw_collect(cell.value.schema.cols, {id:"id"});
+                        if(col && col.length) {
+                            if(elm_in_list("rowid", col[0].flag)) {
+                                pinta = true;
+                            }
+                        }
+                    }
+                    if(pinta) {
+                        var overlay_instance = new mxCellOverlay(
+                            self.config.image_clone,
+                            "Clone node", // tooltip
+                            mxConstants.ALIGN_RIGH, // horizontal align ALIGN_LEFT,ALIGN_CENTER,ALIGN_RIGH
+                            mxConstants.ALIGN_TOP, // vertical align  ALIGN_TOP,ALIGN_MIDDLE,ALIGN_BOTTOM
+                            new mxPoint(0*offsx - offsy, -offsy), // offset
+                            "pointer" // cursor
+                        );
+                        graph.addCellOverlay(cell, overlay_instance);
+                        overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
+                            self.gobj_send_event(
+                                "EV_CLONE_VERTEX",
+                                {
+                                    cell: cell
+                                },
+                                self
+                            );
+                        });
+                    }
                 }
 
             } else if(cell.isEdge()) {
@@ -2514,6 +2554,52 @@
     }
 
     /********************************************
+     *  From vertex's overlay icon
+     ********************************************/
+    function ac_clone_vertex(self, event, kw, src)
+    {
+        var graph = self.config._mxgraph;
+        var model = graph.getModel();
+        var cell = kw.cell;
+
+        model.beginUpdate();
+        try {
+            if(cell.value.cell_name) {
+                // new vertex in progress, delete formtable of cell
+                if(cell.value.gobj_cell_formtable) {
+                    __yuno__.gobj_destroy(cell.value.gobj_cell_formtable);
+                    cell.value.gobj_cell_formtable = 0;
+                }
+
+                var options = {
+                    list_dict: true
+                };
+                var kw_create = {
+                    treedb_name: self.config.treedb_name,
+                    topic_name: cell.value.schema.topic_name,
+                    record: cell.value.record,
+                    options: options
+                };
+                delete kw_create.record.id;
+                kw_create.record._geometry.x += kw_create.record._geometry.width;
+                kw_create.record._geometry.y += kw_create.record._geometry.height;
+                self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
+
+
+                // TODO clone the vertex, solo son id aka rowid !!!
+
+            }
+
+        } catch (e) {
+            log_error(e);
+        } finally {
+            model.endUpdate();
+        }
+
+        return 0;
+    }
+
+    /********************************************
      *  From edge's overlay icon
      ********************************************/
     function ac_delete_edge(self, event, kw, src)
@@ -3298,6 +3384,7 @@
 
             "EV_CREATE_VERTEX",
             "EV_DELETE_VERTEX",
+            "EV_CLONE_VERTEX",
             "EV_DELETE_EDGE",
             "EV_SHOW_CELL_DATA_FORM",
             "EV_SHOW_CELL_DATA_JSON",
@@ -3336,6 +3423,7 @@
 
                 ["EV_CREATE_VERTEX",            ac_create_vertex,           undefined],
                 ["EV_DELETE_VERTEX",            ac_delete_vertex,           undefined],
+                ["EV_CLONE_VERTEX",             ac_clone_vertex,            undefined],
                 ["EV_DELETE_EDGE",              ac_delete_edge,             undefined],
 
                 ["EV_SHOW_HOOK_DATA",           ac_show_hook_data,          undefined],
