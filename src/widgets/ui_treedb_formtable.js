@@ -554,7 +554,7 @@
                     view: "icon",
                     id: build_name(self, "copy_record"),
                     hidden: self.config.with_clone_button?false:true,
-                    icon: "fad fa-clone",
+                    icon: "far fa-copy",
                     css: "webix_transparent icon_toolbar_24",
                     tooltip: t("copy"),
                     click: function() {
@@ -604,7 +604,7 @@
                     view: "icon",
                     id: build_name(self, "paste_record"),
                     hidden: self.config.with_clone_button?false:true,
-                    icon: "far fa-clone",
+                    icon: "far fa-paste",
                     css: "webix_transparent icon_toolbar_24",
                     tooltip: t("paste"),
                     click: function() {
