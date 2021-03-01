@@ -1888,6 +1888,33 @@
         return regex.test(s);
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function escapeRegExp(stringToGoIntoTheRegex) {
+        return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    /********************************************
+     *  Code copied from
+     *  https://stackoverflow.com/questions/17885855/use-dynamic-variable-string-as-regex-pattern-in-javascript
+     *
+     *  Example of use:
+     *
+     *      var regex = replace_variable_engine("ip");
+     *      var input = "wss://#ip#:1600";
+     *      var output = input.replace(regex, "localhost");
+     *
+     *          output: "wss://localhost:1600"
+     *
+     ********************************************/
+    function replace_variable_engine(variable)
+    {
+        var variable = escapeRegExp(variable);
+        return new RegExp("#" + variable + "#", "g");
+    }
+
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -1976,5 +2003,7 @@
     exports.kw_set_local_storage_value = kw_set_local_storage_value;
     exports.kw_remove_local_storage_value = kw_remove_local_storage_value;
     exports.parseBoolean = parseBoolean;
+    exports.escapeRegExp = escapeRegExp;
+    exports.replace_variable_engine = replace_variable_engine;
 
 })(this);

@@ -2584,10 +2584,6 @@
                 kw_create.record._geometry.x += kw_create.record._geometry.width;
                 kw_create.record._geometry.y += kw_create.record._geometry.height;
                 self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
-
-
-                // TODO clone the vertex, solo son id aka rowid !!!
-
             }
 
         } catch (e) {
@@ -2883,6 +2879,9 @@
      ********************************************/
     function ac_run_node(self, event, kw, src)
     {
+        var graph = self.config._mxgraph;
+        var model = graph.model;
+
         var cell = kw.cell;
         if(!cell) {
             return -1;
@@ -2890,10 +2889,32 @@
         if(cell.isVertex()) {
             if(cell.value && cell.value.schema) {
                 // It's a topic node cell
+                var record = __duplicate__(cell.value.record);
+
+                for(var key in record) {
+                    var value = record[key];
+                    if(is_string(value) && value.indexOf("#") != -1) {
+                        var nodes = record.nodes;
+                        if(nodes.length >= 1) {
+                            var node = nodes[0];
+                            var parent_cell = model.getCell(
+                                build_cell_name(self, node.topic_name, node.id)
+                            );
+                            if(parent_cell) {
+                                // For now only to ip variable
+                                var ip = parent_cell.value.record.ip;
+                                var regex = replace_variable_engine("ip");
+                                value = value.replace(regex, ip);
+                                record[key] = value;
+                            }
+                        }
+                    }
+                }
+
                 var kw_cell = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    record: cell.value.record
+                    record: record
                 }
                 self.gobj_publish_event("EV_RUN_NODE", kw_cell, self);
             }
