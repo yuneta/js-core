@@ -1076,7 +1076,14 @@
                     return get_fkey_info(cell, true, false);
                 } else if(cell.value.schema) {
                     var topic_name = cell.value.schema.topic_name;
-                    var id = cell.value.record? cell.value.record.id: "";
+                    var id = "";
+                    if(cell.value.record) {
+                        if(cell.value.record.value) {
+                            id = cell.value.record.value;
+                        } else if(cell.value.record.id) {
+                            id = cell.value.record.id;
+                        }
+                    }
 
                     var t = topic_name + "^<br/><b>" + id + "</b><br/>";
 
@@ -2692,8 +2699,8 @@
             with_top_title: true,
             with_footer: true,
             with_navigation_toolbar: true,
-            without_refresh: true,
-            without_trash_button: true,
+            with_refresh: true,
+            with_trash_button: false,
             hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",

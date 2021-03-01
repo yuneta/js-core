@@ -74,9 +74,9 @@
         with_resizeColumn: true,
         with_resizeRow: false,
         with_fixedRowHeight: true,
-        without_refresh: false,
-        without_json_viewers: false,
-        without_trash_button: false,
+        with_refresh: true,
+        with_json_viewers: true,
+        with_trash_button: true,
         publish_row_selected: false,
 
         _writable_fields: null, // automatic built
@@ -385,7 +385,7 @@
                     },
                     {
                         view: "button",
-                        hidden: self.config.without_refresh?true:false,
+                        hidden: self.config.with_refresh?false:true,
                         type: "icon",
                         icon: "far fa-sync",
                         css: "webix_transparent icon_toolbar_16",
@@ -412,7 +412,7 @@
                         type: "icon",
                         icon: "fas fa-folder-tree",
                         css: "webix_transparent icon_toolbar_16",
-                        hidden: self.config.without_json_viewers?true:false,
+                        hidden: self.config.with_json_viewers?false:true,
                         maxWidth: 80,
                         label: t("Cols"),
                         click: function() {
@@ -456,7 +456,7 @@
                         type: "icon",
                         icon: "fas fa-folder-tree",
                         css: "webix_transparent icon_toolbar_16",
-                        hidden: self.config.without_json_viewers?true:false,
+                        hidden: self.config.with_json_viewers?false:true,
                         maxWidth: 80,
                         label: t("Data"),
                         click: function() {
@@ -529,7 +529,7 @@
                 {
                     view: "icon",
                     id: build_name(self, "delete_record"),
-                    hidden: self.config.without_trash_button?true:false,
+                    hidden: self.config.with_trash_button?false:true,
                     icon: "fas fa-trash-alt",
                     css: "webix_transparent icon_toolbar_24",
                     tooltip: t("delete record"),

@@ -751,7 +751,7 @@
     }
 
     /********************************************
-     *  Event from Mx_nodes_tree
+     *  Event from formtable
      *  kw: {
      *      treedb_name
      *      parent_topic_name,
