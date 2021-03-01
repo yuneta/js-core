@@ -77,7 +77,10 @@
         with_refresh: true,
         with_json_viewers: true,
         with_trash_button: true,
+        with_clone_button: true,
         publish_row_selected: false,
+
+        clone_record: null,
 
         _writable_fields: null, // automatic built
 
@@ -545,6 +548,26 @@
                             }
                         );
                     }
+                },
+                {},
+                {
+                    view: "icon",
+                    id: build_name(self, "copy_record"),
+                    hidden: self.config.with_clone_button?false:true,
+                    icon: "fad fa-clone",
+                    css: "webix_transparent icon_toolbar_24",
+                    tooltip: t("copy"),
+                    click: function() {
+                        var $form = $$(build_name(self, "update_form"));
+                        self.config.clone_record = __duplicate__($form.getValues());
+                        delete self.config.clone_record.id;
+
+                        if(is_string(self.config.clone_record._geometry)) {
+                            self.config.clone_record._geometry = JSON.parse(
+                                self.config.clone_record._geometry
+                            );
+                        }
+                    }
                 }
             ]
         };
@@ -564,8 +587,6 @@
                     click: function() {
                         var $new = $$(build_name(self, "create_form"));
                         self.gobj_send_event("EV_CREATE_RECORD", $new.getValues(), self);
-                        //$form.clearValidation();
-                        //$form.clear();
                     }
                 },
                 {
@@ -576,6 +597,26 @@
                     tooltip: t("discard record"),
                     click: function() {
                         self.gobj_send_event("EV_DISCARD_RECORD", {}, self);
+                    }
+                },
+                {},
+                {
+                    view: "icon",
+                    id: build_name(self, "paste_record"),
+                    hidden: self.config.with_clone_button?false:true,
+                    icon: "far fa-clone",
+                    css: "webix_transparent icon_toolbar_24",
+                    tooltip: t("paste"),
+                    click: function() {
+                        var $form = $$(build_name(self, "create_form"));
+                        if(self.config.clone_record) {
+                            self.config.clone_record._geometry.x +=
+                                self.config.clone_record._geometry.width;
+                            self.config.clone_record._geometry.y +=
+                                self.config.clone_record._geometry.height;
+
+                            $form.setValues(self.config.clone_record);
+                        }
                     }
                 }
             ]
@@ -1869,13 +1910,13 @@
     /********************************************
      *  Convert from frontend to backend
      ********************************************/
-    function record2backend(self, kw)
+    function record2backend(self, kw, operation)
     {
         for(var field_name in kw) {
             var value = kw[field_name];
             var col = get_schema_col(self, field_name);
             if(col) {
-                kw[field_name] = col2backend(col, value);
+                kw[field_name] = col2backend(col, value, operation);
             } else {
                 log_error("No col def for " + field_name);
             }
@@ -1886,11 +1927,12 @@
     /********************************************
      *  Convert from frontend to backend
      ********************************************/
-    function col2backend(col, value)
+    function col2backend(col, value, operation)
     {
         var flag = col.flag;
         var is_hook = elm_in_list("hook", flag);
         var is_fkey = elm_in_list("fkey", flag);
+        var is_rowid = elm_in_list("rowid", flag);
         var is_enum = elm_in_list("enum", flag);
         var is_time = elm_in_list("time", flag);
         var is_color = elm_in_list("color", flag);
@@ -1910,6 +1952,9 @@
 
         switch(type) {
             case "string":
+                if(is_rowid && operation=="create") {
+                    value = "";
+                }
                 break;
             case "integer":
                 value = parseInt(value) || 0;
@@ -2293,7 +2338,7 @@
             }
 
             try {
-                new_kw = record2backend(self, new_kw);
+                new_kw = record2backend(self, new_kw, "update");
             } catch (e) {
                 log_warning(e);
                 throw e
@@ -2335,7 +2380,7 @@
         }
 
         try {
-            new_kw = record2backend(self, new_kw);
+            new_kw = record2backend(self, new_kw, "delete");
         } catch (e) {
             log_warning(e);
             throw e
@@ -2403,7 +2448,7 @@
             }
 
             try {
-                new_kw = record2backend(self, new_kw);
+                new_kw = record2backend(self, new_kw, "create");
             } catch (e) {
                 log_warning(e);
                 throw e

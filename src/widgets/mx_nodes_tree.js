@@ -1286,6 +1286,7 @@
                             }
                         }
                     }
+                    pinta = false; // De momento no funciona TODO
                     if(pinta) {
                         var overlay_instance = new mxCellOverlay(
                             self.config.image_clone,
@@ -2783,6 +2784,7 @@
             with_navigation_toolbar: true,
             with_refresh: true,
             with_trash_button: false,
+            with_clone_button: false,
             hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",
