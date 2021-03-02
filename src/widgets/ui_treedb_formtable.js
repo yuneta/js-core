@@ -78,6 +78,7 @@
         with_json_viewers: true,
         with_trash_button: true,
         with_clone_button: true,
+        with_rowid_field: false,
         publish_row_selected: false,
 
         clone_record: null,
@@ -921,7 +922,7 @@
             );
         }
 
-        for(var i=0; cols && i<cols.length; i++) {
+        for(var i=0,j=0; cols && i<cols.length; i++) {
             var webix_col = null;
             var tranger_col = cols[i];
             if(self.config.hide_private_fields) {
@@ -941,19 +942,6 @@
                 minWidth: tranger_col.fillspace * 10,
                 fillspace: tranger_col.fillspace
             }
-            if(self.config.with_footer) {
-                if(i==0) {
-                    webix_col.footer = {
-                        content: "countColumn",
-                        height: 25
-                    };
-                } else if(i==1) {
-                    webix_col.footer = {
-                        text: t("records"),
-                        height: 25
-                    };
-                }
-            }
 
             var flag = tranger_col.flag;
             var is_hook = elm_in_list("hook", flag);
@@ -961,6 +949,13 @@
             var is_enum = elm_in_list("enum", flag);
             var is_time = elm_in_list("time", flag);
             var is_color = elm_in_list("color", flag);
+            var is_rowid = elm_in_list("rowid", flag);
+
+            if(is_rowid) {
+                if(!self.config.with_rowid_field) {
+                    continue;
+                }
+            }
 
             var type = tranger_col.type; // By default is basic type
             if(is_hook) {
@@ -1094,6 +1089,21 @@
             }
 
             if(webix_col) {
+                j++;
+                if(self.config.with_footer) {
+                    if(j==1) {
+                        webix_col.footer = {
+                            content: "countColumn",
+                            height: 25
+                        };
+                    } else if(j==2) {
+                        webix_col.footer = {
+                            text: t("records"),
+                            height: 25
+                        };
+                    }
+                }
+
                 if(tranger_col.template) {
                     webix_col["template"] = tranger_col.template;
                 }
@@ -1216,6 +1226,14 @@
             var is_enum = elm_in_list("enum", flag);
             var is_time = elm_in_list("time", flag);
             var is_color = elm_in_list("color", flag);
+            var is_rowid = elm_in_list("rowid", flag);
+
+            if(is_rowid) {
+                if(!self.config.with_rowid_field) {
+                    continue;
+                }
+            }
+
             if(is_hook || is_fkey) {
                 is_writable = true;
             }

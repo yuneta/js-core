@@ -1286,7 +1286,6 @@
                             }
                         }
                     }
-                    pinta = false; // De momento no funciona TODO
                     if(pinta) {
                         var overlay_instance = new mxCellOverlay(
                             self.config.image_clone,
@@ -1298,13 +1297,27 @@
                         );
                         graph.addCellOverlay(cell, overlay_instance);
                         overlay_instance.addListener(mxEvent.CLICK, function(sender, evt2) {
-                            self.gobj_send_event(
-                                "EV_CLONE_VERTEX",
-                                {
-                                    cell: cell
+                            webix.prompt({
+                                title: "New Service",
+                                text: "Service",
+                                ok: "Submit",
+                                cancel: "Cancel",
+                                input: {
+                                    required:true,
+                                    placeholder: cell.value.record.value,
                                 },
-                                self
-                            );
+                                width:350,
+                            }).then(function(result) {
+                                self.gobj_send_event(
+                                    "EV_CLONE_VERTEX",
+                                    {
+                                        cell: cell,
+                                        name: result
+                                    },
+                                    self
+                                );
+                            }).fail(function(){
+                            });
                         });
                     }
                 }
@@ -2562,6 +2575,7 @@
         var graph = self.config._mxgraph;
         var model = graph.getModel();
         var cell = kw.cell;
+        var name = kw.name;
 
         model.beginUpdate();
         try {
@@ -2578,10 +2592,11 @@
                 var kw_create = {
                     treedb_name: self.config.treedb_name,
                     topic_name: cell.value.schema.topic_name,
-                    record: cell.value.record,
+                    record: __duplicate__(cell.value.record),
                     options: options
                 };
                 delete kw_create.record.id;
+                kw_create.record.value = name;
                 kw_create.record._geometry.x += kw_create.record._geometry.width;
                 kw_create.record._geometry.y += kw_create.record._geometry.height;
                 self.gobj_publish_event("EV_CREATE_RECORD", kw_create, self);
@@ -2785,6 +2800,7 @@
             with_refresh: true,
             with_trash_button: false,
             with_clone_button: false,
+            with_rowid_field: true,
             hide_private_fields: true,
             list_mode_enabled: true,
             current_mode: cell_name?"update":"create",
