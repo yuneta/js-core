@@ -316,7 +316,7 @@
                 window_properties: {
                     without_window_fullscreen_btn: false,
                     without_window_close_btn: false,
-                    without_destroy_window_on_close: self.config.auto_topics?false:true,
+                    without_destroy_window_on_close: self.config.auto_topics?true:false,
                     with_create_window_on_start: false
                 },
                 is_pinhold_window: true,
