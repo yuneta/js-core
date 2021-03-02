@@ -2367,7 +2367,6 @@
                 "EV_UPDATE_RECORD",
                 {
                     topic_name: self.config.topic_name,
-                    is_topic_schema: self.config.is_topic_schema,
                     record: new_kw
                 }
             );
@@ -2409,7 +2408,6 @@
             "EV_DELETE_RECORD",
             {
                 topic_name: self.config.topic_name,
-                is_topic_schema: self.config.is_topic_schema,
                 record: new_kw
             }
         );
@@ -2477,7 +2475,6 @@
                 "EV_CREATE_RECORD",
                 {
                     topic_name: self.config.topic_name,
-                    is_topic_schema: self.config.is_topic_schema,
                     record: new_kw
                 }
             );

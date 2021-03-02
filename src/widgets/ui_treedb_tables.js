@@ -38,6 +38,21 @@
         auto_topics: false,
         descs: null,
 
+        default_formtable_properties: {
+            with_checkbox: false,
+            with_textfilter: true,
+            with_sort: true,
+            with_top_title: true,
+            with_footer: true,
+            with_navigation_toolbar: true,
+            hide_private_fields: true,
+            update_mode_enabled: true,
+            create_mode_enabled: true,
+            delete_mode_enabled: true
+        },
+        formtable_properties: {
+        },
+
         __writable_attrs__: [
         ]
     };
@@ -287,43 +302,36 @@
                 continue;
             }
 
+            var kw_formtable = {
+                subscriber: self,  // HACK get all output events
+
+                ui_properties: {
+                    hidden: true
+                },
+
+                treedb_name: self.config.treedb_name,
+                topic_name: topic_name,
+                cols: null, // later, when arriving data
+
+                window_properties: {
+                    without_window_fullscreen_btn: false,
+                    without_window_close_btn: false,
+                    without_destroy_window_on_close: self.config.auto_topics?false:true,
+                    with_create_window_on_start: false
+                },
+                is_pinhold_window: true,
+                window_title: label,
+                window_image: "",
+                width: 950,
+                height: 600
+            };
+            json_object_update(kw_formtable, self.config.default_formtable_properties);
+            json_object_update(kw_formtable, self.config.formtable_properties);
+
             topic["gobj_formtable"] = __yuno__.gobj_create_unique(
                 build_name(self, topic_name + " formtable"),
                 Ui_treedb_formtable,
-                {
-                    subscriber: self,  // HACK get all output events
-
-                    ui_properties: {
-                        hidden: true
-                    },
-
-                    treedb_name: self.config.treedb_name,
-                    topic_name: topic_name,
-                    cols: null, // later, when arriving data
-                    is_topic_schema: false,
-                    with_checkbox: false,
-                    with_textfilter: true,
-                    with_sort: true,
-                    with_top_title: true,
-                    with_footer: true,
-                    with_navigation_toolbar: true,
-                    hide_private_fields: true,
-                    update_mode_enabled: true,
-                    create_mode_enabled: true,
-                    delete_mode_enabled: true,
-
-                    window_properties: {
-                        without_window_fullscreen_btn: false,
-                        without_window_close_btn: false,
-                        without_destroy_window_on_close: self.config.auto_topics?false:true,
-                        with_create_window_on_start: false
-                    },
-                    is_pinhold_window: true,
-                    window_title: label,
-                    window_image: "",
-                    width: 950,
-                    height: 600
-                },
+                kw_formtable,
                 self
             );
             if(topic["gobj_formtable"]) {
@@ -648,7 +656,6 @@
      *  Event from formtable
      *  kw: {
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *  }
      ********************************************/
@@ -677,7 +684,6 @@
      *  Event from formtable
      *  kw: {
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *  }
      ********************************************/
@@ -705,7 +711,6 @@
      *  Event from formtable
      *  kw: {
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *  }
      ********************************************/
@@ -731,7 +736,6 @@
      *  Event from formtable
      *  kw: {
      *      topic_name,
-     *      is_topic_schema
      *  }
      ********************************************/
     function ac_refresh_table(self, event, kw, src)

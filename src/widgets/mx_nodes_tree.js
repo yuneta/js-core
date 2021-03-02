@@ -2667,7 +2667,6 @@
      *  Event from formtable
      *  kw: {
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *      + treedb_name
      *  }
@@ -2688,7 +2687,6 @@
         var kw_create = {
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
-            is_topic_schema: kw.is_topic_schema,
             record: kw.record,
             options: options
         };
@@ -2710,7 +2708,6 @@
      *  kw: {
      *      + treedb_name
      *      topic_name,
-     *      is_topic_schema,
      *      record
      *  }
      ********************************************/
@@ -2729,7 +2726,6 @@
         var kw_update = {
             treedb_name: self.config.treedb_name,
             topic_name: kw.topic_name,
-            is_topic_schema: kw.is_topic_schema,
             record: kw.record,
             options: options
         };
@@ -2790,7 +2786,6 @@
             treedb_name: self.config.treedb_name,
             topic_name: schema.topic_name,
             cols: schema.cols,
-            is_topic_schema: false,
             with_checkbox: false,
             with_textfilter: true,
             with_sort: true,

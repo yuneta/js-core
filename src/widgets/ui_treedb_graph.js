@@ -974,7 +974,6 @@
         var topic_name = kw.topic_name;
         var record = kw.record;
         var options = kw.options || {};
-        var is_topic_schema = kw.is_topic_schema;
 
         var url = record.url;
         var dst_role = record.dst_role;

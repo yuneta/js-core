@@ -89,6 +89,9 @@
      ************************************************************/
     function __update_dict__(destination, source) {
         "use strict";
+        if(!source) {
+            return destination;
+        }
         for (var property in source) {
             if (source.hasOwnProperty(property) && destination.hasOwnProperty(property)) {
                 destination[property] = source[property];
@@ -104,6 +107,9 @@
      ************************************************************/
     function __extend_dict__(destination, source) {
         "use strict";
+        if(!source) {
+            return destination;
+        }
         for (var property in source) {
             if (source.hasOwnProperty(property)) {
                 destination[property] = source[property];
@@ -117,6 +123,9 @@
      ************************************************************/
     function __extend_list__(destination, source) {
         "use strict";
+        if(!source) {
+            return destination;
+        }
         Array.prototype.push.apply(destination, source)
         return destination;
     }
@@ -128,6 +137,9 @@
      ************************************************************/
     function json_object_update_missing(destination, source) {
         "use strict";
+        if(!source) {
+            return destination;
+        }
         for (var property in source) {
             if(source.hasOwnProperty(property) && !destination.hasOwnProperty(property)) {
                 destination[property] = source[property];
