@@ -1643,6 +1643,7 @@
                 "EV_ROW_SELECTED",
                 {
                     topic_name: self.config.topic_name,
+                    record: record,
                     id: id.id
                 }
             );
