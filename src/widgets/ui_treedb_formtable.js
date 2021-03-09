@@ -13,6 +13,7 @@
  *  1.3     Add user_data attribute
  *          Set initial mode
  *  1.4     Paging optional
+ *  1.5     Select row only if it has update/create mode
  *
  *          Copyright (c) 2020-2021 Niyamaka.
  *          All Rights Reserved.
@@ -2177,17 +2178,22 @@
 
         $table.unselectAll(); // HACK important, to update the form in the select below.
 
-        if(data.length == 1) {
-            if(!self.config.with_webix_id) {
-                self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
-            } else {
-                self.gobj_send_event("EV_FIRST_RECORD", {}, self);
-            }
-        } else if(data.length > 1) {
-            if(self.config.last_selected_id) {
-                self.gobj_send_event("EV_RECORD_BY_ID", {id:self.config.last_selected_id.id}, self);
-            } else {
-                self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+        if(self.config.update_mode_enabled || self.config.create_mode_enabled) {
+            /*
+             *  Select only if it has update/create mode
+             */
+            if(data.length == 1) {
+                if(!self.config.with_webix_id) {
+                    self.gobj_send_event("EV_RECORD_BY_ID", {id:data[0].id}, self);
+                } else {
+                    self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+                }
+            } else if(data.length > 1) {
+                if(self.config.last_selected_id) {
+                    self.gobj_send_event("EV_RECORD_BY_ID", {id:self.config.last_selected_id.id}, self);
+                } else {
+                    self.gobj_send_event("EV_FIRST_RECORD", {}, self);
+                }
             }
         }
 
