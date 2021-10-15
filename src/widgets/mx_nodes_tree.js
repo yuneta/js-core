@@ -1812,38 +1812,41 @@
         var graph = self.config._mxgraph;
         var model = graph.model;
 
-        try {
-            fkey = decoder_fkey(source_col, fkey);
-            if(!fkey) {
-                return;
-            }
-            var target_topic_name = fkey.topic_name;
-            var target_topic_id = fkey.id;
-            var target_hook = fkey.hook_name;
+        fkey = decoder_fkey(source_col, fkey);
+        if(!fkey) {
+            return;
+        }
+        var target_topic_name = fkey.topic_name;
+        var target_topic_id = fkey.id;
+        var target_hook = fkey.hook_name;
 
-            var target_cell_name = build_cell_name(
-                self, target_topic_name, target_topic_id
-            );
-            var target_cell = model.getCell(target_cell_name);
-            var targer_hook_col = get_col(target_cell.value.schema.cols, target_hook);
+        var target_cell_name = build_cell_name(
+            self, target_topic_name, target_topic_id
+        );
+        var target_cell = model.getCell(target_cell_name);
+        if(!target_cell) {
+            log_error("target_cell '" + target_cell_name + "' NOT FOUND");
+            return;
+        }
+        var targer_hook_col = get_col(target_cell.value.schema.cols, target_hook);
 
-            var target_port_name = build_hook_port_id(
-                self,
-                target_topic_name,
-                target_topic_id,
-                targer_hook_col
-            );
-            var target_port_cell = model.getCell(target_port_name);
+        var target_port_name = build_hook_port_id(
+            self,
+            target_topic_name,
+            target_topic_id,
+            targer_hook_col
+        );
+        var target_port_cell = model.getCell(target_port_name);
+        if(!target_port_cell) {
+            log_error("target_port_cell '" + target_port_name + "' NOT FOUND");
+            return;
+        }
 
-            // HACK "==>" repeated
-            var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
-            var link_cell = model.getCell(cell_id);
-            if(link_cell) {
-                graph.removeCells([link_cell]);
-            }
-
-        } catch (e) {
-            log_error(e);
+        // HACK "==>" repeated
+        var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
+        var link_cell = model.getCell(cell_id);
+        if(link_cell) {
+            graph.removeCells([link_cell]);
         }
     }
 
@@ -1915,63 +1918,69 @@
         var graph = self.config._mxgraph;
         var model = graph.model;
 
-        try {
-            var source_fkey = decoder_fkey(source_col, fkey_port_cell.id);
-            if(!source_fkey) {
-                log_error("What f*?");
-                return;
-            }
-            var source_topic_name = source_fkey.topic_name;
-            var source_topic_id = source_fkey.id;
-            var source_fkey = source_fkey.hook_name;
+        var source_fkey = decoder_fkey(source_col, fkey_port_cell.id);
+        if(!source_fkey) {
+            log_error("What f*?");
+            return;
+        }
+        var source_topic_name = source_fkey.topic_name;
+        var source_topic_id = source_fkey.id;
+        var source_fkey = source_fkey.hook_name;
 
-            var target_fkey = decoder_fkey(source_col, fkey);
-            if(!target_fkey) {
-                log_error("What f*?");
-                return;
-            }
-            var target_topic_name = target_fkey.topic_name;
-            var target_topic_id = target_fkey.id;
-            var target_hook = target_fkey.hook_name;
+        var target_fkey = decoder_fkey(source_col, fkey);
+        if(!target_fkey) {
+            log_error("What f*?");
+            return;
+        }
+        var target_topic_name = target_fkey.topic_name;
+        var target_topic_id = target_fkey.id;
+        var target_hook = target_fkey.hook_name;
 
-            var target_cell_name = build_cell_name(
-                self, target_topic_name, target_topic_id
+        var target_cell_name = build_cell_name(
+            self, target_topic_name, target_topic_id
+        );
+
+        var target_cell = model.getCell(target_cell_name);
+        if(!target_cell) {
+            log_error("target_cell '" + target_cell_name + "' NOT FOUND");
+            return;
+        }
+
+        var targer_hook_col = get_col(target_cell.value.schema.cols, target_hook);
+
+        var target_port_name = build_hook_port_id(
+            self,
+            target_topic_name,
+            target_topic_id,
+            targer_hook_col
+        );
+
+        var target_port_cell = model.getCell(target_port_name);
+        if(!target_port_cell) {
+            log_error("target_port_cell '" + target_port_name + "' NOT FOUND");
+            return;
+        }
+
+        // HACK "==>" repeated
+        var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
+        var link_cell = model.getCell(cell_id);
+        if(!link_cell) {
+            var cell_value = {
+                child_topic_name: source_topic_name,
+                child_topic_id: source_topic_id,
+                child_fkey: source_fkey,
+                parent_topic_name: target_topic_name,
+                parent_topic_id: target_topic_id,
+                parent_hook: target_hook
+            }
+            graph.insertEdge(
+                get_layer(self),                // group
+                cell_id,                        // id
+                cell_value,                     // value
+                fkey_port_cell,                 // source
+                target_port_cell,               // target
+                source_topic_name + "_arrow"    // style
             );
-            var target_cell = model.getCell(target_cell_name);
-            var targer_hook_col = get_col(target_cell.value.schema.cols, target_hook);
-
-            var target_port_name = build_hook_port_id(
-                self,
-                target_topic_name,
-                target_topic_id,
-                targer_hook_col
-            );
-            var target_port_cell = model.getCell(target_port_name);
-
-            // HACK "==>" repeated
-            var cell_id = fkey_port_cell.id + " ==> " + target_port_name;
-            var link_cell = model.getCell(cell_id);
-            if(!link_cell) {
-                var cell_value = {
-                    child_topic_name: source_topic_name,
-                    child_topic_id: source_topic_id,
-                    child_fkey: source_fkey,
-                    parent_topic_name: target_topic_name,
-                    parent_topic_id: target_topic_id,
-                    parent_hook: target_hook
-                }
-                graph.insertEdge(
-                    get_layer(self),                // group
-                    cell_id,                        // id
-                    cell_value,                     // value
-                    fkey_port_cell,                 // source
-                    target_port_cell,               // target
-                    source_topic_name + "_arrow"    // style
-                );
-            }
-
-        } catch (e) {
-            log_error(e);
         }
     }
 
@@ -3107,8 +3116,21 @@
                 }
 
                 // New Edges or edges source/target changes are done by user edition
-                var source_cell = model.getCell(cell.source.id);
-                var target_cell = model.getCell(cell.target.id);
+                var source_cell = null;
+                var target_cell = null;
+                try {
+                    source_cell = model.getCell(cell.source.id);
+                    target_cell = model.getCell(cell.target.id);
+                } catch (e) {
+                }
+                if(!source_cell) {
+                    log_error("source_cell '" + cell.source.id + "' NOT FOUND");
+                    continue;
+                }
+                if(!target_cell) {
+                    log_error("target_cell '" + cell.target.id + "' NOT FOUND");
+                    continue;
+                }
                 var parent_cell = null;
                 var child_cell = null;
 
