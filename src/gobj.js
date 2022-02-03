@@ -1235,7 +1235,7 @@ __inside_event_loop__ = 0;
         }
         set_event_names = __set__(set_event_names);
         if (event_names.length !== set_event_names.length) {
-            log_error("event-list OVERFILLED: /" + event_names + " /" + set_event_names);
+            log_error(this.gclass_name + ": event-list OVERFILLED: /" + event_names + " /" + set_event_names);
         }
 
         // check next state names and actions
