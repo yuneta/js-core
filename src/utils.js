@@ -1339,7 +1339,7 @@
             return default_value?true:false;
         }
         var b = _kw_search_path(kw, key);
-        if(b == undefined) {
+        if(b === undefined || b === null) {
             if(create) {
                 kw[key] = default_value?true:false;
             }
@@ -1354,16 +1354,34 @@
     function kw_get_int(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
-            return parseInt(default_value);
+            return default_value;
         }
         var i = _kw_search_path(kw, key);
-        if(i == undefined) {
+        if(i === undefined || i === null) {
             if(create) {
-                kw[key] = parseInt(default_value);
+                kw[key] = default_value;
             }
-            return parseInt(default_value);
+            return default_value;
         }
         return parseInt(i);
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function kw_get_real(kw, key, default_value, create)
+    {
+        if(!(kw === Object(kw))) {
+            return default_value;
+        }
+        var r = _kw_search_path(kw, key);
+        if(r === undefined || r === null) {
+            if(create) {
+                kw[key] = default_value;
+            }
+            return default_value;
+        }
+        return parseFloat(i);
     }
 
     /************************************************************
@@ -1372,16 +1390,16 @@
     function kw_get_str(kw, key, default_value, create)
     {
         if(!(kw === Object(kw))) {
-            return default_value.toString();
+            return default_value;
         }
         var str = _kw_search_path(kw, key);
-        if(str == undefined) {
+        if(str === undefined || str === null) {
             if(create) {
-                kw[key] = default_value.toString();
+                kw[key] = default_value;
             }
-            return default_value.toString();
+            return default_value;
         }
-        return str.toString();
+        return String(str);
     }
 
     /************************************************************
@@ -1393,7 +1411,7 @@
             return default_value;
         }
         var v = _kw_search_path(kw, key);
-        if(v == undefined) {
+        if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
             }
