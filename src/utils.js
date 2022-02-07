@@ -1315,7 +1315,7 @@
             return 0;
         }
         if(!is_string(path)) {
-            log_error("path NULL or NOT STRING");
+            log_error("path must be a string: " + String(path));
             return 0;
         }
         var ss = path.split("`");
@@ -1326,6 +1326,9 @@
         for(var i=0; i<len; i++) {
             var key = ss[i];
             kw = kw[key];
+            if(kw === undefined) {
+                return undefined;
+            }
         }
         return kw;
     }
@@ -1333,15 +1336,17 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_bool(kw, key, default_value, create)
+    function kw_get_bool(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
             return default_value?true:false;
         }
         var b = _kw_search_path(kw, key);
-        if(b === undefined || b === null) {
+        if(b === undefined) {
             if(create) {
                 kw[key] = default_value?true:false;
+            } else if(verbose) {
+                log_error("kw_get_bool() path not found: '" + key + "'");
             }
             return default_value?true:false;
         }
@@ -1357,9 +1362,11 @@
             return default_value;
         }
         var i = _kw_search_path(kw, key);
-        if(i === undefined || i === null) {
+        if(i === undefined) {
             if(create) {
                 kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_int() path not found: '" + key + "'");
             }
             return default_value;
         }
@@ -1375,9 +1382,11 @@
             return default_value;
         }
         var r = _kw_search_path(kw, key);
-        if(r === undefined || r === null) {
+        if(r === undefined) {
             if(create) {
                 kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_real() path not found: '" + key + "'");
             }
             return default_value;
         }
@@ -1393,9 +1402,11 @@
             return default_value;
         }
         var str = _kw_search_path(kw, key);
-        if(str === undefined || str === null) {
+        if(str === undefined) {
             if(create) {
                 kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_str() path not found: '" + key + "'");
             }
             return default_value;
         }
@@ -1414,6 +1425,8 @@
         if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_dict_value() path not found: '" + key + "'");
             }
             return default_value;
         }
