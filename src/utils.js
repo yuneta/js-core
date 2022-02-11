@@ -1356,7 +1356,7 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_int(kw, key, default_value, create)
+    function kw_get_int(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
             return default_value;
@@ -1376,7 +1376,7 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_real(kw, key, default_value, create)
+    function kw_get_real(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
             return default_value;
@@ -1396,7 +1396,7 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_str(kw, key, default_value, create)
+    function kw_get_str(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
             return default_value;
@@ -1416,7 +1416,7 @@
     /************************************************************
      *
      ************************************************************/
-    function kw_get_dict_value(kw, key, default_value, create)
+    function kw_get_dict_value(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
             return default_value;
@@ -1706,7 +1706,17 @@
     /********************************************
      *
      ********************************************/
-    function jdb_get(jdb, topic_name, id)
+    function jdb_get_topic(jdb, topic_name)
+    {
+        var topics = kw_get_dict_value(jdb, "topics", null, 0);
+        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        return topic;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function jdb_get(jdb, topic_name, id, recursive)
     {
         var topics = kw_get_dict_value(jdb, "topics", null, 0);
         var topic = kw_get_dict_value(topics, topic_name, null, 0);
@@ -1714,7 +1724,10 @@
             log_error("jdb_get: topic not found: " + topic_name);
             return null;
         }
-        return _jdb_get(topic, jdb.hook, id, true);
+        if(recursive === undefined) {
+            recursive = true;
+        }
+        return _jdb_get(topic, jdb.hook, id, recursive);
     }
 
     /********************************************
@@ -2199,6 +2212,7 @@
     exports.jdb_init = jdb_init;
     exports.jdb_update = jdb_update;
     exports.jdb_delete = jdb_delete;
+    exports.jdb_get_topic = jdb_get_topic;
     exports.jdb_get = jdb_get;
     exports.jdb_get_by_idx = jdb_get_by_idx;
 
