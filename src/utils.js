@@ -2216,5 +2216,6 @@
     exports.parseBoolean = parseBoolean;
     exports.escapeRegExp = escapeRegExp;
     exports.replace_variable_engine = replace_variable_engine;
+    exports.CssClassBuilder = CssClassBuilder;
 
 })(this);
