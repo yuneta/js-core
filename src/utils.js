@@ -6,8 +6,9 @@
  *  Con poder programar con mis gobjs tengo suficiente.
  *
  *  Last revision:
- *      20 Junio 2014 - Upgraded to yuneta api. Nothing to do.
- *      15 Julio 2015 - Upgraded to yuneta 1.0.0.
+ *      20 Jun 2014 - Upgraded to yuneta api. Nothing to do.
+ *      15 Jul 2015 - Upgraded to yuneta 1.0.0.
+ *      12 Feb 2022 - new CssClassBuilder
  *
  *********************************************************************************/
 
@@ -1583,6 +1584,32 @@
     }
 
     /************************************************************
+     *  callback (obj, key, value, full_path)
+     ************************************************************/
+    function traverse_dict(obj, callback, full_path)
+    {
+        if(full_path == undefined) {
+            full_path = "";
+        }
+        for (var key in obj) {
+            if(!obj.hasOwnProperty(key)) {
+                continue;
+            }
+            var sufix = (full_path.length? "`":"") + key;
+            full_path += sufix;
+
+            callback.apply(this, [obj, key, obj[key], full_path]);
+
+            if(is_object(obj[key])) {
+                //going one step down in the object tree!!
+                traverse_dict(obj[key], callback, full_path);
+            }
+
+            full_path = full_path.slice(0, -sufix.length)
+        }
+    }
+
+    /************************************************************
      *   Init json database
      ************************************************************/
     function jdb_init(jdb)
@@ -1593,9 +1620,13 @@
         var topics = kw_get_dict_value(jdb, "topics", {}, 1);
 
         // Create topics defined in schema
-        for(var key in schema) {
-            kw_get_dict_value(topics, key, __duplicate__(type), 1);
+        var walk = function(obj, key, value, full_path) {
+            if(key.substring(0, 2) != "__") {
+                kw_get_dict_value(topics, full_path, __duplicate__(type), 1);
+                //trace_msg(sprintf("full_path: '%s', key: %s, value: %j", full_path, key, value));
+            }
         }
+        traverse_dict(schema, walk);
     }
 
     /********************************************
