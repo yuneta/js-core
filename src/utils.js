@@ -1348,6 +1348,7 @@
                 kw[key] = default_value?true:false;
             } else if(verbose) {
                 log_error("kw_get_bool() path not found: '" + key + "'");
+                trace_msg(kw);
             }
             return default_value?true:false;
         }
@@ -1368,6 +1369,7 @@
                 kw[key] = default_value;
             } else if(verbose) {
                 log_error("kw_get_int() path not found: '" + key + "'");
+                trace_msg(kw);
             }
             return default_value;
         }
@@ -1388,6 +1390,7 @@
                 kw[key] = default_value;
             } else if(verbose) {
                 log_error("kw_get_real() path not found: '" + key + "'");
+                trace_msg(kw);
             }
             return default_value;
         }
@@ -1408,6 +1411,7 @@
                 kw[key] = default_value;
             } else if(verbose) {
                 log_error("kw_get_str() path not found: '" + key + "'");
+                trace_msg(kw);
             }
             return default_value;
         }
@@ -1428,6 +1432,7 @@
                 kw[key] = default_value;
             } else if(verbose) {
                 log_error("kw_get_dict_value() path not found: '" + key + "'");
+                trace_msg(kw);
             }
             return default_value;
         }
@@ -1588,7 +1593,7 @@
      ************************************************************/
     function traverse_dict(obj, callback, full_path)
     {
-        if(full_path == undefined) {
+        if(full_path == undefined || !is_string(full_path)) {
             full_path = "";
         }
         for (var key in obj) {
@@ -1612,8 +1617,11 @@
     /************************************************************
      *   Init json database
      ************************************************************/
-    function jdb_init(jdb)
+    function jdb_init(jdb, prefix, duplicate)
     {
+        if(duplicate) {
+            jdb = __duplicate__(jdb);
+        }
         var type = kw_get_dict_value(jdb, "type", [], 1);
         var hook = kw_get_str(jdb, "hook", "data", 1);
         var schema = kw_get_dict_value(jdb, "schema", {}, 1);
@@ -1626,7 +1634,9 @@
                 //trace_msg(sprintf("full_path: '%s', key: %s, value: %j", full_path, key, value));
             }
         }
-        traverse_dict(schema, walk);
+        traverse_dict(schema, walk, prefix);
+
+        return jdb;
     }
 
     /********************************************
@@ -2001,7 +2011,6 @@
         return new RegExp("#" + variable + "#", "g");
     }
 
-
     /********************************************
      *  Create class by program, example:
      *      var css = CssClassBuilder();
@@ -2240,6 +2249,7 @@
     exports.strstr = strstr;
     exports.list2options = list2options;
 
+    exports.traverse_dict = traverse_dict;
     exports.jdb_init = jdb_init;
     exports.jdb_update = jdb_update;
     exports.jdb_delete = jdb_delete;
