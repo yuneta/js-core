@@ -1749,8 +1749,18 @@
      ********************************************/
     function jdb_get_topic(jdb, topic_name)
     {
-        var topics = kw_get_dict_value(jdb, "topics", null, 0);
-        var topic = kw_get_dict_value(topics, topic_name, null, 0);
+        var topics = kw_get_dict_value(jdb, "topics", null, 0, false);
+        if(!topics) {
+            log_error("jdb topics section not found");
+            trace_msg(jdb);
+            return null;
+        }
+        var topic = kw_get_dict_value(topics, topic_name, null, 0, false);
+        if(!topic) {
+            log_error("jdb topic not found: " + topic_name);
+            trace_msg(topics);
+            return null;
+        }
         return topic;
     }
 
