@@ -1421,6 +1421,60 @@
     /************************************************************
      *
      ************************************************************/
+    function kw_get_dict(kw, key, default_value, create, verbose)
+    {
+        if(!(kw === Object(kw))) {
+            return default_value;
+        }
+        var v = _kw_search_path(kw, key);
+        if(v === undefined) {
+            if(create) {
+                kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_dict() path not found: '" + key + "'");
+                trace_msg(kw);
+            }
+            return default_value;
+        }
+        if(!is_object(v)) {
+            log_error("path MUST BE a json dict: " + key);
+            trace_msg(kw);
+            return default_value;
+        }
+
+        return v;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function kw_get_list(kw, key, default_value, create, verbose)
+    {
+        if(!(kw === Object(kw))) {
+            return default_value;
+        }
+        var v = _kw_search_path(kw, key);
+        if(v === undefined) {
+            if(create) {
+                kw[key] = default_value;
+            } else if(verbose) {
+                log_error("kw_get_list() path not found: '" + key + "'");
+                trace_msg(kw);
+            }
+            return default_value;
+        }
+        if(!is_array(v)) {
+            log_error("path MUST BE a json list: " + key);
+            trace_msg(kw);
+            return default_value;
+        }
+
+        return v;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function kw_get_dict_value(kw, key, default_value, create, verbose)
     {
         if(!(kw === Object(kw))) {
@@ -2251,6 +2305,7 @@
     exports.kw_get_bool = kw_get_bool;
     exports.kw_get_int = kw_get_int;
     exports.kw_get_str = kw_get_str;
+    exports.kw_get_dict = kw_get_dict;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.kw_set_dict_value = kw_set_dict_value;
     exports.get_unique_id = get_unique_id;
