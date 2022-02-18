@@ -11,7 +11,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *
@@ -74,6 +74,3 @@
     exports.mxgraph2json = mxgraph2json;
 
 })(this);
-
-
-

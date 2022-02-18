@@ -7,7 +7,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /**************************************************************
      *  Uso:
@@ -397,5 +397,3 @@
     exports.display_time = display_time;
 
 })(this);
-
-

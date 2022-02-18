@@ -30,7 +30,7 @@ DEBUG: {
  *      Interevents to remote yuno
  **************************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)

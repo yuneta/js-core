@@ -9,7 +9,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -568,4 +568,3 @@
     exports.Je_viewer = Je_viewer;
 
 })(this);
-

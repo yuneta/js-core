@@ -22,7 +22,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *  Enter in fullscreen
@@ -138,4 +138,3 @@
     exports.get_window_top_toolbar = get_window_top_toolbar;
 
 })(this);
-

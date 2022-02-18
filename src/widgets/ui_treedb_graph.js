@@ -9,7 +9,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -1313,4 +1313,3 @@
     exports.Ui_treedb_graph = Ui_treedb_graph;
 
 })(this);
-

@@ -19,7 +19,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -3031,4 +3031,3 @@
     exports.Ui_treedb_formtable = Ui_treedb_formtable;
 
 })(this);
-

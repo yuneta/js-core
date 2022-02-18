@@ -11,7 +11,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *
@@ -261,6 +261,3 @@
     exports.set_btn_cancel_state = set_btn_cancel_state;
     exports.set_btn_active_state = set_btn_active_state;
 })(this);
-
-
-

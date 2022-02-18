@@ -12,7 +12,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -554,4 +554,3 @@
     exports.Ui_gobj_tree_js = Ui_gobj_tree_js;
 
 })(this);
-

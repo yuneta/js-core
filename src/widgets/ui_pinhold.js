@@ -22,7 +22,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -948,4 +948,3 @@
     exports.get_pinhold_window_top_toolbar = get_pinhold_window_top_toolbar;
 
 })(this);
-

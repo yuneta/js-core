@@ -7,7 +7,7 @@
  *********************************************************************************/
 
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /************************************************************
      *
@@ -68,4 +68,3 @@
     exports.db_list_persistent_attrs = db_list_persistent_attrs;
 
 })(this);
-

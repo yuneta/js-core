@@ -32,7 +32,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Data
@@ -295,6 +295,3 @@
     exports.decoder_hook = decoder_hook;
 
 })(this);
-
-
-

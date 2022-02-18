@@ -1,7 +1,7 @@
 /* global window, exports, define */
 
 !function() {
-    'use strict'
+    "use strict"
 
     var re = {
         not_string: /[^s]/,

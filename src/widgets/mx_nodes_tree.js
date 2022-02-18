@@ -22,7 +22,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -3599,4 +3599,3 @@
     exports.Mx_nodes_tree = Mx_nodes_tree;
 
 })(this);
-

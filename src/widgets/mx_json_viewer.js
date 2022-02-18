@@ -9,7 +9,7 @@
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
-    'use strict';
+    "use strict";
 
     /********************************************
      *      Configuration (C attributes)
@@ -1316,4 +1316,3 @@
     exports.Mx_json_viewer = Mx_json_viewer;
 
 })(this);
-

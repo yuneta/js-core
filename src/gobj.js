@@ -21,7 +21,7 @@ __inside_event_loop__ = 0;
 
 (function(exports) {
     // Place the script in strict mode
-    'use strict';
+    "use strict";
 
     /************************************************************
      *        Get current "fecha"
