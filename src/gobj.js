@@ -300,7 +300,6 @@ __inside_event_loop__ = 0;
         // TODO if attribute not found then find in bottom gobj
         if(key in this.config) {
             if (this.config.hasOwnProperty(key)) {
-                previous_value = this.config[key]
                 this.config[key] = value;
 
                 if(this.mt_writing) {
