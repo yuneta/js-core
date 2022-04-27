@@ -637,6 +637,22 @@ __inside_event_loop__ = 0;
     };
 
     /************************************************************
+     *  only to childs supporting the event
+     ************************************************************/
+    proto.gobj_send_event_to_childs = function(event, kw, src)
+    {
+        var set = this.dl_childs;
+        for(var i=0; i<set.length; i++) {
+            var child = set[i];
+            if(child) {
+                if(child.gobj_event_in_input_event_list(event)) {
+                    child.gobj_send_event(event, kw, src);
+                }
+            }
+        }
+    }
+
+    /************************************************************
      *      _Subscription class.
      ************************************************************/
     function _Subscription(publisher, event, kw, subscriber) {
