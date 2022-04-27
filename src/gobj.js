@@ -296,14 +296,21 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_write_attr = function(key, value)
     {
-        var previous_value = undefined;
+        // TODO implement inherited attributes
+        // TODO if attribute not found then find in bottom gobj
         if(key in this.config) {
             if (this.config.hasOwnProperty(key)) {
                 previous_value = this.config[key]
                 this.config[key] = value;
+
+                if(this.mt_writing) {
+                    this.mt_writing(key);
+                }
+
+                return 0;
             }
         }
-        return previous_value;
+        return -1;
     };
 
     /************************************************************
@@ -311,9 +318,15 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_read_attr = function(key)
     {
+        // TODO implement inherited attributes
+        // TODO if attribute not found then find in bottom gobj
         if(key in this.config) {
-            if (this.config.hasOwnProperty(key)) {
-                return this.config[key];
+            if(this.config.hasOwnProperty(key)) {
+                var value = this.config[key];
+                if(this.mt_reading) {
+                    return this.mt_reading(key, value);
+                }
+                return value;
             }
         }
         return null;
