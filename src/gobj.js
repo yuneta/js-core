@@ -306,7 +306,6 @@ __inside_event_loop__ = 0;
                 if(this.mt_writing) {
                     this.mt_writing(key);
                 }
-
                 return 0;
             }
         }
