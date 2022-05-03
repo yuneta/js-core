@@ -1538,14 +1538,14 @@
     }
     function load_json_file(url, on_success, on_error)
     {
-        var req = new XMLHttpRequest();
+        let req = new XMLHttpRequest();
         req.open("GET", url, true);
         req.setRequestHeader("Accept", "application/json");
 
         req.onreadystatechange = function () {
             if (req.readyState == 4) {
                 if (req.status == 200 || fileLoaded(req)) {
-                    var json = JSON.parse(req.responseText);
+                    let json = JSON.parse(req.responseText);
                     on_success(json);
                 } else {
                     if(on_error) {
