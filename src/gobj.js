@@ -114,6 +114,7 @@ __inside_event_loop__ = 0;
         if(this.mt_stop) {
             return this.mt_stop();
         }
+        if(this.__volatil__)
         return 0;
     };
 
@@ -204,7 +205,7 @@ __inside_event_loop__ = 0;
     proto.gobj_is_service = function()
     {
         return this.config.__service__;
-    }
+    };
 
     /************************************************************
      *  HACK Los servicios se registran como únicos
@@ -212,7 +213,15 @@ __inside_event_loop__ = 0;
     proto.gobj_is_unique = function()
     {
         return this.config.__unique__ || this.config.__service__;
-    }
+    };
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_is_volatil = function()
+    {
+        return this.config.__volatil__;
+    };
 
     /************************************************************
      *

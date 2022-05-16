@@ -76,6 +76,7 @@
         this.config.yuno_version = yuno_version;
         this.config.__service__ = false;
         this.config.__unique__ = false;
+        this.config.__volatil__ = false;
         this.parent = null;
         this.yuno = this;
         this._inside = 0;
@@ -177,7 +178,7 @@
     /************************************************************
      *      gobj_create factory.
      ************************************************************/
-    proto._gobj_create = function(name, gclass, kw, parent, is_service, is_unique)
+    proto._gobj_create = function(name, gclass, kw, parent, is_service, is_unique, is_volatil)
     {
         if (name) {
             /*
@@ -261,6 +262,11 @@
         if(is_service || is_unique) {
             gobj.gobj_load_persistent_attrs();
         }
+        if(is_volatil) {
+            gobj.config.__volatil__ = true;
+        } else {
+            gobj.config.__volatil__ = false;
+        }
 
         if (parent) {
             parent._add_child(gobj)
@@ -279,7 +285,15 @@
      ************************************************************/
     proto.gobj_create = function(name, gclass, kw, parent)
     {
-        return this._gobj_create(name, gclass, kw, parent, false, false);
+        return this._gobj_create(
+            name,
+            gclass,
+            kw,
+            parent,
+            false,
+            false,
+            false
+        );
     };
 
     /************************************************************
@@ -293,7 +307,15 @@
             return null;
         }
 
-        return this._gobj_create(name, gclass, kw, parent, false, true);
+        return this._gobj_create(
+            name,
+            gclass,
+            kw,
+            parent,
+            false,
+            true,
+            false
+        );
     };
 
     /************************************************************
@@ -307,7 +329,31 @@
             return null;
         }
 
-        return this._gobj_create(name, gclass, kw, parent, true, false);
+        return this._gobj_create(
+            name,
+            gclass,
+            kw,
+            parent,
+            true,
+            false,
+            false
+        );
+    };
+
+    /************************************************************
+     *      gobj_create factory.
+     ************************************************************/
+    proto.gobj_create_volatil = function(name, gclass, kw, parent)
+    {
+        return this._gobj_create(
+            name,
+            gclass,
+            kw,
+            parent,
+            false,
+            false,
+            true
+        );
     };
 
     /************************************************************
