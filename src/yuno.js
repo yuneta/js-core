@@ -74,9 +74,9 @@
         this.config.yuno_role = yuno_role;
         this.config.yuno_name = yuno_name;
         this.config.yuno_version = yuno_version;
-        this.config.__service__ = false;
-        this.config.__unique__ = false;
-        this.config.__volatil__ = false;
+        this.__service__ = false;
+        this.__unique__ = false;
+        this.__volatil__ = false;
         this.parent = null;
         this.yuno = this;
         this._inside = 0;
@@ -247,25 +247,25 @@
             if(!this._register_unique_gobj(gobj)) {
                return null;
             }
-            gobj.config.__unique__ = true;
+            gobj.__unique__ = true;
         } else {
-            gobj.config.__unique__ = false;
+            gobj.__unique__ = false;
         }
         if(is_service) {
             if(!this._register_service_gobj(gobj)) {
                return null;
             }
-            gobj.config.__service__ = true;
+            gobj.__service__ = true;
         } else {
-            gobj.config.__service__ = false;
+            gobj.__service__ = false;
         }
         if(is_service || is_unique) {
             gobj.gobj_load_persistent_attrs();
         }
         if(is_volatil) {
-            gobj.config.__volatil__ = true;
+            gobj.__volatil__ = true;
         } else {
-            gobj.config.__volatil__ = false;
+            gobj.__volatil__ = false;
         }
 
         if (parent) {

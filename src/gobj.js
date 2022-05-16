@@ -114,7 +114,9 @@ __inside_event_loop__ = 0;
         if(this.mt_stop) {
             return this.mt_stop();
         }
-        if(this.__volatil__)
+        if(this.__volatil__) {
+            this.gobj_destroy();
+        }
         return 0;
     };
 
@@ -212,7 +214,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_is_unique = function()
     {
-        return this.config.__unique__ || this.config.__service__;
+        return this.__unique__ || this.__service__;
     };
 
     /************************************************************
@@ -220,7 +222,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_is_volatil = function()
     {
-        return this.config.__volatil__;
+        return this.__volatil__;
     };
 
     /************************************************************
