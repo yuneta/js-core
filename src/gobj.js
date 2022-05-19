@@ -112,10 +112,10 @@ __inside_event_loop__ = 0;
         }
         this.running = false;
         if(this.mt_stop) {
-            return this.mt_stop();
+            this.mt_stop();
         }
         if(this.__volatil__) {
-            this.gobj_destroy();
+            return this.yuno.gobj_destroy(this);
         }
         return 0;
     };
