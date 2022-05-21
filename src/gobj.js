@@ -69,6 +69,7 @@ __inside_event_loop__ = 0;
         __update_dict__(this.config, kw || {});
         this.gcflag = gcflag;
 
+        this.private = {};
         this.user_data = {};
         this.yuno = undefined;
         this.parent = undefined;
