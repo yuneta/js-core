@@ -1507,6 +1507,26 @@
     }
 
     /************************************************************
+     *  Return object with private data (HACK original kw modified)
+     *  (keys begin with "_" are extracted, removed from source)
+     ************************************************************/
+    function kw_extract_private(kw)
+    {
+        var copy = {};
+
+        for (var attr in kw) {
+            if (kw.hasOwnProperty(attr)) {
+                if(strncmp(attr, "_", 1)==0) {
+                    copy[attr] = kw[attr];
+                    delete kw[attr];
+                }
+            }
+        }
+
+        return copy;
+    }
+
+    /************************************************************
      *
      ************************************************************/
     function get_unique_id(prefix)
@@ -2308,6 +2328,7 @@
     exports.kw_get_dict = kw_get_dict;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.kw_set_dict_value = kw_set_dict_value;
+    exports.kw_extract_private = kw_extract_private;
     exports.get_unique_id = get_unique_id;
     exports.uuidv4 = uuidv4;
     exports.load_json_file = load_json_file;
