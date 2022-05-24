@@ -57,14 +57,9 @@
      ********************************************/
     function konva2json(layer)
     {
-        let root = layer;
-        let json = {
-            id: root.id,
-            name: root.name,
-            children: []
-        };
-        add_children(json, root);
-        return json;
+        let json = layer.toJSON();
+        //add_children(json, root);
+        return JSON.parse(json);
     }
 
     //=======================================================================
