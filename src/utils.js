@@ -2263,6 +2263,95 @@
         return pub;
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function zot(v) {
+        return v==null; // both null and undefined match but not false or 0
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    /*--
+    zim.Proportion = function(baseMin, baseMax, targetMin, targetMax, factor, targetRound, clamp)
+
+    Proportion
+    zim class
+
+    DESCRIPTION
+    Proportion converts an input value to an output value on a different scale.
+    (sometimes called a map() function)
+    For instance, like a slider controlling the scale of an object or sound volume.
+    Make a Proportion object and then in an interval, ticker or event,
+    convert the base value to the target value using the convert method.
+
+    NOTE: as of ZIM 5.5.0 the zim namespace is no longer required (unless zns is set to true before running zim)
+
+    EXAMPLE
+    frame.loadAssets("mySound.mp3");
+    frame.on("complete", function() {
+        var sound = frame.asset("mySound.mp3").play();
+        var p = new Proportion(0, 10, 0, 1);
+        var dial = new Dial(); // default range of 0 to 10
+        dial.currentValue = 10;
+        dial.on("change", function(){
+            sound.volume = p.convert(dial.currentValue);
+        }); // end of dial change
+    }); // end sound loaded
+    END EXAMPLE
+
+    PARAMETERS supports DUO - parameters or single object with properties below
+    baseMin - min for the input scale (say x value)
+    baseMax - max for the input scale (say x value)
+    targetMin - (default 0) min for the output scale (say volume)
+    targetMax - (default 1) max for the output scale (say volume)
+    factor - (default 1) is going the same direction and -1 is going in opposite direction
+    targetRound - (default false) set to true to round the converted number
+    clamp - (default true) set to false to let results go outside min and max range
+
+    METHODS
+    convert(input) - will return the output property (for instance, a volume)
+
+    NOTE: the object always starts by assuming baseMin as baseValue
+    just call the convert method right away if you want it to start at a different baseValue
+    for instance, if your slider went from 100 to 500 and you want to start at half way
+    make the object and call p.convert(300); on the next line
+    --*/
+    let Proportion = function(baseMin, baseMax, targetMin, targetMax, factor, targetRound, clamp) {
+        // factor - set to 1 for increasing and -1 for decreasing
+        // round - true to round results to whole number
+        if (zot(targetMin)) targetMin = 0;
+        if (zot(targetMax)) targetMax = 1;
+        if (zot(factor)) factor = 1;
+        if (zot(targetRound)) targetRound = false;
+
+        // proportion
+        var proportion;
+        var targetAmount;
+
+        this.convert = function(baseAmount) {
+            if (zot(baseAmount)) {
+                baseAmount = baseMin; // just start at the min otherwise call immediate(baseValue);
+            }
+            if (isNaN(baseAmount) || (baseMax-baseMin==0)) {
+                return;
+            }
+            if (clamp) {
+                baseAmount = Math.max(baseAmount, baseMin);
+                baseAmount = Math.min(baseAmount, baseMax);
+            }
+            proportion = (baseAmount - baseMin) / (baseMax - baseMin);
+            if (factor > 0) {
+                targetAmount = targetMin + (targetMax-targetMin) * proportion;
+            } else {
+                targetAmount = targetMax - (targetMax-targetMin) * proportion;
+            }
+            if (targetRound) {targetAmount = Math.round(targetAmount);}
+            return targetAmount;
+        };
+    };
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -2358,5 +2447,6 @@
     exports.escapeRegExp = escapeRegExp;
     exports.replace_variable_engine = replace_variable_engine;
     exports.CssClassBuilder = CssClassBuilder;
+    exports.Proportion = Proportion;
 
 })(this);
