@@ -2352,6 +2352,36 @@
         };
     };
 
+    /********************************************
+     *
+     ********************************************/
+    function get_text_size(text, font_family, font_size)
+    {
+        let pa = document.body;
+        let who = document.createElement('div');
+
+        if(empty_string(font_size)) {
+            font_size = "1em";
+        }
+        if(empty_string(font_family)) {
+            font_family = "san-serif";
+        }
+        if(empty_string(text)) {
+            text = "Mj";
+        }
+        who.style.cssText="display:inline-block;padding:0;line-height:1;position:absolute;visibility:hidden font-family:"+ font_family + ";font-size:" + font_size + ";";
+
+        who.appendChild(document.createTextNode(text));
+        pa.appendChild(who);
+        //let fs= {width: who.offsetWidth, height: who.offsetHeight};
+        let height = who.offsetHeight;
+        let width = who.offsetWidth;
+        pa.removeChild(who);
+
+        return {width: width, height: height};
+    }
+
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -2448,5 +2478,6 @@
     exports.replace_variable_engine = replace_variable_engine;
     exports.CssClassBuilder = CssClassBuilder;
     exports.Proportion = Proportion;
+    exports.get_text_size = get_text_size;
 
 })(this);
