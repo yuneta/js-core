@@ -2445,6 +2445,7 @@
     exports.kw_get_int = kw_get_int;
     exports.kw_get_str = kw_get_str;
     exports.kw_get_dict = kw_get_dict;
+    exports.kw_get_list = kw_get_list;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.kw_set_dict_value = kw_set_dict_value;
     exports.kw_extract_private = kw_extract_private;
