@@ -2360,6 +2360,9 @@
         let pa = document.body;
         let who = document.createElement('div');
 
+        if(is_number(font_size)) {
+            font_size = font_size + "px";
+        }
         if(empty_string(font_size)) {
             font_size = "1em";
         }
