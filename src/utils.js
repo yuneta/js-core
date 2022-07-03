@@ -2355,11 +2355,17 @@
     /********************************************
      *
      ********************************************/
-    function get_text_size(text, font_family, font_size)
+    function get_text_size(text, font_family, font_size, padding)
     {
         let pa = document.body;
         let who = document.createElement('div');
 
+        if(!padding) {
+            padding = 0;
+        }
+        if(is_number(padding)) {
+            padding = padding + "px";
+        }
         if(is_number(font_size)) {
             font_size = font_size + "px";
         }
@@ -2372,7 +2378,7 @@
         if(empty_string(text)) {
             text = "Mj";
         }
-        who.style.cssText="display:inline-block;padding:0;line-height:1;position:absolute;visibility:hidden font-family:"+ font_family + ";font-size:" + font_size + ";";
+        who.style.cssText="display:inline-block;padding:" + padding + ";line-height:1;position:absolute;visibility:hidden font-family:"+ font_family + ";font-size:" + font_size + ";";
 
         who.appendChild(document.createTextNode(text));
         pa.appendChild(who);
