@@ -1694,6 +1694,22 @@
      *      If a record has childs,
      *      the own record has the key 'data' with the array of child records
      *
+     *      Initialization
+     *      --------------
+            let jdb: {
+                "type": [], // Can be [] or {}
+                "hook": "data",
+                "schema": { // topics
+                    "app_menu": [],
+                    "account_menu": []
+                }
+            }
+
+            jdb_init(jdb);
+
+     *
+     *      Inside example
+     *      --------------
      *      jdb: {
      *          hook: "data",
      *          type: []
