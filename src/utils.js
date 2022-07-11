@@ -1690,7 +1690,7 @@
 
     /************************************************************
      *   Init json database
-     *      Hierarchical tree.
+     *      Hierarchical tree. To use in webix style.
      *      If a record has childs,
      *      the own record has the key 'data' with the array of child records
      *
