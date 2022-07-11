@@ -1690,6 +1690,45 @@
 
     /************************************************************
      *   Init json database
+     *      Hierarchical tree.
+     *      If a record has childs,
+     *      the own record has the key 'data' with the array of child records
+     *
+     *      jdb: {
+     *          hook: "data",
+     *          type: []
+     *          schema:{
+     *              app_menu: [],
+     *              account_menu: [],
+     *              ...
+     *          }
+     *          topics: {
+     *              app_menu: [
+     *                  {
+     *                      id:
+     *                      icon:
+     *                      value:
+     *                      action:
+     *                  },
+     *                  {
+     *                      id:
+     *                      icon:
+     *                      value:
+     *                      action:
+     *                      data: [
+     *                          {
+     *                              id:
+     *                              icon:
+     *                              value:
+     *                              action:
+     *                          },
+     *
+     *                      ]
+     *                  },
+     *                  ...
+     *              ]
+     *          }
+     *      }
      ************************************************************/
     function jdb_init(jdb, prefix, duplicate)
     {
