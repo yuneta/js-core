@@ -1696,14 +1696,14 @@
      *
      *      Initialization
      *      --------------
-            let jdb: {
+            var jdb = {
                 "type": [], // Can be [] or {}
                 "hook": "data",
                 "schema": { // topics
                     "app_menu": [],
                     "account_menu": []
                 }
-            }
+            };
 
             jdb_init(jdb);
 
