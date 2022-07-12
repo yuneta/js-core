@@ -484,7 +484,8 @@
      *
      ************************************************************/
     // Return if a value is a number
-    function is_number(value) {
+    function is_number(value)
+    {
         return typeof value === "number" && isFinite(value);
     }
 
@@ -492,7 +493,8 @@
      *
      ************************************************************/
     // Return if a value is a boolean
-    function is_boolean(value) {
+    function is_boolean(value)
+    {
         return value === false || value === true;
     }
 
@@ -500,16 +502,25 @@
      *
      ************************************************************/
     // Return if a value is a null
-    function is_null(value) {
+    function is_null(value)
+    {
         return value === null || value === undefined;
     }
 
     /************************************************************
      *
      ************************************************************/
-    // Return if a value is a null
-    function is_date(value) {
+    function is_date(value)
+    {
         return value instanceof Date
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    function is_function(value)
+    {
+        return typeof value === "function"
     }
 
     /************************************************************
@@ -1721,8 +1732,8 @@
      *          topics: {
      *              app_menu: [
      *                  {
-     *                      id:
-     *                      icon:
+     *                      id:         // Mandatory field
+     *                      icon:       // Remains: optional fields
      *                      value:
      *                      action:
      *                  },
@@ -2479,6 +2490,7 @@
     exports.is_boolean = is_boolean;
     exports.is_null = is_null;
     exports.is_date = is_date;
+    exports.is_function = is_function;
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
     exports.strcmp = strcmp;
