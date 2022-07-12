@@ -2456,6 +2456,17 @@
         return {width: width, height: height};
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function htmlToElement(html)
+    {
+        let template = document.createElement('template');
+        html = html.trim(); // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+        return template.content.firstChild;
+    }
+
 
     //=======================================================================
     //      Expose the class via the global object
@@ -2556,5 +2567,6 @@
     exports.CssClassBuilder = CssClassBuilder;
     exports.Proportion = Proportion;
     exports.get_text_size = get_text_size;
+    exports.htmlToElement = htmlToElement;
 
 })(this);
