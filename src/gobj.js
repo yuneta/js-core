@@ -967,17 +967,14 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_publish_event = function(event, kw)
     {
-        var ret_sum = 0;
-        var sent_count = 0;
+        let ret_sum = 0;
+        let sent_count = 0;
 
         if(!kw) {
             kw = {};
         }
         if(empty_string(event)) {
-            var msg = "GObj.gobj_publish_event('" +
-                this.gobj_short_name() +
-                "'): '"
-                + event + "' event NULL";
+            let msg = sprintf("GObj.gobj_publish_event('%s'): event NULL", this.gobj_short_name());
             log_error(msg);
             return -1;
         }
@@ -988,54 +985,39 @@ __inside_event_loop__ = 0;
         var output_events = this.get_output_event_list();
         if(!(this.gcflag & gcflag_no_check_ouput_events)) {
             if (!elm_in_list(event, output_events)) {
-                var msg = "GObj.gobj_publish_event('" +
-                    this.gobj_short_name() +
-                    "'): '"
-                    + event + "' not in output-event list";
+                let msg = sprintf("GObj.gobj_publish_event('%s'): event '%s' not in output-event list",
+                    this.gobj_short_name(),
+                    event
+                );
                 log_error(msg);
                 return -1;
             }
         }
 
-        var tracing = this.is_tracing(event);
+        let tracing = this.is_tracing(event);
         if (tracing) {
-            var hora = get_current_datetime();
-            var fsm = this.fsm;
-            var event_id = fsm.event_index[event] || 0;
-            try {
-                var msg = hora + this._tab() + '**> mach: ' +
-                    this.gclass_name + '^' + this.name +
-                    ', st: ' + fsm.state_list[fsm.current_state-1] +
-                    ', ev: ' + fsm.event_list[event_id - 1];
-                if(tracing > 1) {
-                    try {
-                        var kw_ = JSON.stringify(kw, replacer);
-                    } catch (e) {
-                        kw_ = kw;
-                    }
-                    msg += ', kw: ' + kw_;
-                } else {
-                    msg += ', kw: ' + kw;
-                }
-
-            } catch (e) {
-                log_error("tracing: " + e);
-
-                var msg = hora + this._tab() + '-> mach: ' +
-                    this.gclass_name + '^' + this.name +
-                    ', st: ' + fsm.state_list[fsm.current_state-1] +
-                    ', ev: ' + fsm.event_list[event_id - 1] +
-                    ', kw: ' + kw;
-            }
+            let hora = get_current_datetime();
+            let fsm = this.fsm;
+            let event_id = fsm.event_index[event] || 0;
+            let msg = sprintf("%s%s**> mach: %s, st: %s, ev: %s",
+                hora,
+                this._tab(),
+                this.gobj_short_name(),
+                fsm.state_list[fsm.current_state-1],
+                fsm.event_list[event_id - 1]
+            );
             log_debug(msg);
+            if(tracing > 1) {
+                let msg = sprintf("                   %skw:", this._tab())
+                console.dir(msg, kw);
+            }
         }
 
         /*---------------------------*
          *  Own publication method
          *---------------------------*/
         if(this.mt_publish_event) {
-            var topublish = this.mt_publish_event(event, kw);
-            if(!topublish) {
+            if(!this.mt_publish_event(event, kw)) {
                 return 0;
             }
         }
@@ -1043,34 +1025,34 @@ __inside_event_loop__ = 0;
         /*--------------------------------------------------------------*
          *  Default publication method
          *--------------------------------------------------------------*/
-        var subscriptions = this.dl_subscriptions;
-        var len = subscriptions.length;
-        for(var i=0; i<len; i++) {
-            var subs = subscriptions[i];
+        let subscriptions = this.dl_subscriptions;
+        let len = subscriptions.length;
+        for(let i=0; i<len; i++) {
+            let topublish = true;
+            let subs = subscriptions[i];
             if(!subs) {
                 continue;
             }
             if(this.mt_publication_pre_filter) {
-                var topublish = this.mt_publication_pre_filter(subs, event, kw);
+                topublish = this.mt_publication_pre_filter(subs, event, kw);
                 if(!topublish) {
                     continue;
                 }
             }
-            var subscriber = subs.subscriber;
+            let subscriber = subs.subscriber;
 
             /*
              *  Check if event null or event in event_list
              */
             if (subs.event===null ||subs.event===undefined || event === subs.event) {
-
-                var kw2publish = null;
-                var __global__ = subs.__global__;
-                var __filter__ = subs.__filter__;
+                let kw2publish = null;
+                let __global__ = subs.__global__;
+                let __filter__ = subs.__filter__;
 
                 /*
                  *  Check renamed_event
                  */
-                var event_name = subs.renamed_event;
+                let event_name = subs.renamed_event;
                 if (empty_string(event_name)) {
                     event_name = event;
                 }
@@ -1080,7 +1062,7 @@ __inside_event_loop__ = 0;
                  *  (__extend_dict__): add new keys and overwrite existing keys.
                  */
                 if(__global__) {
-                    kw2publish = __clone(__global__);
+                    kw2publish = __duplicate__(__global__); // TODO aquí había __clone__
                     __extend_dict__(kw2publish, kw);
                 } else {
                     kw2publish = __duplicate__(kw);
@@ -1089,7 +1071,7 @@ __inside_event_loop__ = 0;
                 /*
                  *  User filter or configured filter
                  */
-                var topublish = true;
+                topublish = true;
                 if(this.mt_publication_filter) {
                     topublish = this.mt_publication_filter(
                         this,
@@ -1117,8 +1099,8 @@ __inside_event_loop__ = 0;
         }
 
         if(!sent_count) {
-            var event_id = this.fsm.event_index[event] || 0;
-            var attrs = this.fsm.event_attrs[event_id-1];
+            let event_id = this.fsm.event_index[event] || 0;
+            let attrs = this.fsm.event_attrs[event_id-1];
             if(!elm_in_list("no_warn_subs", attrs)) {
                 if(!this._destroyed) {
                     log_warning(
