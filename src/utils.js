@@ -1360,7 +1360,12 @@
             } else if(verbose) {
                 log_error("kw_get_bool() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value?true:false;
         }
         return b?true:false;
@@ -1381,6 +1386,12 @@
             } else if(verbose) {
                 log_error("kw_get_int() path not found: '" + key + "'");
                 trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
             }
             return default_value;
         }
@@ -1402,7 +1413,12 @@
             } else if(verbose) {
                 log_error("kw_get_real() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value;
         }
         return parseFloat(i);
@@ -1423,7 +1439,12 @@
             } else if(verbose) {
                 log_error("kw_get_str() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value;
         }
         return String(str);
@@ -1444,7 +1465,12 @@
             } else if(verbose) {
                 log_error("kw_get_dict() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value;
         }
         if(!is_object(v)) {
@@ -1471,7 +1497,12 @@
             } else if(verbose) {
                 log_error("kw_get_list() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value;
         }
         if(!is_array(v)) {
@@ -1498,7 +1529,12 @@
             } else if(verbose) {
                 log_error("kw_get_dict_value() path not found: '" + key + "'");
                 trace_msg(kw);
-            }
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }            }
             return default_value;
         }
         return v;
