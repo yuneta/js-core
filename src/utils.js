@@ -85,6 +85,29 @@
     }
 
     /************************************************************
+     *  Update a dict with another dict: ONLY existing items!! (YES recursive)
+     ************************************************************/
+    function json_object_update_existing_recursive(destination, source) {
+        "use strict";
+        if(!source) {
+            return destination;
+        }
+        for (let property in source) {
+            if (source.hasOwnProperty(property) && destination.hasOwnProperty(property)) {
+                if(is_object(destination[property]) && is_object(source[property])) {
+                    json_object_update_existing_recursive(
+                        destination[property],
+                        source[property]
+                    );
+                } else {
+                    destination[property] = source[property];
+                }
+            }
+        }
+        return destination;
+    }
+
+    /************************************************************
      *  Update a dict with another dict: ONLY existing items!! (NOT recursive)
      *  Like json_object_update_existing()
      ************************************************************/
@@ -2514,6 +2537,7 @@
     //=======================================================================
     exports.__duplicate__ = __duplicate__;
     exports.__update_dict__ = __update_dict__;
+    exports.json_object_update_existing_recursive = json_object_update_existing_recursive;
     exports.json_object_update_existing = __update_dict__;
     exports.__extend_dict__ = __extend_dict__;
     exports.json_object_update = __extend_dict__;

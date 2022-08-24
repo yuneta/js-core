@@ -66,7 +66,7 @@ __inside_event_loop__ = 0;
         this.name = name || '';
         this.gclass_name = gclass_name || '';
         this.config = __duplicate__(config);
-        __update_dict__(this.config, kw || {});
+        json_object_update_existing_recursive(this.config, kw || {});
         this.private = kw_extract_private(this.config);
         this.gcflag = gcflag;
 
