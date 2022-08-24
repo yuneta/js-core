@@ -998,13 +998,12 @@ __inside_event_loop__ = 0;
         if (tracing) {
             let hora = get_current_datetime();
             let fsm = this.fsm;
-            let event_id = fsm.event_index[event] || 0;
             let msg = sprintf("%s%s**> mach: %s, st: %s, ev: %s",
                 hora,
                 this._tab(),
                 this.gobj_short_name(),
                 fsm.state_list[fsm.current_state-1],
-                fsm.event_list[event_id - 1]
+                event
             );
             log_debug(msg);
             if(tracing > 1) {
@@ -1100,7 +1099,7 @@ __inside_event_loop__ = 0;
 
         if(!sent_count) {
             let event_id = this.fsm.event_index[event] || 0;
-            let attrs = this.fsm.event_attrs[event_id-1];
+            let attrs = this.fsm.event_attrs[event_id-1] || {};
             if(!elm_in_list("no_warn_subs", attrs)) {
                 if(!this._destroyed) {
                     log_warning(
