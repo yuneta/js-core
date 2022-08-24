@@ -1365,7 +1365,8 @@
                     throw new Error();
                 } catch(e) {
                     console.log(e.stack);
-                }            }
+                }
+            }
             return default_value?true:false;
         }
         return b?true:false;
@@ -1418,7 +1419,8 @@
                     throw new Error();
                 } catch(e) {
                     console.log(e.stack);
-                }            }
+                }
+            }
             return default_value;
         }
         return parseFloat(i);
@@ -1470,7 +1472,8 @@
                     throw new Error();
                 } catch(e) {
                     console.log(e.stack);
-                }            }
+                }
+            }
             return default_value;
         }
         if(!is_object(v)) {
@@ -1502,7 +1505,8 @@
                     throw new Error();
                 } catch(e) {
                     console.log(e.stack);
-                }            }
+                }
+            }
             return default_value;
         }
         if(!is_array(v)) {
@@ -1534,7 +1538,8 @@
                     throw new Error();
                 } catch(e) {
                     console.log(e.stack);
-                }            }
+                }
+            }
             return default_value;
         }
         return v;
