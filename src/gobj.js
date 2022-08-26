@@ -881,7 +881,7 @@ __inside_event_loop__ = 0;
                 return 0;
             }
 
-            if(!(this.gcflag & gcflag_no_check_ouput_events)) {
+            if(!(this.gcflag & gcflag_no_check_output_events)) {
                 if (!elm_in_list(event, output_events)) {
                     var msg = "GObj.gobj_subscribe_event('" +
                         this.gobj_short_name() +
@@ -983,7 +983,7 @@ __inside_event_loop__ = 0;
          *  Chequea que el evento existe en la output_event_list
          */
         var output_events = this.get_output_event_list();
-        if(!(this.gcflag & gcflag_no_check_ouput_events)) {
+        if(!(this.gcflag & gcflag_no_check_output_events)) {
             if (!elm_in_list(event, output_events)) {
                 let msg = sprintf("GObj.gobj_publish_event('%s'): event '%s' not in output-event list",
                     this.gobj_short_name(),
@@ -1615,7 +1615,7 @@ __inside_event_loop__ = 0;
     };
 
     var gcflag_manual_start = 0x0001;   // gobj_start_tree() don't start gobjs of this gclass.
-    var gcflag_no_check_ouput_events = 0x0002;   // When publishing don't check events in output_event_list.
+    var gcflag_no_check_output_events = 0x0002;   // When publishing don't check events in output_event_list.
 
 
     //=======================================================================
@@ -1624,5 +1624,5 @@ __inside_event_loop__ = 0;
     exports.GObj = GObj;
     exports.get_current_datetime = get_current_datetime;
     exports.gcflag_manual_start = gcflag_manual_start;
-    exports.gcflag_no_check_ouput_events = gcflag_no_check_ouput_events;
+    exports.gcflag_no_check_output_events = gcflag_no_check_output_events;
 })(this);

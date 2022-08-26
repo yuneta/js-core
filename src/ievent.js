@@ -678,7 +678,7 @@ DEBUG: {
             name,
             "IEvent",
             kw,
-            gcflag_no_check_ouput_events
+            gcflag_no_check_output_events
         );
         return this;
     };
