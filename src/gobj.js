@@ -17,7 +17,7 @@
 /**************************************************************************
  *        GObj
  **************************************************************************/
-__inside_event_loop__ = 0;
+var __inside_event_loop__ = 0;
 
 (function(exports) {
     // Place the script in strict mode
@@ -28,31 +28,31 @@ __inside_event_loop__ = 0;
      ************************************************************/
     function get_current_datetime() // TODO revisa
     {
-        var currentTime = new Date();
-        var month = currentTime.getMonth() + 1;
+        let currentTime = new Date();
+        let month = currentTime.getMonth() + 1;
         if (month < 10) {
             month = "0" + month;
         }
-        var day = currentTime.getDate();
+        let day = currentTime.getDate();
         if (day < 10) {
             day = "0" + day;
         }
-        var year = currentTime.getFullYear();
-        var fecha = year + "/" + month + "/" + day;
+        let year = currentTime.getFullYear();
+        let fecha = year + "/" + month + "/" + day;
 
-        var hours = currentTime.getHours();
+        let hours = currentTime.getHours();
         if (hours < 10) {
             hours = "0" + hours;
         }
-        var minutes = currentTime.getMinutes();
+        let minutes = currentTime.getMinutes();
         if (minutes < 10) {
             minutes = "0" + minutes;
         }
-        var seconds = currentTime.getSeconds();
+        let seconds = currentTime.getSeconds();
         if (seconds < 10) {
             seconds = "0" + seconds;
         }
-        var hora = hours + ":" + minutes + ":" + seconds;
+        let hora = hours + ":" + minutes + ":" + seconds;
         return fecha + " " + hora;
     }
 
@@ -137,9 +137,9 @@ __inside_event_loop__ = 0;
         if(!this.running) {
             this.gobj_start();
         }
-        var set = this.dl_childs;
-        for(var i=0; i<set.length; i++) {
-            var child = set[i];
+        let set = this.dl_childs;
+        for(let i=0; i<set.length; i++) {
+            let child = set[i];
             if(child) {
                 child.gobj_start_tree();
             }
@@ -156,9 +156,9 @@ __inside_event_loop__ = 0;
         if(this.running) {
             this.gobj_stop();
         }
-        var set = this.dl_childs;
-        for(var i=0; i<set.length; i++) {
-            var child = set[i];
+        let set = this.dl_childs;
+        for(let i=0; i<set.length; i++) {
+            let child = set[i];
             if(child) {
                 child.gobj_stop_tree();
             }
@@ -392,10 +392,10 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto._match_child = function(properties)
     {
-        var __gclass_name__ = properties.__gclass_name__;
-        var __gobj_name__ = properties.__gobj_name__;
-        var __prefix_gobj_name__ = properties.__prefix_gobj_name__;
-        var __state__ = properties.__state__;
+        let __gclass_name__ = properties.__gclass_name__;
+        let __gobj_name__ = properties.__gobj_name__;
+        let __prefix_gobj_name__ = properties.__prefix_gobj_name__;
+        let __state__ = properties.__state__;
 
         /*
          *  Check the system keys of the jn_filter used in find loop
@@ -411,20 +411,20 @@ __inside_event_loop__ = 0;
             }
         }
         if(__prefix_gobj_name__) {
-            var l = __prefix_gobj_name__.length;
-            var name = this.name.substring(0, l);
+            let l = __prefix_gobj_name__.length;
+            let name = this.name.substring(0, l);
             if(__prefix_gobj_name__ != name) {
                 return false;
             }
         }
         if(__state__) {
-            var state = this.gobj_current_state();
+            let state = this.gobj_current_state();
             if(__state__ != state) {
                 return false;
             }
         }
 
-        for(var key in properties) {
+        for(let key in properties) {
             if(key == "__gclass_name__" ||
                     key == "__gobj_name__" ||
                     key == "__prefix_gobj_name__" ||
@@ -445,9 +445,9 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_find_child = function(kw)
     {
-        var set = this.dl_childs;
-        for(var i=0; i<set.length; i++) {
-            var child = set[i];
+        let set = this.dl_childs;
+        for(let i=0; i<set.length; i++) {
+            let child = set[i];
             if(child._match_child(kw)) {
                 return child;
             }
@@ -460,10 +460,10 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_match_childs = function(kw)
     {
-        var childs = [];
-        var set = this.dl_childs;
-        for(var i=0; i<set.length; i++) {
-            var child = set[i];
+        let childs = [];
+        let set = this.dl_childs;
+        for(let i=0; i<set.length; i++) {
+            let child = set[i];
             if(child._match_child(kw)) {
                 childs.push(child);
             }
@@ -497,28 +497,21 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_command = function(command, kw, src) {
         if(this.mt_command) {
-            var tracing = this.is_tracing();
+            let tracing = this.is_tracing();
             if (tracing) {
-                var hora = get_current_datetime();
-                var msg = hora + this._tab() + "!> cmd: " +
-                    this.gclass_name + ":" + this.name +
-                    ", cmd: '" + command + "'";
-                if(tracing > 1) {
-                    try {
-                        var kw_ = JSON.stringify(kw, replacer);
-                    } catch (e) {
-                        kw_ = kw;
-                    }
-                    msg += ', kw: ' + kw_;
-                } else {
-                    msg += ', kw: ' + kw;
-                }
-                if(src) {
-                    msg += ', src: ' + src.gclass_name + '^' + src.name;
-                } else {
-                    msg += ', src: undefined';
-                }
+                let hora = get_current_datetime();
+                let msg = sprintf("%s%s!> cmd: %s, src: %s",
+                    hora,
+                    this._tab(),
+                    this.gobj_short_name(),
+                    command,
+                    src?src.gobj_short_name():"undefined"
+                );
                 log_debug(msg);
+                if(tracing > 1) {
+                    let msg = sprintf("                      %skw:", this._tab())
+                    console.dir(msg, kw);
+                }
             }
             return this.mt_command(command, kw, src);
         }
@@ -570,7 +563,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.set_timeout = function(msec)
     {
-        var gobj = this;
+        let gobj = this;
         if (this.timer_id !== -1) {
             clearTimeout(this.timer_id);
             this.timer_id = -1;
@@ -607,9 +600,9 @@ __inside_event_loop__ = 0;
         }
         if(this.mt_inject_event) {
             if(!this.gobj_event_in_input_event_list(event)) {
-                var tracing = this.is_tracing();
+                let tracing = this.is_tracing();
                 if(tracing) {
-                    var hora = get_current_datetime();
+                    let hora = get_current_datetime();
                     var kw_ = kw;
                     if(tracing > 1) {
                         try {
@@ -653,9 +646,9 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_send_event_to_childs = function(event, kw, src)
     {
-        var set = this.dl_childs;
-        for(var i=0; i<set.length; i++) {
-            var child = set[i];
+        let set = this.dl_childs;
+        for(let i=0; i<set.length; i++) {
+            let child = set[i];
             if(child) {
                 if(child.gobj_event_in_input_event_list(event)) {
                     child.gobj_send_event(event, kw, src);
@@ -679,10 +672,10 @@ __inside_event_loop__ = 0;
         this.__service__ = null;
 
         if(kw) {
-            var __global__ = kw["__global__"];
-            var __config__ = kw["__config__"];
-            var __filter__ = kw["__filter__"];
-            var __service__ = kw["__service__"];
+            let __global__ = kw["__global__"];
+            let __config__ = kw["__config__"];
+            let __filter__ = kw["__filter__"];
+            let __service__ = kw["__service__"];
 
             if(__global__) {
                 this.__global__ = __duplicate__(__global__);
@@ -690,12 +683,12 @@ __inside_event_loop__ = 0;
             if(__config__) {
                 this.__config__ = __duplicate__(__config__);
                 if(kw_has_key(this.__config__, "__rename_event_name__")) {
-                    var renamed_event = kw_get_str(this.__config__, "__rename_event_name__", 0);
+                    let renamed_event = kw_get_str(this.__config__, "__rename_event_name__", 0);
                     this.renamed_event = renamed_event;
                     delete this.__config__["__rename_event_name__"];
 
                     // Get/Create __global__
-                    var kw_global = this.__global__;
+                    let kw_global = this.__global__;
                     if(!kw_global) {
                         kw_global = {};
                         this.__global__ = kw_global;
@@ -723,20 +716,20 @@ __inside_event_loop__ = 0;
      ************************************************************/
     function _find_subscription(dl_subs, publisher, event, kw, subscriber)
     {
-        var sub_list = [];
+        let sub_list = [];
 
-        var __global__ = null;
-        var __config__ = null;
-        var __filter__ = null;
+        let __global__ = null;
+        let __config__ = null;
+        let __filter__ = null;
         if(kw) {
-            var __global__ = kw["__global__"];
-            var __config__ = kw["__config__"];
-            var __filter__ = kw["__filter__"];
+            let __global__ = kw["__global__"];
+            let __config__ = kw["__config__"];
+            let __filter__ = kw["__filter__"];
         }
 
-        for(var i=0; i<dl_subs.length; i++) {
-            var subs = dl_subs[i];
-            var match = true;
+        for(let i=0; i<dl_subs.length; i++) {
+            let subs = dl_subs[i];
+            let match = true;
 
             if(subscriber) {
                 if(subscriber != subs.subscriber) {
@@ -751,7 +744,7 @@ __inside_event_loop__ = 0;
             }
 
             if(__config__) {
-                var kw_config = subs["__config__"];
+                let kw_config = subs["__config__"];
                 if(kw_config) {
                     if(!kw_is_identical(kw_config, __config__)) {
                         match = false;
@@ -761,7 +754,7 @@ __inside_event_loop__ = 0;
                 }
             }
             if(__global__) {
-                var kw_global = subs["__global__"];
+                let kw_global = subs["__global__"];
                 if(kw_global) {
                     if(!kw_is_identical(kw_global, __global__)) {
                         match = false;
@@ -771,7 +764,7 @@ __inside_event_loop__ = 0;
                 }
             }
             if(__filter__) {
-                var kw_filter = subs["__filter__"];
+                let kw_filter = subs["__filter__"];
                 if(kw_filter) {
                     if(!kw_is_identical(kw_filter, __filter__)) {
                         match = false;
@@ -997,17 +990,16 @@ __inside_event_loop__ = 0;
         let tracing = this.is_tracing(event);
         if (tracing) {
             let hora = get_current_datetime();
-            let fsm = this.fsm;
             let msg = sprintf("%s%s**> mach: %s, st: %s, ev: %s",
                 hora,
                 this._tab(),
                 this.gobj_short_name(),
-                fsm.state_list[fsm.current_state-1],
+                this.fsm.state_list[this.fsm.current_state-1],
                 event
             );
             log_debug(msg);
             if(tracing > 1) {
-                let msg = sprintf("                   %skw:", this._tab())
+                let msg = sprintf("                      %skw:", this._tab())
                 console.dir(msg, kw);
             }
         }
@@ -1382,19 +1374,22 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto._change_state = function(state_id)
     {
-        var fsm = this.fsm;
+        let fsm = this.fsm;
 
         if (state_id <= 0 || state_id > fsm.state_list.length) {
             log_error(this.gclass_name + ": _change_state() state_id INVALID " + state_id);
         }
-        var tracing = this.is_tracing();
+        let tracing = this.is_tracing();
         fsm.last_state = fsm.current_state;
         fsm.current_state = state_id;
         if (tracing) {
             if (fsm.last_state !== state_id) {
-                var hora = get_current_datetime();
-                var msg = hora + this._tab(fsm) + ' - mach: ' + this.gclass_name + ":" + this.name +
-                    ', new_st: ' + fsm.state_list[state_id-1];
+                let hora = get_current_datetime();
+                let msg = sprintf("%s - mach: %s, new_st: %s",
+                    hora,
+                    this.gobj_short_name(),
+                    this.fsm.state_list[this.fsm.current_state-1]
+                );
                 log_debug(msg);
             }
         }
@@ -1405,7 +1400,7 @@ __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_current_state = function()
     {
-        var fsm = this.fsm;
+        let fsm = this.fsm;
         if (fsm.current_state <= 0 || fsm.state_list.length == 0) {
             return null;
         }
@@ -1415,45 +1410,35 @@ __inside_event_loop__ = 0;
     /************************************************************
      *        Inject event.
      ************************************************************/
-    function replacer(key, value)
-    {
-        if (value && typeof value === "object") {
-            if("__init__" in value) {
-                return value.gclass_name + '^' + value.name;
-            }
-        }
-        return value;
-    }
-
-    /************************************************************
-     *        Inject event.
-     ************************************************************/
     proto.inject_event = function(event, kw, src)
     {
-        var fsm = this.fsm;
-        var result;
-        var action;
+        let fsm = this.fsm;
+        let result;
+        let action;
 
         if (typeof event !== 'string') {
             log_error("inject_event() invalid event TYPE");
             return -1;  //# EventNotAcceptedError
         }
 
-        var event_id = fsm.event_index[event] || 0;
-        if (event_id <= 0) {
-            try {
-                var kw_ = JSON.stringify(__duplicate__(kw));
-            } catch (e) {
-                kw_ = kw;
-            }
+        let tracing = this.is_tracing(event);
+        let hora = null;
+        if(tracing) {
+            hora = get_current_datetime();
+        }
 
-            log_error(
-                this.gobj_short_name() +
-                " inject_event() event UNKNOWN: "  +
-                event +
-                " kw:" +
-                kw_
+        let event_id = fsm.event_index[event] || 0;
+        if (event_id <= 0) {
+            let msg = sprintf("EVENT UNKNOWN -> mach: %s, st: %s, ev: %s",
+                this.gobj_short_name(),
+                this.fsm.state_list[this.fsm.current_state-1],
+                event
             );
+            log_error(msg);
+            if(tracing > 1) {
+                let msg = sprintf("                      %skw:", this._tab())
+                console.dir(msg, kw);
+            }
             return -1;  //# EventNotAcceptedError
         }
 
@@ -1463,71 +1448,42 @@ __inside_event_loop__ = 0;
             action = fsm.states[fsm.current_state][event_id];
         }
 
-        var tracing = this.is_tracing(event);
-
-        var hora = null;
-        if (tracing) {
-            hora = get_current_datetime();
-        }
-
         if (!action) {
-            if (!hora) {
-                hora = get_current_datetime();
-            }
-
-            var msg = hora + this._tab() + '<> mach: ' +
-                this.gclass_name + '^' + this.name +
-                ', st: ' + fsm.state_list[fsm.current_state-1] +
-                ', ev: ' + event + " (REFUSED, no match action)";
+            let msg = sprintf("%s<> mach: %s, st: %s, ev: %s, src: %s (REFUSED, no match action)",
+                hora,
+                this.gobj_short_name(),
+                this.fsm.state_list[this.fsm.current_state-1],
+                event,
+                src?src.gobj_short_name():"undefined"
+            );
             log_warning(msg);
+            if(tracing > 1) {
+                let msg = sprintf("                      %skw:", this._tab())
+                console.dir(msg, kw);
+            }
             this._decrease_inside();
             return -1;  //# EventNotAcceptedError
         }
 
         if (tracing) {
-            var action_name = '';
+            let action_name = "";
             if (action[0]) {
                 action_name = get_function_name(action[0]);
             }
-            try {
-                var msg = hora + this._tab() + '-> mach: ' +
-                    this.gclass_name + '^' + this.name +
-                    ', st: ' + fsm.state_list[fsm.current_state-1] +
-                    ', ev: ' + fsm.event_list[event_id - 1] +
-                    ', ac: ' + action_name;
-                if(tracing > 1) {
-                    try {
-                        var kw_ = JSON.stringify(kw, replacer);
-                    } catch (e) {
-                        kw_ = kw;
-                    }
-                    msg += ', kw: ' + kw_;
-                } else {
-                    msg += ', kw: ' + kw;
-                }
-
-                if(src) {
-                    msg += ', src: ' + src.gclass_name + '^' + src.name;
-                } else {
-                    msg += ', src: undefined';
-                }
-
-            } catch (e) {
-                log_error("tracing: " + e);
-
-                var msg = hora + this._tab() + '-> mach: ' +
-                    this.gclass_name + '^' + this.name +
-                    ', st: ' + fsm.state_list[fsm.current_state-1] +
-                    ', ev: ' + fsm.event_list[event_id - 1] +
-                    ', ac: ' + action_name +
-                    ', kw: ' + kw;
-                if(src) {
-                    msg += ', src: ' + src.gclass_name + '^' + src.name;
-                } else {
-                    msg += ', src: undefined';
-                }
-            }
+            let msg = sprintf("%s%s-> mach: %s, st: %s, ev: %s, ac: %s, src: %s",
+                hora,
+                this._tab(),
+                this.gobj_short_name(),
+                this.fsm.state_list[this.fsm.current_state-1],
+                event,
+                action_name,
+                src?src.gobj_short_name():"undefined"
+            );
             log_debug(msg);
+            if(tracing > 1) {
+                let msg = sprintf("                      %skw:", this._tab())
+                console.dir(msg, kw);
+            }
         }
 
         if (action[1]) {
@@ -1552,12 +1508,16 @@ __inside_event_loop__ = 0;
         }
 
         if (tracing) {
-                var msg = hora + this._tab() + '<- mach: ' +
-                    this.gclass_name + '^' + this.name +
-                    ', st: ' + fsm.state_list[fsm.current_state-1] +
-                    ', ret: ' + result;
-                log_debug(msg);
-            }
+            let msg = sprintf("%s%s<- mach: %s, st: %s, ev: %s, ret: %d",
+                hora,
+                this._tab(),
+                this.gobj_short_name(),
+                this.fsm.state_list[this.fsm.current_state-1],
+                event,
+                Number(result)
+            );
+            log_debug(msg);
+        }
 
         this._decrease_inside();
         return result;
