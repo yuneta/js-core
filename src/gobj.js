@@ -603,25 +603,19 @@ let __inside_event_loop__ = 0;
                 let tracing = this.is_tracing();
                 if(tracing) {
                     let hora = get_current_datetime();
-                    let kw_ = kw;
-                    if(tracing > 1) {
-                        try {
-                            let kw_ = JSON.stringify(kw);
-                        } catch (e) {
-                            kw_ = kw;
-                        }
-                    }
-                    let msg = hora + '+> mach: ' +
-                        this.gclass_name + '^' + this.name +
-                        ', ev: ' + event +
-                        ', kw: ' + kw_;
-
-                    if(src) {
-                        msg += ', src: ' + src.gclass_name + '^' + src.name;
-                    } else {
-                        msg += ', src: undefined';
-                    }
+                    let msg = sprintf("%s%s+> mach: %s, st: %s, ev: %s, src: %s",
+                        hora,
+                        this._tab(),
+                        this.gobj_short_name(),
+                        this.fsm.state_list[this.fsm.current_state-1],
+                        event,
+                        src?src.gobj_short_name():"undefined"
+                    );
                     log_debug(msg);
+                    if(tracing > 1) {
+                        let msg = sprintf("                      %skw:", this._tab())
+                        console.dir(msg, kw);
+                    }
                 }
 
                 return this.mt_inject_event(event, kw, src);
