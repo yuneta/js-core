@@ -1379,8 +1379,9 @@ let __inside_event_loop__ = 0;
         if (tracing) {
             if (fsm.last_state !== state_id) {
                 let hora = get_current_datetime();
-                let msg = sprintf("%s - mach: %s, new_st: %s",
+                let msg = sprintf("%s%s - mach: %s, new_st: %s",
                     hora,
+                    this._tab(),
                     this.gobj_short_name(),
                     this.fsm.state_list[this.fsm.current_state-1]
                 );
