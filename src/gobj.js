@@ -17,7 +17,7 @@
 /**************************************************************************
  *        GObj
  **************************************************************************/
-var __inside_event_loop__ = 0;
+let __inside_event_loop__ = 0;
 
 (function(exports) {
     // Place the script in strict mode
@@ -59,8 +59,8 @@ var __inside_event_loop__ = 0;
     /************************************************************
      *      GObj class.
      ************************************************************/
-    var GObj = Object.__makeSubclass__();
-    var proto = GObj.prototype; // Easy access to the prototype
+    let GObj = Object.__makeSubclass__();
+    let proto = GObj.prototype; // Easy access to the prototype
 
     proto.__init__ = function(fsm_desc, config, name, gclass_name, kw, gcflag) {
         this.name = name || '';
@@ -181,7 +181,7 @@ var __inside_event_loop__ = 0;
      *        remove child
      ************************************************************/
     proto._remove_child = function(gobj) {
-        var index = index_in_list(this.dl_childs, gobj);
+        let index = index_in_list(this.dl_childs, gobj);
         if (index >= 0) {
             this.dl_childs.remove(index);
         }
@@ -263,9 +263,9 @@ var __inside_event_loop__ = 0;
         this.yuno.__global_remove_persistent_attrs_fn__(this, recursive);
 
         if(recursive)  {
-            var set = this.dl_childs;
-            for(var i=0; i<set.length; i++) {
-                var child = set[i];
+            let set = this.dl_childs;
+            for(let i=0; i<set.length; i++) {
+                let child = set[i];
                 if(child) {
                     child.gobj_remove_persistent_attrs(recursive);
                 }
@@ -294,9 +294,9 @@ var __inside_event_loop__ = 0;
     proto.gobj_update_writable_attrs = function(attrs)
     {
         if(this.config && this.config.__writable_attrs__) {
-            for(var attr in attrs) {
+            for(let attr in attrs) {
                 if(elm_in_list(attr, this.config.__writable_attrs__)) {
-                    var new_value = attrs[attr];
+                    let new_value = attrs[attr];
                     this.config[attr] = new_value;
                 }
             }
@@ -332,7 +332,7 @@ var __inside_event_loop__ = 0;
         // TODO if attribute not found then find in bottom gobj
         if(key in this.config) {
             if(this.config.hasOwnProperty(key)) {
-                var value = this.config[key];
+                let value = this.config[key];
                 if(this.mt_reading) {
                     return this.mt_reading(key, value);
                 }
@@ -482,13 +482,13 @@ var __inside_event_loop__ = 0;
         data,
         kw        // to extract ONLY __md_iev__ of source kw.
     ) {
-        var webix = {
+        let webix = {
             "result": result,
             "comment": comment,
             "schema": schema,
             "data": data
         };
-        var webix_answer = msg_iev_answer(gobj, kw, webix);
+        let webix_answer = msg_iev_answer(gobj, kw, webix);
         return webix_answer;
     };
 
@@ -603,15 +603,15 @@ var __inside_event_loop__ = 0;
                 let tracing = this.is_tracing();
                 if(tracing) {
                     let hora = get_current_datetime();
-                    var kw_ = kw;
+                    let kw_ = kw;
                     if(tracing > 1) {
                         try {
-                            var kw_ = JSON.stringify(kw);
+                            let kw_ = JSON.stringify(kw);
                         } catch (e) {
                             kw_ = kw;
                         }
                     }
-                    var msg = hora + '+> mach: ' +
+                    let msg = hora + '+> mach: ' +
                         this.gclass_name + '^' + this.name +
                         ', ev: ' + event +
                         ', kw: ' + kw_;
@@ -636,7 +636,7 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_event_in_input_event_list = function(event)
     {
-        var input_events = this.get_input_event_list();
+        let input_events = this.get_input_event_list();
 
         return elm_in_list(event, input_events);
     };
@@ -844,7 +844,7 @@ var __inside_event_loop__ = 0;
         }
 
         if (typeof subscriber === 'string') {
-            var new_subscriber = this.yuno.gobj_find_unique_gobj(subscriber);
+            let new_subscriber = this.yuno.gobj_find_unique_gobj(subscriber);
             if (!new_subscriber) {
                 log_error("GObj.gobj_subscribe_event(): '" + subscriber + "' gobj NOT FOUND");
                 return;
@@ -860,13 +860,13 @@ var __inside_event_loop__ = 0;
          *  Comprueba que el evento está declarado en output_event_list,
          *  solo para warning, no cortes el procedimiento.
          */
-        var output_events = this.get_output_event_list();
+        let output_events = this.get_output_event_list();
         /*
          *  Event can be null or undefined
          */
         if(event) {
             if (!(typeof event === 'string')) {
-                var msg = "GObj.gobj_subscribe_event('" +
+                let msg = "GObj.gobj_subscribe_event('" +
                     this.gobj_short_name() +
                     "') from " + subscriber.gobj_short_name() + ": '"
                     + event + "' is not a string";
@@ -876,7 +876,7 @@ var __inside_event_loop__ = 0;
 
             if(!(this.gcflag & gcflag_no_check_output_events)) {
                 if (!elm_in_list(event, output_events)) {
-                    var msg = "GObj.gobj_subscribe_event('" +
+                    let msg = "GObj.gobj_subscribe_event('" +
                         this.gobj_short_name() +
                         "') from " + subscriber.gobj_short_name() + ": '"
                         + event + "' not in output-event list";
@@ -889,7 +889,7 @@ var __inside_event_loop__ = 0;
         /*------------------------------*
          *  Find repeated subscription
          *------------------------------*/
-        var dl_subs = this.gobj_find_subscriptions(event, kw, subscriber);
+        let dl_subs = this.gobj_find_subscriptions(event, kw, subscriber);
         if(dl_subs.length > 0) {
             return 0;
         }
@@ -897,7 +897,7 @@ var __inside_event_loop__ = 0;
         /*
          *  Crea una instancia de subscription
          */
-        var subscription = new _Subscription(this, event, kw, subscriber);
+        let subscription = new _Subscription(this, event, kw, subscriber);
         this.dl_subscriptions.push(subscription);
 
         /*-----------------------------*
@@ -921,9 +921,9 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_unsubscribe_event = function(event, kw, subscriber)
     {
-        var sub_list = this.gobj_find_subscriptions(event, kw, subscriber);
+        let sub_list = this.gobj_find_subscriptions(event, kw, subscriber);
         if(sub_list.length) {
-            for (var i=0; i<sub_list.length; i++) {
+            for (let i=0; i<sub_list.length; i++) {
                 this._delete_subscription(sub_list[i], false)
             }
         } else {
@@ -934,7 +934,7 @@ var __inside_event_loop__ = 0;
     };
 
     /************************************************************
-     *  Delete subscription by hander
+     *  Delete subscription by handler
      *  (handler returned by subscribe_event()
      ************************************************************/
     proto.gobj_unsubscribe_event2 = function(hsub)
@@ -949,7 +949,7 @@ var __inside_event_loop__ = 0;
     proto.gobj_unsubscribe_list = function(dl_subs, force)
     {
         if(dl_subs.length) {
-            for (var i=0; i<dl_subs.length; i++) {
+            for (let i=0; i<dl_subs.length; i++) {
                 this._delete_subscription(dl_subs[i], force)
             }
         }
@@ -975,7 +975,7 @@ var __inside_event_loop__ = 0;
         /*
          *  Chequea que el evento existe en la output_event_list
          */
-        var output_events = this.get_output_event_list();
+        let output_events = this.get_output_event_list();
         if(!(this.gcflag & gcflag_no_check_output_events)) {
             if (!elm_in_list(event, output_events)) {
                 let msg = sprintf("GObj.gobj_publish_event('%s'): event '%s' not in output-event list",
@@ -1118,12 +1118,12 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_full_name = function()
     {
-        var self=this;
+        let self=this;
 
-        var full_name = self.gobj_short_name();
-        var parent = self.parent;
+        let full_name = self.gobj_short_name();
+        let parent = self.parent;
         while(parent) {
-            var prefix = parent.gobj_short_name();
+            let prefix = parent.gobj_short_name();
             full_name = prefix + '`' + full_name;
             parent = parent.parent;
         }
@@ -1168,7 +1168,7 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto.fsm_create = function(fsm_desc)
     {
-        var self = this.fsm = {};
+        let self = this.fsm = {};
         self.event_list = fsm_desc.event_list || [];
         self.event_attrs = [];
         self.state_list = fsm_desc.state_list || [];
@@ -1177,8 +1177,8 @@ var __inside_event_loop__ = 0;
         self.current_state = 1;
 
         // check state names
-        var state_names = __duplicate__(self.state_list); // dup list
-        for (var st_name in fsm_desc.machine) {
+        let state_names = __duplicate__(self.state_list); // dup list
+        for (let st_name in fsm_desc.machine) {
             if (elm_in_list(st_name, state_names)) {
                 delete_from_list(state_names, st_name);
             } else {
@@ -1192,28 +1192,28 @@ var __inside_event_loop__ = 0;
         }
 
         // remove attributes from event_list and move attrs to _event_attr list
-        var event_list = [];
-        var event_attrs = [];
-        for (var i=0; i<self.event_list.length; i++) {
-            var ev = self.event_list[i];
-            var name = ev.split(":");
-            var ev_name = name[0];
+        let event_list = [];
+        let event_attrs = [];
+        for (let i=0; i<self.event_list.length; i++) {
+            let ev = self.event_list[i];
+            let name = ev.split(":");
+            let ev_name = name[0];
             ev_name = __strip__(ev_name);
             event_list.push(ev_name);
 
-            var ev_attrs = name[1];
+            let ev_attrs = name[1];
             ev_attrs = __strip__(ev_attrs);
-            var attrs_list = ev_attrs.split(" "); // TODO
+            let attrs_list = ev_attrs.split(" "); // TODO
             event_attrs.push(attrs_list);
         }
         self.event_list = event_list;
         self.event_attrs = event_attrs;
 
         // build _output_events from event attributes
-        var output_events = []; //__set__()
-        for(var idx=0; idx < self.event_list.length; idx++) {
-            var ev_name = self.event_list[idx];
-            var attrs = self.event_attrs[idx];
+        let output_events = []; //__set__()
+        for(let idx=0; idx < self.event_list.length; idx++) {
+            let ev_name = self.event_list[idx];
+            let attrs = self.event_attrs[idx];
             if (elm_in_list("output", attrs)) {
                 output_events.push(ev_name);
             }
@@ -1221,21 +1221,21 @@ var __inside_event_loop__ = 0;
         self.output_events = __set__(output_events);
 
         // check event names
-        var event_names = __duplicate__(self.event_list);
-        var set_event_names = __duplicate__(self.output_events);  // start with output_events!
-        for (var st in fsm_desc.machine) {
+        let event_names = __duplicate__(self.event_list);
+        let set_event_names = __duplicate__(self.output_events);  // start with output_events!
+        for (let st in fsm_desc.machine) {
             if (fsm_desc.machine.hasOwnProperty(st)) {
-                var st_desc = fsm_desc.machine[st];
-                var len = st_desc.length;
-                for (var idx=0; idx < len; idx++) {
-                    var ev_ac_nt = st_desc[idx];
+                let st_desc = fsm_desc.machine[st];
+                let len = st_desc.length;
+                for (let idx=0; idx < len; idx++) {
+                    let ev_ac_nt = st_desc[idx];
                     if (!ev_ac_nt) {
                         // In IE the last comma in a list [] include a new undefined element.
                         continue;
                     }
-                    var ev_name = ev_ac_nt[0];
-                    var ac = ev_ac_nt[1];
-                    var nt = ev_ac_nt[2];
+                    let ev_name = ev_ac_nt[0];
+                    let ac = ev_ac_nt[1];
+                    let nt = ev_ac_nt[2];
 
                     if (elm_in_list(ev_name, event_names)) {
                         set_event_names.push(ev_name);
@@ -1252,19 +1252,19 @@ var __inside_event_loop__ = 0;
 
         // check next state names and actions
         state_names = __duplicate__(self.state_list);
-        for (var st in fsm_desc.machine) {
+        for (let st in fsm_desc.machine) {
             if (fsm_desc.machine.hasOwnProperty(st)) {
-                var st_desc = fsm_desc.machine[st];
-                var len = st_desc.length;
-                for (var idx=0; idx < len; idx++) {
-                    var ev_ac_nt = st_desc[idx];
+                let st_desc = fsm_desc.machine[st];
+                let len = st_desc.length;
+                for (let idx=0; idx < len; idx++) {
+                    let ev_ac_nt = st_desc[idx];
                     if (!ev_ac_nt) {
                         // In IE the last comma in a list [] include a new undefined element.
                         continue;
                     }
-                    var ev_name = ev_ac_nt[0];
-                    var ac = ev_ac_nt[1];
-                    var nt = ev_ac_nt[2];
+                    let ev_name = ev_ac_nt[0];
+                    let ac = ev_ac_nt[1];
+                    let nt = ev_ac_nt[2];
 
                     if (nt && !elm_in_list(nt, state_names)) {
                         log_error(this.gclass_name + ": next statename: "+ nt + " is NOT in state-list");
@@ -1278,15 +1278,15 @@ var __inside_event_loop__ = 0;
 
         // Build constant names (like C enum) for states: dict of name:id
         self.state_index = {'': 0};
-        for(var i=0; i<self.state_list.length; i++) {
-            var elm = self.state_list[i];
+        for(let i=0; i<self.state_list.length; i++) {
+            let elm = self.state_list[i];
             self.state_index[elm] = i+1;
         }
 
         // Build constant names (like C enum) for events: dict of name:id
         self.event_index = {'': 0};
-        for(var i=0; i<self.event_list.length; i++) {
-            var elm = self.event_list[i];
+        for(let i=0; i<self.event_list.length; i++) {
+            let elm = self.event_list[i];
             self.event_index[elm] = i+1;
         }
 
@@ -1316,24 +1316,24 @@ var __inside_event_loop__ = 0;
         */
 
         self.states = new Array(self.state_list.length+1);
-        for(var i=0; i<self.state_list.length; i++) {
-            var st = self.state_list[i];
-            var st_idx = self.state_index[st];
-            var st_desc = fsm_desc.machine[st];
+        for(let i=0; i<self.state_list.length; i++) {
+            let st = self.state_list[i];
+            let st_idx = self.state_index[st];
+            let st_desc = fsm_desc.machine[st];
             self.states[st_idx] = new Array(self.event_list.length + 1);
 
-            for(var j=0; j<st_desc.length; j++) {
-                var ev_ac_nt = st_desc[j];
+            for(let j=0; j<st_desc.length; j++) {
+                let ev_ac_nt = st_desc[j];
                 if (!ev_ac_nt) {
                     // In IE the last comma in a list [] include a new undefined element.
                     continue;
                 }
 
-                var iev = self.event_index[ev_ac_nt[0]];
+                let iev = self.event_index[ev_ac_nt[0]];
                 // Get the action
-                var ac = ev_ac_nt[1];
+                let ac = ev_ac_nt[1];
                 // Save the next state
-                var next_state_id;
+                let next_state_id;
                 if (ev_ac_nt[2]) {
                     next_state_id = self.state_index[ev_ac_nt[2]];
                 } else {
@@ -1361,7 +1361,7 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_change_state = function(new_state)
     {
-        var state_id = this.fsm.state_index[new_state] || 0;
+        let state_id = this.fsm.state_index[new_state] || 0;
         if (state_id <= 0) {
             log_error(this.gclass_name + ": change_state() state UNKNOWN: " + new_state);
             return;
@@ -1552,7 +1552,7 @@ var __inside_event_loop__ = 0;
      ************************************************************/
     proto._tab = function()
     {
-        var spaces, pad;
+        let spaces, pad;
         if (__inside_event_loop__ <= 0) {
             spaces = 1;
         } else {
@@ -1574,8 +1574,8 @@ var __inside_event_loop__ = 0;
         __inside_event_loop__ -= 1;
     };
 
-    var gcflag_manual_start = 0x0001;   // gobj_start_tree() don't start gobjs of this gclass.
-    var gcflag_no_check_output_events = 0x0002;   // When publishing don't check events in output_event_list.
+    let gcflag_manual_start = 0x0001;   // gobj_start_tree() don't start gobjs of this gclass.
+    let gcflag_no_check_output_events = 0x0002;   // When publishing don't check events in output_event_list.
 
 
     //=======================================================================
