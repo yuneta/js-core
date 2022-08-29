@@ -951,10 +951,10 @@ let __inside_event_loop__ = 0;
 
     /************************************************************
      *      publish_event
+     *      Return the number of sent events
      ************************************************************/
     proto.gobj_publish_event = function(event, kw)
     {
-        let ret_sum = 0;
         let sent_count = 0;
 
         if(!kw) {
@@ -963,7 +963,7 @@ let __inside_event_loop__ = 0;
         if(empty_string(event)) {
             let msg = sprintf("GObj.gobj_publish_event('%s'): event NULL", this.gobj_short_name());
             log_error(msg);
-            return -1;
+            return 0;
         }
 
         /*
@@ -977,7 +977,7 @@ let __inside_event_loop__ = 0;
                     event
                 );
                 log_error(msg);
-                return -1;
+                return 0;
             }
         }
 
@@ -998,11 +998,16 @@ let __inside_event_loop__ = 0;
             }
         }
 
-        /*---------------------------*
+        /*-------------------------------------*
          *  Own publication method
-         *---------------------------*/
+         *  Return:
+         *     -1  (broke),
+         *      0  continue without publish,
+         *      1  continue and publish
+         *-------------------------------------*/
         if(this.mt_publish_event) {
-            if(!this.mt_publish_event(event, kw)) {
+            let topublish = this.mt_publish_event(event, kw);
+            if(topublish<=0) {
                 return 0;
             }
         }
@@ -1013,14 +1018,15 @@ let __inside_event_loop__ = 0;
         let subscriptions = this.dl_subscriptions;
         let len = subscriptions.length;
         for(let i=0; i<len; i++) {
-            let topublish = true;
             let subs = subscriptions[i];
             if(!subs) {
                 continue;
             }
             if(this.mt_publication_pre_filter) {
-                topublish = this.mt_publication_pre_filter(subs, event, kw);
-                if(!topublish) {
+                let topublish = this.mt_publication_pre_filter(subs, event, kw);
+                if(topublish<0) {
+                    break;
+                } else if(topublish==0) {
                     continue;
                 }
             }
@@ -1056,7 +1062,7 @@ let __inside_event_loop__ = 0;
                 /*
                  *  User filter or configured filter
                  */
-                topublish = true;
+                let topublish = 1;
                 if(this.mt_publication_filter) {
                     topublish = this.mt_publication_filter(
                         this,
@@ -1067,14 +1073,20 @@ let __inside_event_loop__ = 0;
                 } else if(__filter__) {
                     topublish = kw_match_simple(kw2publish , __filter__);
                 }
-                if(!topublish) {
+                if(topublish<0) {
+                    break;
+                } else if(topublish==0) {
+                    /*
+                     *  Must not be published
+                     *  Next subs
+                     */
                     continue;
                 }
 
                 /*
                  *  Send event
                  */
-                ret_sum += subscriber.gobj_send_event(
+                subscriber.gobj_send_event(
                     event_name,
                     kw2publish,
                     this
@@ -1095,7 +1107,7 @@ let __inside_event_loop__ = 0;
                 }
             }
         }
-        return ret_sum;
+        return sent_count;
     };
 
 
