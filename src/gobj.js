@@ -1096,8 +1096,16 @@ let __inside_event_loop__ = 0;
                     kw2publish,
                     this
                 );
-                sent_count++;
                 if(ret < 0 && subs.own_event) {
+                    sent_count = -1; // Return of -1 indicates that someone owned the event
+                    break;
+                }
+                sent_count++;
+
+                if(this._destroyed) {
+                    /*
+                     *  break all, self publisher deleted
+                     */
                     break;
                 }
             }
