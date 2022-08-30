@@ -890,6 +890,7 @@ let __inside_event_loop__ = 0;
          *------------------------------*/
         let dl_subs = this.gobj_find_subscriptions(event, kw, subscriber);
         if(dl_subs.length > 0) {
+            log_error("subscription(s) REPEATED, new ignored");
             return 0;
         }
 
