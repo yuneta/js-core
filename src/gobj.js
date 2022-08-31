@@ -890,7 +890,12 @@ let __inside_event_loop__ = 0;
          *------------------------------*/
         let dl_subs = this.gobj_find_subscriptions(event, kw, subscriber);
         if(dl_subs.length > 0) {
-            log_error("subscription(s) REPEATED, new ignored");
+            log_error(sprintf(
+                "subscription(s) REPEATED, event %s, publisher %s, subscriber %s: NEW IGNORED",
+                event,
+                this.gobj_short_name(),
+                subscriber.gobj_short_name()
+            ));
             return 0;
         }
 
@@ -927,7 +932,9 @@ let __inside_event_loop__ = 0;
                 this._delete_subscription(sub_list[i], false)
             }
         } else {
-            log_error("GObj.gobj_unsubscribe_event(): sub '" + event + "' NOT FOUND");
+            log_error(
+                sprintf("%s: gobj_unsubscribe_event(): event '%s' NOT FOUND", this.gobj_short_name(), event)
+            );
             return -1;
         }
         return 0;
