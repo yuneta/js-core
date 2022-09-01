@@ -2034,6 +2034,29 @@
         return null;
     }
 
+    /***************************************************************************
+     *
+     *  type can be: str, int, real, bool, null, dict, list
+     *  Example:
+
+        static json_desc_t jn_xxx_desc[] = {
+            // Name         Type        Default
+            {"string",      "str",      ""},
+            {"string2",     "str",      "Pepe"},
+            {"integer",     "int",      "0660"},     // beginning with "0":octal,"x":hexa, others: integer
+            {"boolean",     "bool",     "false"},
+            {0}   // HACK important, final null
+        };
+
+     ***************************************************************************/
+    function create_json_record(json_desc, value) // here in js `json_desc` it's a dictionary with the defaults.
+    {
+        let record = __duplicate__(json_desc);  // Get fields and default vaues from json_desc
+        json_object_update_existing(record, value); // Update (only with service fields) with user data
+
+        return record;
+    }
+
     /************************************************************
      *          log function
      ************************************************************/
@@ -2614,6 +2637,7 @@
     exports.jdb_get_topic = jdb_get_topic;
     exports.jdb_get = jdb_get;
     exports.jdb_get_by_idx = jdb_get_by_idx;
+    exports.create_json_record = create_json_record;
 
     exports._logger = _logger;
     exports.set_log_functions = set_log_functions;
