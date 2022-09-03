@@ -933,7 +933,7 @@ let __inside_event_loop__ = 0;
             }
         } else {
             log_error(
-                sprintf("%s: gobj_unsubscribe_event(): event '%s' NOT FOUND, subscriber %s",
+                sprintf("%s: gobj_unsubscribe_event(): event '%s', subscriber %s, NOT FOUND",
                     this.gobj_short_name(),
                     event,
                     subscriber.gobj_short_name()

@@ -179,7 +179,7 @@
     {
         var ln = 0;
         for(var i in list) {
-            if(list.hasOwnProperty(i)) {
+            if(list.hasOwnProperty(i)) { // TODO review, dudes
                 ln++;
             }
         }
@@ -846,7 +846,7 @@
             return [];
         }
 
-        var new_ids = [];
+        let new_ids = [];
 
         if(is_string(ids)) {
             /*
@@ -863,8 +863,10 @@
                     ...
                 }
             */
-            for(var id in ids) {
-                new_ids.push(id);
+            for(let id in ids) {
+                if (ids.hasOwnProperty(id)) {
+                    new_ids.push(id);
+                }
             }
         } else if(is_array(ids)) {
             ids.forEach(function(item) {
@@ -885,7 +887,7 @@
                             ...
                         ]
                      */
-                    var id = kw_get_str(item, "id", 0, 0);
+                    let id = kw_get_str(item, "id", 0, 0);
                     if(id) {
                         new_ids.push(id);
                     }
@@ -1032,6 +1034,21 @@
         }
 
         return new_dict;
+    }
+
+    /************************************************************
+     *  kw can be a dict or a list
+     *  dict: return the first key
+     *  list: return the first item
+     ************************************************************/
+    function kwid_get_first(kw)
+    {
+        let list = kwid_get_ids(kw);
+        if(list.length > 0) {
+            return list[0];
+        }
+
+        return null;
     }
 
     /*************************************************************
@@ -2600,6 +2617,7 @@
     exports.kwid_match_id = kwid_match_id;
     exports.kwid_collect = kwid_collect;
     exports.kwid_new_dict = kwid_new_dict;
+    exports.kwid_get_first = kwid_get_first;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
