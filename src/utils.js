@@ -1420,7 +1420,7 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var i = _kw_search_path(kw, key);
+        let i = _kw_search_path(kw, key);
         if(i === undefined) {
             if(create) {
                 kw[key] = default_value;
@@ -1447,7 +1447,7 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var r = _kw_search_path(kw, key);
+        let r = _kw_search_path(kw, key);
         if(r === undefined) {
             if(create) {
                 kw[key] = default_value;
@@ -1463,7 +1463,7 @@
             }
             return default_value;
         }
-        return parseFloat(i);
+        return parseFloat(r);
     }
 
     /************************************************************
@@ -2636,6 +2636,7 @@
     exports.kw_has_key = kw_has_key;
     exports.kw_get_bool = kw_get_bool;
     exports.kw_get_int = kw_get_int;
+    exports.kw_get_real = kw_get_real;
     exports.kw_get_str = kw_get_str;
     exports.kw_get_dict = kw_get_dict;
     exports.kw_get_list = kw_get_list;
