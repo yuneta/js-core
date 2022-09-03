@@ -885,6 +885,9 @@ let __inside_event_loop__ = 0;
             }
         }
 
+trace_msg("subscribe list " + this.gobj_short_name()); // TODO TEST
+trace_msg(this.dl_subscriptions); // TODO TEST
+
         /*------------------------------*
          *  Find repeated subscription
          *------------------------------*/
@@ -899,6 +902,7 @@ let __inside_event_loop__ = 0;
             return 0;
         }
 
+
         /*
          *  Crea una instancia de subscription
          */
@@ -909,6 +913,11 @@ let __inside_event_loop__ = 0;
          *  Trace
          *-----------------------------*/
         // TODO tracea subs
+trace_msg("subscribe NEW " + this.gobj_short_name()); // TODO TEST
+trace_msg(subscription); // TODO TEST
+
+trace_msg("subscribe list " + this.gobj_short_name()); // TODO TEST
+trace_msg(this.dl_subscriptions); // TODO TEST
 
         /*
          *  Avisa de la nueva subscription si quieren
@@ -926,11 +935,22 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_unsubscribe_event = function(event, kw, subscriber)
     {
+    trace_msg("unsubscribe list " + this.gobj_short_name()); // TODO TEST
+    trace_msg(this.dl_subscriptions); // TODO TEST
+
         let sub_list = this.gobj_find_subscriptions(event, kw, subscriber);
+    trace_msg("unsubscribe list " + this.gobj_short_name()); // TODO TEST
+    trace_msg(sub_list); // TODO TEST
+
         if(sub_list.length) {
             for (let i=0; i<sub_list.length; i++) {
                 this._delete_subscription(sub_list[i], false)
             }
+
+trace_msg("new list " + this.gobj_short_name()); // TODO TEST
+trace_msg(this.dl_subscriptions); // TODO TEST
+
+
         } else {
             log_error(
                 sprintf("%s: gobj_unsubscribe_event(): event '%s', subscriber %s, NOT FOUND",
@@ -939,6 +959,7 @@ let __inside_event_loop__ = 0;
                     subscriber.gobj_short_name()
                 )
             );
+            trace_msg(this.dl_subscriptions); // TODO TEST
             return -1;
         }
         return 0;
