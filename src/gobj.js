@@ -885,9 +885,6 @@ let __inside_event_loop__ = 0;
             }
         }
 
-trace_msg("subscribe list " + this.gobj_short_name()); // TODO TEST
-trace_msg(this.dl_subscriptions); // TODO TEST
-
         /*------------------------------*
          *  Find repeated subscription
          *------------------------------*/
@@ -913,11 +910,8 @@ trace_msg(this.dl_subscriptions); // TODO TEST
          *  Trace
          *-----------------------------*/
         // TODO tracea subs
-trace_msg("subscribe NEW " + this.gobj_short_name()); // TODO TEST
-trace_msg(subscription); // TODO TEST
-
-trace_msg("subscribe list " + this.gobj_short_name()); // TODO TEST
-trace_msg(this.dl_subscriptions); // TODO TEST
+        // trace_msg("subscribe list " + this.gobj_short_name());
+        // trace_msg(this.gobj_print_subscriptions());
 
         /*
          *  Avisa de la nueva subscription si quieren
@@ -935,21 +929,12 @@ trace_msg(this.dl_subscriptions); // TODO TEST
      ************************************************************/
     proto.gobj_unsubscribe_event = function(event, kw, subscriber)
     {
-    trace_msg("unsubscribe list " + this.gobj_short_name()); // TODO TEST
-    trace_msg(this.dl_subscriptions); // TODO TEST
-
         let sub_list = this.gobj_find_subscriptions(event, kw, subscriber);
-    trace_msg("unsubscribe list " + this.gobj_short_name()); // TODO TEST
-    trace_msg(sub_list); // TODO TEST
 
         if(sub_list.length) {
             for (let i=0; i<sub_list.length; i++) {
                 this._delete_subscription(sub_list[i], false)
             }
-
-trace_msg("new list " + this.gobj_short_name()); // TODO TEST
-trace_msg(this.dl_subscriptions); // TODO TEST
-
 
         } else {
             log_error(
@@ -959,10 +944,41 @@ trace_msg(this.dl_subscriptions); // TODO TEST
                     subscriber.gobj_short_name()
                 )
             );
-            trace_msg(this.dl_subscriptions); // TODO TEST
             return -1;
         }
         return 0;
+    };
+
+    /************************************************************
+     *  Debug: return list of subscriptions
+     ************************************************************/
+    proto.gobj_print_subscriptions = function()
+    {
+        let lista = [];
+        let subscriptions = this.dl_subscriptions;
+        let len = subscriptions.length;
+
+        for(let i=0; i<len; i++) {
+            let subs = subscriptions[i];
+            if (!subs) {
+                continue;
+            }
+            let item = {
+                publisher: subs.publisher.gobj_short_name(),
+                subscriber: subs.subscriber.gobj_short_name(),
+                event: subs.event,
+                renamed_event: subs.renamed_event,
+                hard_subscription: subs.hard_subscription,
+                own_event: subs.own_event,
+                __config__: __duplicate__(subs.__config__),
+                __global__: __duplicate__(subs.__global__),
+                __filter__: __duplicate__(subs.__filter__),
+                __service__: __duplicate__(subs.__service__)
+
+            };
+            lista.push(item);
+        }
+        return lista;
     };
 
     /************************************************************
