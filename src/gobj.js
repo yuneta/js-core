@@ -509,8 +509,7 @@ let __inside_event_loop__ = 0;
                 );
                 log_debug(msg);
                 if(tracing > 1) {
-                    let msg = sprintf("                      %skw:", this._tab())
-                    console.dir(msg, kw);
+                    trace_msg(kw);
                 }
             }
             return this.mt_command(command, kw, src);
@@ -613,8 +612,7 @@ let __inside_event_loop__ = 0;
                     );
                     log_debug(msg);
                     if(tracing > 1) {
-                        let msg = sprintf("                      %skw:", this._tab())
-                        console.dir(msg, kw);
+                        trace_msg(kw);
                     }
                 }
 
@@ -1047,8 +1045,7 @@ let __inside_event_loop__ = 0;
             );
             log_debug(msg);
             if(tracing > 1) {
-                let msg = sprintf("                      %skw:", this._tab())
-                console.dir(msg, kw);
+                trace_msg(kw);
             }
         }
 
@@ -1508,8 +1505,7 @@ let __inside_event_loop__ = 0;
             );
             log_error(msg);
             if(tracing > 1) {
-                let msg = sprintf("                      %skw:", this._tab())
-                console.dir(msg, kw);
+                trace_msg(kw);
             }
             return -1;  //# EventNotAcceptedError
         }
@@ -1530,8 +1526,7 @@ let __inside_event_loop__ = 0;
             );
             log_warning(msg);
             if(tracing > 1) {
-                let msg = sprintf("                      %skw:", this._tab())
-                console.dir(msg, kw);
+                trace_msg(kw);
             }
             this._decrease_inside();
             return -1;  //# EventNotAcceptedError
@@ -1553,8 +1548,7 @@ let __inside_event_loop__ = 0;
             );
             log_debug(msg);
             if(tracing > 1) {
-                let msg = sprintf("                      %skw:", this._tab())
-                console.dir(msg, kw);
+                trace_msg(kw);
             }
         }
 

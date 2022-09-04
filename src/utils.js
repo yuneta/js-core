@@ -2166,6 +2166,16 @@
         }
     }
 
+    function trace_msg2(msg, msg2)
+    {
+        console.log(msg);
+        console.log(msg2);
+        if(f_debug) {
+            f_debug(String(msg));
+            f_debug(String(msg2));
+        }
+    }
+
     /********************************************
      *  Get a local attribute
      ********************************************/
@@ -2665,6 +2675,7 @@
     exports.log_info = log_info;
     exports.log_debug = log_debug;
     exports.trace_msg = trace_msg;
+    exports.trace_msg2 = trace_msg2;
 
     exports.kw_get_local_storage_value = kw_get_local_storage_value;
     exports.kw_set_local_storage_value = kw_set_local_storage_value;
