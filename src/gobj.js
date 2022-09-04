@@ -57,6 +57,29 @@ let __inside_event_loop__ = 0;
     }
 
     /************************************************************
+     *  Update existing in first level, and all in next levels
+     ************************************************************/
+    function json_object_update_config(destination, source) {
+        "use strict";
+        if(!source) {
+            return destination;
+        }
+        for (let property in source) {
+            if (source.hasOwnProperty(property) && destination.hasOwnProperty(property)) {
+                if(is_object(destination[property]) && is_object(source[property])) {
+                    json_object_update(
+                        destination[property],
+                        source[property]
+                    );
+                } else {
+                    destination[property] = source[property];
+                }
+            }
+        }
+        return destination;
+    }
+
+    /************************************************************
      *      GObj class.
      ************************************************************/
     let GObj = Object.__makeSubclass__();
@@ -66,7 +89,7 @@ let __inside_event_loop__ = 0;
         this.name = name || '';
         this.gclass_name = gclass_name || '';
         this.config = __duplicate__(config);
-        json_object_update_existing_recursive(this.config, kw || {});
+        json_object_update_config(this.config, kw || {});
         this.private = kw_extract_private(this.config);
         this.gcflag = gcflag;
 

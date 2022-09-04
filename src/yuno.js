@@ -607,12 +607,12 @@
      ************************************************************/
     proto.gobj_find_public_event_service = function (event)
     {
-        for (var gobj_name in this._unique_gobjs) {
+        for (let gobj_name in this._unique_gobjs) {
             if (!this._unique_gobjs.hasOwnProperty(gobj_name)) {
                 //The current property is not a direct property.
                 continue;
             }
-            var gobj = this._unique_gobjs[gobj_name];
+            let gobj = this._unique_gobjs[gobj_name];
             if(gobj.gobj_event_in_input_event_list(event)) {
                 return gobj;
             }
@@ -630,27 +630,26 @@
      ************************************************************/
     proto.gobj_list_gobj_tree = function (gobj)
     {
-
         function _add_gobj_to_webix_tree(d, o)
         {
-            var content = {
+            let content = {
                 "id": o.gobj_full_name(),
                 "value": o.gobj_short_name()
             }
             d.push(content);
-            var dl_childs = o.dl_childs;
+            let dl_childs = o.dl_childs;
             if(dl_childs.length>0) {
-                var d2 = [];
+                let d2 = [];
                 content['data'] = d2;
 
-                for (var i=0; i < dl_childs.length; i++) {
-                    var child = dl_childs[i];
+                for (let i=0; i < dl_childs.length; i++) {
+                    let child = dl_childs[i];
                     _add_gobj_to_webix_tree(d2, child);
                 }
             }
         }
 
-        var data = [];
+        let data = [];
         _add_gobj_to_webix_tree(data, gobj);
         return data;
     };
@@ -660,11 +659,11 @@
      ************************************************************/
     proto.gobj_list_gobj_attr = function (gobj)
     {
-        var data = [];
+        let data = [];
         if(!gobj || !gobj.config) {
             return data;
         }
-        for (var attr in gobj.config) {
+        for (let attr in gobj.config) {
             if (gobj.config.hasOwnProperty(attr)) {
                 data.push({
                     name: attr,
