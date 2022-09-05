@@ -265,7 +265,7 @@
         if(!list) {
             throw "ERROR: index_in_list() list empty";
         }
-        for(var i=0; i<list.length; i++) {
+        for(let i=0; i<list.length; i++) {
             if(elm === list[i]) {
                 return i;
             }
@@ -281,7 +281,7 @@
         if(!list) {
             return -1;
         }
-        for(var i=0; i<list.length; i++) {
+        for(let i=0; i<list.length; i++) {
             if(list[i] && list[i].id === id) {
                 return i;
             }
@@ -298,7 +298,7 @@
         if(!list) {
             return null;
         }
-        for(var i=0; i<list.length; i++) {
+        for(let i=0; i<list.length; i++) {
             if(list[i] && list[i].id == id) {
                 return list[i];
             }
@@ -311,7 +311,7 @@
      ************************************************************/
     function none_in_list(list) {
         "use strict";
-        for(var i=0; i<list.length; i++) {
+        for(let i=0; i<list.length; i++) {
             if(!list[i]) {
                 return true;
             }
@@ -324,7 +324,7 @@
      ************************************************************/
     function delete_from_list(list, elm) {
         "use strict";
-        for(var i=0; i<list.length; i++) {
+        for(let i=0; i<list.length; i++) {
             if(elm === list[i]) {
                 list.splice(i, 1);
                 return true;
@@ -345,10 +345,10 @@
 
         //slice so we do not effect the orginal
         //sort makes sure they are in order
-        var cA = arrA.slice().sort();
-        var cB = arrB.slice().sort();
+        let cA = arrA.slice().sort();
+        let cB = arrB.slice().sort();
 
-        for(var i=0;i<cA.length; i++) {
+        for(let i=0;i<cA.length; i++) {
             if(cA[i]!==cB[i]) {
                 return false;
             }
@@ -369,11 +369,11 @@
      ************************************************************/
     function __set__(arr) {
         "use strict";
-        var seen = {},
+        let seen = {},
             result = [];
-        var len = arr.length;
-        for (var i = 0; i < len; i++) {
-            var el = arr[i];
+        let len = arr.length;
+        for (let i = 0; i < len; i++) {
+            let el = arr[i];
             if (!seen[el]) {
                 seen[el] = true;
                 result.push(el);
@@ -914,8 +914,8 @@
                 // A empty object at first level evaluate as true.
                 return true;
             }
-            for(var i=0; i<ids.length; i++) {
-                var value = ids[i];
+            for(let i=0; i<ids.length; i++) {
+                let value = ids[i];
                 if(value == id) {
                     return true;
                 }
@@ -926,7 +926,7 @@
                 // A empty object at first level evaluate as true.
                 return true;
             }
-            for(var key in ids) {
+            for(let key in ids) {
                 if(key == id) {
                     return true;
                 }
@@ -960,16 +960,16 @@
         if(!match_fn) {
             match_fn = kw_match_simple;
         }
-        var kw_new = [];
+        let kw_new = [];
 
         if(is_array(kw)) {
-            for(var i=0; i<kw.length; i++) {
-                var jn_value = kw[i];
+            for(let i=0; i<kw.length; i++) {
+                let jn_value = kw[i];
 
-                var id;
+                let id;
                 if(is_object(jn_value)) {
                     id = kw_get_str(jn_value, "id", 0, 0);
-                } else if(json_is_string(jn_value)) {
+                } else if(is_string(jn_value)) {
                     id = jn_value;
                 } else {
                     continue;
@@ -983,8 +983,8 @@
                 }
             }
         } else if(is_object(kw)) {
-            for(var id in kw) {
-                var jn_value = kw[id];
+            for(let id in kw) {
+                let jn_value = kw[id];
 
                 if(!kwid_match_id(ids, id)) {
                     continue;
@@ -1013,7 +1013,7 @@
      *************************************************************/
     function kwid_new_dict(kw, path)
     {
-        var new_dict = {};
+        let new_dict = {};
         if(!empty_string(path)) {
             kw = _kw_search_path(kw, path);
         }
@@ -1021,9 +1021,9 @@
             new_dict = kw;
 
         } else if(is_array(kw)) {
-            for(var i=0; i<kw.length; i++) {
-                var kv = kw[i];
-                var id = kw_get_str(kv, "id", null, false);
+            for(let i=0; i<kw.length; i++) {
+                let kv = kw[i];
+                let id = kw_get_str(kv, "id", null, false);
                 if(!empty_string(id)) {
                     new_dict[id] = kv;
                 }
@@ -1041,7 +1041,7 @@
      *  dict: return the first key
      *  list: return the first item
      ************************************************************/
-    function kwid_get_first(kw)
+    function kwid_get_first_id(kw)
     {
         let list = kwid_get_ids(kw);
         if(list.length > 0) {
@@ -1049,6 +1049,48 @@
         }
 
         return null;
+    }
+
+    /*************************************************************
+     *  Utility for databases. See kwid_collect parameters
+     *************************************************************/
+    function kwid_find_one_record(kw, ids, jn_filter, match_fn)
+    {
+        let list = kwid_collect(kw, ids, jn_filter, match_fn);
+        if(list.length > 0) {
+            return list[0];
+        } else {
+            return null;
+        }
+    }
+
+    /*************************************************************
+     *  Utility for databases
+     *************************************************************/
+    function kwid_delete_record(kw, ids_)
+    {
+        let deletes = 0;
+        let ids = kwid_get_ids(ids_);
+
+        for(let i=0; i<ids.length; i++) {
+            let id = ids[i];
+            if(is_object(kw)) {
+                delete kw[id];
+                deletes++;
+            } else if(is_array(kw)) {
+                for(let j=0; j<kw.length; j++) {
+                    if(id == kw[j].id) {
+                        delete_from_list(kw, kw[j]);
+                        deletes++;
+                        j = -1;
+                        continue;
+                    }
+                }
+            } else {
+                log_error("kwid_delete_record: data type unknown");
+            }
+        }
+        return deletes>0?0:-1;
     }
 
     /*************************************************************
@@ -2627,7 +2669,9 @@
     exports.kwid_match_id = kwid_match_id;
     exports.kwid_collect = kwid_collect;
     exports.kwid_new_dict = kwid_new_dict;
-    exports.kwid_get_first = kwid_get_first;
+    exports.kwid_get_first_id = kwid_get_first_id;
+    exports.kwid_find_one_record = kwid_find_one_record;
+    exports.kwid_delete_record = kwid_delete_record;
     exports.match_dict_list_by_kw = match_dict_list_by_kw;
     exports.filter_dictlist = filter_dictlist;
     exports.filter_dict = filter_dict;
