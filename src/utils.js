@@ -2157,9 +2157,11 @@
         if(is_object(msg)) {
             msg = JSON.stringify(msg)
         }
-        console.log("%c ERROR: " + String(msg), "color:yellow");
+        let hora = get_current_datetime();
+        console.log("%c" + hora + " ERROR: " + String(msg), "color:yellow");
+
         if(f_error) {
-            f_error("ERROR: " + String(msg));
+            f_error("" + hora + " ERROR: " + String(msg));
         }
     }
 
@@ -2168,9 +2170,10 @@
         if(is_object(msg)) {
             msg = JSON.stringify(msg)
         }
-        console.log("%c WARNING: " + String(msg), "color:cyan");
+        let hora = get_current_datetime();
+        console.log("%c" + hora + " WARNING: " + String(msg), "color:cyan");
         if(f_warning) {
-            f_warning("WARNING: " + String(msg));
+            f_warning("" + hora + " WARNING: " + String(msg));
         }
     }
 
@@ -2623,6 +2626,39 @@
         return template.content.firstChild;
     }
 
+    /************************************************************
+     *        Get current "fecha"
+     ************************************************************/
+    function get_current_datetime()
+    {
+        let currentTime = new Date();
+        let month = currentTime.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        let day = currentTime.getDate();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        let year = currentTime.getFullYear();
+        let fecha = year + "/" + month + "/" + day;
+
+        let hours = currentTime.getHours();
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        let minutes = currentTime.getMinutes();
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        let seconds = currentTime.getSeconds();
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        let hora = hours + ":" + minutes + ":" + seconds;
+        return fecha + " " + hora;
+    }
+
 
     //=======================================================================
     //      Expose the class via the global object
@@ -2731,5 +2767,6 @@
     exports.Proportion = Proportion;
     exports.get_text_size = get_text_size;
     exports.htmlToElement = htmlToElement;
+    exports.get_current_datetime = get_current_datetime;
 
 })(this);

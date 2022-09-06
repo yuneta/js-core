@@ -24,39 +24,6 @@ let __inside_event_loop__ = 0;
     "use strict";
 
     /************************************************************
-     *        Get current "fecha"
-     ************************************************************/
-    function get_current_datetime() // TODO revisa
-    {
-        let currentTime = new Date();
-        let month = currentTime.getMonth() + 1;
-        if (month < 10) {
-            month = "0" + month;
-        }
-        let day = currentTime.getDate();
-        if (day < 10) {
-            day = "0" + day;
-        }
-        let year = currentTime.getFullYear();
-        let fecha = year + "/" + month + "/" + day;
-
-        let hours = currentTime.getHours();
-        if (hours < 10) {
-            hours = "0" + hours;
-        }
-        let minutes = currentTime.getMinutes();
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        let seconds = currentTime.getSeconds();
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        let hora = hours + ":" + minutes + ":" + seconds;
-        return fecha + " " + hora;
-    }
-
-    /************************************************************
      *  Update existing in first level, and all in next levels
      ************************************************************/
     function json_object_update_config(destination, source) {
