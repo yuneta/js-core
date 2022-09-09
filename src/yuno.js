@@ -91,7 +91,7 @@
         this.__global_command_parser_fn__ = null;
         this.__global_stats_parser_fn__ = null;
 
-        this.mt_create();   // auto-create
+        this.mt_create(kw);   // auto-create
     };
 
     proto.mt_create = function(kw)
