@@ -1713,6 +1713,25 @@
     }
 
     /************************************************************
+     *          Post http
+     *          function on_response(status, response_data)
+     ************************************************************/
+    function send_http_json_post(url, data, on_response) {
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                on_response(xhr.status, xhr.responseText);
+            }
+        };
+        xhr.send(data);
+    }
+
+    /************************************************************
      *
      ************************************************************/
     function strstr(haystack, needle, bool)
@@ -2736,6 +2755,7 @@
     exports.get_unique_id = get_unique_id;
     exports.uuidv4 = uuidv4;
     exports.load_json_file = load_json_file;
+    exports.send_http_json_post = send_http_json_post;
     exports.strstr = strstr;
     exports.list2options = list2options;
 
