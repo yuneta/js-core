@@ -2646,7 +2646,8 @@
     }
 
     /************************************************************
-     *        Get current "fecha"
+     *        Get current date
+     *        Return string in "2022/09/12 12:27:15" format
      ************************************************************/
     function get_current_datetime()
     {
@@ -2676,6 +2677,17 @@
         }
         let hora = hours + ":" + minutes + ":" + seconds;
         return fecha + " " + hora;
+    }
+
+    /********************************************
+     *  Return UTC time of right now
+     ********************************************/
+    function get_now()
+    {
+        let start = new Date();
+        start.setMilliseconds(0);
+
+        return start/1000;
     }
 
     /************************************************************
@@ -2856,6 +2868,7 @@
     exports.get_text_size = get_text_size;
     exports.htmlToElement = htmlToElement;
     exports.get_current_datetime = get_current_datetime;
+    exports.get_now = get_now;
     exports.jwtDecode = jwtDecode;
     exports.jwt2json = jwt2json;
 
