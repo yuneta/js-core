@@ -166,6 +166,20 @@
     /************************************************************
      *
      ************************************************************/
+    function gobj_get_gclass_config(gclass_name, verbose)
+    {
+        let gclass = gobj_find_gclass(gclass_name, verbose);
+        if(gclass.prototype.mt_get_gclass_config) {
+            return gclass.prototype.mt_get_gclass_config.call();
+        } else {
+            return null;
+        }
+    }
+
+
+    /************************************************************
+     *
+     ************************************************************/
     function gobj_list_persistent_attrs()
     {
         // TODO
@@ -703,6 +717,7 @@
     exports.Yuno = Yuno;
     exports.gobj_register_gclass = gobj_register_gclass;
     exports.gobj_find_gclass = gobj_find_gclass;
+    exports.gobj_get_gclass_config = gobj_get_gclass_config;
     exports.gobj_start_up = gobj_start_up;
 
 })(this);
