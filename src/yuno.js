@@ -169,9 +169,14 @@
     function gobj_get_gclass_config(gclass_name, verbose)
     {
         let gclass = gobj_find_gclass(gclass_name, verbose);
-        if(gclass.prototype.mt_get_gclass_config) {
+        if(gclass && gclass.prototype.mt_get_gclass_config) {
             return gclass.prototype.mt_get_gclass_config.call();
         } else {
+            if(verbose) {
+                log_error(sprintf(
+                    "gobj_get_gclass_config: '%s' gclass without mt_get_gclass_config", gclass_name
+                ));
+            }
             return null;
         }
     }
