@@ -1561,6 +1561,12 @@
         if(!is_object(v)) {
             log_error("path MUST BE a json dict: " + key);
             trace_msg(kw);
+            try {
+                // Code throwing an exception
+                throw new Error();
+            } catch(e) {
+                console.log(e.stack);
+            }
             return default_value;
         }
 
@@ -1594,6 +1600,12 @@
         if(!is_array(v)) {
             log_error("path MUST BE a json list: " + key);
             trace_msg(kw);
+            try {
+                // Code throwing an exception
+                throw new Error();
+            } catch(e) {
+                console.log(e.stack);
+            }
             return default_value;
         }
 
