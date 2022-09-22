@@ -2616,7 +2616,7 @@
     {
         let h;
 
-        for(h = 1; h <120; h++) {
+        for(h = 1; h <80; h++) {
             let dim = get_text_size("Mj", fontFamily, h, 0);
             if(dim.height > wanted_size) {
                 break;
