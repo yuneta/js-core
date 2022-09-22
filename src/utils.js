@@ -2608,10 +2608,27 @@
         };
     };
 
+    /************************************************
+     *  Adjust font size to screen's pixels
+     *  to see the same size in mobiles with text size changed
+     ************************************************/
+    function adjust_font_size(wanted_size, fontFamily)
+    {
+        let h;
+
+        for(h = 1; h <120; h++) {
+            let dim = get_text_size("Mj", fontFamily, h, 0);
+            if(dim.height > wanted_size) {
+                break;
+            }
+        }
+        return h;
+    }
+
     /********************************************
      *
      ********************************************/
-    function get_text_size(text, font_family, font_size, padding)
+    function get_text_size(text, font_family, font_size, padding, adjust_size)
     {
         let pa = document.body;
         let who = document.createElement('div');
@@ -2623,13 +2640,16 @@
             padding = padding + "px";
         }
         if(is_number(font_size)) {
+            if(adjust_size) {
+                font_size = adjust_font_size(font_size, font_family);
+            }
             font_size = font_size + "px";
         }
         if(empty_string(font_size)) {
             font_size = "1em";
         }
         if(empty_string(font_family)) {
-            font_family = "san-serif";
+            font_family = "sans-serif";
         }
         if(empty_string(text)) {
             text = "Mj";
@@ -2878,6 +2898,7 @@
     exports.CssClassBuilder = CssClassBuilder;
     exports.Proportion = Proportion;
     exports.get_text_size = get_text_size;
+    exports.adjust_font_size = adjust_font_size;
     exports.htmlToElement = htmlToElement;
     exports.get_current_datetime = get_current_datetime;
     exports.get_now = get_now;
