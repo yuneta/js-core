@@ -2617,8 +2617,8 @@
         let h;
 
         for(h = 1; h <80; h++) {
-            let dim = get_text_size("Mj", fontFamily, h, 0);
-            if(dim.height > wanted_size) {
+            let dim = get_text_size("MWj|}", fontFamily, h, 0);
+            if(dim.height >= wanted_size) {
                 break;
             }
         }
@@ -2628,7 +2628,7 @@
     /********************************************
      *
      ********************************************/
-    function get_text_size(text, font_family, font_size, padding, adjust_size)
+    function get_text_size(text, font_family, font_size, padding)
     {
         let pa = document.body;
         let who = document.createElement('div');
@@ -2640,9 +2640,6 @@
             padding = padding + "px";
         }
         if(is_number(font_size)) {
-            if(adjust_size) {
-                font_size = adjust_font_size(font_size, font_family);
-            }
             font_size = font_size + "px";
         }
         if(empty_string(font_size)) {
