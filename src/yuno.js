@@ -386,11 +386,17 @@
             return;
         }
         if (this.config.trace_creation) {
-            log_debug("<========== DESTROYD " + gobj.gclass_name + "^" + gobj.name);
+            log_debug("<========== DESTROYED " + gobj.gclass_name + "^" + gobj.name);
         }
         if (gobj._destroyed) {
             // Already deleted
             log_debug("<========== ALREADY DESTROYED! " + gobj.gclass_name + "^" + gobj.name);
+            try {
+                // Code throwing an exception
+                throw new Error();
+            } catch(e) {
+                console.log(e.stack);
+            }
             return;
         }
         if(gobj.gobj_is_running()) {
