@@ -1435,7 +1435,7 @@
         if(!(kw === Object(kw))) {
             return default_value?true:false;
         }
-        var b = _kw_search_path(kw, key);
+        let b = _kw_search_path(kw, key);
         if(b === undefined) {
             if(create) {
                 kw[key] = default_value?true:false;
@@ -1462,8 +1462,8 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        let i = _kw_search_path(kw, key);
-        if(i === undefined) {
+        let v = _kw_search_path(kw, key);
+        if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
             } else if(verbose) {
@@ -1493,7 +1493,7 @@
             return default_value;
         }
 
-        return parseInt(i);
+        return parseInt(v);
     }
 
     /************************************************************
@@ -1504,8 +1504,8 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        let r = _kw_search_path(kw, key);
-        if(r === undefined) {
+        let v = _kw_search_path(kw, key);
+        if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
             } else if(verbose) {
@@ -1535,7 +1535,7 @@
             return default_value;
         }
 
-        return parseFloat(r);
+        return parseFloat(v);
     }
 
     /************************************************************
@@ -1546,8 +1546,8 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var str = _kw_search_path(kw, key);
-        if(str === undefined) {
+        let v = _kw_search_path(kw, key);
+        if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
             } else if(verbose) {
@@ -1576,7 +1576,7 @@
             return default_value;
         }
 
-        return String(str);
+        return String(v);
     }
 
     /************************************************************
@@ -1587,7 +1587,7 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var v = _kw_search_path(kw, key);
+        let v = _kw_search_path(kw, key);
         if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
@@ -1628,7 +1628,7 @@
         if(!(kw === Object(kw))) {
             return default_value;
         }
-        var v = _kw_search_path(kw, key);
+        let v = _kw_search_path(kw, key);
         if(v === undefined) {
             if(create) {
                 kw[key] = default_value;
