@@ -1478,6 +1478,21 @@
             }
             return default_value;
         }
+
+        if(!is_number(v)) {
+            if(verbose) {
+                log_error("path value MUST BE a number: " + key);
+                trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
+            }
+            return default_value;
+        }
+
         return parseInt(i);
     }
 
@@ -1505,6 +1520,21 @@
             }
             return default_value;
         }
+
+        if(!is_number(v)) {
+            if(verbose) {
+                log_error("path value MUST BE a number: " + key);
+                trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
+            }
+            return default_value;
+        }
+
         return parseFloat(r);
     }
 
@@ -1531,6 +1561,21 @@
                 }            }
             return default_value;
         }
+
+        if(!is_string(v)) {
+            if(verbose) {
+                log_error("path value MUST BE a string: " + key);
+                trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
+            }
+            return default_value;
+        }
+
         return String(str);
     }
 
@@ -1559,13 +1604,15 @@
             return default_value;
         }
         if(!is_object(v)) {
-            log_error("path MUST BE a json dict: " + key);
-            trace_msg(kw);
-            try {
-                // Code throwing an exception
-                throw new Error();
-            } catch(e) {
-                console.log(e.stack);
+            if(verbose) {
+                log_error("path value MUST BE a json dict: " + key);
+                trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
             }
             return default_value;
         }
@@ -1598,13 +1645,15 @@
             return default_value;
         }
         if(!is_array(v)) {
-            log_error("path MUST BE a json list: " + key);
-            trace_msg(kw);
-            try {
-                // Code throwing an exception
-                throw new Error();
-            } catch(e) {
-                console.log(e.stack);
+            if(verbose) {
+                log_error("path value MUST BE a json list: " + key);
+                trace_msg(kw);
+                try {
+                    // Code throwing an exception
+                    throw new Error();
+                } catch(e) {
+                    console.log(e.stack);
+                }
             }
             return default_value;
         }
