@@ -904,7 +904,7 @@
      *************************************************************/
     function kwid_match_id(ids, id)
     {
-        if(is_null(ids) || !id) {
+        if(is_null(ids) || is_null(id)) {
             // Si no hay filtro pasan todos.
             return true;
         }
@@ -968,7 +968,7 @@
 
                 let id;
                 if(is_object(jn_value)) {
-                    id = kw_get_str(jn_value, "id", 0, 0);
+                    id = kw_get_str(jn_value, "id", "", false);
                 } else if(is_string(jn_value)) {
                     id = jn_value;
                 } else {
