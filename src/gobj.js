@@ -1472,8 +1472,8 @@ let __inside_event_loop__ = 0;
     proto.inject_event = function(event, kw, src)
     {
         let fsm = this.fsm;
-        let result;
-        let action;
+        let result = -1;
+        let action = null;
 
         if (typeof event !== 'string') {
             log_error("inject_event() invalid event TYPE");
