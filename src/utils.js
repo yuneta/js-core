@@ -242,10 +242,10 @@
     function elms_in_list(elms, list) {
         "use strict";
         if(!list) {
-            throw "ERROR: elm_in_list() list empty";
+            throw "ERROR: elms_in_list() list empty";
         }
         if(!elms) {
-            throw "ERROR: elm_in_list() elm empty";
+            throw "ERROR: elms_in_list() elm empty";
         }
 
         for(var i=0; i<elms.length; i++) {
@@ -1350,23 +1350,25 @@
      *
      ************************************************************/
     var msg_type_list = [
-        "__publishing__",
         "__command__",
+        "__publishing__",
         "__subscribing__",
         "__unsubscribing__",
+        "__query__",
+        "__response__",
         "__order__",
-        "__request__",
-        "__answer__",
-        "__response__"
+        "__first_shot__"
     ];
 
     function msg_set_msg_type(kw, msg_type)
     {
-        if(is_metadata_key(msg_type) && !elm_in_list(msg_type, msg_type_list)) {
-            // If it's a metadata key then only admit the message inter-event msg_type_list
-            return;
+        if(!empty_string(msg_type)) {
+            if(is_metadata_key(msg_type) && !elm_in_list(msg_type, msg_type_list)) {
+                // HACK If it's a metadata key then only admit our message inter-event msg_type_list
+                return;
+            }
+            msg_write_MIA_key(kw, "__msg_type__", msg_type)
         }
-        msg_write_MIA_key(kw, "__msg_type__", msg_type)
     }
 
     /************************************************************
