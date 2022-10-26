@@ -2876,6 +2876,9 @@
      ***************************************************************************/
     function is_metadata_key(key)
     {
+        if(!is_string(key)) {
+            return false;
+        }
         let i;
         for(i = 0; i < key.length; i++) {
             if (key[i] !== '_') {
@@ -2893,6 +2896,9 @@
      ***************************************************************************/
     function is_private_key(key)
     {
+        if(!is_string(key)) {
+            return false;
+        }
         let i;
         for(i = 0; i < key.length; i++) {
             if (key[i] !== '_') {
