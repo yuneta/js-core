@@ -1690,14 +1690,48 @@
 
     /************************************************************
      *  TODO implement path,
-     *  and change key by path in all kw_get_...() functions
+     *  TODO and change key by path in all kw_get_...() functions
      ************************************************************/
     function kw_set_dict_value(kw, path, value)
     {
-        if(!(kw === Object(kw))) {
+        if(!is_object(kw)) {
+            log_error("kw is not an object");
+            try {
+                // Code throwing an exception
+                throw new Error();
+            } catch(e) {
+                console.log(e.stack);
+            }
             return -1;
         }
+
         kw[path] = value;
+        return 0;
+    }
+
+
+    /************************************************************
+     *  TODO implement path,
+     ************************************************************/
+    function kw_set_subdict_value(kw, path, key, value)
+    {
+        if(!is_object(kw)) {
+            log_error("kw is not an object");
+            try {
+                // Code throwing an exception
+                throw new Error();
+            } catch(e) {
+                console.log(e.stack);
+            }
+            return -1;
+        }
+
+        let path_ = kw[path];
+        if(is_null(path_) || !is_object(path_)) {
+            path_ = {};
+            kw[path] = path_;
+        }
+        path_[key] = value;
         return 0;
     }
 
@@ -2909,6 +2943,7 @@
     exports.kw_get_list = kw_get_list;
     exports.kw_get_dict_value = kw_get_dict_value;
     exports.kw_set_dict_value = kw_set_dict_value;
+    exports.kw_set_subdict_value = kw_set_subdict_value;
     exports.kw_extract_private = kw_extract_private;
     exports.get_unique_id = get_unique_id;
     exports.uuidv4 = uuidv4;
