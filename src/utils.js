@@ -1331,7 +1331,7 @@
             return null;
         }
 
-        var jn_stack = msg_read_MIA_key(kw, stack);
+        let jn_stack = msg_read_MIA_key(kw, stack);
         if(!jn_stack) {
             return 0;
         }
@@ -1339,7 +1339,7 @@
         if(jn_stack.length == 0) {
             return null;
         }
-        var user_info = jn_stack.shift();
+        let user_info = jn_stack.shift();
         if(jn_stack.length == 0) {
             msg_delete_MIA_key(kw, stack);
         }
