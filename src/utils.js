@@ -1361,7 +1361,8 @@
 
     function msg_set_msg_type(kw, msg_type)
     {
-        if(!elm_in_list(msg_type, msg_type_list)) {
+        if(is_metadata_key(msg_type) && !elm_in_list(msg_type, msg_type_list)) {
+            // If it's a metadata key then only admit the message inter-event msg_type_list
             return;
         }
         msg_write_MIA_key(kw, "__msg_type__", msg_type)
