@@ -1350,13 +1350,14 @@
      *
      ************************************************************/
     var msg_type_list = [
+        "__publishing__",
+        "__subscribing__",
+        "__unsubscribing__",
+        "__command__",
         "__order__",
         "__request__",
         "__answer__",
-        "__response__",
-        "__publishing__",
-        "__subscribing__",
-        "__unsubscribing__"
+        "__response__"
     ];
 
     function msg_set_msg_type(kw, msg_type)
