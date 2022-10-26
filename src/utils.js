@@ -2871,6 +2871,41 @@
         }
     }
 
+    /***************************************************************************
+     *  Metadata key (variable) has a prefix of 2 underscore
+     ***************************************************************************/
+    function is_metadata_key(key)
+    {
+        let i;
+        for(i = 0; i < key.length; i++) {
+            if (key[i] !== '_') {
+                break;
+            }
+            if(i > 2) {
+                break;
+            }
+        }
+        return (i === 2);
+    }
+
+    /***************************************************************************
+     *  Private key (variable) has a prefix of 1 underscore
+     ***************************************************************************/
+    function is_private_key(key)
+    {
+        let i;
+        for(i = 0; i < key.length; i++) {
+            if (key[i] !== '_') {
+                break;
+            }
+            if(i > 2) {
+                break;
+            }
+        }
+        return (i === 1);
+    }
+
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -2985,5 +3020,7 @@
     exports.get_now = get_now;
     exports.jwtDecode = jwtDecode;
     exports.jwt2json = jwt2json;
+    exports.is_metadata_key = is_metadata_key;
+    exports.is_private_key = is_private_key;
 
 })(this);
