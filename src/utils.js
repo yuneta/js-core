@@ -1273,9 +1273,9 @@
     function msg_iev_answer(gobj, kw, kw_answer)
     {
         try {
-            var __md_iev__ = kw["__md_iev__"];
+            let __md_iev__ = kw["__md_iev__"];
             if(__md_iev__) {
-                var new_msg_area = Object(__md_iev__); // WARNING new_msg_area is not a clone, is the same obj
+                let new_msg_area = Object(__md_iev__); // WARNING new_msg_area is not a clone, is the same obj
                 kw_answer["__md_iev__"] = new_msg_area;
                 msg_apply_answer_filters(kw_answer, new_msg_area, gobj);
             }
@@ -1294,7 +1294,7 @@
             return;
         }
 
-        var jn_stack = msg_read_MIA_key(kw, stack);
+        let jn_stack = msg_read_MIA_key(kw, stack);
         if(!jn_stack) {
             jn_stack = [];
             msg_write_MIA_key(kw, stack, jn_stack);

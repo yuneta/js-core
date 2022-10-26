@@ -737,7 +737,7 @@ DEBUG: {
      ************************************************/
     proto.mt_stats = function(stats, kw, src)
     {
-        var self = this;
+        let self = this;
         if(self.gobj_current_state() != "ST_SESSION") {
             return self.gobj_build_webix_answer(
                 self,
@@ -756,7 +756,7 @@ DEBUG: {
         /*
          *      __REQUEST__ __MESSAGE__
          */
-        var jn_ievent_id = build_ievent_request(
+        let jn_ievent_id = build_ievent_request(
             self,
             src.name,
             kw.service?kw.service:null
@@ -768,6 +768,11 @@ DEBUG: {
         );
 
         kw["__stats__"] = stats;
+        msg_iev_push_stack(
+            kw,         // not owned
+            "__stats__",
+            stats   // owned
+        );
 
         return send_static_iev(self, "EV_MT_STATS", kw);
     }
@@ -777,7 +782,7 @@ DEBUG: {
      ************************************************/
     proto.mt_command = function(command, kw, src)
     {
-        var self = this;
+        let self = this;
         if(self.gobj_current_state() != "ST_SESSION") {
             return self.gobj_build_webix_answer(
                 self,
@@ -796,7 +801,7 @@ DEBUG: {
         /*
          *      __REQUEST__ __MESSAGE__
          */
-        var jn_ievent_id = build_ievent_request(
+        let jn_ievent_id = build_ievent_request(
             self,
             src.name,
             kw.service?kw.service:null
@@ -808,6 +813,11 @@ DEBUG: {
         );
 
         kw["__command__"] = command;
+        msg_iev_push_stack(
+            kw,         // not owned
+            "__command__",
+            command   // owned
+        );
 
         return send_static_iev(self, "EV_MT_COMMAND", kw);
     }
@@ -817,7 +827,7 @@ DEBUG: {
      ************************************************/
     proto.mt_inject_event = function(event, kw, src)
     {
-        var self = this;
+        let self = this;
         if(self.gobj_current_state() != "ST_SESSION") {
             log_error("Not in session, ignore event: " + event);
             return -1;
@@ -829,18 +839,18 @@ DEBUG: {
         /*
          *      __MESSAGE__
          */
-        var jn_request = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID);
+        let jn_request = msg_iev_get_stack(kw, IEVENT_MESSAGE_AREA_ID);
         if(!jn_request) {
             /*
              *  Pon el ievent si no viene con él,
              *  si lo trae es que será alguna respuesta/redirección
              */
-            var __service__ = null;
+            let __service__ = null;
             if(kw_has_key(kw, "__service__")) {
                 __service__ = kw.__service__;
                 delete kw.__service__;
             }
-            var jn_ievent_id = build_ievent_request(
+            let jn_ievent_id = build_ievent_request(
                 self,
                 src.name,
                 __service__
