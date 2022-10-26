@@ -1351,9 +1351,9 @@
      ************************************************************/
     var msg_type_list = [
         "__publishing__",
+        "__command__",
         "__subscribing__",
         "__unsubscribing__",
-        "__command__",
         "__order__",
         "__request__",
         "__answer__",
