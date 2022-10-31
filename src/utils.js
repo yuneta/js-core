@@ -2720,7 +2720,7 @@
         let pa = document.body;
         let who = document.createElement('div');
 
-        if(!padding) {
+        if(is_null(padding)) {
             padding = 0;
         }
         if(is_number(padding)) {
