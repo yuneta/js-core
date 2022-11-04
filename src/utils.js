@@ -549,6 +549,14 @@
     /************************************************************
      *
      ************************************************************/
+    function is_gobj(value)
+    {
+        return value instanceof GObj
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
     function empty_string(s)
     {
         "use strict";
@@ -2875,6 +2883,7 @@
     exports.is_null = is_null;
     exports.is_date = is_date;
     exports.is_function = is_function;
+    exports.is_gobj = is_gobj;
     exports.empty_string = empty_string;
     exports.kw_is_identical = kw_is_identical;
     exports.strcmp = strcmp;
