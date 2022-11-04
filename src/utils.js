@@ -196,7 +196,7 @@
     function index_of_list(elm, list) {
         "use strict";
         // Existence of a native index
-        var nativeIndexOf = list.indexOf? true : false;
+        let nativeIndexOf = list.indexOf? true : false;
 
         // Return the index via the native method if possible
         if(nativeIndexOf) {
@@ -205,7 +205,7 @@
 
         // There is no native method
         // Use a manual loop to find the index
-        var i = list.length;
+        let i = list.length;
         while(i--) {
             // If the elm matches, return it is index
             if(list[i] === elm) {
@@ -2847,6 +2847,21 @@
         return (i === 1);
     }
 
+    /***************************************************************************
+     *
+     ***************************************************************************/
+    function find_gobj_in_list(list, name)
+    {
+        for(gobj of list) {
+            if(!is_gobj(gobj)) {
+                continue;
+            }
+            if(gobj.gobj_name() === name) {
+                return gobj;
+            }
+        }
+        return null;
+    }
 
     //=======================================================================
     //      Expose the class via the global object
@@ -2965,5 +2980,6 @@
     exports.jwt2json = jwt2json;
     exports.is_metadata_key = is_metadata_key;
     exports.is_private_key = is_private_key;
+    exports.find_gobj_in_list = find_gobj_in_list;
 
 })(this);
