@@ -199,7 +199,7 @@
      ************************************************************/
     proto._gobj_create = function(name, gclass, kw, parent, is_service, is_unique, is_volatil)
     {
-        if (name) {
+        if(!empty_string(name)) {
             /*
              *  Check that the name: cannot contain `
              */
@@ -234,23 +234,23 @@
             // find the named gobj
             parent = this.gobj_find_unique_gobj(parent);
             if (!parent) {
-                var msg = "Yuno.gobj_create('" + name + "'): " +
+                let msg = "Yuno.gobj_create('" + name + "'): " +
                     "WITHOUT registered named PARENT: '" + parent + "'";
                 log_warning(msg);
                 return null;
             }
         }
 
-        var gobj = new gclass(name, kw);
+        let gobj = new gclass(name, kw);
         gobj.yuno = this;
 
         if (this.config.trace_creation) {
-            var gclass_name = gobj.gclass_name || '';
-            log_debug("<========== CREATED  " + gclass_name + "^" + name);
+            let gclass_name = gobj.gclass_name || '';
+            log_debug("💙💙⏩ creating: " + gclass_name + "^" + name);
         }
 
         if(!gobj.gobj_load_persistent_attrs) {
-            var msg = "Check GClass of '" + name + "': don't look a GClass";
+            let msg = "Check GClass of '" + name + "': don't look a GClass";
             log_error(msg);
             return null;
         }
@@ -293,9 +293,18 @@
         if (gobj.mt_create) {
             gobj.mt_create(kw);
         }
+
         if (parent && parent.mt_child_added) {
+            if (this.config.trace_creation) {
+                log_debug(sprintf("👦👦🔵 child_added(%s): %s", parent.gobj_full_name(), gobj.gobj_short_name()));
+            }
             parent.mt_child_added(gobj);
         }
+
+        if (this.config.trace_creation) {
+            log_debug("💙💙⏪ created: " + gobj.gobj_full_name());
+        }
+
         return gobj;
     };
 
