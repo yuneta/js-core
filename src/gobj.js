@@ -435,6 +435,7 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_find_child = function(kw)
     {
+        kw = kw || {};
         let set = this.dl_childs;
         for(let i=0; i<set.length; i++) {
             let child = set[i];
@@ -450,6 +451,7 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_match_childs = function(kw)
     {
+        kw = kw || {};
         let childs = [];
         let set = this.dl_childs;
         for(let i=0; i<set.length; i++) {
