@@ -164,7 +164,23 @@
     };
 
     /************************************************************
+     *  Example how change CONFIG of a gclass (temporarily)
      *
+            let CONFIG = gobj_get_gclass_config("Ka_scrollview", true);
+            let old_dragging = CONFIG.draggable;
+            CONFIG.draggable = true;
+
+            let gobj_ka_scrollview = self.yuno.gobj_create(
+                "xxx",
+                Ka_scrollview,
+                {
+                    ...
+                },
+                self // this will provoke EV_SHOWED,EV_KEYDOWN
+            );
+
+            CONFIG.draggable = old_dragging;
+
      ************************************************************/
     function gobj_get_gclass_config(gclass_name, verbose)
     {
