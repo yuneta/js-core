@@ -544,8 +544,16 @@
      ************************************************************/
     proto.gobj_find_unique_gobj = function (gobj_name, verbose)
     {
+        let named_gobj = null;
+
         try {
-            var named_gobj = this._unique_gobjs[gobj_name];
+            named_gobj = this._unique_gobjs[gobj_name];
+        } catch (e) {
+            log_warning("gobj unique not found: '" + gobj_name + "'" );
+            return null;
+        }
+        try {
+            named_gobj = this._service_gobjs[gobj_name];
         } catch (e) {
             log_warning("gobj unique not found: '" + gobj_name + "'" );
             return null;
@@ -561,8 +569,10 @@
      ************************************************************/
     proto.gobj_find_service = function (service_name, verbose)
     {
+        let service_gobj = null;
+
         try {
-            var service_gobj = this._service_gobjs[service_name];
+            service_gobj = this._service_gobjs[service_name];
         } catch (e) {
             log_warning("gobj service not found: '" + service_name + "'" );
             return null;
