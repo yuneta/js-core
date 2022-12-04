@@ -492,7 +492,7 @@ let __inside_event_loop__ = 0;
             let tracing = this.is_tracing();
             if (tracing) {
                 let hora = get_current_datetime();
-                let msg = sprintf("%s%s!> cmd: %s, src: %s",
+                let msg = sprintf("%s%s!> cmd: %s, cmd: %s, src: %s",
                     hora,
                     this._tab(),
                     this.gobj_short_name(),
