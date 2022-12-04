@@ -514,20 +514,19 @@ DEBUG: {
      ********************************************/
     function ac_on_message(self, event, kw, src)
     {
-        var url = self.config.urls[self.config.idx_url];
+        let url = self.config.urls[self.config.idx_url];
 
         /*------------------------------------------*
          *  Create inter_event from received data
          *------------------------------------------*/
-        var size = kw.data.length;
-        var iev_msg = iev_create_from_json(self, kw.data);
+        let size = kw.data.length;
+        let iev_msg = iev_create_from_json(self, kw.data);
 
         /*---------------------------------------*
          *          trace inter_event
          *---------------------------------------*/
         if (self.yuno.config.trace_inter_event) {
-            var url = self.config.urls[self.config.idx_url];
-            var prefix = self.yuno.yuno_name + ' <== ' + url;
+            let prefix = self.yuno.yuno_name + ' <== ' + url;
             if(self.yuno.config.trace_ievent_callback) {
                 self.yuno.config.trace_ievent_callback(prefix, iev_msg, 2, size);
             } else {
@@ -538,8 +537,8 @@ DEBUG: {
         /*----------------------------------------*
          *
          *----------------------------------------*/
-        var iev_event = iev_msg.event;
-        var iev_kw = iev_msg.kw;
+        let iev_event = iev_msg.event;
+        let iev_kw = iev_msg.kw;
 
         /*-----------------------------------------*
          *  If state is not SESSION send self.
@@ -557,15 +556,15 @@ DEBUG: {
         /*------------------------------------*
          *   Analyze inter_event
          *------------------------------------*/
-        var msg_type = msg_get_msg_type(iev_kw);
+        let msg_type = msg_get_msg_type(iev_kw);
 
         /*----------------------------------------*
          *  Pop inter-event routing information.
          *----------------------------------------*/
-        var event_id = msg_iev_get_stack(iev_kw, IEVENT_MESSAGE_AREA_ID);
-        var dst_service = kw_get_str(event_id, "dst_service", "");
+        let event_id = msg_iev_get_stack(iev_kw, IEVENT_MESSAGE_AREA_ID);
+        let dst_service = kw_get_str(event_id, "dst_service", "");
         // Chequea tb el nombre TODO
-        var dst_role = kw_get_str(event_id, "dst_role", "");
+        let dst_role = kw_get_str(event_id, "dst_role", "");
 
         if(dst_role != self.yuno.yuno_role) {
             log_error("It's not my role, yuno_role: " + dst_role + ", my_role: " + self.yuno.yuno_role);
@@ -608,7 +607,7 @@ DEBUG: {
         // 4 Dic 2022, WARNING until 6.2.2 version was used gobj_find_unique_gobj(),
         // improving security: only gobj services must be accessed externally,
         // may happen collateral damages
-        var gobj_service = self.yuno.gobj_find_service(dst_service);
+        let gobj_service = self.yuno.gobj_find_service(dst_service);
         if(gobj_service) {
             if(gobj_service.gobj_event_in_input_event_list(iev_event)) {
                 gobj_service.gobj_send_event(iev_event, iev_kw, self);
