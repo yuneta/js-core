@@ -605,7 +605,10 @@ DEBUG: {
         /*-------------------------*
          *  Dispatch the event
          *-------------------------*/
-        var gobj_service = self.yuno.gobj_find_unique_gobj(dst_service);
+        // 4 Dic 2022, WARNING until 6.2.2 version was used gobj_find_unique_gobj(),
+        // improving security: only gobj services must be accessed externally,
+        // may happen collateral damages
+        var gobj_service = self.yuno.gobj_find_service(dst_service);
         if(gobj_service) {
             if(gobj_service.gobj_event_in_input_event_list(iev_event)) {
                 gobj_service.gobj_send_event(iev_event, iev_kw, self);
