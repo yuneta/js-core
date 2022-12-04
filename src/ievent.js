@@ -127,12 +127,11 @@ DEBUG: {
      *****************************************/
     function trace_inter_event(self, prefix, iev)
     {
-        var hora = get_current_datetime();
-        var fields= null;
+        let hora = get_current_datetime();
         try {
             log_debug("\n" + hora + " " + prefix + "\n");
-            var trace = JSON.stringify(iev,  null, 4);
-            log_debug(trace);
+            //log_debug(JSON.stringify(iev,  null, 4));
+            log_debug(iev);
         } catch (e) {
             log_debug("ERROR in trace_inter_event: " + e);
         }
