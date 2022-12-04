@@ -130,8 +130,8 @@ DEBUG: {
         let hora = get_current_datetime();
         try {
             log_debug("\n" + hora + " " + prefix + "\n");
-            //log_debug(JSON.stringify(iev,  null, 4));
-            log_debug(iev);
+            //trace_msg(JSON.stringify(iev,  null, 4));
+            trace_msg(iev);
         } catch (e) {
             log_debug("ERROR in trace_inter_event: " + e);
         }
