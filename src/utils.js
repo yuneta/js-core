@@ -2850,7 +2850,7 @@
     /***************************************************************************
      *
      ***************************************************************************/
-    function find_gobj_in_list(list, name)
+    function find_gobj_in_list(list, name) // TODO elimina, usa gobj api
     {
         for(gobj of list) {
             if(!is_gobj(gobj)) {
@@ -2980,6 +2980,6 @@
     exports.jwt2json = jwt2json;
     exports.is_metadata_key = is_metadata_key;
     exports.is_private_key = is_private_key;
-    exports.find_gobj_in_list = find_gobj_in_list;
+    exports.find_gobj_in_list = find_gobj_in_list; // TODO elimina, usa gobj api
 
 })(this);
