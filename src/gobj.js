@@ -86,6 +86,9 @@ let __inside_event_loop__ = 0;
         }
         this.running = true;
         if(this.mt_start) {
+            if(this.is_tracing()) {
+                log_debug(sprintf("⏺ ⏺ start: %s", this.gobj_full_name()));
+            }
             return this.mt_start();
         }
         return 0;
@@ -102,6 +105,9 @@ let __inside_event_loop__ = 0;
         }
         this.running = false;
         if(this.mt_stop) {
+            if(this.is_tracing()) {
+                log_debug(sprintf("⏺ ⏺ stop: %s", this.gobj_full_name()));
+            }
             this.mt_stop();
         }
         if(this.__volatil__) {
@@ -123,6 +129,9 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_start_tree = function()
     {
+        if(this.is_tracing()) {
+            log_debug(sprintf("⏺ ⏺ ⏺ ⏺ start_tree: %s", this.gobj_full_name()));
+        }
         if(!this.running) {
             this.gobj_start();
         }
@@ -142,6 +151,9 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_stop_tree = function()
     {
+        if(this.is_tracing()) {
+            log_debug(sprintf("⏺ ⏺ ⏺ ⏺ stop_tree: %s", this.gobj_full_name()));
+        }
         if(this.running) {
             this.gobj_stop();
         }
