@@ -27,7 +27,6 @@ let __inside_event_loop__ = 0;
      *  Update existing in first level, and all in next levels
      ************************************************************/
     function json_object_update_config(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -175,7 +174,7 @@ let __inside_event_loop__ = 0;
         if (index >= 0) {
             this.dl_childs.remove(index);
         }
-    }
+    };
 
     /************************************************************
      *      Return child in index position
@@ -276,7 +275,7 @@ let __inside_event_loop__ = 0;
         } else {
             return [];
         }
-    }
+    };
 
     /************************************************************
      *
@@ -291,7 +290,7 @@ let __inside_event_loop__ = 0;
                 }
             }
         }
-    }
+    };
 
     /************************************************************
      *
@@ -345,7 +344,7 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_kw_set_user_data = function(path, value)
     {
-        return kw_set_dict_value(this.user_data, path, value)
+        return kw_set_dict_value(this.user_data, path, value);
     };
 
     /************************************************************
@@ -361,7 +360,7 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_kw_get_user_data = function(path, default_value, create)
     {
-        return kw_get_dict_value(this.user_data, path, default_value, create)
+        return kw_get_dict_value(this.user_data, path, default_value, create);
     };
 
     /************************************************************
@@ -639,7 +638,7 @@ let __inside_event_loop__ = 0;
                 }
             }
         }
-    }
+    };
 
     /************************************************************
      *      _Subscription class.
@@ -696,7 +695,7 @@ let __inside_event_loop__ = 0;
                 this.__service__ = __service__;
             }
         }
-    };
+    }
 
     /************************************************************
      *  Return a iter of subscriptions (sdata),
@@ -768,7 +767,7 @@ let __inside_event_loop__ = 0;
             }
         }
         return sub_list;
-    };
+    }
 
     /************************************************************
      *  Return a iter of subscriptions (sdata),
@@ -923,7 +922,7 @@ let __inside_event_loop__ = 0;
 
         if(sub_list.length) {
             for (let i=0; i<sub_list.length; i++) {
-                this._delete_subscription(sub_list[i], false)
+                this._delete_subscription(sub_list[i], false);
             }
 
         } else {
@@ -988,7 +987,7 @@ let __inside_event_loop__ = 0;
     {
         if(dl_subs.length) {
             for (let i=0; i<dl_subs.length; i++) {
-                this._delete_subscription(dl_subs[i], force)
+                this._delete_subscription(dl_subs[i], force);
             }
         }
     };
@@ -1466,7 +1465,7 @@ let __inside_event_loop__ = 0;
             return null;
         }
         return fsm.state_list[fsm.current_state - 1];
-    }
+    };
 
     /************************************************************
      *        Inject event.
