@@ -11,6 +11,7 @@ core.*
 .hgignore
 .hgtags
 /.hg/
+node_modules/
 
 *~
 *.o
