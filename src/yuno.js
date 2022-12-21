@@ -215,6 +215,15 @@
      ************************************************************/
     proto._gobj_create = function(name, gclass, kw, parent, is_service, is_unique, is_volatil)
     {
+        if(is_string(gclass)) {
+            let gclass_ = gclass;
+            gclass = gobj_find_gclass(gclass_, false);
+            if(!gclass) {
+                log_error("GClass not found: '" + gclass_ +"'");
+                return null;
+            }
+        }
+
         if(!empty_string(name)) {
             /*
              *  Check that the name: cannot contain `

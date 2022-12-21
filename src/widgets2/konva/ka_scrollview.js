@@ -711,7 +711,7 @@ Group(_ka_container)
         if(ka_vscroll_rect) {
             ka_vscroll_rect.on('dragmove', function (ev) {
                 ev.cancelBubble = true;
-                let y = self.private._vProportion_scroll2content.convert(ka_vscroll_rect.y())
+                let y = self.private._vProportion_scroll2content.convert(ka_vscroll_rect.y());
                 ka_content_group.y(-y);
             });
             ka_vscroll_rect.on('dragend', function (ev) {
@@ -720,7 +720,7 @@ Group(_ka_container)
                  *---------------------------------*/
                 ev.cancelBubble = true;
 
-                let y = self.private._vProportion_scroll2content.convert(ka_vscroll_rect.y())
+                let y = self.private._vProportion_scroll2content.convert(ka_vscroll_rect.y());
                 ka_content_group.y(-y);
                 adjust_screen_position(self); // by end of scrollbar movement
             });
@@ -729,7 +729,7 @@ Group(_ka_container)
         if(ka_hscroll_rect) {
             ka_hscroll_rect.on('dragmove', function (ev) {
                 ev.cancelBubble = true;
-                let x = self.private._hProportion_scroll2content.convert(ka_hscroll_rect.x())
+                let x = self.private._hProportion_scroll2content.convert(ka_hscroll_rect.x());
                 ka_content_group.x(-x);
             });
             ka_hscroll_rect.on('dragend', function (ev) {
@@ -824,7 +824,7 @@ Group(_ka_container)
     function adjust_screen_position(self)
     {
         let ka_content_group = self.private._ka_content_group;
-        let pos = ka_content_group.getClientRect({relativeTo: ka_content_group.getParent()})
+        let pos = ka_content_group.getClientRect({relativeTo: ka_content_group.getParent()});
 
         if(self.config.scroll_by_step === true) {
             if (self.config.enable_vscroll) {
@@ -927,7 +927,7 @@ Group(_ka_container)
                 }
             }
         } else if(WIDTH <= width) {
-            x = 0
+            x = 0;
             width = WIDTH;
             if(self.private._original_width === null) {
                 self.private._original_width = self.config.width;
@@ -943,7 +943,7 @@ Group(_ka_container)
                 }
             }
         } else if(HEIGHT <= height) {
-            y = 0
+            y = 0;
             height = HEIGHT;
             if(self.private._original_height === null) {
                 self.private._original_height = self.config.height;
@@ -982,7 +982,7 @@ Group(_ka_container)
                 self.private._original_x = self.config.x;
             }
         } else if(WIDTH <= width) {
-            x = 0
+            x = 0;
         }
 
         if(HEIGHT > height) {
@@ -991,7 +991,7 @@ Group(_ka_container)
                 self.private._original_y = self.config.y;
             }
         } else if(HEIGHT <= height) {
-            y = 0
+            y = 0;
         }
 
         self.config.x = x;
@@ -1086,7 +1086,7 @@ Group(_ka_container)
                 return [
                     next,
                     next.getClientRect({relativeTo:child.getParent()})
-                ]
+                ];
             }
         }
 
@@ -1124,7 +1124,7 @@ Group(_ka_container)
                 return [
                     next,
                     next.getClientRect({relativeTo:child.getParent()})
-                ]
+                ];
             }
         }
 
@@ -1540,7 +1540,7 @@ Group(_ka_container)
             y: 0,
             width: self.private._util_width,
             height: self.private._util_height
-        }
+        };
 
         return 0;
     }
@@ -1709,7 +1709,7 @@ Group(_ka_container)
         }
 
         create_scrollview(self, true);
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -1724,7 +1724,7 @@ Group(_ka_container)
             self.private._ka_container.destroy();
             self.private._ka_container = null;
         }
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -1732,7 +1732,7 @@ Group(_ka_container)
     proto.mt_start = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -1740,7 +1740,7 @@ Group(_ka_container)
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -1749,7 +1749,7 @@ Group(_ka_container)
     {
         let self = this;
         return self.private._ka_viewport_rect.size();
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -1758,7 +1758,7 @@ Group(_ka_container)
     {
         let self = this;
         return self.private._ka_container.isVisible();
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -1767,7 +1767,7 @@ Group(_ka_container)
     {
         let self = this;
         return self.private._ka_container;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -1780,7 +1780,7 @@ Group(_ka_container)
             width: self.private._util_width,
             height: self.private._util_height
         };
-    }
+    };
 
     /************************************************
      *      Framework Method CONFIG
@@ -1805,7 +1805,7 @@ Group(_ka_container)
     proto.mt_get_gclass_config = function()
     {
         return CONFIG;
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

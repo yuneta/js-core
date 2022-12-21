@@ -45,7 +45,7 @@
         enable_vscroll: false,  // Calculated inside
         enable_hscroll: false,  // Calculated inside
 
-        quick_display: false,       // For debugging, draw quickly
+        quick_display: false,   // For debugging, draw quickly
 
         kw_border_shape: { /* Border shape */
             strokeWidth: 0,
@@ -53,8 +53,10 @@
             shadowBlur: 0
         },
         kw_border_shape_actived: { /* Border shape for active windows */
+            stroke: null,
             opacity: 1,
-            shadowBlur: 0
+            shadowColor: null,
+            shadowBlur: null
         },
 
         //////////////// Private Attributes /////////////////
@@ -180,7 +182,7 @@
             } else if(is_gobj(view)) {
                 gobj = gobj;
             } else {
-                log_error("What the f*ck is?" + view);
+                log_error("What f*ck is?" + view);
                 continue;
             }
 

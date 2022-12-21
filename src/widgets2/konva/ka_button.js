@@ -20,6 +20,10 @@
         //------------ Own Attributes ------------//
         text: "",
         icon: "",
+        fontStyle: "normal",
+        align: "center",
+        verticalAlign: "middle",
+        wrap: "char",
 
         x: 100,
         y: 100,
@@ -48,6 +52,8 @@
             shadowBlur: 0,
             shadowColor: "#FFB659"
         },
+
+        quick_display: false,   // For debugging, draw quickly
 
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
@@ -78,27 +84,82 @@
         self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
     }
 
-    /************************************************
+    /********************************************
      *
-     ************************************************/
-    function build_text(self, data) {
-        let data_ = sprintf(
-            "%s\nVersion: %s",
-            //data.agent_id,
-            data.agent_name,
-            data.yuneta_version
+     ********************************************/
+    function create_shape(self, kw) {
+        let width = self.config.width;
+        let height = self.config.height;
+
+        /*
+         *  Container (Group)
+         */
+        let ka_container = self.private._ka_container = new Konva.Group({
+            id: self.gobj_short_name(),
+            name: "ka_container",
+            x: self.config.x,
+            y: self.config.y,
+            width: self.config.width,
+            height: self.config.height,
+            visible: self.config.visible,
+            draggable: self.config.draggable,
+            listening: true
+        });
+        ka_container.gobj = self; // cross-link
+
+        /*
+         *  Border
+         */
+        let kw_border_shape = __duplicate__(
+            kw_get_dict(self.config, "kw_border_shape", {}, false, false)
         );
-        return data_;
+        json_object_update(
+            kw_border_shape,
+            {
+                name: "ka_border_rect",
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+                fill: kw_get_str(self.config, "background_color", null, false, false)
+            }
+        );
+        self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
+        ka_container.add(self.private._ka_border_rect);
+
+        create_label(self,
+            ka_container,
+            "EV_BUTTON_CLICKED",
+            kw
+        );
+
+        if (self.config.draggable) {
+            ka_container.on('dragstart', function (ev) {
+                ev.cancelBubble = true;
+                self.gobj_publish_event("EV_MOVING", ka_container.position());
+            });
+            ka_container.on('dragmove', function (ev) {
+                ev.cancelBubble = true;
+                document.body.style.cursor = 'pointer';
+                self.gobj_publish_event("EV_MOVING", ka_container.position());
+            });
+            ka_container.on('dragend', function (ev) {
+                ev.cancelBubble = true;
+                document.body.style.cursor = 'default';
+                self.gobj_publish_event("EV_MOVED", ka_container.position());
+            });
+        }
+
+        return ka_container;
     }
 
     /********************************************
      *
      ********************************************/
     function create_label(self, ka_parent, event, kw) {
-        let text = build_text(self, kw.data);
-
         let kw_element = { // Common fields
             id: event,
+            text: kw_get_str(kw, "text", "???"),
             fill: self.config.items_color,
             opacity: 1,
             fontFamily: self.config.fontFamily,
@@ -106,20 +167,18 @@
             lineHeight: self.private._line_height,
             width: self.config.width,
             height: self.config.height,
-
-            fontStyle: "normal",
-            align: "center",
-            verticalAlign: "middle",
             padding: self.config.padding,
-            text: text,
-            wrap: "char",
+
+            fontStyle: self.config.fontStyle,
+            align: self.config.align,
+            verticalAlign: self.config.verticalAlign,
+            wrap: self.config.wrap,
 
             listening: true
         };
         json_object_update(kw_element, kw);
 
         let element = new Konva.Text(kw_element);
-        // element.data = data;
 
         if (!empty_string(event)) {
             //element.filters([Konva.Filters.RGBA]);
@@ -173,77 +232,6 @@
         ka_parent.add(element);
 
         return element;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function create_shape(self, data) {
-        let width = self.config.width;
-        let height = self.config.height;
-
-        /*
-         *  Container (Group)
-         */
-        let ka_container = self.private._ka_container = new Konva.Group({
-            id: self.gobj_short_name(),
-            name: "ka_container",
-            x: self.config.x,
-            y: self.config.y,
-            width: self.config.width,
-            height: self.config.height,
-            visible: self.config.visible,
-            draggable: self.config.draggable,
-            listening: true
-        });
-        ka_container.gobj = self; // cross-link
-
-        /*
-         *  Border
-         */
-        let kw_border_shape = __duplicate__(
-            kw_get_dict(self.config, "kw_border_shape", {}, false, false)
-        );
-        json_object_update(
-            kw_border_shape,
-            {
-                name: "ka_border_rect",
-                x: 0,
-                y: 0,
-                width: width,
-                height: height,
-                fill: kw_get_str(self.config, "background_color", null, false, false)
-            }
-        );
-        self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
-        ka_container.add(self.private._ka_border_rect);
-
-        create_label(self,
-            ka_container,
-            "EV_BUTTON_CLICKED",
-            {
-                data: data
-            }
-        );
-
-        if (self.config.draggable) {
-            ka_container.on('dragstart', function (ev) {
-                ev.cancelBubble = true;
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragmove', function (ev) {
-                ev.cancelBubble = true;
-                document.body.style.cursor = 'pointer';
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragend', function (ev) {
-                ev.cancelBubble = true;
-                document.body.style.cursor = 'default';
-                self.gobj_publish_event("EV_MOVED", ka_container.position());
-            });
-        }
-
-        return ka_container;
     }
 
 
@@ -469,7 +457,7 @@
 
         adjust_text_and_icon_size(self);
 
-        create_shape(self, kw.data); // WARNING added to layer in mt_child_added of parent
+        create_shape(self, kw); // WARNING added to layer in mt_child_added of parent
     };
 
     /************************************************
