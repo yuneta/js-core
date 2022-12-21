@@ -206,7 +206,7 @@
                 altKey: e.altKey,
                 shiftKey: e.shiftKey,
                 repeat: e.repeat
-            }
+            };
             /*
              *  WARNING:
              *      ; is 59 in Firefox but 186 in other browsers.
@@ -422,7 +422,7 @@
                             x: dim_abs.x<0?0:dim_abs.x,
                             y: dim_abs.y<0?0:dim_abs.y
                         });
-                        node_info.text(info)
+                        node_info.text(info);
                     }
                 }
             });
@@ -715,7 +715,7 @@
         );
 
         subscribe_to_system_resize(self);
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -724,7 +724,7 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -740,7 +740,7 @@
             200
         );
 
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -748,7 +748,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method child_added
@@ -763,7 +763,7 @@
         };
 
         self.gobj_send_event("EV_RESIZE", kw_size, self);
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -772,7 +772,7 @@
     {
         let self = this;
         return self.private._ka_container;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -781,7 +781,7 @@
     {
         let self = this;
         return self.config.stage;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -790,7 +790,7 @@
     {
         let self = this;
         return self.config.main_layer;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -799,7 +799,7 @@
     {
         let self = this;
         return self.config.static_layer;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -808,7 +808,7 @@
     {
         let self = this;
         return self.config.link_layer;
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

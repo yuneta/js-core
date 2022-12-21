@@ -104,7 +104,7 @@
                     continue;
                 }
             } else {
-                log_error("What is it?" + view)
+                log_error("What is it?" + view);
                 continue;
             }
 
@@ -147,7 +147,7 @@
             } else if(is_gobj(view)) {
                 gobj = gobj;
             } else {
-                log_error("What the f*ck is?" + view)
+                log_error("What the f*ck is?" + view);
                 continue;
             }
 
@@ -200,7 +200,7 @@
                 let gobj = find_gobj_in_list(self.private._views, name);
                 if(gobj) {
                     gobj.get_konva_container().moveToTop();
-                    __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj)
+                    __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj);
                 }
             }
             return 0;
@@ -225,10 +225,10 @@
             /*
              *  Window visible
              */
-            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
 
         } else {
-            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self);
         }
 
         return 0;
@@ -541,7 +541,7 @@
         if(visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -551,7 +551,7 @@
     proto.mt_destroy = function()
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -559,7 +559,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -567,7 +567,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *  Framework Method mt_child_added
@@ -584,7 +584,7 @@
                 self
             );
         }
-    }
+    };
 
     /************************************************
      *  Framework Method mt_child_added
@@ -599,7 +599,7 @@
             },
             self
         );
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -608,7 +608,7 @@
     {
         let self = this;
         return self.private._gobj_ka_scrollview.get_konva_container();
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object
