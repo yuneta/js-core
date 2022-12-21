@@ -23,15 +23,18 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
+        orientation: "horizontal", /* "vertical" or "horizontal" */
+        wide: 40,
+        long: 0,        /* 0 = adjust to screen */
         views: [],
 
         //------- Ka_scrollview Attributes --- HACK use ka_scrollview directly ---------//
-        x: 100,
-        y: 100,
-        width: 240,
-        height: 240,
+        x: 0,
+        y: 0,
+        width: 0,       // Calculated inside (based in orientation/wide/long)
+        height: 0,      // Calculated inside (based in orientation/wide/long)
         padding: 10,
-        background_color: "#cccccc",
+        background_color: "#EEEEEE",
 
         visible: true,
         panning: true,          // Enable (inner dragging) panning
@@ -39,9 +42,8 @@
 
         fix_dimension_to_screen: false,
 
-        enable_vscroll: true,       // Enable content vertical scrolling, default true
-        enable_hscroll: true,       // Enable content horizontal scrolling, default true
-        scroll_by_step: false,      // false: use native; true: use child dimension; number: use 'number' step;
+        enable_vscroll: false,  // Calculated inside
+        enable_hscroll: false,  // Calculated inside
 
         quick_display: false,       // For debugging, draw quickly
 
@@ -67,6 +69,37 @@
             /***************************
              *      Local Methods
              ***************************/
+
+
+
+
+    /************************************************
+     *
+     ************************************************/
+    function calculate_dimension(self)
+    {
+        switch(self.config.orientation) {
+            case "vertical":
+                if(self.config.long === 0) {
+                    self.config.long = self.gobj_parent().gobj_read_attr("height");
+                }
+                self.config.width = self.config.wide;
+                self.config.height = self.config.long;
+                self.config.enable_vscroll = true;
+                self.config.enable_hscroll = false;
+                break;
+            default:
+            case "horizontal":
+                if(self.config.long === 0) {
+                    self.config.long = self.gobj_parent().gobj_read_attr("width");
+                }
+                self.config.width = self.config.long;
+                self.config.height = self.config.wide;
+                self.config.enable_vscroll = false;
+                self.config.enable_hscroll = true;
+                break;
+        }
+    }
 
 
 
@@ -316,8 +349,11 @@
     {
         self.config.x = kw_get_int(kw, "x", self.config.x);
         self.config.y = kw_get_int(kw, "y", self.config.y);
-        self.config.width = kw_get_int(kw, "width", self.config.width);
-        self.config.height = kw_get_int(kw, "height", self.config.height);
+        self.config.wide = kw_get_int(kw, "wide", self.config.wide);
+        self.config.long = kw_get_int(kw, "long", self.config.long);
+
+        calculate_dimension(self);
+
         self.private._gobj_ka_scrollview.gobj_send_event(
             "EV_RESIZE",
             {
@@ -496,6 +532,8 @@
             self.config.layer = self.gobj_parent().config.layer;
         }
 
+        calculate_dimension(self);
+
         let visible = self.config.visible;
 
         self.private._gobj_ka_scrollview = self.yuno.gobj_create(
@@ -522,7 +560,9 @@
 
                 enable_vscroll: self.config.enable_vscroll,
                 enable_hscroll: self.config.enable_hscroll,
-                scroll_by_step: self.config.scroll_by_step,
+                scroll_by_step: true,
+                hide_hscrollbar: true,     // Don't show horizontal (auto) scrollbar
+                hide_vscrollbar: true,     // Don't show vertical (auto) scrollbar
 
                 quick_display: self.config.quick_display,
 

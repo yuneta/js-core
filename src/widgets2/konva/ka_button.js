@@ -263,7 +263,7 @@
     {
         let __ka_main__ = self.yuno.gobj_find_service("__ka_main__", true);
 
-        __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self)
+        __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
 
         get_list_realms(self);
 
@@ -470,9 +470,7 @@
         adjust_text_and_icon_size(self);
 
         create_shape(self, kw.data); // WARNING added to layer in mt_child_added of parent
-
-        // create_menus_popups(self);
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -481,7 +479,7 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -489,8 +487,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
-        get_list_realms(self);
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -498,7 +495,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -507,7 +504,7 @@
     {
         let self = this;
         return self.private._ka_container;
-    }
+    };
 
 
     //=======================================================================
