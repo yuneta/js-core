@@ -43,11 +43,6 @@
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
         },
-        kw_border_shape_actived: {
-            stroke: "blue",
-            shadowBlur: 0,
-            shadowColor: "blue"
-        },
 
         timeout_retry: 5,       // timeout retry, in seconds
         timeout_idle: 5,        // idle timeout, in seconds

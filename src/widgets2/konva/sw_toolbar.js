@@ -49,14 +49,13 @@
 
         kw_border_shape: { /* Border shape */
             strokeWidth: 0,
-            opacity: 1,
-            shadowBlur: 0
-        },
-        kw_border_shape_actived: { /* Border shape for active windows */
             stroke: null,
             opacity: 1,
             shadowColor: null,
-            shadowBlur: null
+            shadowBlur: 0
+        },
+        kw_border_shape_actived: { /* Border shape for active windows */
+            // Only used: stroke, opacity, shadowBlur, shadowColor
         },
 
         //////////////// Private Attributes /////////////////
@@ -135,9 +134,7 @@
                     kw_get_dict(view, "kw", {}),
                     self
                 );
-                if(!gobj_node) {
-                    continue;
-                }
+                continue; // goes recurrent ac_add_views() by mt_child_added()
             } else {
                 log_error("What is it?" + view);
                 continue;
@@ -539,7 +536,7 @@
         let visible = self.config.visible;
 
         self.private._gobj_ka_scrollview = self.yuno.gobj_create(
-            "ka_scrollview",
+            self.gobj_name(),
             Ka_scrollview,
             {
                 layer: self.config.layer,

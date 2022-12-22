@@ -46,8 +46,7 @@
             shadowBlur: 5
         },
         kw_border_shape_actived: { /* Border shape for active windows */
-            opacity: 1,
-            shadowBlur: 5
+            // Only used: stroke, opacity, shadowBlur, shadowColor
         },
 
         //////////////// Private Attributes /////////////////
@@ -74,7 +73,7 @@
         for(let i=0; i<items.length; i++) {
             let item = items[i];
             let value = kw_get_str(item, "value", "", false, true);
-            let kw_text = kw_get_dict(item, "kw_text", {}, false, false)
+            let kw_text = kw_get_dict(item, "kw_text", {}, false, false);
             if(empty_string(value)) {
                 continue;
             }
@@ -146,9 +145,9 @@
             let event = action;
             record.action = function(_self, _id) {
                 _self.gobj_publish_event(event, {"id": _id});
-            }
+            };
         } else if(action && !is_function(action)) {
-            log_error("action must be a string or function")
+            log_error("action must be a string or function");
         }
 
         /*---------------------------------*
@@ -387,7 +386,7 @@
                 case 13: // Enter
                     let record = kwid_find_one_record(self.config.items, "submit");
                     if(record) {
-                        record.action(self, record.id?record.id:record.name)
+                        record.action(self, record.id?record.id:record.name);
                         ret = -1; // OWN the EV_KEYDOWN event
                     }
                     break;
@@ -486,10 +485,10 @@
             /*
              *  Window visible
              */
-            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
 
         } else {
-            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self);
         }
 
         return 0;
@@ -641,7 +640,7 @@
         self.gobj_subscribe_event(null, null, subscriber);
 
         self.private._gobj_ka_scrollview = self.yuno.gobj_create(
-            "ka_scrollview",
+            self.gobj_name(),
             Ka_scrollview,
             {
                 // quick_display: true, // TODO TEST
@@ -681,7 +680,7 @@
 
         self.gobj_send_event("EV_ADD_ITEMS", {items: self.config.items}, self);
         self.gobj_send_event("EV_SHOW", {}, self);
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -691,7 +690,7 @@
     proto.mt_destroy = function()
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -699,7 +698,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -707,7 +706,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -716,7 +715,7 @@
     {
         let self = this;
         return self.private._gobj_ka_scrollview.get_konva_container();
-    }
+    };
 
 
 
@@ -814,9 +813,9 @@
                 },
                 "action": function(_self, _item) {
                     _self.gobj_send_event("EV_HIDE", {}, __ka_main__);
-                    __yuno__.gobj_destroy(_self)
+                    __yuno__.gobj_destroy(_self);
                     if(callback) {
-                        callback()
+                        callback();
                     }
                 }
             }
@@ -839,7 +838,7 @@
         );
 
         if(gobj_display_message) {
-            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj_display_message)
+            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj_display_message);
         }
     }
 

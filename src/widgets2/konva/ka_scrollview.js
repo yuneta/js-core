@@ -74,14 +74,11 @@ Group(_ka_container)
             stroke: "black",
             opacity: 1,
             shadowBlur: 0,
-            shadowForStrokeEnabled: false, // HTML5 Canvas Optimizing Strokes Performance Tip
-            shadowColor: "black"
+            shadowColor: "black",
+            shadowForStrokeEnabled: false   // HTML5 Canvas Optimizing Strokes Performance Tip
         },
-        kw_border_shape_actived: {
-            stroke: "blue",
-            opacity: 1,
-            shadowBlur: 0,
-            shadowColor: "blue"
+        kw_border_shape_actived: { /* Border shape for active windows */
+            // Only used: stroke, opacity, shadowBlur, shadowColor
         },
 
         /*
@@ -1212,11 +1209,11 @@ Group(_ka_container)
             } else {
                 log_error("ka_scrollview.ac_add_items(): what fuck is it?");
             }
+            if(self.config.quick_display) {
+                self.private._ka_container.draw();
+            }
         }
 
-        /*
-         *  Update ka_content_rect to size of ka_content_group
-         */
         self.private._ka_content_rect.moveToBottom();
 
         /*
@@ -1327,46 +1324,22 @@ Group(_ka_container)
          */
         let kw_rect = self.config.kw_border_shape_actived;
 
-        let stroke = kw_get_str(
-            kw_rect,
-            "stroke",
-            null,
-            false,
-            null
-        );
+        let stroke = kw_get_str(kw_rect,"stroke",null);
         if(!is_null(stroke)) {
             self.private._ka_border_rect.stroke(stroke);
         }
 
-        let opacity = kw_get_real(
-            kw_rect,
-            "opacity",
-            null,
-            false,
-            false
-        );
+        let opacity = kw_get_real(kw_rect, "opacity", null);
         if(!is_null(opacity)) {
             self.private._ka_border_rect.opacity(opacity);
         }
 
-        let shadowBlur = kw_get_int(
-            kw_rect,
-            "shadowBlur",
-            null,
-            false,
-            false
-        );
+        let shadowBlur = kw_get_int(kw_rect, "shadowBlur", null);
         if(!is_null(shadowBlur)) {
             self.private._ka_border_rect.shadowBlur(shadowBlur);
         }
 
-        let shadowColor = kw_get_str(
-            kw_rect,
-            "shadowColor",
-            null,
-            false,
-            false
-        );
+        let shadowColor = kw_get_str(kw_rect, "shadowColor", null);
         if(!is_null(shadowColor)) {
             self.private._ka_border_rect.shadowColor(shadowColor);
         }
@@ -1384,46 +1357,22 @@ Group(_ka_container)
          */
         let kw_rect = self.config.kw_border_shape;
 
-        let stroke = kw_get_str(
-            kw_rect,
-            "stroke",
-            null,
-            false,
-            false
-        );
+        let stroke = kw_get_str(kw_rect,"stroke",null);
         if(!is_null(stroke)) {
             self.private._ka_border_rect.stroke(stroke);
         }
 
-        let opacity = kw_get_real(
-            kw_rect,
-            "opacity",
-            null,
-            false,
-            false
-        );
+        let opacity = kw_get_real(kw_rect, "opacity", null);
         if(!is_null(opacity)) {
             self.private._ka_border_rect.opacity(opacity);
         }
 
-        let shadowBlur = kw_get_int(
-            kw_rect,
-            "shadowBlur",
-            null,
-            false,
-            false
-        );
+        let shadowBlur = kw_get_int(kw_rect, "shadowBlur", null);
         if(!is_null(shadowBlur)) {
             self.private._ka_border_rect.shadowBlur(shadowBlur);
         }
 
-        let shadowColor = kw_get_str(
-            kw_rect,
-            "shadowColor",
-            null,
-            false,
-            false
-        );
+        let shadowColor = kw_get_str(kw_rect, "shadowColor", null);
         if(!is_null(shadowColor)) {
             self.private._ka_border_rect.shadowColor(shadowColor);
         }

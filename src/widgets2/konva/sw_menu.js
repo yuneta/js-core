@@ -75,6 +75,7 @@
             shadowColor: "gray"
         },
         kw_border_shape_actived: { /* Border shape for active windows */
+            // Only used: stroke, opacity, shadowBlur, shadowColor
             stroke: "blue",
             opacity: 1,
             shadowBlur: 0,
@@ -147,9 +148,9 @@
             let event = action;
             record.action = function(_id) {
                 self.gobj_publish_event(event, {"id": _id});
-            }
+            };
         } else if(action && !is_function(action)) {
-            log_error("action must be a string or function")
+            log_error("action must be a string or function");
         }
 
         /*---------------------------------*
@@ -593,10 +594,10 @@
             /*
              *  Window visible
              */
-            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
 
         } else {
-            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self)
+            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self);
         }
 
         return 0;
@@ -762,7 +763,7 @@
         jdb_init(self.private._jdb);
 
         self.private._gobj_ka_scrollview = self.yuno.gobj_create(
-            "ka_scrollview",
+            self.gobj_name(),
             Ka_scrollview,
             {
                 layer: self.config.layer,
@@ -803,7 +804,7 @@
         if(self.config.visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -818,7 +819,7 @@
             self.yuno.gobj_destroy(self.private._gobj_ka_scrollview);
             self.private._gobj_ka_scrollview = null;
         }
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -826,7 +827,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -834,7 +835,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -843,7 +844,7 @@
     {
         let self = this;
         return self.private._gobj_ka_scrollview.get_konva_container();
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

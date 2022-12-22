@@ -25,8 +25,8 @@
         verticalAlign: "middle",
         wrap: "char",
 
-        x: 100,
-        y: 100,
+        x: 0,
+        y: 0,
         width: 150,
         height: 150,
         padding: 10,
@@ -40,17 +40,13 @@
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
 
         kw_border_shape: { /* Border shape */
+            cornerRadius: 10,
             strokeWidth: 2,
             stroke: "#f5c211ff",
-            cornerRadius: 10,
+            opacity: 1,
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
-        },
-        kw_border_shape_actived: {
-            stroke: "#1a5fb4ff",
-            shadowBlur: 0,
-            shadowColor: "#FFB659"
         },
 
         quick_display: false,   // For debugging, draw quickly
