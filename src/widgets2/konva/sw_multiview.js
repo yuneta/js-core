@@ -97,9 +97,7 @@
                     kw_get_dict(view, "kw", {}),
                     self
                 );
-                if(!child) {
-                    continue;
-                }
+                continue; // goes recurrent ac_add_views() by mt_child_added()
             } else {
                 log_error("What is it?" + view);
                 continue;

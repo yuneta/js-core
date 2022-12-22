@@ -20,24 +20,42 @@
         //------------ Own Attributes ------------//
         text: "",
         icon: "",
-        fontStyle: "normal",
-        align: "center",
-        verticalAlign: "middle",
-        wrap: "char",
+        icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
 
         x: 0,
         y: 0,
         width: 150,
-        height: 150,
-        padding: 10,
+        height: 40,
         background_color: "#FFF7E0",
 
         visible: true,
         draggable: false,       // Enable (outer dragging) dragging
 
-        fontFamily: "sans-serif", // "OpenSans"
-        icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
+        icon_size: 22,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
+        autosize: false,    // Change dimension to size of font text
+
+        kw_text_font_properties: {
+            // fontSize:    // Override if you don't want it was calculated internally (_text_size)
+            // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
+            fontFamily: "sans-serif", // "OpenSans"
+            fontStyle: "normal",
+            padding: 2,
+            align: "center",
+            verticalAlign: "middle",
+            wrap: "char"
+        },
+        kw_icon_font_properties: {
+            // fontSize:    // Override if you don't want it was calculated internally (_icon_size)
+            // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
+            fontFamily: "yuneta-icons-font",
+            fontStyle: "normal",
+            padding: 2,
+            align: "center",
+            verticalAlign: "middle",
+            wrap: "char"
+        },
+
 
         kw_border_shape: { /* Border shape */
             cornerRadius: 10,
@@ -49,12 +67,12 @@
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
         },
 
-        quick_display: false,   // For debugging, draw quickly
+        quick_display: false,       // For debugging, draw quickly
 
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
-        _line_height: 1,
+        _line_height: 1.2,    // Calculated internally
 
         _ka_container: null
     };
@@ -75,7 +93,7 @@
     function adjust_text_and_icon_size(self) {
         self.private._text_size = adjust_font_size(self.config.text_size, self.config.fontFamily);
         if (self.config.text_size > self.private._text_size) {
-            self.private._line_height = 1.2;
+            self.private._line_height = 1.4;
         }
         self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
     }
@@ -83,7 +101,7 @@
     /********************************************
      *
      ********************************************/
-    function create_shape(self, kw) {
+    function create_shape(self) {
         let width = self.config.width;
         let height = self.config.height;
 
@@ -123,11 +141,32 @@
         self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
         ka_container.add(self.private._ka_border_rect);
 
-        create_label(self,
-            ka_container,
-            "EV_BUTTON_CLICKED",
-            kw
-        );
+        if(self.config.quick_display) {
+            if(self.config.layer) {
+                self.config.layer.add(ka_container);
+                ka_container.draw();
+            }
+        }
+
+        let label = create_label(self);
+        ka_container.add(label);
+
+        if(self.config.autosize) {
+            let font_dimension = label.getClientRect();
+            self.private._ka_border_rect.size(font_dimension);
+            let ka_container_dimension = ka_container.getClientRect();
+            self.config.width = ka_container_dimension.width;
+            self.config.height = ka_container_dimension.height;
+        }
+
+        ka_container.add(label);
+
+        if(self.config.quick_display) {
+            if(self.config.layer) {
+                self.config.layer.add(ka_container);
+                ka_container.draw();
+            }
+        }
 
         if (self.config.draggable) {
             ka_container.on('dragstart', function (ev) {
@@ -152,80 +191,219 @@
     /********************************************
      *
      ********************************************/
-    function create_label(self, ka_parent, event, kw) {
-        let kw_element = { // Common fields
-            id: event,
-            text: kw_get_str(kw, "text", "???"),
-            fill: self.config.items_color,
-            opacity: 1,
-            fontFamily: self.config.fontFamily,
-            fontSize: self.private._text_size,
-            lineHeight: self.private._line_height,
-            width: self.config.width,
-            height: self.config.height,
-            padding: self.config.padding,
+    function create_label(self) {
+        let text = self.config.text;
+        let icon = self.config.icon;
 
-            fontStyle: self.config.fontStyle,
-            align: self.config.align,
-            verticalAlign: self.config.verticalAlign,
-            wrap: self.config.wrap,
+        let container = new Konva.Group({
+        });
 
-            listening: true
-        };
-        json_object_update(kw_element, kw);
+        if(!empty_string(text) && !empty_string(icon)) {
+            let icon_position = self.config.icon_position;
+            switch(icon_position) {
+                case "top": {
+                    let kw_icon = { // Common fields
+                        text: icon,
+                        x: 0,
+                        y: 0,
+                        lineHeight: self.private._line_height,
+                        fontSize: self.private._icon_size
+                    };
+                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    let icon_element = new Konva.Text(kw_icon);
+                    container.add(icon_element);
 
-        let element = new Konva.Text(kw_element);
-
-        if (!empty_string(event)) {
-            //element.filters([Konva.Filters.RGBA]);
-
-            element.on("mouseenter", function (e) {
-                let stage = self.config.layer.getStage();
-                stage.container().style.cursor = "pointer";
-            });
-
-            element.on("mouseleave", function (e) {
-                let stage = self.config.layer.getStage();
-                stage.container().style.cursor = "default";
-            });
-
-            element.on("pointerdown", function (e) {
-                if (self.is_tracing()) {
-                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-                        "nd_machine", "element",
-                        e.type,
-                        (e.cancelBubble) ? "Y" : "N",
-                        self.gobj_short_name(),
-                        kw_get_str(e.target.attrs, "id", ""),
-                        kw_get_str(e.target.attrs, "name", "")
-                    ));
+                    let kw_text = { // Common fields
+                        text: text,
+                        x: 0,
+                        y: icon_element.height(),
+                        lineHeight: icon_element.lineHeight(),
+                        fontSize: self.private._text_size
+                    };
+                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    let text_element = new Konva.Text(kw_text);
+                    container.add(text_element);
                 }
-            });
-            element.on("pointerup", function (e) {
-                e.cancelBubble = false;
-                e.gobj = self;
-                if (self.is_tracing()) {
-                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-                        "nd_machine", "element",
-                        e.type,
-                        (e.cancelBubble) ? "Y" : "N",
-                        self.gobj_short_name(),
-                        kw_get_str(e.target.attrs, "id", ""),
-                        kw_get_str(e.target.attrs, "name", "")
-                    ));
+                break;
+
+                case "bottom": {
+                    let kw_text = { // Common fields
+                        text: text,
+                        x: 0,
+                        y: 0,
+                        lineHeight: self.private._line_height,
+                        fontSize: self.private._text_size
+                    };
+                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    let text_element = new Konva.Text(kw_text);
+                    container.add(text_element);
+
+                    let kw_icon = { // Common fields
+                        text: icon,
+                        x: 0,
+                        y: text_element.height(),
+                        lineHeight: text_element.lineHeight(),
+                        fontSize: self.private._icon_size
+                    };
+                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    let icon_element = new Konva.Text(kw_icon);
+                    container.add(icon_element);
                 }
-                /*
-                 *  WARNING If action provoke deleting the konva node then the event is not bubbled!
-                 *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
-                 *  the window will send a EV_DEACTIVATE and the window will be deactive,
-                 *  so for the activation service will work well.
-                 *  BE CAREFUL with service needing bubbling.
-                 */
-                self.gobj_send_event(event, {element: element}, self);
-            });
+                break;
+
+                case "left": {
+                    let kw_icon = { // Common fields
+                        text: icon,
+                        x: 0,
+                        y: 0,
+                        lineHeight: self.private._line_height,
+                        fontSize: self.private._icon_size
+                    };
+                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    let icon_element = new Konva.Text(kw_icon);
+                    container.add(icon_element);
+
+                    let kw_text = { // Common fields
+                        text: text,
+                        x: icon_element.width(),
+                        y: 0,
+                        lineHeight: icon_element._line_height,
+                        fontSize: self.private._text_size
+                    };
+                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    let text_element = new Konva.Text(kw_text);
+                    container.add(text_element);
+                }
+                break;
+
+                case "right": {
+                    let kw_text = { // Common fields
+                        text: text,
+                        x: 0,
+                        y: 0,
+                        lineHeight: self.private._line_height,
+                        fontSize: self.private._text_size
+                    };
+                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    let text_element = new Konva.Text(kw_text);
+                    container.add(text_element);
+
+                    let kw_icon = { // Common fields
+                        text: icon,
+                        x: text_element.width(),
+                        y: 0,
+                        lineHeight: self.private._line_height,
+                        fontSize: self.private._icon_size
+                    };
+                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    let icon_element = new Konva.Text(kw_icon);
+                    container.add(icon_element);
+                }
+                break;
+            }
+
+        } else if(!empty_string(icon)) {
+            let kw_icon = { // Common fields
+                text: icon,
+                x: 0,
+                y: 0,
+                width: self.config.width,
+                height: self.config.height,
+                lineHeight: self.private._line_height,
+                fontSize: self.private._icon_size
+            };
+            json_object_update(kw_icon, self.config.kw_icon_font_properties);
+            let icon_element = new Konva.Text(kw_icon);
+            container.add(icon_element);
+
+        } else if(!empty_string(text)) {
+            let kw_text = { // Common fields
+                text: text,
+                x: 0,
+                y: 0,
+                width: self.config.width,
+                height: self.config.height,
+                lineHeight: self.private._line_height,
+                fontSize: self.private._text_size
+            };
+            json_object_update(kw_text, self.config.kw_text_font_properties);
+            let text_element = new Konva.Text(kw_text);
+            container.add(text_element);
+
         }
+        return container;
 
-        ka_parent.add(element);
+        // let kw_element = { // Common fields
+        //     id: event,
+        //     text: text,
+        //     x: 0,
+        //     y: 0,
+        //     width: self.config.width,
+        //     height: self.config.height,
+        //     lineHeight: self.private._line_height,
+        //     fontSize: self.private._text_size,
+        //     listening: true
+        // };
+        //
+        // // fontSize: self.private._icon_size,
+        // // fontFamily: "yuneta-icons-font",
+        //
+        //
+        // json_object_update(kw_element, self.config.kw_font_properties);
+        //
+        // if(self.config.autosize) {
+        //     delete kw_element["width"];
+        //     delete kw_element["height"];
+        // }
+        //
+        // let element = new Konva.Text(kw_element);
+        //
+        // if (!empty_string(event)) {
+        //     element.on("mouseenter", function (e) {
+        //         let stage = self.config.layer.getStage();
+        //         stage.container().style.cursor = "pointer";
+        //     });
+        //
+        //     element.on("mouseleave", function (e) {
+        //         let stage = self.config.layer.getStage();
+        //         stage.container().style.cursor = "default";
+        //     });
+        //
+        //     element.on("pointerdown", function (e) {
+        //         if (self.is_tracing()) {
+        //             log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
+        //                 "nd_machine", "element",
+        //                 e.type,
+        //                 (e.cancelBubble) ? "Y" : "N",
+        //                 self.gobj_short_name(),
+        //                 kw_get_str(e.target.attrs, "id", ""),
+        //                 kw_get_str(e.target.attrs, "name", "")
+        //             ));
+        //         }
+        //     });
+        //     element.on("pointerup", function (e) {
+        //         e.cancelBubble = false;
+        //         e.gobj = self;
+        //         if (self.is_tracing()) {
+        //             log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
+        //                 "nd_machine", "element",
+        //                 e.type,
+        //                 (e.cancelBubble) ? "Y" : "N",
+        //                 self.gobj_short_name(),
+        //                 kw_get_str(e.target.attrs, "id", ""),
+        //                 kw_get_str(e.target.attrs, "name", "")
+        //             ));
+        //         }
+        //         /*
+        //          *  WARNING If action provoke deleting the konva node then the event is not bubbled!
+        //          *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
+        //          *  the window will send a EV_DEACTIVATE and the window will be deactive,
+        //          *  so for the activation service will work well.
+        //          *  BE CAREFUL with service needing bubbling.
+        //          */
+        //         self.gobj_send_event(event, {element: element}, self);
+        //     });
+        // }
 
         return element;
     }
@@ -453,7 +631,7 @@
 
         adjust_text_and_icon_size(self);
 
-        create_shape(self, kw); // WARNING added to layer in mt_child_added of parent
+        create_shape(self); // WARNING added to layer in mt_child_added of parent
     };
 
     /************************************************
