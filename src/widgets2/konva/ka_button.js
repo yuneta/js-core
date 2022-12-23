@@ -185,7 +185,7 @@
             });
             ka_container.on('dragend', function (ev) {
                 ev.cancelBubble = true;
-                if (!empty_string(self.config.event)) {
+                if (self.config.action) {
                     self.config.layer.getStage().container().style.cursor = "pointer";
                 } else {
                     self.config.layer.getStage().container().style.cursor = "default";
