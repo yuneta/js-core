@@ -18,10 +18,13 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
-        event: "",
-        text: "",
+        id: "",         // unique id (not really). If id is empty id=action if action is a string
+        value: "",      // text of item
         icon: "",
+        action: null,   // function(item) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
+        // disabled: false, TODO
+        // selected: false, TODO
 
         x: 0,
         y: 0,
@@ -191,7 +194,26 @@
             });
         }
 
-        if (!empty_string(self.config.event)) {
+        let id = kw_get_str(self.config, "id", null);
+        let action = kw_get_dict_value(self.config, "action", null);
+
+        if(is_null(id)) {
+            if(is_string(item.action)) {
+                self.config.id = action;
+            }
+        }
+
+        if(is_string(action)) {
+            let event = action;
+            self.config.action = function(_id) {
+                self.gobj_publish_event(event, {"id": _id});
+            };
+        } else if(action && !is_function(action)) {
+            log_error("action must be a string or function");
+            return ka_container;
+        }
+
+        if (is_function(self.config.action)) {
             ka_container.on("mouseenter", function (e) {
                 self.config.layer.getStage().container().style.cursor = "pointer";
             });
@@ -225,17 +247,9 @@
                         kw_get_str(e.target.attrs, "name", "")
                     ));
                 }
-                /*
-                 *  WARNING If action provoke deleting the konva node then the event is not bubbled!
-                 *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
-                 *  the window will send a EV_DEACTIVATE and the window will be deactive,
-                 *  so for the activation service will work well.
-                 *  BE CAREFUL with service needing bubbling.
-                 */
-                self.gobj_publish_event(self.config.event, {});
+                self.config.action(self.config.id);
             });
         }
-
 
         return ka_container;
     }
@@ -244,7 +258,7 @@
      *
      ********************************************/
     function create_label(self) {
-        let text = self.config.text;
+        let text = self.config.value;
         let icon = self.config.icon;
 
         let container = new Konva.Group({
@@ -609,6 +623,10 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        if(self.private._ka_container) {
+            self.private._ka_container.destroy();
+            self.private._ka_container = null;
+        }
     };
 
     /************************************************

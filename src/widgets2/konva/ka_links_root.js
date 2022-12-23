@@ -166,7 +166,7 @@
             //     self.gobj_publish_event("EV_MOVED", ka_container.position());
             // });
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -175,7 +175,11 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+        if(self.private._ka_container) {
+            self.private._ka_container.destroy();
+            self.private._ka_container = null;
+        }
+    };
 
     /************************************************
      *      Framework Method start
@@ -183,7 +187,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -191,7 +195,7 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
-    }
+    };
 
     /************************************************
      *  Framework Method mt_child_added
@@ -200,7 +204,7 @@
     {
         let self = this;
         self.private._ka_container.add(child.get_konva_container());
-    }
+    };
 
     /************************************************
      *  Framework Method mt_child_added
@@ -210,7 +214,7 @@
         let self = this;
         // TODO ??? self.private._ka_container.remove(child.get_konva_container());
         // TODO donde se hace el destroy() del konva node
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -219,7 +223,7 @@
     {
         let self = this;
         return self.private._ka_container;
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

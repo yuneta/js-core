@@ -296,7 +296,7 @@
 
         source_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
         target_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -305,7 +305,11 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+        if(self.private._ka_container) {
+            self.private._ka_container.destroy();
+            self.private._ka_container = null;
+        }
+    };
 
     /************************************************
      *      Framework Method start
@@ -314,7 +318,7 @@
     {
         let self = this;
         // self.set_timeout(1*1000);
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -323,7 +327,7 @@
     {
         let self = this;
         // self.clear_timeout();
-    }
+    };
 
     /************************************************
      *      Local Method
@@ -332,7 +336,7 @@
     {
         let self = this;
         return self.private._ka_container;
-    }
+    };
 
 
     //=======================================================================

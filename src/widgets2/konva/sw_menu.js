@@ -29,8 +29,7 @@
         //------------ Own Attributes ------------//
         /*  Item:
          *      {
-         *          "id": unique id (not really). If id is empty id=action if it's actions is a string
-         *          "name": non-unique name
+         *          "id": unique id (not really). If id is empty id=action if action is a string
          *          "value":  text of menu item
          *          "icon":
          *          "action": function(item) | string (event to publish when hit item),
@@ -125,8 +124,7 @@
     /********************************************
      *  konva node: menu item
      *      {
-     *          "id": unique id (not really). If id is empty id=action if it's actions is a string
-     *          "name": non-unique name
+     *          "id": unique id (not really). If id is empty id=action if action is a string
      *          "value":  text of menu item
      *          "icon":
      *          "action": function(item) | string (event to publish when hit item),
@@ -137,7 +135,6 @@
     function create_konva_node(self, record, y, width)
     {
         let id = kw_get_str(record, "id", "", false, false);
-        let name = kw_get_str(record, "name", "", false, false);
         let value = kw_get_str(record, "value", "", false, true);
         if(empty_string(value)) {
             return null;
@@ -164,7 +161,7 @@
         let ka_group = new Konva.Group({
             //draggable: true, // TODO TEST remove
             id: id,
-            name: name,
+            name: "sw_menu_container",
             x: x,
             y: y
         });
@@ -242,7 +239,7 @@
 
                 ka_text.opacity(1);
 
-                if(record.action) {
+                if(is_function(record.action)) {
                     ka_group.on("mouseenter", function (e) {
                         stage.container().style.cursor = "pointer";
                     });
@@ -332,8 +329,7 @@
      *  {
      *      "items": [
      *          {
-     *              "id": unique id (not really). If id is empty id=action if it's actions is a string
-     *              "name": non-unique name
+     *              "id": unique id (not really). If id is empty id=action if action is a string
      *              "value":  text of menu item
      *              "icon":
      *              "action": function(item) | string (event to publish when hit item),
