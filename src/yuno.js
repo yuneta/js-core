@@ -765,10 +765,6 @@
     /************************************************
      *          Expose to the global object
      ************************************************/
-    if(typeof __jsyuneta_version__ === 'undefined') {
-        var __jsyuneta_version__ = 'debug_version';
-    }
-    exports.__jsyuneta_version__ = __jsyuneta_version__ ;  // created via Makefile
     exports.Yuno = Yuno;
     exports.gobj_register_gclass = gobj_register_gclass;
     exports.gobj_find_gclass = gobj_find_gclass;
