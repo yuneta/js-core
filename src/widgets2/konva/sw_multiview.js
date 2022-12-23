@@ -287,6 +287,22 @@
     }
 
     /********************************************
+     *  Some child moving
+     ********************************************/
+    function ac_moving(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  Some child moved
+     ********************************************/
+    function ac_moved(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
      *  kw: {
      *      x:
      *      y:
@@ -381,6 +397,8 @@
             "EV_REMOVE_VIEWS",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
+            "EV_MOVING: output no_warn_subs",
+            "EV_MOVED: output no_warn_subs",
             "EV_TOGGLE",
             "EV_POSITION",
             "EV_SIZE",
@@ -401,6 +419,8 @@
                 ["EV_REMOVE_VIEWS",     ac_remove_views,        undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
+                ["EV_MOVING",           ac_moving,              undefined],
+                ["EV_MOVED",            ac_moved,               undefined],
                 ["EV_TOGGLE",           ac_show_or_hide,        undefined],
                 ["EV_SHOW",             ac_show_or_hide,        undefined],
                 ["EV_HIDE",             ac_show_or_hide,        undefined],

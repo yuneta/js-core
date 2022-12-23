@@ -18,6 +18,7 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
+        event: "",
         text: "",
         icon: "",
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
@@ -31,7 +32,7 @@
         visible: true,
         draggable: false,       // Enable (outer dragging) dragging
 
-        icon_size: 22,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
+        icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
         autosize: false,    // Change dimension to size of font text
 
@@ -40,7 +41,7 @@
             // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
             fontFamily: "sans-serif", // "OpenSans"
             fontStyle: "normal",
-            padding: 2,
+            padding: 10,
             align: "center",
             verticalAlign: "middle",
             wrap: "char"
@@ -50,7 +51,7 @@
             // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
             fontFamily: "yuneta-icons-font",
             fontStyle: "normal",
-            padding: 2,
+            padding: 10,
             align: "center",
             verticalAlign: "middle",
             wrap: "char"
@@ -171,19 +172,70 @@
         if (self.config.draggable) {
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
+                self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragmove', function (ev) {
                 ev.cancelBubble = true;
-                document.body.style.cursor = 'pointer';
+                self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragend', function (ev) {
                 ev.cancelBubble = true;
-                document.body.style.cursor = 'default';
+                if (!empty_string(self.config.event)) {
+                    self.config.layer.getStage().container().style.cursor = "pointer";
+                } else {
+                    self.config.layer.getStage().container().style.cursor = "default";
+                }
                 self.gobj_publish_event("EV_MOVED", ka_container.position());
             });
         }
+
+        if (!empty_string(self.config.event)) {
+            ka_container.on("mouseenter", function (e) {
+                self.config.layer.getStage().container().style.cursor = "pointer";
+            });
+
+            ka_container.on("mouseleave", function (e) {
+                self.config.layer.getStage().container().style.cursor = "default";
+            });
+
+            ka_container.on("pointerdown", function (e) {
+                if (self.is_tracing()) {
+                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
+                        "nd_machine", "element",
+                        e.type,
+                        (e.cancelBubble) ? "Y" : "N",
+                        self.gobj_short_name(),
+                        kw_get_str(e.target.attrs, "id", ""),
+                        kw_get_str(e.target.attrs, "name", "")
+                    ));
+                }
+            });
+            ka_container.on("pointerup", function (e) {
+                e.cancelBubble = false;
+                e.gobj = self;
+                if (self.is_tracing()) {
+                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
+                        "nd_machine", "element",
+                        e.type,
+                        (e.cancelBubble) ? "Y" : "N",
+                        self.gobj_short_name(),
+                        kw_get_str(e.target.attrs, "id", ""),
+                        kw_get_str(e.target.attrs, "name", "")
+                    ));
+                }
+                /*
+                 *  WARNING If action provoke deleting the konva node then the event is not bubbled!
+                 *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
+                 *  the window will send a EV_DEACTIVATE and the window will be deactive,
+                 *  so for the activation service will work well.
+                 *  BE CAREFUL with service needing bubbling.
+                 */
+                self.gobj_publish_event(self.config.event, {});
+            });
+        }
+
 
         return ka_container;
     }
@@ -199,6 +251,7 @@
         });
 
         if(!empty_string(text) && !empty_string(icon)) {
+            let icon_element, text_element;
             let icon_position = self.config.icon_position;
             switch(icon_position) {
                 case "top": {
@@ -210,19 +263,24 @@
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    let icon_element = new Konva.Text(kw_icon);
+                    icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
                     let kw_text = { // Common fields
                         text: text,
                         x: 0,
-                        y: icon_element.height(),
+                        y: icon_element.height() -
+                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
                         lineHeight: icon_element.lineHeight(),
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
-                    let text_element = new Konva.Text(kw_text);
+                    text_element = new Konva.Text(kw_text);
                     container.add(text_element);
+
+                    let max_width = Math.max(icon_element.width(), text_element.width());
+                    icon_element.width(max_width);
+                    text_element.width(max_width);
                 }
                 break;
 
@@ -235,19 +293,24 @@
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
-                    let text_element = new Konva.Text(kw_text);
+                    text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
                     let kw_icon = { // Common fields
                         text: icon,
                         x: 0,
-                        y: text_element.height(),
+                        y: text_element.height() -
+                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
                         lineHeight: text_element.lineHeight(),
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    let icon_element = new Konva.Text(kw_icon);
+                    icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
+
+                    let max_width = Math.max(icon_element.width(), text_element.width());
+                    icon_element.width(max_width);
+                    text_element.width(max_width);
                 }
                 break;
 
@@ -260,19 +323,24 @@
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    let icon_element = new Konva.Text(kw_icon);
+                    icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
                     let kw_text = { // Common fields
                         text: text,
-                        x: icon_element.width(),
+                        x: icon_element.width() -
+                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
                         y: 0,
                         lineHeight: icon_element._line_height,
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
-                    let text_element = new Konva.Text(kw_text);
+                    text_element = new Konva.Text(kw_text);
                     container.add(text_element);
+
+                    let max_height = Math.max(icon_element.height(), text_element.height());
+                    icon_element.height(max_height);
+                    text_element.height(max_height);
                 }
                 break;
 
@@ -285,19 +353,24 @@
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
-                    let text_element = new Konva.Text(kw_text);
+                    text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
                     let kw_icon = { // Common fields
                         text: icon,
-                        x: text_element.width(),
+                        x: text_element.width() -
+                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
                         y: 0,
                         lineHeight: self.private._line_height,
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    let icon_element = new Konva.Text(kw_icon);
+                    icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
+
+                    let max_height = Math.max(icon_element.height(), text_element.height());
+                    icon_element.height(max_height);
+                    text_element.height(max_height);
                 }
                 break;
             }
@@ -332,80 +405,6 @@
 
         }
         return container;
-
-        // let kw_element = { // Common fields
-        //     id: event,
-        //     text: text,
-        //     x: 0,
-        //     y: 0,
-        //     width: self.config.width,
-        //     height: self.config.height,
-        //     lineHeight: self.private._line_height,
-        //     fontSize: self.private._text_size,
-        //     listening: true
-        // };
-        //
-        // // fontSize: self.private._icon_size,
-        // // fontFamily: "yuneta-icons-font",
-        //
-        //
-        // json_object_update(kw_element, self.config.kw_font_properties);
-        //
-        // if(self.config.autosize) {
-        //     delete kw_element["width"];
-        //     delete kw_element["height"];
-        // }
-        //
-        // let element = new Konva.Text(kw_element);
-        //
-        // if (!empty_string(event)) {
-        //     element.on("mouseenter", function (e) {
-        //         let stage = self.config.layer.getStage();
-        //         stage.container().style.cursor = "pointer";
-        //     });
-        //
-        //     element.on("mouseleave", function (e) {
-        //         let stage = self.config.layer.getStage();
-        //         stage.container().style.cursor = "default";
-        //     });
-        //
-        //     element.on("pointerdown", function (e) {
-        //         if (self.is_tracing()) {
-        //             log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-        //                 "nd_machine", "element",
-        //                 e.type,
-        //                 (e.cancelBubble) ? "Y" : "N",
-        //                 self.gobj_short_name(),
-        //                 kw_get_str(e.target.attrs, "id", ""),
-        //                 kw_get_str(e.target.attrs, "name", "")
-        //             ));
-        //         }
-        //     });
-        //     element.on("pointerup", function (e) {
-        //         e.cancelBubble = false;
-        //         e.gobj = self;
-        //         if (self.is_tracing()) {
-        //             log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-        //                 "nd_machine", "element",
-        //                 e.type,
-        //                 (e.cancelBubble) ? "Y" : "N",
-        //                 self.gobj_short_name(),
-        //                 kw_get_str(e.target.attrs, "id", ""),
-        //                 kw_get_str(e.target.attrs, "name", "")
-        //             ));
-        //         }
-        //         /*
-        //          *  WARNING If action provoke deleting the konva node then the event is not bubbled!
-        //          *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
-        //          *  the window will send a EV_DEACTIVATE and the window will be deactive,
-        //          *  so for the activation service will work well.
-        //          *  BE CAREFUL with service needing bubbling.
-        //          */
-        //         self.gobj_send_event(event, {element: element}, self);
-        //     });
-        // }
-
-        return element;
     }
 
 
@@ -417,35 +416,6 @@
 
 
 
-
-    /********************************************
-     *  Button clicked
-     ********************************************/
-    function ac_button_clicked(self, event, kw, src)
-    {
-        let __ka_main__ = self.yuno.gobj_find_service("__ka_main__", true);
-
-        __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
-
-        get_list_realms(self);
-
-        // TODO comandos para recoger información pendientes
-        // __yuno__.__remote_service__.gobj_command(
-        //     "command-agent",
-        //     {
-        //         "agent_id": agent_id,
-        //         "cmd2agent": "list-realms"
-        //     },
-        //     self
-        // );
-        //command=command-agent cmd2agent="command-agent service=__yuno__ gobj=__yuno__ command=view-attrs"
-        // info-cpus
-        // info-ifs
-        // info-os
-        //console.dir(kw);
-        // TODO
-        return 0;
-    }
 
     /********************************************
      *  kw: {
@@ -558,7 +528,6 @@
 
     let FSM = {
         "event_list": [
-            "EV_BUTTON_CLICKED",
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
@@ -573,7 +542,6 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_BUTTON_CLICKED",       ac_button_clicked,      undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
@@ -593,7 +561,7 @@
             name,
             "Ka_button",
             kw,
-            0
+            gcflag_no_check_output_events
         );
         return this;
     };
