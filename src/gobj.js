@@ -1233,6 +1233,16 @@ let __inside_event_loop__ = 0;
         return this.name;
     };
 
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_is_destroying = function()
+    {
+        if(this._destroyed) {
+            return true;
+        }
+        return false;
+    };
 
     /************************************************************
      *          Automata create

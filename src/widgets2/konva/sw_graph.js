@@ -57,9 +57,7 @@
         },
 
         //////////////// Private Attributes /////////////////
-        _gobj_ka_scrollview: null,
-        // TODO debería usar los child gobj y sus funciones y no la extra find_gobj_in_list()
-        _views: []  // list of view's gobjs
+        _gobj_ka_scrollview: null
     };
 
 
@@ -85,6 +83,9 @@
      *      or
      *      "views": [gobj, ...]
      *  }
+     *
+     *  You can use "name" instead of "id"
+     *
      ********************************************/
     function ac_add_views(self, event, kw, src)
     {
@@ -106,8 +107,6 @@
                 log_error("What is it?" + view);
                 continue;
             }
-
-            self.private._views.push(gobj_node); // TODO no deberían ser simplemente hijos?, esto unuseful
 
             let k = gobj_node.get_konva_container();
             self.private._gobj_ka_scrollview.gobj_send_event(
@@ -136,38 +135,33 @@
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
         for(let view of views) {
-            let gobj = null;
+            let childs = null;
             if(is_string(view)) {
                 let name = view;
-                gobj = find_gobj_in_list(self.private._views, name);
+                childs = self.gobj_match_childs({__gobj_name__: name});
             } else if(is_object(view)) {
-                let name = kw_get_str(view, "id", kw_get_str(view, "name", null));
-                gobj = find_gobj_in_list(self.private._views, name);
+                let name = kw_get_str(view, "id", kw_get_str(view, "name", ""));
+                childs = self.gobj_match_childs({__gobj_name__: name});
             } else if(is_gobj(view)) {
-                gobj = gobj;
+                childs = [view];
             } else {
-                log_error("What the f*ck is?" + view);
+                log_error("What is?" + view);
                 continue;
             }
 
-            let idx = index_of_list(gobj, self.private._views);
-            if(idx < 0) {
-                log_error("gobj not found: ", gobj.gobj_name());
-                continue;
+            for(let child in childs) {
+                let k = child.get_konva_container();
+                self.private._gobj_ka_scrollview.gobj_send_event(
+                    "EV_REMOVE_ITEMS",
+                    {
+                        items: [k]
+                    },
+                    self
+                );
+                if(!child.gobj_is_destroying()) {
+                    self.yuno.gobj_destroy(child);
+                }
             }
-
-            let k = gobj.get_konva_container();
-            self.private._gobj_ka_scrollview.gobj_send_event(
-                "EV_REMOVE_ITEMS",
-                {
-                    items: [k]
-                },
-                self
-            );
-
-            self.private._views.splice(idx, 1);
-
-            self.yuno.gobj_destroy(gobj);
         }
 
         return 0;
@@ -193,7 +187,7 @@
         /*--------------------------------------*
          *  Check if it's the show for a view
          *--------------------------------------*/
-        let name = kw_get_str(kw, "id", kw_get_str(kw, "name", null));
+        let name = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
         if(!empty_string(name)) {
             if(event === "EV_SHOW") {
                 let gobj = find_gobj_in_list(self.private._views, name);
