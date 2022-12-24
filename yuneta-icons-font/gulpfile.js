@@ -9,7 +9,7 @@ let tasks = {
         let fs  = require('fs')
         let css = `@font-face {
     font-family: "yuneta-icons-font";
-    src: url("yuneta-icons-font.ttf") format("truetype");    
+    src: url("yuneta-icons-font.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
 }
@@ -50,13 +50,14 @@ let tasks = {
             .pipe(iconfont({
                 fontName: 'yuneta-icons-font',
                 formats: ['ttf', 'eot', 'woff'],
-                fontHeight: 1500,
+                fontHeight: 1000,
+                descent: 200,
                 normalize: true,
                 preserveAspectRatio: true,
                 prependUnicode: true, // recommended option
                 fixedWidth: true,
-                centerHorizontally: true,
-                centerVertically: true,
+                centerHorizontally: false,
+                centerVertically: false,
                 timestamp: Math.round(Date.now()/1000)
             }))
             .on('error', function (err) {
