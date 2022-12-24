@@ -53,10 +53,10 @@ let tasks = {
                 fontHeight: 1000,
                 descent: 200,
                 normalize: true,
-                preserveAspectRatio: true,
+                preserveAspectRatio: false,
                 prependUnicode: true, // recommended option
-                fixedWidth: true,
-                centerHorizontally: false,
+                fixedWidth: false,
+                centerHorizontally: true,
                 centerVertically: false,
                 timestamp: Math.round(Date.now()/1000)
             }))
