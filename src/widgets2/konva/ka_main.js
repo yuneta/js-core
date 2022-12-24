@@ -369,6 +369,7 @@
                         }
                         create_json_editor_window({
                             props: {
+                                indentation: 4,
                                 content: {
                                     text: undefined,
                                     json: jn

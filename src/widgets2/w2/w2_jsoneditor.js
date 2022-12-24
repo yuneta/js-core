@@ -53,7 +53,9 @@ function create_json_editor_window(kw)
         // body: `<div id="jse-${name}"  class="my-json-editor jse-theme-dark" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;"></div>`,
 
         onClose(ev) {
-            editor && editor.destroy();
+            if(editor && editor.destroy) {
+                editor.destroy();
+            }
         },
         onMoving(ev) {
             // console.log("moving")
@@ -78,10 +80,10 @@ function create_json_editor_window(kw)
             // function name is used for button text
             Ok(ev) {
                 // do something
-                this.close()
+                this.close();
             },
             Cancel(ev) {
-                this.close()
+                this.close();
             },
             // custom button, when you can define text and class
             custom: {
@@ -89,7 +91,7 @@ function create_json_editor_window(kw)
                 class: "w2ui-btn-blue",
                 style: "color: yellow",
                 onClick(ev) {
-                    console.log("button clicked")
+                    console.log("button clicked");
                 }
             }
         }
@@ -98,12 +100,20 @@ function create_json_editor_window(kw)
     // target = query(`.my-json-editor`); // other option
     // target = query(`#jse-${name}`);
     target = w2.get_container();
-    target.addClass("jse-theme-dark");
     if(target.length > 0) {
+        target.addClass("jse-theme-dark");
+
+        let font_family = "DejaVu Sans Mono, monospace";
+        let sz = adjust_font_size(16, font_family);
+        // const root = document.querySelector(':root');
+        const root = target[0];
+        root.style.setProperty('--jse-font-size-mono', sz + 'px');
+        root.style.setProperty('--jse-font-family-mono', font_family);
+
         editor = new JSONEditor({
             target: target[0],
             props: props
-        })
+        });
     }
 
 //

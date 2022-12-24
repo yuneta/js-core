@@ -2644,6 +2644,23 @@
         return h;
     }
 
+    /************************************************
+     *  Adjust font size to screen's pixels
+     *  to see the same size in mobiles with text size changed
+     ************************************************/
+    function adjust_icon_size(wanted_size, fontFamily)
+    {
+        let h;
+
+        for(h = 1; h <80; h++) {
+            let dim = get_text_size("\u{EA01}\u{EA02}", fontFamily, h, 0);
+            if(dim.height >= wanted_size) {
+                break;
+            }
+        }
+        return h;
+    }
+
     /********************************************
      *
      ********************************************/
@@ -2973,6 +2990,7 @@
     exports.Proportion = Proportion;
     exports.get_text_size = get_text_size;
     exports.adjust_font_size = adjust_font_size;
+    exports.adjust_icon_size = adjust_icon_size;
     exports.htmlToElement = htmlToElement;
     exports.get_current_datetime = get_current_datetime;
     exports.get_now = get_now;

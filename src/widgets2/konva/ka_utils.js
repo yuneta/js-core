@@ -169,11 +169,11 @@
             id: k.getAttr("id"),
             name: k.getAttr("name"),
             config: k.gobj?filter_dict(k.gobj.config, ["x", "y", "width", "height"]):"",
-            dim: Object.assign({}, k.position(), k.size()),
+            position_size: Object.assign({}, k.position(), k.size()),
             stroke: k.getAttr("strokeWidth")?k.getAttr("strokeWidth"):0,
             shadowBlue: k.getAttr("shadowBlur")?k.getAttr("shadowBlur"):0,
-            rel: k.getClientRect({relativeTo:k.getParent()}),
-            abs: k.getClientRect()
+            clientrect_rel: k.getClientRect({relativeTo:k.getParent()}),
+            clientrect_abs: k.getClientRect()
         });
 
         if(k.getChildren) {

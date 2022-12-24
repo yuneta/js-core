@@ -20,7 +20,7 @@
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty id=action if action is a string
         value: "",      // text of item
-        icon: "",
+        icon: "",       // icon of item (from an icon font)
         action: null,   // function(item) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         // disabled: false, TODO
@@ -60,7 +60,6 @@
             wrap: "char"
         },
 
-
         kw_border_shape: { /* Border shape */
             cornerRadius: 10,
             strokeWidth: 2,
@@ -95,11 +94,17 @@
      *
      ************************************************/
     function adjust_text_and_icon_size(self) {
-        self.private._text_size = adjust_font_size(self.config.text_size, self.config.fontFamily);
+        self.private._text_size = adjust_font_size(
+            self.config.text_size,
+            self.config.kw_text_font_properties.fontFamily
+        );
         if (self.config.text_size > self.private._text_size) {
             self.private._line_height = 1.4;
         }
-        self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
+        self.private._icon_size = adjust_icon_size(
+            self.config.icon_size,
+            self.config.kw_icon_font_properties.fontFamily
+        );
     }
 
     /********************************************
@@ -117,8 +122,8 @@
             name: "ka_container",
             x: self.config.x,
             y: self.config.y,
-            width: self.config.width,
-            height: self.config.height,
+            width: width,
+            height: height,
             visible: self.config.visible,
             draggable: self.config.draggable,
             listening: true
@@ -139,36 +144,42 @@
                 y: 0,
                 width: width,
                 height: height,
-                fill: kw_get_str(self.config, "background_color", null, false, false)
+                fill: kw_get_str(self.config, "background_color", null)
             }
         );
         self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
         ka_container.add(self.private._ka_border_rect);
 
         if(self.config.quick_display) {
-            if(self.config.layer) {
-                self.config.layer.add(ka_container);
+            let parent_container = self.gobj_parent().get_konva_container();
+            if(parent_container) {
+                // Quick add
+                parent_container.add(ka_container);
                 ka_container.draw();
+            } else {
+                self.config.quick_display = false;
             }
         }
 
         let label = create_label(self);
         ka_container.add(label);
 
-        if(self.config.autosize) {
-            let font_dimension = label.getClientRect();
-            self.private._ka_border_rect.size(font_dimension);
-            let ka_container_dimension = ka_container.getClientRect();
-            self.config.width = ka_container_dimension.width;
-            self.config.height = ka_container_dimension.height;
+        if(self.config.quick_display) {
+            ka_container.getStage().draw();
         }
 
-        ka_container.add(label);
+        if(self.config.autosize) {
+            let font_dimension = label.getClientRect();
+            console.dir(font_dimension);  // TODO TEST
+            console.dir(label.size());  // TODO TEST
+            self.private._ka_border_rect.size(font_dimension);
+            let ka_container_dimension = ka_container.getClientRect();
+            console.dir(ka_container_dimension);  // TODO TEST
 
-        if(self.config.quick_display) {
-            if(self.config.layer) {
-                self.config.layer.add(ka_container);
-                ka_container.draw();
+            self.config.width = ka_container_dimension.width;
+            self.config.height = ka_container_dimension.height;
+            if(self.config.quick_display) {
+                ka_container.getStage().draw();
             }
         }
 
@@ -262,14 +273,17 @@
         let icon = self.config.icon;
 
         let container = new Konva.Group({
+            name: "ka_label_container"
         });
 
+        let icon_element=null, text_element=null;
+
         if(!empty_string(text) && !empty_string(icon)) {
-            let icon_element, text_element;
             let icon_position = self.config.icon_position;
             switch(icon_position) {
                 case "top": {
                     let kw_icon = { // Common fields
+                        name: "ka_icon",
                         text: icon,
                         x: 0,
                         y: 0,
@@ -281,6 +295,7 @@
                     container.add(icon_element);
 
                     let kw_text = { // Common fields
+                        name: "ka_text",
                         text: text,
                         x: 0,
                         y: icon_element.height() -
@@ -300,6 +315,7 @@
 
                 case "bottom": {
                     let kw_text = { // Common fields
+                        name: "ka_text",
                         text: text,
                         x: 0,
                         y: 0,
@@ -311,6 +327,7 @@
                     container.add(text_element);
 
                     let kw_icon = { // Common fields
+                        name: "ka_icon",
                         text: icon,
                         x: 0,
                         y: text_element.height() -
@@ -330,6 +347,7 @@
 
                 case "left": {
                     let kw_icon = { // Common fields
+                        name: "ka_icon",
                         text: icon,
                         x: 0,
                         y: 0,
@@ -341,6 +359,7 @@
                     container.add(icon_element);
 
                     let kw_text = { // Common fields
+                        name: "ka_text",
                         text: text,
                         x: icon_element.width() -
                             kw_get_int(self.config.kw_text_font_properties, "padding", 0),
@@ -360,6 +379,7 @@
 
                 case "right": {
                     let kw_text = { // Common fields
+                        name: "ka_text",
                         text: text,
                         x: 0,
                         y: 0,
@@ -371,6 +391,7 @@
                     container.add(text_element);
 
                     let kw_icon = { // Common fields
+                        name: "ka_icon",
                         text: icon,
                         x: text_element.width() -
                             kw_get_int(self.config.kw_text_font_properties, "padding", 0),
@@ -391,33 +412,35 @@
 
         } else if(!empty_string(icon)) {
             let kw_icon = { // Common fields
+                name: "ka_icon",
                 text: icon,
                 x: 0,
                 y: 0,
-                width: self.config.width,
-                height: self.config.height,
                 lineHeight: self.private._line_height,
                 fontSize: self.private._icon_size
             };
             json_object_update(kw_icon, self.config.kw_icon_font_properties);
-            let icon_element = new Konva.Text(kw_icon);
+            icon_element = new Konva.Text(kw_icon);
             container.add(icon_element);
 
         } else if(!empty_string(text)) {
             let kw_text = { // Common fields
+                name: "ka_text",
                 text: text,
                 x: 0,
                 y: 0,
-                width: self.config.width,
-                height: self.config.height,
                 lineHeight: self.private._line_height,
                 fontSize: self.private._text_size
             };
             json_object_update(kw_text, self.config.kw_text_font_properties);
-            let text_element = new Konva.Text(kw_text);
+            text_element = new Konva.Text(kw_text);
             container.add(text_element);
-
         }
+
+        // if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
+        // if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
+        // console.dir(container.getClientRect()); // TODO TEST
+
         return container;
     }
 
