@@ -124,24 +124,50 @@
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
+        let toolbar_container = self.private._gobj_ka_scrollview.get_konva_container();
+
+        let x=0,y=0,k=null;
+
         for(let view of views) {
             let gobj_node = null;
             if(is_gobj(view)) {
                 gobj_node = view;
+                k = gobj_node.get_konva_container();
             } else if(is_object(view)) {
+                let kw_item = kw_get_dict(view, "kw", {});
+                json_object_update(kw_item, {
+                    subscriber: self.config.subscriber,
+                    x: x,
+                    y: y
+                });
                 gobj_node = self.yuno.gobj_create(
                     kw_get_str(view, "id", kw_get_str(view, "name", "")),
                     kw_get_dict_value(view, "gclass", null),
-                    kw_get_dict(view, "kw", {}),
+                    kw_item,
                     self
                 );
+                if(!gobj_node) {
+                    continue;
+                }
+                k = gobj_node.get_konva_container();
+                let dim = k.getClientRect({skipShadow:true, skipStroke:true});
+                switch(self.config.orientation) {
+                    case "vertical":
+                        x = 0;  // TODO toolbar padding
+                        y += dim.height;
+                        break;
+                    default:
+                    case "horizontal":
+                        x += dim.width;
+                        y = 0;  // TODO toolbar padding
+                        break;
+                }
                 continue; // goes recurrent ac_add_views() by mt_child_added()
             } else {
                 log_error("What is it?" + view);
                 continue;
             }
 
-            let k = gobj_node.get_konva_container();
             self.private._gobj_ka_scrollview.gobj_send_event(
                 "EV_ADD_ITEMS",
                 {

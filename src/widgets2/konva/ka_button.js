@@ -21,7 +21,7 @@
         id: "",         // unique id (not really). If id is empty id=action if action is a string
         value: "",      // text of item
         icon: "",       // icon of item (from an icon font)
-        action: null,   // function(item) | string (event to publish when hit item),
+        action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         // disabled: false, TODO
         // selected: false, TODO
@@ -216,8 +216,8 @@
 
         if(is_string(action)) {
             let event = action;
-            self.config.action = function(_id) {
-                self.gobj_publish_event(event, {"id": _id});
+            self.config.action = function(e) {
+                self.gobj_publish_event(event, e);
             };
         } else if(action && !is_function(action)) {
             log_error("action must be a string or function");
@@ -234,6 +234,8 @@
             });
 
             ka_container.on("pointerdown", function (e) {
+                ka_container.opacity(0.5);
+                e.gobj = self;
                 if (self.is_tracing()) {
                     log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
                         "nd_machine", "element",
@@ -246,7 +248,8 @@
                 }
             });
             ka_container.on("pointerup", function (e) {
-                e.cancelBubble = false;
+                ka_container.opacity(1);
+                e.cancelBubble = true;
                 e.gobj = self;
                 if (self.is_tracing()) {
                     log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
@@ -258,7 +261,14 @@
                         kw_get_str(e.target.attrs, "name", "")
                     ));
                 }
-                self.config.action(self.config.id);
+                /*
+                 *  WARNING If action provoke deleting the konva node then the event is not bubbled!
+                 *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
+                 *  the window will send a EV_DEACTIVATE and the window will be deactivated,
+                 *  so for the activation service will work well.
+                 *  BE CAREFUL with service needing bubbling.
+                 */
+                self.config.action(e);
             });
         }
 
@@ -361,8 +371,7 @@
                     let kw_text = { // Common fields
                         name: "ka_text",
                         text: text,
-                        x: icon_element.width() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
+                        x: icon_element.width(),
                         y: 0,
                         lineHeight: icon_element._line_height,
                         fontSize: self.private._text_size
@@ -393,8 +402,7 @@
                     let kw_icon = { // Common fields
                         name: "ka_icon",
                         text: icon,
-                        x: text_element.width() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
+                        x: text_element.width(),
                         y: 0,
                         lineHeight: self.private._line_height,
                         fontSize: self.private._icon_size

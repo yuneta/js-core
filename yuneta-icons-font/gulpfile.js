@@ -1,6 +1,7 @@
 /* eslint-env node */
 const gulp     = require('gulp')
 const iconfont = require('gulp-iconfont')
+const svgmin = require('gulp-svgmin');
 const fs = require("fs");
 
 let tasks = {
@@ -8,14 +9,14 @@ let tasks = {
     icons(cb) {
         let fs  = require('fs')
         let css = `@font-face {
-    font-family: "yuneta-icons-font";
-    src: url("yuneta-icons-font.ttf") format("truetype");
+    font-family: "yuneta-icon-font";
+    src: url("yuneta-icon-font.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
 }
 [class^="yuneta-icon-"]:before,
 [class*=" yuneta-icon-"]:before {
-    font-family: "yuneta-icons-font";
+    font-family: "yuneta-icon-font";
     display: inline-block;
     vertical-align: middle;
     line-height: 1;
@@ -33,8 +34,8 @@ let tasks = {
 <html>
 <head>
     <meta charset="utf-8">
-    <link href="./dist/yuneta-icons-font.css" rel="stylesheet">
-    <title>yuneta-icons-font</title>
+    <link href="./dist/yuneta-icon-font.css" rel="stylesheet">
+    <title>yuneta-icon-font</title>
     <style>
         body { font-family: verdana; font-size: 13px }
         .preview { padding: 8px; margin: 4px; width: 200px; box-shadow: 1px 1px 2px #ccc; float: left }
@@ -43,19 +44,22 @@ let tasks = {
     </style>
 </head>
 <body>
-    <h1 style="font-family: arial; padding-left: 15px;">yuneta-icons-font $count</h1>
+    <h1 style="font-family: arial; padding-left: 15px;">yuneta-icon-font $count</h1>
 `
         let json = []
+        let json2 = {}
         gulp.src(['./icons/*.svg'])
-            .pipe(iconfont({
-                fontName: 'yuneta-icons-font',
+            // .pipe(svgmin())
+            .pipe(iconfont({// svgicons2svgfont options
+                fontName: 'yuneta-icon-font',
                 formats: ['ttf', 'eot', 'woff'],
                 fontHeight: 1000,
                 descent: 200,
                 normalize: true,
+                autohint: true,
                 preserveAspectRatio: false,
                 prependUnicode: true, // recommended option
-                fixedWidth: false,
+                fixedWidth: true,
                 centerHorizontally: true,
                 centerVertically: false,
                 timestamp: Math.round(Date.now()/1000)
@@ -70,21 +74,24 @@ let tasks = {
                     html       += `    <div class="preview"><span class="icon yuneta-icon-${glyphs[i].name}"></span><span>yuneta-icon-${glyphs[i].name}</span></div>\n`
                     css        += `.yuneta-icon-${glyphs[i].name}:before { content: "\\${unicode.toString(16)}" }\n`
                     json.push(glyphs[i].name)
+                    json2[glyphs[i].name] = unicode
+                    json2[glyphs[i].name+"_"] = "\\u" + unicode.toString(16)
                 })
 
                 html += '    <div style="clear: both; height: 10px;"></div>\n</body>\n</html>'
                 html  = html.replace('$count', ' - ' + glyphs.length + ' glyphs')
-                fs.writeFileSync('./dist/yuneta-icons-font.css', css)
+                fs.writeFileSync('./dist/yuneta-icon-font.css', css)
                 fs.writeFileSync('./preview.html', html)
                 fs.writeFileSync('./glyphs.json', JSON.stringify(json))
+                fs.writeFileSync('./yuneta-icon-font.json', JSON.stringify(json2, null, 4))
             })
             .pipe(gulp.dest('./dist/'))
             .on('end', function () {
-                let font = fs.readFileSync('./dist/yuneta-icons-font.ttf')
-                let file = fs.readFileSync('./dist/yuneta-icons-font.css', 'utf-8')
-                file     = file.replace('src: url("yuneta-icons-font.ttf") format("truetype");',
+                let font = fs.readFileSync('./dist/yuneta-icon-font.ttf')
+                let file = fs.readFileSync('./dist/yuneta-icon-font.css', 'utf-8')
+                file     = file.replace('src: url("yuneta-icon-font.ttf") format("truetype");',
                     `src: url("data:application/x-font-ttf;charset=utf-8;base64,${font.toString('base64')}") format("truetype");`)
-                fs.writeFileSync('./dist/yuneta-icons-font.css', file)
+                fs.writeFileSync('./dist/yuneta-icon-font.css', file)
                 cb()
             })
     },
