@@ -11,6 +11,6 @@
   "devDependencies": {
     "gulp": "^4.0.2",
     "gulp-iconfont": "^11.0.1",
-    "gulp-svgmin": "^4.1.0"
+    "svgicons2svgfont": "^12.0.0"
   }
 }

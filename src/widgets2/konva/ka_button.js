@@ -52,7 +52,7 @@
         kw_icon_font_properties: {
             // fontSize:    // Override if you don't want it was calculated internally (_icon_size)
             // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
-            fontFamily: "yuneta-icons-font",
+            fontFamily: "yuneta-icon-font",
             fontStyle: "normal",
             padding: 10,
             align: "center",

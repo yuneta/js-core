@@ -1,7 +1,6 @@
 /* eslint-env node */
 const gulp     = require('gulp')
 const iconfont = require('gulp-iconfont')
-const svgmin = require('gulp-svgmin');
 const fs = require("fs");
 
 let tasks = {
@@ -49,17 +48,15 @@ let tasks = {
         let json = []
         let json2 = {}
         gulp.src(['./icons/*.svg'])
-            // .pipe(svgmin())
-            .pipe(iconfont({// svgicons2svgfont options
+            .pipe(iconfont({
                 fontName: 'yuneta-icon-font',
                 formats: ['ttf', 'eot', 'woff'],
                 fontHeight: 1000,
                 descent: 200,
                 normalize: true,
-                autohint: true,
                 preserveAspectRatio: false,
                 prependUnicode: true, // recommended option
-                fixedWidth: true,
+                fixedWidth: false,
                 centerHorizontally: true,
                 centerVertically: false,
                 timestamp: Math.round(Date.now()/1000)
@@ -83,7 +80,8 @@ let tasks = {
                 fs.writeFileSync('./dist/yuneta-icon-font.css', css)
                 fs.writeFileSync('./preview.html', html)
                 fs.writeFileSync('./glyphs.json', JSON.stringify(json))
-                fs.writeFileSync('./yuneta-icon-font.json', JSON.stringify(json2, null, 4))
+                fs.writeFileSync('./yuneta-icon-font.js', JSON.stringify(json2, null, 4))
+                fs.writeFileSync('./dist/yuneta-icon-font.js', JSON.stringify(json2, null, 4))
             })
             .pipe(gulp.dest('./dist/'))
             .on('end', function () {
