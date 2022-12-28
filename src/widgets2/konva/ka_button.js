@@ -195,6 +195,7 @@
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragend', function (ev) {
+                ka_container.opacity(1);
                 ev.cancelBubble = true;
                 if (self.config.action) {
                     self.config.layer.getStage().container().style.cursor = "pointer";

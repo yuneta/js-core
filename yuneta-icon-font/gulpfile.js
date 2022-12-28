@@ -45,6 +45,15 @@ let tasks = {
 <body>
     <h1 style="font-family: arial; padding-left: 15px;">yuneta-icon-font $count</h1>
 `
+
+        let template_json2 = `(function (exports) {
+    "use strict";
+
+    var yuneta_icon_font = $values;
+
+    exports.yuneta_icon_font = yuneta_icon_font;
+})(this);
+`
         let json = []
         let json2 = {}
         gulp.src(['./icons/*.svg'])
@@ -54,8 +63,8 @@ let tasks = {
                 fontHeight: 1000,
                 descent: 200,
                 normalize: true,
-                preserveAspectRatio: false,
-                prependUnicode: true, // recommended option
+                preserveAspectRatio: true,
+                prependUnicode: false,
                 fixedWidth: false,
                 centerHorizontally: true,
                 centerVertically: false,
@@ -72,7 +81,6 @@ let tasks = {
                     css        += `.yuneta-icon-${glyphs[i].name}:before { content: "\\${unicode.toString(16)}" }\n`
                     json.push(glyphs[i].name)
                     json2[glyphs[i].name] = unicode
-                    json2[glyphs[i].name+"_"] = "\\u" + unicode.toString(16)
                 })
 
                 html += '    <div style="clear: both; height: 10px;"></div>\n</body>\n</html>'
@@ -80,8 +88,9 @@ let tasks = {
                 fs.writeFileSync('./dist/yuneta-icon-font.css', css)
                 fs.writeFileSync('./preview.html', html)
                 fs.writeFileSync('./glyphs.json', JSON.stringify(json))
-                fs.writeFileSync('./yuneta-icon-font.js', JSON.stringify(json2, null, 4))
-                fs.writeFileSync('./dist/yuneta-icon-font.js', JSON.stringify(json2, null, 4))
+
+                template_json2 = template_json2.replace('$values', JSON.stringify(json2, null, 8))
+                fs.writeFileSync('./dist/yuneta-icon-font.js', template_json2)
             })
             .pipe(gulp.dest('./dist/'))
             .on('end', function () {
