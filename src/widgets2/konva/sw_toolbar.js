@@ -33,7 +33,7 @@
         y: 0,
         width: 0,       // Calculated inside (based in orientation/wide/long)
         height: 0,      // Calculated inside (based in orientation/wide/long)
-        padding: 10,
+        padding: 2,
         background_color: "#EEEEEE",
 
         visible: true,
