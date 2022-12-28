@@ -171,7 +171,6 @@
         if(self.config.autosize) {
             let font_dimension = label.getClientRect();
             console.dir(font_dimension);  // TODO TEST
-            console.dir(label.size());  // TODO TEST
             self.private._ka_border_rect.size(font_dimension);
             let ka_container_dimension = ka_container.getClientRect();
             console.dir(ka_container_dimension);  // TODO TEST

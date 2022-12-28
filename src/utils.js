@@ -22,7 +22,6 @@
      *
      ************************************************************/
     Function.prototype.__makeSubclass__ = function() {
-        "use strict";
 
         function Class() {
             if (!(this instanceof Class)) {
@@ -47,48 +46,13 @@
         **clone** is a copy with incref references
      ************************************************************/
     function __duplicate__(obj) {
-        "use strict";
-
-        var copy;
-
-        // Handle the 3 simple types, and null or undefined
-        if (null == obj || "object" != typeof obj) return obj;
-
-        // Handle Date
-        if (obj instanceof Date) {
-            copy = new Date();
-            copy.setTime(obj.getTime());
-            return copy;
-        }
-
-        // Handle Array
-        if (obj instanceof Array) {
-            copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = __duplicate__(obj[i]);
-            }
-            return copy;
-        }
-
-        // Handle Object
-        if (obj instanceof Object) {
-            copy = {};
-            for (var attr in obj) {
-                if (obj.hasOwnProperty(attr)) {
-                    copy[attr] = __duplicate__(obj[attr]);
-                }
-            }
-            return copy;
-        }
-
-        throw new Error("Unable to copy obj! Its type is not supported.");
+        return JSON.parse(JSON.stringify(obj));
     }
 
     /************************************************************
      *  Update a dict with another dict: ONLY existing items!! (YES recursive)
      ************************************************************/
     function json_object_update_existing_recursive(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -112,7 +76,6 @@
      *  Like json_object_update_existing()
      ************************************************************/
     function __update_dict__(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -130,7 +93,6 @@
      *  Like json_object_update()
      ************************************************************/
     function __extend_dict__(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -146,7 +108,6 @@
      *  Extend array
      ************************************************************/
     function __extend_list__(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -160,7 +121,6 @@
      *  Like json_object_update_missing()
      ************************************************************/
     function json_object_update_missing(destination, source) {
-        "use strict";
         if(!source) {
             return destination;
         }
@@ -194,7 +154,6 @@
      * @return {Number} Index of the specified elm, -1 if not found
      ************************************************************/
     function index_of_list(elm, list) {
-        "use strict";
         // Existence of a native index
         let nativeIndexOf = list.indexOf? true : false;
 
@@ -221,7 +180,6 @@
      *
      ************************************************************/
     function elm_in_list(elm, list) {
-        "use strict";
         if(!list) {
             throw "ERROR: elm_in_list() list empty";
         }
@@ -240,7 +198,6 @@
      *
      ************************************************************/
     function elms_in_list(elms, list) {
-        "use strict";
         if(!list) {
             throw "ERROR: elms_in_list() list empty";
         }
@@ -261,7 +218,6 @@
      *
      ************************************************************/
     function index_in_list(list, elm) {
-        "use strict";
         if(!list) {
             throw "ERROR: index_in_list() list empty";
         }
@@ -277,7 +233,6 @@
      *
      ************************************************************/
     function id_index_in_obj_list(list, id) {
-        "use strict";
         if(!list) {
             return -1;
         }
@@ -293,7 +248,6 @@
      *
      ************************************************************/
     function get_object_from_list(list, id) {
-        "use strict";
 
         if(!list) {
             return null;
@@ -310,7 +264,6 @@
      *
      ************************************************************/
     function none_in_list(list) {
-        "use strict";
         for(let i=0; i<list.length; i++) {
             if(!list[i]) {
                 return true;
@@ -323,7 +276,6 @@
      *
      ************************************************************/
     function delete_from_list(list, elm) {
-        "use strict";
         for(let i=0; i<list.length; i++) {
             if(elm === list[i]) {
                 list.splice(i, 1);
@@ -337,7 +289,6 @@
      *
      ************************************************************/
     function same_list(arrA, arrB) {
-        "use strict";
         //check if lengths are different
         if(arrA.length !== arrB.length) {
             return false;
@@ -360,7 +311,6 @@
      *
      ************************************************************/
     function __strip__(s){
-        "use strict";
         return ( s || "" ).replace( /^\s+|\s+$/g, "" );
     }
 
@@ -368,7 +318,6 @@
      *
      ************************************************************/
     function __set__(arr) {
-        "use strict";
         let seen = {},
             result = [];
         let len = arr.length;
@@ -386,7 +335,6 @@
      *
      ************************************************************/
     function get_function_name(func) {
-        "use strict";
         var fName = null;
         if (typeof func === "function" || typeof func === "object") {
             fName = ("" + func).match(/function\s*([\w\$]*)\s*\(/);
@@ -559,7 +507,6 @@
      ************************************************************/
     function empty_string(s)
     {
-        "use strict";
         if(!s || typeof(s) !== "string") {
             return true;
         }
@@ -2867,6 +2814,19 @@
     /***************************************************************************
      *
      ***************************************************************************/
+    function icono(name)
+    {
+        let icon_unicode = yuneta_icon_font[name];
+        if(!icon_unicode) {
+            log_error("Yuneta icon not found: '" + name + "'");
+            return null;
+        }
+        return String.fromCharCode(parseInt(icon_unicode, 10))
+    }
+
+    /***************************************************************************
+     *
+     ***************************************************************************/
     function find_gobj_in_list(list, name) // TODO elimina, usa gobj api
     {
         for(gobj of list) {
@@ -2998,6 +2958,7 @@
     exports.jwt2json = jwt2json;
     exports.is_metadata_key = is_metadata_key;
     exports.is_private_key = is_private_key;
+    exports.icono = icono;
     exports.find_gobj_in_list = find_gobj_in_list; // TODO elimina, usa gobj api
 
 })(this);
