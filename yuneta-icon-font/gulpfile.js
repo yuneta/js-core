@@ -60,13 +60,13 @@ let tasks = {
             .pipe(iconfont({
                 fontName: 'yuneta-icon-font',
                 formats: ['ttf', 'eot', 'woff'],
-                fontHeight: 1000,
-                descent: 200,
-                normalize: true,
+                // fontHeight: 1000,
+                descent: 50,
+                // normalize: true,
                 preserveAspectRatio: true,
                 prependUnicode: false,
                 fixedWidth: false,
-                centerHorizontally: true,
+                // centerHorizontally: true,
                 centerVertically: false,
                 timestamp: Math.round(Date.now()/1000)
             }))
@@ -105,8 +105,9 @@ let tasks = {
 
     watch(cb) {
         gulp.watch(['icons/*.svg'], tasks.icons)
-    },
+    }
 }
 
 exports.default = gulp.series(tasks.icons)
 exports.icons   = gulp.series(tasks.icons)
+exports.watch   = gulp.series(tasks.watch)

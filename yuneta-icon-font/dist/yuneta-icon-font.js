@@ -2,14 +2,15 @@
     "use strict";
 
     var yuneta_icon_font = {
-        "align-justify": 61497,
-        "bolt-lightning-solid": 57527,
-        "bulldog": 59906,
-        "chevron-left": 61523,
-        "chevron-right": 61524,
-        "plug-solid": 61926,
-        "user": 61447,
-        "yuneta": 59905
+        "align-justify": 59905,
+        "bolt-lightning-solid": 59906,
+        "bulldog": 59907,
+        "chevron-left": 59908,
+        "chevron-right": 59909,
+        "plug-solid": 59910,
+        "user": 59911,
+        "yuneta": 59912,
+        "zblank": 59913
 };
 
     exports.yuneta_icon_font = yuneta_icon_font;
