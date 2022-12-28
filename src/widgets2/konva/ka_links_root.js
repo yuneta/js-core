@@ -32,7 +32,6 @@
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
-        _line_height: 1,
 
         _ka_container: null
     };

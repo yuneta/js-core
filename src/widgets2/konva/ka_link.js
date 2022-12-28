@@ -50,7 +50,6 @@
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
-        _line_height: 1,
 
         _ka_container: null
     };
@@ -71,9 +70,6 @@
     function adjust_text_and_icon_size(self)
     {
         self.private._text_size = adjust_font_size(self.config.text_size, self.config.fontFamily);
-        if (self.config.text_size > self.private._text_size) {
-            self.private._line_height = 1.2;
-        }
         self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
     }
 

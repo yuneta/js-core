@@ -35,13 +35,12 @@
         visible: true,
         draggable: false,       // Enable (outer dragging) dragging
 
-        icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
+        icon_size: 18,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
         autosize: false,    // Change dimension to size of font text
 
         kw_text_font_properties: {
             // fontSize:    // Override if you don't want it was calculated internally (_text_size)
-            // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
             fontFamily: "sans-serif", // "OpenSans"
             fontStyle: "normal",
             padding: 10,
@@ -51,7 +50,6 @@
         },
         kw_icon_font_properties: {
             // fontSize:    // Override if you don't want it was calculated internally (_icon_size)
-            // lineHeight:  // Override if you don't want it was calculated internally (_line_height)
             fontFamily: "yuneta-icon-font",
             fontStyle: "normal",
             padding: 10,
@@ -75,7 +73,6 @@
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
-        _line_height: 1.2,    // Calculated internally
 
         _ka_container: null
     };
@@ -98,9 +95,6 @@
             self.config.text_size,
             self.config.kw_text_font_properties.fontFamily
         );
-        if (self.config.text_size > self.private._text_size) {
-            self.private._line_height = 1.4;
-        }
         self.private._icon_size = adjust_icon_size(
             self.config.icon_size,
             self.config.kw_icon_font_properties.fontFamily
@@ -170,10 +164,10 @@
 
         if(self.config.autosize) {
             let font_dimension = label.getClientRect();
-            console.dir(font_dimension);  // TODO TEST
+            // console.dir(font_dimension);  // TODO TEST
             self.private._ka_border_rect.size(font_dimension);
             let ka_container_dimension = ka_container.getClientRect();
-            console.dir(ka_container_dimension);  // TODO TEST
+            // console.dir(ka_container_dimension);  // TODO TEST
 
             self.config.width = ka_container_dimension.width;
             self.config.height = ka_container_dimension.height;
@@ -297,7 +291,6 @@
                         text: icon,
                         x: 0,
                         y: 0,
-                        lineHeight: self.private._line_height,
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
@@ -329,7 +322,6 @@
                         text: text,
                         x: 0,
                         y: 0,
-                        lineHeight: self.private._line_height,
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
@@ -361,7 +353,6 @@
                         text: icon,
                         x: 0,
                         y: 0,
-                        lineHeight: self.private._line_height,
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
@@ -373,7 +364,6 @@
                         text: text,
                         x: icon_element.width(),
                         y: 0,
-                        lineHeight: icon_element._line_height,
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
@@ -392,7 +382,6 @@
                         text: text,
                         x: 0,
                         y: 0,
-                        lineHeight: self.private._line_height,
                         fontSize: self.private._text_size
                     };
                     json_object_update(kw_text, self.config.kw_text_font_properties);
@@ -404,7 +393,6 @@
                         text: icon,
                         x: text_element.width(),
                         y: 0,
-                        lineHeight: self.private._line_height,
                         fontSize: self.private._icon_size
                     };
                     json_object_update(kw_icon, self.config.kw_icon_font_properties);
@@ -424,7 +412,6 @@
                 text: icon,
                 x: 0,
                 y: 0,
-                lineHeight: self.private._line_height,
                 fontSize: self.private._icon_size
             };
             json_object_update(kw_icon, self.config.kw_icon_font_properties);
@@ -437,7 +424,6 @@
                 text: text,
                 x: 0,
                 y: 0,
-                lineHeight: self.private._line_height,
                 fontSize: self.private._text_size
             };
             json_object_update(kw_text, self.config.kw_text_font_properties);
@@ -445,8 +431,8 @@
             container.add(text_element);
         }
 
-        // if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
-        // if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
+        if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
+        if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
         // console.dir(container.getClientRect()); // TODO TEST
 
         return container;
