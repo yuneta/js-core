@@ -1112,7 +1112,7 @@ let __inside_event_loop__ = 0;
                  *  (__extend_dict__): add new keys and overwrite existing keys.
                  */
                 if(__global__) {
-                    kw2publish = __duplicate__(__global__); // TODO aquí había __clone__
+                    kw2publish = __duplicate__(__global__);
                     __extend_dict__(kw2publish, kw);
                 } else {
                     if(subs.share_kw) {
