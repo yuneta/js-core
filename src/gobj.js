@@ -457,6 +457,15 @@ let __inside_event_loop__ = 0;
         return null;
     };
 
+    /***************************************************************************
+     *  Return the child of gobj by name.
+     *  The first found is returned.
+     ***************************************************************************/
+    proto.gobj_child_by_name = function(name)
+    {
+        return this.gobj_find_child({"__gobj_name__": name});
+    };
+
     /************************************************************
      *  Return child's list matched with kw attributes
      ************************************************************/
