@@ -450,6 +450,28 @@
 
     /********************************************
      *  kw: {
+     *      color:
+     *  }
+     ********************************************/
+    function ac_icon_color(self, event, kw, src)
+    {
+        let ka = self.private._ka_container.find(".ka_icon");
+        if(ka.length === 0) {
+            log_error("ka not found");
+            return -1;
+        }
+        let color = kw_get_str(kw, "color", "");
+        if(color) {
+            ka[0].fill(color);
+        } else {
+            kw["color"] = ka[0].fill();
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  kw: {
      *      x:
      *      y:
      *  }
@@ -559,6 +581,7 @@
 
     let FSM = {
         "event_list": [
+            "EV_ICON_COLOR",
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
@@ -573,6 +596,7 @@
         "machine": {
             "ST_IDLE":
             [
+                ["EV_ICON_COLOR",           ac_icon_color,          undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
