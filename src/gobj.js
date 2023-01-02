@@ -671,7 +671,7 @@ let __inside_event_loop__ = 0;
         this.renamed_event = null;
         this.hard_subscription = false;
         this.own_event = false;
-        this.share_kw = false;
+        this.share_kw = false;  // HACK in js-core all events are published with shared kw
         this.__config__ = null;
         this.__global__ = null;
         this.__filter__ = null;
@@ -1127,7 +1127,8 @@ let __inside_event_loop__ = 0;
                     if(subs.share_kw) {
                         kw2publish = kw;
                     } else {
-                        kw2publish = __duplicate__(kw);
+                        kw2publish = kw;
+                        // kw2publish = __duplicate__(kw); // Native js objects don't duplicate well
                     }
                 }
 

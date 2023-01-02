@@ -431,8 +431,8 @@
             container.add(text_element);
         }
 
-        if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
-        if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
+        // if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
+        // if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
         // console.dir(container.getClientRect()); // TODO TEST
 
         return container;

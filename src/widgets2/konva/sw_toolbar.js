@@ -134,8 +134,8 @@
                 gobj_node = view;
                 k = gobj_node.get_konva_container();
             } else if(is_object(view)) {
-                let kw_item = kw_get_dict(view, "kw", {});
-                json_object_update(kw_item, {
+                let kw_view = kw_get_dict(view, "kw", {});
+                json_object_update(kw_view, {
                     subscriber: self.config.subscriber,
                     x: x,
                     y: y
@@ -143,7 +143,7 @@
                 gobj_node = self.yuno.gobj_create(
                     kw_get_str(view, "id", kw_get_str(view, "name", "")),
                     kw_get_dict_value(view, "gclass", null),
-                    kw_item,
+                    kw_view,
                     self
                 );
                 if(!gobj_node) {
@@ -153,11 +153,21 @@
                 let dim = k.getClientRect({skipShadow:true, skipStroke:true});
                 switch(self.config.orientation) {
                     case "vertical":
+                        // TODO ajusta tamaño a la toolbar y posiciona
+                        // EV_SIZE
+                        //width,height
+
+                        // TODO
+                        // EV_POSITION
+                        //x,y
+
                         x = 0;  // TODO toolbar padding
                         y += dim.height;
                         break;
+
                     default:
                     case "horizontal":
+                        // TODO ajusta tamaño a la toolbar y posiciona
                         x += dim.width;
                         y = 0;  // TODO toolbar padding
                         break;
