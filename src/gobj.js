@@ -671,7 +671,7 @@ let __inside_event_loop__ = 0;
         this.renamed_event = null;
         this.hard_subscription = false;
         this.own_event = false;
-        this.share_kw = false;  // HACK in js-core all events are published with shared kw
+        this.share_kw = false;
         this.__config__ = null;
         this.__global__ = null;
         this.__filter__ = null;
@@ -1083,6 +1083,7 @@ let __inside_event_loop__ = 0;
         /*--------------------------------------------------------------*
          *  Default publication method
          *--------------------------------------------------------------*/
+        let global_kw_shared = kw_get_bool(kw, "__share_kw__", false);
         let subscriptions = this.dl_subscriptions;
         let len = subscriptions.length;
         for(let i=0; i<len; i++) {
@@ -1124,11 +1125,10 @@ let __inside_event_loop__ = 0;
                     kw2publish = __duplicate__(__global__);
                     __extend_dict__(kw2publish, kw);
                 } else {
-                    if(subs.share_kw) {
+                    if(global_kw_shared || subs.share_kw) {
                         kw2publish = kw;
                     } else {
-                        kw2publish = kw;
-                        // kw2publish = __duplicate__(kw); // Native js objects don't duplicate well
+                        kw2publish = __duplicate__(kw); // Native js objects don't duplicate well
                     }
                 }
 
