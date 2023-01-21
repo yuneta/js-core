@@ -1,7 +1,10 @@
 /***********************************************************************
  *          Ka_scrollview.js
  *
- *          Scrollview built with konva
+ *          Scrollview built with konvA
+ *
+ *          Based in Konva
+ *
 
 Group(_ka_container)
     |

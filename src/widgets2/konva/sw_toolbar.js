@@ -2,6 +2,7 @@
  *          Sw_toolbar.js
  *
  *          Toolbar
+ *
  *          Based in ScrollvieW
  *
  *          Copyright (c) 2022 Niyamaka.

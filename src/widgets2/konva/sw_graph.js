@@ -4,6 +4,7 @@
  *          **View** that manage **gobj** **nodes**
  *
  *          A **view** can work inside a multiview
+ *
  *          Based in ScrollvieW
  *
  *          Copyright (c) 2022 Niyamaka.

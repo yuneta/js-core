@@ -1,7 +1,9 @@
 /***********************************************************************
  *          Ka_utils.js
  *
- *          Utilities for Konva
+ *          Utilities for KonvA
+ *
+ *          Based in Konva
  *
  *          Copyright (c) 2022 Niyamaka.
  *          All Rights Reserved.

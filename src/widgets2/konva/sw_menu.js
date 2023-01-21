@@ -2,6 +2,7 @@
  *          Sw_menu.js
  *
  *          Menu build with Konva canvas
+ *
  *          Based in ScrollvieW
  *
  *          Copyright (c) 2022 Niyamaka.

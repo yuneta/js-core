@@ -2,6 +2,7 @@
  *          Sw_multiview.js
  *
  *          Keeps a set of **gobj** **view** and displays one **view** at a time.
+ *
  *          Based in ScrollvieW
  *
  *          When a **view** is added its size will be resize to size of multiview

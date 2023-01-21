@@ -3,6 +3,8 @@
  *
  *          Root of link's gobjs
  *
+ *          Based in KonvA
+ *
  *          Copyright (c) 2022 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
