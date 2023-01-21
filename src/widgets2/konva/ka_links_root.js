@@ -214,7 +214,7 @@
     {
         let self = this;
         // TODO ??? self.private._ka_container.remove(child.get_konva_container());
-        // TODO donde se hace el destroy() del konva node
+        // TODO donde se hace el destroy() del konva item
     };
 
     /************************************************

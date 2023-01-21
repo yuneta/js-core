@@ -123,7 +123,7 @@
     }
 
     /********************************************
-     *  konva node: menu item
+     *  konva item: menu item
      *      {
      *          "id": unique id (not really). If id is empty id=action if action is a string
      *          "value":  text of menu item
@@ -133,7 +133,7 @@
      *          "selected": bool
      *      }
      ********************************************/
-    function create_konva_node(self, record, y, width)
+    function create_konva_item(self, record, y, width)
     {
         let id = kw_get_str(record, "id", "", false, false);
         let value = kw_get_str(record, "value", "", false, true);
@@ -214,7 +214,7 @@
         /*---------------------------------*
          *  Enable/Disable node
          *---------------------------------*/
-        enable_konva_node(self, record, !record.disabled, true);
+        enable_konva_item(self, record, !record.disabled, true);
 
         return ka_group;
     }
@@ -222,7 +222,7 @@
     /********************************************
      *
      ********************************************/
-    function enable_konva_node(self, record, enable, force)
+    function enable_konva_item(self, record, enable, force)
     {
         let stage = self.config.layer.getStage();
         let ka_group = record.ka_group;
@@ -363,7 +363,7 @@
         remove_ka_list(self);
 
         /*
-         *  Build new konva nodes and set element node's position
+         *  Build new konva items and set element node's position
          */
         let menu_topic = jdb_get_topic(self.private._jdb, self.private._topic_name);
 
@@ -374,7 +374,7 @@
 
         for(let i=0; i<menu_topic.length; i++) {
             let record = menu_topic[i];
-            let ka_group = create_konva_node(self, record, y, self.config.width);
+            let ka_group = create_konva_item(self, record, y, self.config.width);
             if(ka_group) {
                 // HACK skip shadow/stroke to overlap bottom/up line
                 let delta = ka_group.getClientRect({skipShadow:true, skipStroke:true}).height;
@@ -418,12 +418,12 @@
         remove_ka_list(self);
 
         /*
-         *  Build new konva nodes and set position
+         *  Build new konva items and set position
          */
         let menu_topic = jdb_get_topic(self.private._jdb, self.private._topic_name);
         for(let i=0, y=0; i<menu_topic; i++) {
             let record = menu_topic[i];
-            let ka_group = create_konva_node(self, record, y, self.config.width);
+            let ka_group = create_konva_item(self, record, y, self.config.width);
             if(ka_group) {
                 // HACK skip shadow/stroke to overlap bottom/up line
                 let delta = ka_group.getClientRect({skipShadow:true, skipStroke:true}).height;
@@ -484,7 +484,7 @@
                 log_error(sprintf("%s: enable_items, record not found, id:%s", self.gobj_short_name(), id));
                 continue;
             }
-            enable_konva_node(self, record, true);
+            enable_konva_item(self, record, true);
         }
         return 0;
     }
@@ -502,7 +502,7 @@
                 log_error(sprintf("%s: enable_items, record not found, id:%s", self.gobj_short_name(), id));
                 continue;
             }
-            enable_konva_node(self, record, false);
+            enable_konva_item(self, record, false);
         }
         return 0;
     }

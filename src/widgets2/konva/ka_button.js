@@ -259,8 +259,8 @@
                     ));
                 }
                 /*
-                 *  WARNING If action provoke deleting the konva node then the event is not bubbled!
-                 *  Don't worry, if the konva node is closed, and the event don't arrive to stage listener,
+                 *  WARNING If action provoke deleting the konva item then the event is not bubbled!
+                 *  Don't worry, if the konva item is closed, and the event don't arrive to stage listener,
                  *  the window will send a EV_DEACTIVATE and the window will be deactivated,
                  *  so for the activation service will work well.
                  *  BE CAREFUL with service needing bubbling.

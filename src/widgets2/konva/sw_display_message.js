@@ -120,7 +120,7 @@
     }
 
     /********************************************
-     *  konva node: text item
+     *  konva item: text item
      *      {
      *          "id": unique id (not really). If id is empty id=action if it's actions is a string
      *          "name": non-unique name
@@ -131,7 +131,7 @@
      *          "selected": bool
      *      }
      ********************************************/
-    function create_konva_node(self, record, y, width)
+    function create_konva_item(self, record, y, width)
     {
         let id = kw_get_str(record, "id", "", false, false);
         let name = kw_get_str(record, "name", "", false, false);
@@ -199,7 +199,7 @@
         record.ka_group = ka_group;     // cross-link
         ka_group.record = record;       // cross-link
 
-        enable_konva_node(self, record, !record.disabled, true);
+        enable_konva_item(self, record, !record.disabled, true);
 
         return ka_group;
     }
@@ -207,7 +207,7 @@
     /********************************************
      *
      ********************************************/
-    function enable_konva_node(self, record, enable, force)
+    function enable_konva_item(self, record, enable, force)
     {
         let stage = self.config.layer.getStage();
         let ka_group = record.ka_group;
@@ -339,13 +339,13 @@
         remove_ka_list(self);
 
         /*
-         *  Build new konva nodes and set element node's position
+         *  Build new konva items and set element node's position
          */
         let width = calculate_max_width(self, items);
         let y = 0;
         for(let i=0; i<items.length; i++) {
             let record = items[i];
-            let ka_group = create_konva_node(self, record, y, width);
+            let ka_group = create_konva_item(self, record, y, width);
             if(ka_group) {
                 let rc = ka_group.getClientRect();
                 let delta = rc.height;
