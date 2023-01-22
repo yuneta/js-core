@@ -3,7 +3,7 @@
  *
  *          Node basic
  *
- *          Mixin of ka_scrollview, ka_button and ka_port
+ *          Mixin of ka_scrollview and ka_button
  *
 
 

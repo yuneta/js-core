@@ -25,8 +25,9 @@
         icon: "",       // icon of item (from an icon font)
         action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
-        // disabled: false, TODO
-        // selected: false, TODO
+        disabled: false,    // True: item disabled, change appearance
+        selected: false,    // True: item selected, change appearance
+        unlocked: false,    // True: let design
 
         x: 0,
         y: 0,
@@ -557,10 +558,58 @@
     }
 
     /********************************************
-     *
+     *  Select
      ********************************************/
-    function ac_resize(self, event, kw, src)
+    function ac_select(self, event, kw, src)
     {
+        // TODO change appearance
+        self.config.disabled = false;
+        return 0;
+    }
+
+    /********************************************
+     *  Unselect
+     ********************************************/
+    function ac_unselect(self, event, kw, src)
+    {
+        // TODO change appearance
+        return 0;
+    }
+
+    /********************************************
+     *  Enable
+     ********************************************/
+    function ac_enable(self, event, kw, src)
+    {
+        // TODO change appearance
+        self.config.disabled = false;
+        return 0;
+    }
+
+    /********************************************
+     *  Disable
+     ********************************************/
+    function ac_disable(self, event, kw, src)
+    {
+        // TODO change appearance
+        return 0;
+    }
+
+    /********************************************
+     *  Lock design
+     ********************************************/
+    function ac_lock(self, event, kw, src)
+    {
+        // TODO change appearance
+        return 0;
+    }
+
+    /********************************************
+     *  Unlock design
+     ********************************************/
+    function ac_unlock(self, event, kw, src)
+    {
+        // TODO change appearance
         return 0;
     }
 
@@ -568,6 +617,14 @@
      *
      ************************************************/
     function ac_timeout(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  Top order
+     ********************************************/
+    function ac_resize(self, event, kw, src)
     {
         return 0;
     }
@@ -588,6 +645,12 @@
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
+            "EV_SELECT",
+            "EV_UNSELECT",
+            "EV_ENABLE",
+            "EV_DISABLE",
+            "EV_LOCK",
+            "EV_UNLOCK",
             "EV_MOVING: output no_warn_subs",
             "EV_MOVED: output no_warn_subs",
             "EV_TIMEOUT",
@@ -603,6 +666,12 @@
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
+                ["EV_SELECT",               ac_select,              undefined],
+                ["EV_UNSELECT",             ac_unselect,             undefined],
+                ["EV_ENABLE",               ac_enable,              undefined],
+                ["EV_DISABLE",              ac_disable,             undefined],
+                ["EV_LOCK",                 ac_lock,                undefined],
+                ["EV_UNLOCK",               ac_unlock,              undefined],
                 ["EV_TIMEOUT",              ac_timeout,             undefined],
                 ["EV_RESIZE",               ac_resize,              undefined]
             ]
