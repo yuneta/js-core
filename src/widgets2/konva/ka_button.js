@@ -20,14 +20,15 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
-        id: "",         // unique id (not really). If id is empty id=action if action is a string
+        id: "",         // unique id (not really). If id is empty then id=action if action is a string
         value: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
-        disabled: false,    // True: item disabled, change appearance
-        selected: false,    // True: item selected, change appearance
-        unlocked: false,    // True: let design
+        shape: null,        // TODO rectangle by default, implement circle
+        disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
+        selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
+        unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
         x: 0,
         y: 0,
@@ -563,7 +564,7 @@
     function ac_select(self, event, kw, src)
     {
         // TODO change appearance
-        self.config.disabled = false;
+        self.config.selected = true;
         return 0;
     }
 
@@ -573,6 +574,7 @@
     function ac_unselect(self, event, kw, src)
     {
         // TODO change appearance
+        self.config.selected = false;
         return 0;
     }
 
@@ -592,6 +594,7 @@
     function ac_disable(self, event, kw, src)
     {
         // TODO change appearance
+        self.config.disabled = true;
         return 0;
     }
 
@@ -667,7 +670,7 @@
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
                 ["EV_SELECT",               ac_select,              undefined],
-                ["EV_UNSELECT",             ac_unselect,             undefined],
+                ["EV_UNSELECT",             ac_unselect,            undefined],
                 ["EV_ENABLE",               ac_enable,              undefined],
                 ["EV_DISABLE",              ac_disable,             undefined],
                 ["EV_LOCK",                 ac_lock,                undefined],
@@ -756,6 +759,22 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
+    };
+
+    /************************************************
+     *      Framework Method writing
+     ************************************************/
+    proto.mt_writing = function(name)
+    {
+        let self = this;
+        // TODO if(name == "disabled" "selected" "unlocked")
+        // Simulate events:
+        //     "EV_SELECT",
+        //     "EV_UNSELECT",
+        //     "EV_ENABLE",
+        //     "EV_DISABLE",
+        //     "EV_LOCK",
+        //     "EV_UNLOCK",
     };
 
     /************************************************

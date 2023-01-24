@@ -137,6 +137,18 @@ Button bottom-left ───┘         │                    └────�
 
 
     /********************************************
+     *
+     ********************************************/
+    function ac_keydown(self, event, kw, src)
+    {
+        let ret = 0;
+        /*
+         * Retorna -1 si quieres poseer el evento (No será subido hacia arriba).
+         */
+        return ret;
+    }
+
+    /********************************************
      *  EV_ADD_VIEWS {
      *      "views": [{id:, gclass:, kw: }, ...]
      *      or
@@ -263,6 +275,29 @@ Button bottom-left ───┘         │                    └────�
     }
 
     /********************************************
+     *  Order from __ka_main__
+     *  Please be idempotent
+     ********************************************/
+    function ac_activate(self, event, kw, src)
+    {
+        self.get_konva_container().moveToTop();
+        self.private._gobj_ka_scrollview.gobj_send_event("EV_ACTIVATE", {}, self);
+
+        return 0;
+    }
+
+    /********************************************
+     *  Order from __ka_main__
+     *  Please be idempotent
+     ********************************************/
+    function ac_deactivate(self, event, kw, src)
+    {
+        self.private._gobj_ka_scrollview.gobj_send_event("EV_DEACTIVATE", {}, self);
+
+        return 0;
+    }
+
+    /********************************************
      *  To show a view of multiview:
      *      {
      *          "id":
@@ -318,41 +353,6 @@ Button bottom-left ───┘         │                    └────�
         } else {
             __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self);
         }
-
-        return 0;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function ac_keydown(self, event, kw, src)
-    {
-        let ret = 0;
-        /*
-         * Retorna -1 si quieres poseer el evento (No será subido hacia arriba).
-         */
-        return ret;
-    }
-
-    /********************************************
-     *  Order from __ka_main__
-     *  Please be idempotent
-     ********************************************/
-    function ac_activate(self, event, kw, src)
-    {
-        self.get_konva_container().moveToTop();
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_ACTIVATE", {}, self);
-
-        return 0;
-    }
-
-    /********************************************
-     *  Order from __ka_main__
-     *  Please be idempotent
-     ********************************************/
-    function ac_deactivate(self, event, kw, src)
-    {
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_DEACTIVATE", {}, self);
 
         return 0;
     }
@@ -424,11 +424,58 @@ Button bottom-left ───┘         │                    └────�
     }
 
     /********************************************
+     *  Link supported
+     ********************************************/
+    function ac_link(self, event, kw, src)
+    {
+        let id = kw_get_str(kw, "id", "");
+        let target_gobj = self;
+        let source_gobj = kw_get_dict_value(kw, "source_gobj", src);
+
+        if(!is_gobj(source_gobj)) {
+            let source_gobj_ = self.yuno.gobj_find_unique_gobj(source_gobj);
+            if(!source_gobj_) {
+                log_error("source_gobj must be an unique gobj: " + source_gobj);
+            }
+            source_gobj = source_gobj_;
+        }
+
+        // if(id exists) // TODO
+
+        // foreach if targets or sources are arrays // TODO
+
+        let __links_root__ = self.yuno.gobj_find_service("__links_root__", true);
+
+        self.yuno.gobj_create(
+            id,
+            Ka_link,
+            {
+                draggable: true, // TODO a true cuando se quiera editar el link
+                source_gobj: source_gobj,
+                target_gobj: target_gobj
+            },
+            __links_root__
+        );
+
+        return 0;
+    }
+
+    /********************************************
+     *  Link supported
+     ********************************************/
+    function ac_unlink(self, event, kw, src)
+    {
+        let source_gobj = kw_get_dict_value(kw, "source_gobj", src);
+        // TODO
+        return 0;
+    }
+
+    /********************************************
      *  Child panning/panned
      ********************************************/
     function ac_panning(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self panning
         }
         return 0;
@@ -439,11 +486,11 @@ Button bottom-left ───┘         │                    └────�
      ********************************************/
     function ac_moving(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self moving
         } else {
             // Child moving
-            if(strcmp(event, "EV_MOVED")==0) {
+            if(strcmp(event, "EV_MOVED")===0) {
                 if(kw.x < 0 || kw.y < 0) {
                     // Refuse negative logic
                     if(kw.x < 0) {
@@ -505,6 +552,9 @@ Button bottom-left ───┘         │                    └────�
             "EV_HIDE",
             "EV_RESIZE",
 
+            "EV_LINK",
+            "EV_UNLINK",
+
             "EV_PANNING",
             "EV_PANNED",
             "EV_MOVING",
@@ -530,6 +580,9 @@ Button bottom-left ───┘         │                    └────�
                 ["EV_POSITION",         ac_position,            undefined],
                 ["EV_SIZE",             ac_size,                undefined],
                 ["EV_RESIZE",           ac_resize,              undefined],
+
+                ["EV_LINK",             ac_link,                undefined],
+                ["EV_UNLINK",           ac_unlink,              undefined],
 
                 ["EV_PANNING",          ac_panning,             undefined],
                 ["EV_PANNED",           ac_panning,             undefined],

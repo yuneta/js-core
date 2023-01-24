@@ -2,6 +2,7 @@
  *          Ka_link.js
  *
  *          Node's Link
+ *          Link two gobj's, they must support publishing of EV_MOVING/EV_MOVED events
  *
  *          Based in KonvA
  *
@@ -23,10 +24,8 @@
         subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,        // Konva layer
 
-        source_gobj: null,
-        source_port: null,
-        target_gobj: null,
-        target_port: null,
+        source_gobj: null,  // Must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
+        target_gobj: null,  // Must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
 
         //------------ Own Attributes ------------//
         background_color: "black",
@@ -111,9 +110,7 @@
     function update_link_path(self)
     {
         let target_gobj = self.config.target_gobj;
-        let target_port = self.config.target_port;
         let source_gobj = self.config.source_gobj;
-        let source_port = self.config.source_port;
 
         let kw_source_dim = {};
         let kw_target_dim = {};
@@ -288,12 +285,12 @@
         create_shape(self);
 
         let target_gobj = self.config.target_gobj;
-        let target_port = self.config.target_port;
         let source_gobj = self.config.source_gobj;
-        let source_port = self.config.source_port;
 
         source_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
         target_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
+        source_gobj.gobj_subscribe_event("EV_MOVED", {}, self);
+        target_gobj.gobj_subscribe_event("EV_MOVED", {}, self);
     };
 
     /************************************************
