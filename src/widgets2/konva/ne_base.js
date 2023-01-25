@@ -425,12 +425,28 @@ Button bottom-left ───┘         │                    └────�
 
     /********************************************
      *  Link supported
+     *
+     *  id or name:
+     *      name of link gobj, and name of source/target port if they are empty.
+     *
+     *  source_port:
+     *      - string: name of source port gobj (child of self)
+     *          Use `id` if empty
+     *
+     *  target_gobj:
+     *      - string: name of target gobj (unique or service gobj)
+     *      - gobj: target gobj
+     *  target_port:
+     *      - string: name of target port gobj (child of target_gobj)
+     *          Use `id` if empty
+     *
      ********************************************/
     function ac_link(self, event, kw, src)
     {
-        let id = kw_get_str(kw, "id", "");
-        let target_gobj = self;
-        let source_gobj = kw_get_dict_value(kw, "source_gobj", src);
+        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
+
+        let source_gobj = self;
+        let target_gobj = kw_get_dict_value(kw, "target_gobj", src); // TODO adjust to doc
 
         if(!is_gobj(source_gobj)) {
             let source_gobj_ = self.yuno.gobj_find_unique_gobj(source_gobj);
