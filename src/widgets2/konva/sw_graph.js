@@ -79,7 +79,7 @@
 
 
     /********************************************
-     *  EV_ADD_VIEWS {
+     *  EV_ADD_VIEW {
      *      "views": [{id:, gclass:, kw: }, ...]
      *      or
      *      "views": [gobj, ...]
@@ -88,7 +88,7 @@
      *  You can use "name" instead of "id"
      *
      ********************************************/
-    function ac_add_views(self, event, kw, src)
+    function ac_add_view(self, event, kw, src)
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
@@ -103,7 +103,7 @@
                     kw_get_dict(view, "kw", {}),
                     self
                 );
-                continue; // goes recurrent ac_add_views() by mt_child_added()
+                continue; // goes recurrent ac_add_view() by mt_child_added()
             } else {
                 log_error("What is it?" + view);
                 continue;
@@ -123,7 +123,7 @@
     }
 
     /********************************************
-     *  EV_REMOVE_VIEWS {
+     *  EV_REMOVE_VIEW {
      *      "views": ["id", ...]
      *      or
      *      "views": [{id: "id", }, ...]
@@ -131,7 +131,7 @@
      *      "views": [gobj, ...]
      *  }
      ********************************************/
-    function ac_remove_views(self, event, kw, src)
+    function ac_remove_view(self, event, kw, src)
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
@@ -397,8 +397,8 @@
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_VIEWS",
-            "EV_REMOVE_VIEWS",
+            "EV_ADD_VIEW",
+            "EV_REMOVE_VIEW",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -422,8 +422,8 @@
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_VIEWS",        ac_add_views,           undefined],
-                ["EV_REMOVE_VIEWS",     ac_remove_views,        undefined],
+                ["EV_ADD_VIEW",         ac_add_view,            undefined],
+                ["EV_REMOVE_VIEW",      ac_remove_view,         undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
 
@@ -531,7 +531,7 @@
         );
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
-        self.gobj_send_event("EV_ADD_VIEWS", {views: self.config.views}, self);
+        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
         if(visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
@@ -571,7 +571,7 @@
         let self = this;
         if(self.private._gobj_ka_scrollview) {
             self.gobj_send_event(
-                "EV_ADD_VIEWS",
+                "EV_ADD_VIEW",
                 {
                     views: [child]
                 },
@@ -587,7 +587,7 @@
     {
         let self = this;
         self.gobj_send_event(
-            "EV_REMOVE_VIEWS",
+            "EV_REMOVE_VIEW",
             {
                 views: [child]
             },

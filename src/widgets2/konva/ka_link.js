@@ -2,7 +2,12 @@
  *          Ka_link.js
  *
  *          Node's Link
- *          Link two gobj's, they must support publishing of EV_MOVING/EV_MOVED events
+ *          Link two gobj's
+ *
+ *          HACK: GObj's to be linked must support:
+ *              - publishing of EV_MOVING/EV_MOVED events
+ *              - input event EV_GET_DIMENSION
+ *          See ka_button.js example
  *
  *          Based in KonvA
  *

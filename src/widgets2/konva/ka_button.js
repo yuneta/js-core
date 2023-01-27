@@ -531,12 +531,22 @@
     }
 
     /********************************************
-     *  Return dimensions (position and size)
+     *  Return dimensions:
+     *      - configured position and size (relative to parent)
+     *      - absolute position (relative to screen)
+     *
      *  kw: {
      *      x:
      *      y:
      *      width:
      *      height:
+     *
+     *      absolute_dimension: {
+     *          x:
+     *          y:
+     *          width:
+     *          height:
+     *      }
      *  }
      *
      ********************************************/

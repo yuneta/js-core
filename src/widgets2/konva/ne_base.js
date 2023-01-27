@@ -45,8 +45,9 @@ Button bottom-left ───┘         │                    └────�
      ********************************************/
     let CONFIG = {
         //////////////// Public Attributes //////////////////
-        subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
-        layer: null,        // Konva layer
+        subscriber: null,       // subscriber of publishing messages (Child model: if null will be the parent)
+        layer: null,            // Konva layer
+        gobj_links_root: null,  // Root gobj of links
 
         //------------ Own Attributes ------------//
         orientation: "horizontal", /* "vertical" or "horizontal" */
@@ -126,6 +127,95 @@ Button bottom-left ───┘         │                    └────�
         }
     }
 
+    /************************************************
+     *  Return the link gobj, null if error
+     ************************************************/
+    function create_link(self, kw)
+    {
+        let source_gobj = self; // source gobj is self
+        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
+
+        /*
+         *  Check if link exists
+         */
+        let gobj_link = self.yuno.gobj_find_unique_gobj(id);
+        if(gobj_link) {
+            log_error(sprintf("ne_base: link already exists '%s'", id));
+            return null;
+        }
+
+        let target_gobj = get_unique_gobj(self, kw_get_dict_value(kw, "target_gobj", null));
+        let source_port = get_child_gobj(self, self, kw_get_dict_value(kw, "source_port", id));
+        let target_port = get_child_gobj(self, target_gobj, kw_get_dict_value(kw, "target_port", id));
+        if(!target_gobj || !source_port || !target_port) {
+            // Error already logged
+            return null;
+        }
+
+        return self.yuno.gobj_create(
+            id,
+            Ka_link,
+            {
+                source_gobj: source_gobj,
+                source_port: source_port,
+                target_gobj: target_gobj,
+                target_port: target_port
+            },
+            self.config.gobj_links_root
+        );
+    }
+
+    /********************************************
+     *  Return the unique gobj, null if error
+     ********************************************/
+    function get_unique_gobj(self, name)
+    {
+        let target_gobj;
+
+        if (is_string(name)) {
+            target_gobj = self.yuno.gobj_find_unique_gobj(name);
+            if (!target_gobj) {
+                log_error("ne_base: target_gobj must be an unique gobj: " + name);
+                return null;
+            }
+        } else if (is_gobj(name)) {
+            target_gobj = name;
+        } else {
+            target_gobj = null;
+            log_error(sprintf("ne_base: name must be an string or gobj"));
+        }
+
+        return target_gobj;
+    }
+
+    /********************************************
+     *  Return the child gobj, null if error
+     ********************************************/
+    function get_child_gobj(self, gobj_parent, name)
+    {
+        let child_gobj;
+
+        if (is_string(name)) {
+            child_gobj = gobj_parent.gobj_child_by_name(name);
+            if (!child_gobj) {
+                log_error(
+                    sprintf("ne_base: child_gobj not found: parent '%s', child '%s'",
+                        gobj_parent.gobj_short_name(),
+                        name
+                    )
+                );
+                return null;
+            }
+        } else if (is_gobj(name)) {
+            child_gobj = name;
+        } else {
+            child_gobj = null;
+            log_error(sprintf("ne_base: child_gobj must be an string or gobj"));
+        }
+
+        return child_gobj;
+    }
+
 
 
 
@@ -149,7 +239,7 @@ Button bottom-left ───┘         │                    └────�
     }
 
     /********************************************
-     *  EV_ADD_VIEWS {
+     *  EV_ADD_VIEW {
      *      "views": [{id:, gclass:, kw: }, ...]
      *      or
      *      "views": [gobj, ...]
@@ -158,7 +248,7 @@ Button bottom-left ───┘         │                    └────�
      *  You can use "name" instead of "id"
      *
      ********************************************/
-    function ac_add_views(self, event, kw, src)
+    function ac_add_view(self, event, kw, src)
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
@@ -210,7 +300,7 @@ Button bottom-left ───┘         │                    └────�
                         y = 0;  // TODO toolbar padding
                         break;
                 }
-                continue; // goes recurrent ac_add_views() by mt_child_added()
+                continue; // goes recurrent ac_add_view() by mt_child_added()
             } else {
                 log_error("What is it?" + view);
                 continue;
@@ -229,7 +319,7 @@ Button bottom-left ───┘         │                    └────�
     }
 
     /********************************************
-     *  EV_REMOVE_VIEWS {
+     *  EV_REMOVE_VIEW {
      *      "views": ["id", ...]
      *      or
      *      "views": [{id: "id", }, ...]
@@ -237,7 +327,7 @@ Button bottom-left ───┘         │                    └────�
      *      "views": [gobj, ...]
      *  }
      ********************************************/
-    function ac_remove_views(self, event, kw, src)
+    function ac_remove_view(self, event, kw, src)
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
@@ -426,52 +516,37 @@ Button bottom-left ───┘         │                    └────�
     /********************************************
      *  Link supported
      *
-     *  id or name:
-     *      name of link gobj, and name of source/target port if they are empty.
+     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
      *
-     *  source_port:
-     *      - string: name of source port gobj (child of self)
-     *          Use `id` if empty
+     *  id/name:
+     *      name of link gobj, and name of source_port/target_port if they are empty.
      *
      *  target_gobj:
      *      - string: name of target gobj (unique or service gobj)
-     *      - gobj: target gobj
-     *  target_port:
-     *      - string: name of target port gobj (child of target_gobj)
-     *          Use `id` if empty
+     *      - gobj: target gobj, must be an unique gobj.
+     *
+     *  source_port: Use `id` if source_port is an empty string
+     *      - string: name of source port gobj, must be a child of self
+     *      - gobj: source port gobj, must be a child of self
+     *
+     *  target_port: Use `id` if target_port is an empty string
+     *      - string: name of target port gobj, must be a child of target_gobj
+     *      - gobj: target port gobj, must be a child of target_gobj
      *
      ********************************************/
     function ac_link(self, event, kw, src)
     {
-        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
-
-        let source_gobj = self;
-        let target_gobj = kw_get_dict_value(kw, "target_gobj", src); // TODO adjust to doc
-
-        if(!is_gobj(source_gobj)) {
-            let source_gobj_ = self.yuno.gobj_find_unique_gobj(source_gobj);
-            if(!source_gobj_) {
-                log_error("source_gobj must be an unique gobj: " + source_gobj);
+        let links = kw_get_list(kw, "links", null);
+        if(!links) {
+            /*
+             *  Single link
+             */
+            return create_link(self, kw);
+        } else {
+            for(let link in links) {
+                create_link(self, link);
             }
-            source_gobj = source_gobj_;
         }
-
-        // if(id exists) // TODO
-
-        // foreach if targets or sources are arrays // TODO
-
-        let __links_root__ = self.yuno.gobj_find_service("__links_root__", true);
-
-        self.yuno.gobj_create(
-            id,
-            Ka_link,
-            {
-                draggable: true, // TODO a true cuando se quiera editar el link
-                source_gobj: source_gobj,
-                target_gobj: target_gobj
-            },
-            __links_root__
-        );
 
         return 0;
     }
@@ -557,8 +632,8 @@ Button bottom-left ───┘         │                    └────�
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_VIEWS",
-            "EV_REMOVE_VIEWS",
+            "EV_ADD_VIEW",
+            "EV_REMOVE_VIEW",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -585,8 +660,9 @@ Button bottom-left ───┘         │                    └────�
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_VIEWS",        ac_add_views,           undefined],
-                ["EV_REMOVE_VIEWS",     ac_remove_views,        undefined],
+                ["EV_ADD_VIEW",         ac_add_view,            undefined],
+                ["EV_REMOVE_VIEW",      ac_remove_view,         undefined],
+
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
 
@@ -655,6 +731,12 @@ Button bottom-left ───┘         │                    └────�
         if(!self.config.layer) {
             self.config.layer = self.gobj_parent().config.layer;
         }
+        if(!self.config.gobj_links_root) {
+            self.config.gobj_links_root = self.yuno.gobj_find_service("__links_root__", true);
+            if(!self.config.gobj_links_root) {
+                log_error("gobj_links_root MISSING");
+            }
+        }
 
         calculate_dimension(self);
 
@@ -701,7 +783,7 @@ Button bottom-left ───┘         │                    └────�
         );
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
-        self.gobj_send_event("EV_ADD_VIEWS", {views: self.config.views}, self);
+        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
         if(visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
@@ -741,7 +823,7 @@ Button bottom-left ───┘         │                    └────�
         let self = this;
         if(self.private._gobj_ka_scrollview) {
             self.gobj_send_event(
-                "EV_ADD_VIEWS",
+                "EV_ADD_VIEW",
                 {
                     views: [child]
                 },
@@ -757,7 +839,7 @@ Button bottom-left ───┘         │                    └────�
     {
         let self = this;
         self.gobj_send_event(
-            "EV_REMOVE_VIEWS",
+            "EV_REMOVE_VIEW",
             {
                 views: [child]
             },
