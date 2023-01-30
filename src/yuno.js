@@ -123,7 +123,7 @@
         __global_stats_parser_fn__ = global_stats_parser_fn;
 
         return 0;
-    };
+    }
 
     /************************************************************
      *      Register gclass
@@ -131,13 +131,13 @@
     function gobj_register_gclass(gclass, gclass_name)
     {
         if(!gclass || !gclass_name) {
-            var msg = "Yuno.gobj_register_gclass(): gclass undefined";
+            let msg = "Yuno.gobj_register_gclass(): gclass undefined";
             log_error(msg);
             return -1;
         }
-        var gclass_ = _gclass_register[gclass_name];
+        let gclass_ = _gclass_register[gclass_name];
         if (gclass_) {
-            var msg = "Yuno.gobj_register_gclass(): '" +
+            let msg = "Yuno.gobj_register_gclass(): '" +
                 gclass_name +
                 "' ALREADY REGISTERED";
             log_error(msg);
@@ -145,15 +145,16 @@
         }
         _gclass_register[gclass_name] = gclass;
         return 0;
-    };
+    }
 
     /************************************************************
      *      Find gclass
      ************************************************************/
     function gobj_find_gclass(gclass_name, verbose)
     {
+        let gclass;
         try {
-            var gclass = _gclass_register[gclass_name];
+            gclass = _gclass_register[gclass_name];
         } catch (e) {
             if(verbose) {
                 log_error("Yuno.gobj_find_gclass(): '" + gclass_name + "' gclass not found");
@@ -161,7 +162,7 @@
             return null;
         }
         return gclass;
-    };
+    }
 
     /************************************************************
      *  Example how change CONFIG of a gclass (temporarily)
@@ -208,7 +209,7 @@
             return null;
         }
         return __global_list_persistent_attrs_fn__();
-    };
+    }
 
     /************************************************************
      *      gobj_create factory.
@@ -313,7 +314,7 @@
         }
 
         if (parent) {
-            parent._add_child(gobj)
+            parent._add_child(gobj);
         }
         if (gobj.mt_create) {
             gobj.mt_create(kw);
@@ -442,7 +443,7 @@
             gobj.parent.mt_child_removed(gobj);
         }
         if (gobj.parent) {
-            gobj.parent._remove_child(gobj)
+            gobj.parent._remove_child(gobj);
         }
         if(gobj.gobj_is_unique()) {
             this._deregister_unique_gobj(gobj);
@@ -504,7 +505,7 @@
         var named_gobj = self._unique_gobjs[gobj.name];
         if (named_gobj) {
             delete self._unique_gobjs[gobj.name];
-            return true
+            return true;
         }
         return false;
     };
@@ -615,7 +616,7 @@
             return true;
         }
         return false;
-    };
+    }
 
     /************************************************************
      *
@@ -661,7 +662,7 @@
         p.splice(0, 1);
         p = p.join("`");
         return _gobj_search_path(child, p);
-    };
+    }
 
     /************************************************************
      *        Find a gobj by path
@@ -704,7 +705,7 @@
             let content = {
                 "id": o.gobj_full_name(),
                 "value": o.gobj_short_name()
-            }
+            };
             d.push(content);
             let dl_childs = o.dl_childs;
             if(dl_childs.length>0) {
