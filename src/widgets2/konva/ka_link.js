@@ -29,8 +29,13 @@
         subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,        // Konva layer
 
-        source_gobj: null,  // Must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
-        target_gobj: null,  // Must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
+        // source_port/target_port must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
+        // these gobj/ports can be strings or gobjs
+        // gobj of port's is the goal parameter, but you can pass the parent/child pair as string or gobj
+        source_port: null,
+        target_port: null,
+        source_gobj: null,
+        target_gobj: null,
 
         //------------ Own Attributes ------------//
         background_color: "black",
@@ -77,6 +82,38 @@
     {
         self.private._text_size = adjust_font_size(self.config.text_size, self.config.fontFamily);
         self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function get_port_gobj(self, parent, port)
+    {
+        if(is_gobj(port)) {
+            return port;
+        }
+        if(!is_string(port)) {
+            log_error(sprintf("ka_link: port must be a string or gobj: '%s'",port));
+            return null;
+        }
+        let gobj = parent;
+        if(is_string(parent)) {
+            gobj = self.yuno.gobj_find_unique_gobj(parent, false);
+            if(!gobj) {
+                log_error(sprintf("ka_link: gobj must be a unique gobj: '%s'", parent));
+                return null;
+            }
+        }
+        if(!is_gobj(gobj)) {
+            log_error("ka_link: parent gobj not found");
+            return null;
+        }
+        let child = gobj.gobj_child_by_name(port);
+        if(!child) {
+            log_error(sprintf("ka_link: child gobj not found: '%s' -> '%s'", gobj.gobj_name(), port));
+            return null;
+        }
+        return child;
     }
 
     /********************************************
@@ -162,8 +199,6 @@
         );
         self.private._ka_border_arrow = new Konva.Arrow(kw_border_shape);
         ka_container.add(self.private._ka_border_arrow);
-
-        update_link_path(self); // Draw the arrow
 
         if (self.config.draggable) {
             // TODO cuando editar los link desde el grafo hay que entrar por aquí
@@ -289,13 +324,21 @@
 
         create_shape(self);
 
-        let target_gobj = self.config.target_gobj;
-        let source_gobj = self.config.source_gobj;
-
-        source_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
-        target_gobj.gobj_subscribe_event("EV_MOVING", {}, self);
-        source_gobj.gobj_subscribe_event("EV_MOVED", {}, self);
-        target_gobj.gobj_subscribe_event("EV_MOVED", {}, self);
+        let source_port = self.private._source_port = get_port_gobj(
+            self, self.config.source_gobj, self.config.source_port
+        );
+        let target_port = self.private._target_port = get_port_gobj(
+            self, self.config.target_gobj, self.config.target_port
+        );
+        if(source_port && target_port) {
+            source_port.gobj_subscribe_event("EV_MOVING", {}, self);
+            target_port.gobj_subscribe_event("EV_MOVING", {}, self);
+            source_port.gobj_subscribe_event("EV_MOVED", {}, self);
+            target_port.gobj_subscribe_event("EV_MOVED", {}, self);
+            update_link_path(self); // Draw the arrow
+        } else {
+            log_error("ka_link: source_port or target port not found");
+        }
     };
 
     /************************************************

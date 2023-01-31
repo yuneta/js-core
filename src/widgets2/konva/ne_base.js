@@ -365,6 +365,132 @@ Button bottom-left ───┘         │                    └────�
     }
 
     /********************************************
+     *  EV_ADD_PORT {
+     *      "ports": [{id:, gclass:, kw: }, ...]
+     *      or
+     *      "ports": [gobj, ...]
+     *  }
+     *
+     *  You can use "name" instead of "id"
+     *
+     ********************************************/
+    function ac_add_port(self, event, kw, src)
+    {
+        let ports = kw_get_dict_value(kw, "ports", null, false, false);
+
+        let toolbar_container = self.private._gobj_ka_scrollport.get_konva_container();
+
+        let x=0,y=0,k=null;
+
+        for(let port of ports) {
+            let gobj_node = null;
+            if(is_gobj(port)) {
+                gobj_node = port;
+                k = gobj_node.get_konva_container();
+            } else if(is_object(port)) {
+                let kw_port = kw_get_dict(port, "kw", {});
+                json_object_update(kw_port, {
+                    subscriber: self.config.subscriber,
+                    x: x,
+                    y: y
+                });
+                gobj_node = self.yuno.gobj_create(
+                    kw_get_str(port, "id", kw_get_str(port, "name", "")),
+                    kw_get_dict_value(port, "gclass", null),
+                    kw_port,
+                    self
+                );
+                if(!gobj_node) {
+                    continue;
+                }
+                k = gobj_node.get_konva_container();
+                let dim = k.getClientRect({skipShadow:true, skipStroke:true});
+                switch(self.config.orientation) {
+                    case "vertical":
+                        // TODO ajusta tamaño a la toolbar y posiciona
+                        // EV_SIZE
+                        //width,height
+
+                        // TODO
+                        // EV_POSITION
+                        //x,y
+
+                        x = 0;  // TODO toolbar padding
+                        y += dim.height;
+                        break;
+
+                    default:
+                    case "horizontal":
+                        // TODO ajusta tamaño a la toolbar y posiciona
+                        x += dim.width;
+                        y = 0;  // TODO toolbar padding
+                        break;
+                }
+                continue; // goes recurrent ac_add_port() by mt_child_added()
+            } else {
+                log_error("What is it?" + port);
+                continue;
+            }
+
+            self.private._gobj_ka_scrollport.gobj_send_event(
+                "EV_ADD_ITEMS",
+                {
+                    items: [k]
+                },
+                self
+            );
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  EV_REMOVE_PORT {
+     *      "ports": ["id", ...]
+     *      or
+     *      "ports": [{id: "id", }, ...]
+     *      or
+     *      "ports": [gobj, ...]
+     *  }
+     ********************************************/
+    function ac_remove_port(self, event, kw, src)
+    {
+        let ports = kw_get_dict_value(kw, "ports", null, false, false);
+
+        for(let port of ports) {
+            let childs = null;
+            if(is_string(port)) {
+                let name = port;
+                childs = self.gobj_match_childs({__gobj_name__: name});
+            } else if(is_object(port)) {
+                let name = kw_get_str(port, "id", kw_get_str(port, "name", ""));
+                childs = self.gobj_match_childs({__gobj_name__: name});
+            } else if(is_gobj(port)) {
+                childs = [port];
+            } else {
+                log_error("What is?" + port);
+                continue;
+            }
+
+            for(let child in childs) {
+                let k = child.get_konva_container();
+                self.private._gobj_ka_scrollport.gobj_send_event(
+                    "EV_REMOVE_ITEMS",
+                    {
+                        items: [k]
+                    },
+                    self
+                );
+                if(!child.gobj_is_destroying()) {
+                    self.yuno.gobj_destroy(child);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    /********************************************
      *  Order from __ka_main__
      *  Please be idempotent
      ********************************************/
@@ -634,6 +760,8 @@ Button bottom-left ───┘         │                    └────�
             "EV_KEYDOWN",
             "EV_ADD_VIEW",
             "EV_REMOVE_VIEW",
+            "EV_ADD_PORT",
+            "EV_REMOVE_PORT",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -662,6 +790,8 @@ Button bottom-left ───┘         │                    └────�
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
                 ["EV_ADD_VIEW",         ac_add_view,            undefined],
                 ["EV_REMOVE_VIEW",      ac_remove_view,         undefined],
+                ["EV_ADD_PORT",         ac_add_port,            undefined],
+                ["EV_REMOVE_PORT",      ac_remove_port,         undefined],
 
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
