@@ -7,17 +7,17 @@
  *
 
 
-                                ┌── Ports top
-        Button top-left         │                   ┌──────── Button top-right
+                                ┌── Ports 'top_ports'
+        Button 'btn_top_left'   │                   ┌──────── Button 'btn_top_right'
               │                 ▼                   ▼
               │      ┌─────┬──┬──┬──┬──┬──┬──┬──┬─────┐
               └────► │     │  │  │  │  │  │  │  │     │
                      ├─────┼──┴──┴──┴──┴──┴──┴──┼─────┤
-                     │     │                    │     │
+                     │     │     'title'        │     │
                      ├─────┤                    ├─────┤
-           ┌───────► │     │                    │     │ ─────► Ports output
+           ┌───────► │     │                    │     │ ─────► Ports 'output_ports'
            │         ├─────┤     Scrollview     ├─────┤
-    Ports input      │     │     center         │     │
+ Ports 'input_ports' │     │     'sw_center'    │     │
                      ├─────┤                    ├─────┤
                      │     │                    │     │
                      ├─────┤                    ├─────┤
@@ -26,8 +26,9 @@
                      │     │  │  │  │  │  │  │  │     │
                      └─────┴──┴──┴──┴──┴──┴──┴──┴─────┘
                       ▲         ▲                    ▲
-Button bottom-left ───┘         │                    └─────── Button bottom-right
-                                └─── Ports bottom
+   Button             │         │                    │
+  'btn_bottom_left' ──┘         │                    └─────── Button 'btn_bottom_right'
+                                └─── Ports 'bottom_ports'
 
 
  *          Copyright (c) 2023 Niyamaka.
@@ -50,43 +51,46 @@ Button bottom-left ───┘         │                    └────�
         gobj_links_root: null,  // Root gobj of links
 
         //------------ Own Attributes ------------//
-        orientation: "horizontal", /* "vertical" or "horizontal" */
-        wide: 40,
-        long: 0,        /* 0 = adjust to screen */
-        views: [],
-
-        //------- Ka_scrollview Attributes --- HACK use ka_scrollview directly ---------//
         x: 0,
         y: 0,
-        width: 0,       // Calculated inside (based in orientation/wide/long)
-        height: 0,      // Calculated inside (based in orientation/wide/long)
-        padding: 2,
+        width: 400,
+        height: 250,
+        shape: "rect",      /* "rect" or "circle" */
         background_color: "#FFF7E0",
 
+        title: {},
+        input_ports: [],
+        output_ports: [],
+        top_ports: [],
+        bottom_ports: [],
+        btn_top_left: {},
+        btn_top_right: {},
+        btn_bottom_left: {},
+        btn_bottom_right: {},
+        sw_center_items: [],
+
         visible: true,
-        panning: true,          // Enable (inner dragging) panning
-        draggable: false,       // Enable (outer dragging) dragging
+        draggable: true,   // Enable (outer dragging) dragging
 
-        fix_dimension_to_screen: false,
-
-        enable_vscroll: false,  // Calculated inside
-        enable_hscroll: false,  // Calculated inside
-
-        quick_display: false,   // For debugging, draw quickly
+        disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
+        selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
+        unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
         kw_border_shape: { /* Border shape */
-            strokeWidth: 0,
-            stroke: null,
+            cornerRadius: 10,
+            strokeWidth: 2,
+            stroke: "#f5c211ff",
             opacity: 1,
-            shadowColor: null,
-            shadowBlur: 0
+            shadowBlur: 0,
+            shadowColor: "black",
+            shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
         },
         kw_border_shape_actived: { /* Border shape for active windows */
             // Only used: stroke, opacity, shadowBlur, shadowColor
         },
 
         //////////////// Private Attributes /////////////////
-        _gobj_ka_scrollview: null
+        _ka_container: null
     };
 
 
@@ -98,34 +102,6 @@ Button bottom-left ───┘         │                    └────�
 
 
 
-
-    /************************************************
-     *
-     ************************************************/
-    function calculate_dimension(self)
-    {
-        switch(self.config.orientation) {
-            case "vertical":
-                if(self.config.long === 0) {
-                    self.config.long = self.gobj_parent().gobj_read_attr("height");
-                }
-                self.config.width = self.config.wide;
-                self.config.height = self.config.long;
-                self.config.enable_vscroll = true;
-                self.config.enable_hscroll = false;
-                break;
-            default:
-            case "horizontal":
-                if(self.config.long === 0) {
-                    self.config.long = self.gobj_parent().gobj_read_attr("width");
-                }
-                self.config.width = self.config.long;
-                self.config.height = self.config.wide;
-                self.config.enable_vscroll = false;
-                self.config.enable_hscroll = true;
-                break;
-        }
-    }
 
     /************************************************
      *  Return the link gobj, null if error
@@ -233,6 +209,78 @@ Button bottom-left ───┘         │                    └────�
     /********************************************
      *
      ********************************************/
+    function create_shape(self)
+    {
+        let width = self.config.width;
+        let height = self.config.height;
+
+        /*
+         *  Container (Group)
+         */
+        let ka_container = self.private._ka_container = new Konva.Group({
+            id: self.gobj_short_name(),
+            name: "ka_container",
+            x: self.config.x,
+            y: self.config.y,
+            width: width,
+            height: height,
+            visible: self.config.visible,
+            draggable: self.config.draggable
+        });
+        ka_container.gobj = self; // cross-link
+
+        /*
+         *  Border
+         */
+        let kw_border_shape = __duplicate__(
+            kw_get_dict(self.config, "kw_border_shape", {}, false, false)
+        );
+        json_object_update(
+            kw_border_shape,
+            {
+                name: "ka_border_rect",
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+                fill: kw_get_str(self.config, "background_color", null)
+            }
+        );
+        self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
+        ka_container.add(self.private._ka_border_rect);
+
+        // TODO let label = create_label(self);
+        // ka_container.add(label);
+
+        if (self.config.draggable) {
+            ka_container.on('dragstart', function (ev) {
+                ev.cancelBubble = true;
+                self.config.layer.getStage().container().style.cursor = "move";
+                self.gobj_publish_event("EV_MOVING", ka_container.position());
+            });
+            ka_container.on('dragmove', function (ev) {
+                ev.cancelBubble = true;
+                self.config.layer.getStage().container().style.cursor = "move";
+                self.gobj_publish_event("EV_MOVING", ka_container.position());
+            });
+            ka_container.on('dragend', function (ev) {
+                ka_container.opacity(1);
+                ev.cancelBubble = true;
+                if (self.config.action) {
+                    self.config.layer.getStage().container().style.cursor = "pointer";
+                } else {
+                    self.config.layer.getStage().container().style.cursor = "default";
+                }
+                self.gobj_publish_event("EV_MOVED", ka_container.position());
+            });
+        }
+
+        return ka_container;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function ac_keydown(self, event, kw, src)
     {
         let ret = 0;
@@ -240,132 +288,6 @@ Button bottom-left ───┘         │                    └────�
          * Retorna -1 si quieres poseer el evento (No será subido hacia arriba).
          */
         return ret;
-    }
-
-    /********************************************
-     *  EV_ADD_VIEW {
-     *      "views": [{id:, gclass:, kw: }, ...]
-     *      or
-     *      "views": [gobj, ...]
-     *  }
-     *
-     *  You can use "name" instead of "id"
-     *
-     ********************************************/
-    function ac_add_view(self, event, kw, src)
-    {
-        let views = kw_get_dict_value(kw, "views", null, false, false);
-
-        let toolbar_container = self.private._gobj_ka_scrollview.get_konva_container();
-
-        let x=0,y=0,k=null;
-
-        for(let view of views) {
-            let gobj_node = null;
-            if(is_gobj(view)) {
-                gobj_node = view;
-                k = gobj_node.get_konva_container();
-            } else if(is_object(view)) {
-                let kw_view = kw_get_dict(view, "kw", {});
-                json_object_update(kw_view, {
-                    subscriber: self.config.subscriber,
-                    x: x,
-                    y: y
-                });
-                gobj_node = self.yuno.gobj_create(
-                    kw_get_str(view, "id", kw_get_str(view, "name", "")),
-                    kw_get_dict_value(view, "gclass", null),
-                    kw_view,
-                    self
-                );
-                if(!gobj_node) {
-                    continue;
-                }
-                k = gobj_node.get_konva_container();
-                let dim = k.getClientRect({skipShadow:true, skipStroke:true});
-                switch(self.config.orientation) {
-                    case "vertical":
-                        // TODO ajusta tamaño a la toolbar y posiciona
-                        // EV_SIZE
-                        //width,height
-
-                        // TODO
-                        // EV_POSITION
-                        //x,y
-
-                        x = 0;  // TODO toolbar padding
-                        y += dim.height;
-                        break;
-
-                    default:
-                    case "horizontal":
-                        // TODO ajusta tamaño a la toolbar y posiciona
-                        x += dim.width;
-                        y = 0;  // TODO toolbar padding
-                        break;
-                }
-                continue; // goes recurrent ac_add_view() by mt_child_added()
-            } else {
-                log_error("What is it?" + view);
-                continue;
-            }
-
-            self.private._gobj_ka_scrollview.gobj_send_event(
-                "EV_ADD_ITEMS",
-                {
-                    items: [k]
-                },
-                self
-            );
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  EV_REMOVE_VIEW {
-     *      "views": ["id", ...]
-     *      or
-     *      "views": [{id: "id", }, ...]
-     *      or
-     *      "views": [gobj, ...]
-     *  }
-     ********************************************/
-    function ac_remove_view(self, event, kw, src)
-    {
-        let views = kw_get_dict_value(kw, "views", null, false, false);
-
-        for(let view of views) {
-            let childs = null;
-            if(is_string(view)) {
-                let name = view;
-                childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_object(view)) {
-                let name = kw_get_str(view, "id", kw_get_str(view, "name", ""));
-                childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_gobj(view)) {
-                childs = [view];
-            } else {
-                log_error("What is?" + view);
-                continue;
-            }
-
-            for(let child in childs) {
-                let k = child.get_konva_container();
-                self.private._gobj_ka_scrollview.gobj_send_event(
-                    "EV_REMOVE_ITEMS",
-                    {
-                        items: [k]
-                    },
-                    self
-                );
-                if(!child.gobj_is_destroying()) {
-                    self.yuno.gobj_destroy(child);
-                }
-            }
-        }
-
-        return 0;
     }
 
     /********************************************
@@ -500,8 +422,9 @@ Button bottom-left ───┘         │                    └────�
      ********************************************/
     function ac_activate(self, event, kw, src)
     {
-        self.get_konva_container().moveToTop();
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_ACTIVATE", {}, self);
+        // TODO ???
+        // self.get_konva_container().moveToTop();
+        // self.private._gobj_ka_scrollview.gobj_send_event("EV_ACTIVATE", {}, self);
 
         return 0;
     }
@@ -512,7 +435,8 @@ Button bottom-left ───┘         │                    └────�
      ********************************************/
     function ac_deactivate(self, event, kw, src)
     {
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_DEACTIVATE", {}, self);
+        // TODO ???
+        // self.private._gobj_ka_scrollview.gobj_send_event("EV_DEACTIVATE", {}, self);
 
         return 0;
     }
@@ -792,8 +716,6 @@ Button bottom-left ───┘         │                    └────�
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_VIEW",         ac_add_view,            undefined],
-                ["EV_REMOVE_VIEW",      ac_remove_view,         undefined],
                 ["EV_ADD_PORT",         ac_add_port,            undefined],
                 ["EV_REMOVE_PORT",      ac_remove_port,         undefined],
 
@@ -872,53 +794,11 @@ Button bottom-left ───┘         │                    └────�
             }
         }
 
-        calculate_dimension(self);
+        create_shape(self);
 
-        let visible = self.config.visible;
+        // TODO ??? self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
 
-        self.private._gobj_ka_scrollview = self.yuno.gobj_create(
-            self.gobj_name(),
-            Ka_scrollview,
-            {
-                layer: self.config.layer,
-
-                x: self.config.x,
-                y: self.config.y,
-                width: self.config.width,
-                height: self.config.height,
-                padding: self.config.padding,
-                background_color: self.config.background_color,
-
-                visible: visible,
-                panning: self.config.panning,       // Enable (inner dragging) panning
-                draggable: self.config.draggable,   // Enable (outer dragging) dragging
-
-                autosize: false,
-                fix_dimension_to_screen: self.config.fix_dimension_to_screen,
-                center: false,
-                show_overflow: false,
-
-                enable_vscroll: self.config.enable_vscroll,
-                enable_hscroll: self.config.enable_hscroll,
-                scroll_by_step: true,
-                hide_hscrollbar: true,     // Don't show horizontal (auto) scrollbar
-                hide_vscrollbar: true,     // Don't show vertical (auto) scrollbar
-
-                quick_display: self.config.quick_display,
-
-                kw_border_shape: __duplicate__(
-                    kw_get_dict(self.config, "kw_border_shape", {})
-                ),
-                kw_border_shape_actived: __duplicate__(
-                    kw_get_dict(self.config, "kw_border_shape_actived", {})
-                )
-            },
-            self
-        );
-        self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
-
-        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
-        if(visible) {
+        if(self.config.visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
     };
@@ -936,6 +816,7 @@ Button bottom-left ───┘         │                    └────�
             self.private._ka_container.destroy();
             self.private._ka_container = null;
         }
+        // TODO algo más habrá que destroy() no?
     };
 
     /************************************************
@@ -952,6 +833,22 @@ Button bottom-left ───┘         │                    └────�
     proto.mt_stop = function(kw)
     {
         let self = this;
+    };
+
+    /************************************************
+     *      Framework Method writing
+     ************************************************/
+    proto.mt_writing = function(name)
+    {
+        let self = this;
+        // TODO if(name == "disabled" "selected" "unlocked")
+        // Simulate events:
+        //     "EV_SELECT",
+        //     "EV_UNSELECT",
+        //     "EV_ENABLE",
+        //     "EV_DISABLE",
+        //     "EV_LOCK",
+        //     "EV_UNLOCK",
     };
 
     /************************************************

@@ -94,7 +94,8 @@
     /************************************************
      *
      ************************************************/
-    function adjust_text_and_icon_size(self) {
+    function adjust_text_and_icon_size(self)
+    {
         self.private._text_size = adjust_font_size(
             self.config.text_size,
             self.config.kw_text_font_properties.fontFamily
@@ -108,7 +109,8 @@
     /********************************************
      *
      ********************************************/
-    function create_shape(self) {
+    function create_shape(self)
+    {
         let width = self.config.width;
         let height = self.config.height;
 
@@ -740,6 +742,12 @@
         adjust_text_and_icon_size(self);
 
         create_shape(self); // WARNING added to layer in mt_child_added of parent
+
+        let visible = self.config.visible;
+        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
+        if(visible) {
+            self.gobj_send_event("EV_SHOW", {}, self);
+        }
     };
 
     /************************************************
