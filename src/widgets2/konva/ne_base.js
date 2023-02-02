@@ -61,7 +61,7 @@ Button bottom-left ───┘         │                    └────�
         width: 0,       // Calculated inside (based in orientation/wide/long)
         height: 0,      // Calculated inside (based in orientation/wide/long)
         padding: 2,
-        background_color: "#EEEEEE",
+        background_color: "#FFF7E0",
 
         visible: true,
         panning: true,          // Enable (inner dragging) panning
@@ -145,9 +145,13 @@ Button bottom-left ───┘         │                    └────�
         }
 
         let target_gobj = get_unique_gobj(self, kw_get_dict_value(kw, "target_gobj", null));
-        let source_port = get_child_gobj(self, self, kw_get_dict_value(kw, "source_port", id));
-        let target_port = get_child_gobj(self, target_gobj, kw_get_dict_value(kw, "target_port", id));
-        if(!target_gobj || !source_port || !target_port) {
+        let source_port = get_child_gobj(
+            self, self, kw_get_dict_value(kw, "source_port", id)
+        );
+        let target_port = get_child_gobj(
+            self, target_gobj, kw_get_dict_value(kw, "target_port", id)
+        );
+        if(!source_gobj || !target_gobj || !source_port || !target_port) {
             // Error already logged
             return null;
         }
@@ -175,14 +179,14 @@ Button bottom-left ───┘         │                    └────�
         if (is_string(name)) {
             target_gobj = self.yuno.gobj_find_unique_gobj(name);
             if (!target_gobj) {
-                log_error("ne_base: target_gobj must be an unique gobj: " + name);
+                log_error(sprintf("get_unique_gobj(): gobj must be an unique gobj: '%s'",name));
                 return null;
             }
         } else if (is_gobj(name)) {
             target_gobj = name;
         } else {
             target_gobj = null;
-            log_error(sprintf("ne_base: name must be an string or gobj"));
+            log_error(sprintf("get_unique_gobj(): name must be an string or gobj"));
         }
 
         return target_gobj;
@@ -199,7 +203,7 @@ Button bottom-left ───┘         │                    └────�
             child_gobj = gobj_parent.gobj_child_by_name(name);
             if (!child_gobj) {
                 log_error(
-                    sprintf("ne_base: child_gobj not found: parent '%s', child '%s'",
+                    sprintf("get_child_gobj(): child_gobj not found: parent '%s', child '%s'",
                         gobj_parent.gobj_short_name(),
                         name
                     )
@@ -210,7 +214,7 @@ Button bottom-left ───┘         │                    └────�
             child_gobj = name;
         } else {
             child_gobj = null;
-            log_error(sprintf("ne_base: child_gobj must be an string or gobj"));
+            log_error(sprintf("get_child_gobj(): child_gobj must be an string or gobj"));
         }
 
         return child_gobj;
@@ -927,6 +931,11 @@ Button bottom-left ───┘         │                    └────�
     proto.mt_destroy = function()
     {
         let self = this;
+
+        if(self.private._ka_container) {
+            self.private._ka_container.destroy();
+            self.private._ka_container = null;
+        }
     };
 
     /************************************************
@@ -946,44 +955,12 @@ Button bottom-left ───┘         │                    └────�
     };
 
     /************************************************
-     *  Framework Method mt_child_added
-     ************************************************/
-    proto.mt_child_added = function(child)
-    {
-        let self = this;
-        if(self.private._gobj_ka_scrollview) {
-            self.gobj_send_event(
-                "EV_ADD_VIEW",
-                {
-                    views: [child]
-                },
-                self
-            );
-        }
-    };
-
-    /************************************************
-     *  Framework Method mt_child_added
-     ************************************************/
-    proto.mt_child_removed = function(child)
-    {
-        let self = this;
-        self.gobj_send_event(
-            "EV_REMOVE_VIEW",
-            {
-                views: [child]
-            },
-            self
-        );
-    };
-
-    /************************************************
      *      Local Method
      ************************************************/
     proto.get_konva_container = function()
     {
         let self = this;
-        return self.private._gobj_ka_scrollview.get_konva_container();
+        return self.private._ka_container;
     };
 
     //=======================================================================

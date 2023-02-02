@@ -749,6 +749,8 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        let self = this;
+
         if(self.private._ka_container) {
             self.private._ka_container.destroy();
             self.private._ka_container = null;

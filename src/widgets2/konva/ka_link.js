@@ -93,7 +93,7 @@
             return port;
         }
         if(!is_string(port)) {
-            log_error(sprintf("ka_link: port must be a string or gobj: '%s'",port));
+            log_error(sprintf("ka_link: port must be a string or gobj: '%s'", port));
             return null;
         }
         let gobj = parent;
@@ -105,7 +105,7 @@
             }
         }
         if(!is_gobj(gobj)) {
-            log_error("ka_link: parent gobj not found");
+            log_error("ka_link: parent gobj is null");
             return null;
         }
         let child = gobj.gobj_child_by_name(port);
@@ -348,6 +348,7 @@
      ************************************************/
     proto.mt_destroy = function()
     {
+        let self = this;
         if(self.private._ka_container) {
             self.private._ka_container.destroy();
             self.private._ka_container = null;
