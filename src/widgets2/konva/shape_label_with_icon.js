@@ -133,7 +133,9 @@
         );
         json_object_update(kw_text_font_properties, kw_get_dict(config, "kw_text_font_properties", {}));
         if(color) {
-            kw_text_font_properties.fill = color;
+            if(!kw_has_key(kw_text_font_properties, "fill")) {
+                kw_text_font_properties.fill = color;
+            }
         }
 
         let kw_icon_font_properties = __duplicate__(
@@ -141,7 +143,9 @@
         );
         json_object_update(kw_icon_font_properties, kw_get_dict(config, "kw_icon_font_properties", {}));
         if(color) {
-            kw_icon_font_properties.fill = color;
+            if(!kw_has_key(kw_text_font_properties, "fill")) {
+                kw_icon_font_properties.fill = color;
+            }
         }
 
         let _text_size = adjust_font_size( // Calculated by checking browser

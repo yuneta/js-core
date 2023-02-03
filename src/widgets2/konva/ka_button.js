@@ -476,12 +476,6 @@
         }
 
         self.private._ka_container = create_shape(self); // WARNING added to layer in mt_child_added of parent
-
-        let visible = self.config.visible;
-        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
-        if(visible) {
-            self.gobj_send_event("EV_SHOW", {}, self);
-        }
     };
 
     /************************************************

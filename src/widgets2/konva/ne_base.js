@@ -729,18 +729,18 @@
 
     let FSM = {
         "event_list": [
+            "EV_MOVING: output no_warn_subs",
+            "EV_MOVED: output no_warn_subs",
             "EV_KEYDOWN",
-            "EV_ADD_VIEW",
-            "EV_REMOVE_VIEW",
             "EV_ADD_PORT",
             "EV_REMOVE_PORT",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
-            "EV_POSITION",
-            "EV_SIZE",
             "EV_SHOW",
             "EV_HIDE",
+            "EV_POSITION",
+            "EV_SIZE",
             "EV_RESIZE",
 
             "EV_LINK",
@@ -748,8 +748,6 @@
 
             "EV_PANNING",
             "EV_PANNED",
-            "EV_MOVING",
-            "EV_MOVED",
             "EV_SHOWED",
             "EV_HIDDEN"
         ],
@@ -841,10 +839,9 @@
         create_shape(self);
 
         // TODO ??? self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
-
-        if(self.config.visible) {
-            self.gobj_send_event("EV_SHOW", {}, self);
-        }
+        // if(self.config.visible) {
+        //     self.gobj_send_event("EV_SHOW", {}, self);
+        // }
     };
 
     /************************************************
