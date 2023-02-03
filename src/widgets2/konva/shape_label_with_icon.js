@@ -15,6 +15,7 @@
         id: "",         // konva id
         name: "shape_label_with_icon",       // konva name
         value: "",      // text of item
+        label: "",      // text of item, alternative to value
         icon: "",       // icon of item (from an icon font)
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         shape: null,        // TODO rectangle by default, implement circle
@@ -24,6 +25,7 @@
         width: 150,
         height: 40,
         background_color: "#FFF7E0",
+        color: "black",
 
         visible: true,
 
@@ -124,15 +126,23 @@
      ********************************************/
     function create_label(config)
     {
+        let color = kw_get_str(config, "color", null);
+
         let kw_text_font_properties = __duplicate__(
             kw_get_dict(CONFIG, "kw_text_font_properties", {})
         );
         json_object_update(kw_text_font_properties, kw_get_dict(config, "kw_text_font_properties", {}));
+        if(color) {
+            kw_text_font_properties.fill = color;
+        }
 
         let kw_icon_font_properties = __duplicate__(
             kw_get_dict(CONFIG, "kw_icon_font_properties", {})
         );
         json_object_update(kw_icon_font_properties, kw_get_dict(config, "kw_icon_font_properties", {}));
+        if(color) {
+            kw_icon_font_properties.fill = color;
+        }
 
         let _text_size = adjust_font_size( // Calculated by checking browser
             kw_get_int(config, "text_size", CONFIG.text_size),
@@ -143,7 +153,7 @@
             kw_icon_font_properties.fontFamily
         );
 
-        let text = kw_get_str(config, "value", CONFIG.value);
+        let text = kw_get_str(config, "value", kw_get_str(config, "label", CONFIG.value));
         let icon = kw_get_str(config, "icon", CONFIG.icon);
 
         let container = new Konva.Group({
@@ -326,6 +336,25 @@
     /********************************************
      *
      ********************************************/
+    function shape_label_text_color(ka_container, color)
+    {
+        let ka = ka_container.find(".ka_text");
+        if(ka.length === 0) {
+            log_error("ka not found");
+            return null;
+        }
+        if(color) {
+            ka[0].fill(color);
+        } else {
+            color = ka[0].fill();
+        }
+
+        return color;
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function shape_label_size(ka_container, size)
     {
         ka_container.size(size);
@@ -346,5 +375,6 @@
     //=======================================================================
     exports.create_shape_label_with_icon = create_shape_label_with_icon;
     exports.shape_label_icon_color = shape_label_icon_color;
+    exports.shape_label_text_color = shape_label_text_color;
     exports.shape_label_size = shape_label_size;
 })(this);
