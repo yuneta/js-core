@@ -91,98 +91,17 @@
 
 
 
-    /************************************************
-     *
-     ************************************************/
-    function adjust_text_and_icon_size(self)
-    {
-        self.private._text_size = adjust_font_size(
-            self.config.text_size,
-            self.config.kw_text_font_properties.fontFamily
-        );
-        self.private._icon_size = adjust_icon_size(
-            self.config.icon_size,
-            self.config.kw_icon_font_properties.fontFamily
-        );
-    }
-
     /********************************************
      *
      ********************************************/
     function create_shape(self)
     {
-        let width = self.config.width;
-        let height = self.config.height;
-
-        /*
-         *  Container (Group)
-         */
-        let ka_container = self.private._ka_container = new Konva.Group({
-            id: self.gobj_short_name(),
-            name: "ka_container",
-            x: self.config.x,
-            y: self.config.y,
-            width: width,
-            height: height,
-            visible: self.config.visible,
-            draggable: self.config.draggable,
-            listening: true
-        });
+        let ka_container = create_shape_label_with_icon(self.config);
         ka_container.gobj = self; // cross-link
 
-        /*
-         *  Border
-         */
-        let kw_border_shape = __duplicate__(
-            kw_get_dict(self.config, "kw_border_shape", {}, false, false)
-        );
-        json_object_update(
-            kw_border_shape,
-            {
-                name: "ka_border_rect",
-                x: 0,
-                y: 0,
-                width: width,
-                height: height,
-                fill: kw_get_str(self.config, "background_color", null)
-            }
-        );
-        self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
-        ka_container.add(self.private._ka_border_rect);
-
-        if(self.config.quick_display) {
-            let parent_container = self.gobj_parent().get_konva_container();
-            if(parent_container) {
-                // Quick add
-                parent_container.add(ka_container);
-                ka_container.draw();
-            } else {
-                self.config.quick_display = false;
-            }
-        }
-
-        let label = create_label(self);
-        ka_container.add(label);
-
-        if(self.config.quick_display) {
-            ka_container.getStage().draw();
-        }
-
-        if(self.config.autosize) {
-            let font_dimension = label.getClientRect();
-            // console.dir(font_dimension);  // TODO TEST
-            self.private._ka_border_rect.size(font_dimension);
-            let ka_container_dimension = ka_container.getClientRect();
-            // console.dir(ka_container_dimension);  // TODO TEST
-
-            self.config.width = ka_container_dimension.width;
-            self.config.height = ka_container_dimension.height;
-            if(self.config.quick_display) {
-                ka_container.getStage().draw();
-            }
-        }
-
         if (self.config.draggable) {
+            ka_container.draggable(true);
+
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
                 self.config.layer.getStage().container().style.cursor = "move";
@@ -276,176 +195,6 @@
         return ka_container;
     }
 
-    /********************************************
-     *
-     ********************************************/
-    function create_label(self)
-    {
-        let text = self.config.value;
-        let icon = self.config.icon;
-
-        let container = new Konva.Group({
-            name: "ka_label_container"
-        });
-
-        let icon_element=null, text_element=null;
-
-        if(!empty_string(text) && !empty_string(icon)) {
-            let icon_position = self.config.icon_position;
-            switch(icon_position) {
-                case "top": {
-                    let kw_icon = { // Common fields
-                        name: "ka_icon",
-                        text: icon,
-                        x: 0,
-                        y: 0,
-                        fontSize: self.private._icon_size
-                    };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    icon_element = new Konva.Text(kw_icon);
-                    container.add(icon_element);
-
-                    let kw_text = { // Common fields
-                        name: "ka_text",
-                        text: text,
-                        x: 0,
-                        y: icon_element.height() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
-                        lineHeight: icon_element.lineHeight(),
-                        fontSize: self.private._text_size
-                    };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
-                    text_element = new Konva.Text(kw_text);
-                    container.add(text_element);
-
-                    let max_width = Math.max(icon_element.width(), text_element.width());
-                    icon_element.width(max_width);
-                    text_element.width(max_width);
-                }
-                break;
-
-                case "bottom": {
-                    let kw_text = { // Common fields
-                        name: "ka_text",
-                        text: text,
-                        x: 0,
-                        y: 0,
-                        fontSize: self.private._text_size
-                    };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
-                    text_element = new Konva.Text(kw_text);
-                    container.add(text_element);
-
-                    let kw_icon = { // Common fields
-                        name: "ka_icon",
-                        text: icon,
-                        x: 0,
-                        y: text_element.height() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
-                        lineHeight: text_element.lineHeight(),
-                        fontSize: self.private._icon_size
-                    };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    icon_element = new Konva.Text(kw_icon);
-                    container.add(icon_element);
-
-                    let max_width = Math.max(icon_element.width(), text_element.width());
-                    icon_element.width(max_width);
-                    text_element.width(max_width);
-                }
-                break;
-
-                case "left": {
-                    let kw_icon = { // Common fields
-                        name: "ka_icon",
-                        text: icon,
-                        x: 0,
-                        y: 0,
-                        fontSize: self.private._icon_size
-                    };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    icon_element = new Konva.Text(kw_icon);
-                    container.add(icon_element);
-
-                    let kw_text = { // Common fields
-                        name: "ka_text",
-                        text: text,
-                        x: icon_element.width(),
-                        y: 0,
-                        fontSize: self.private._text_size
-                    };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
-                    text_element = new Konva.Text(kw_text);
-                    container.add(text_element);
-
-                    let max_height = Math.max(icon_element.height(), text_element.height());
-                    icon_element.height(max_height);
-                    text_element.height(max_height);
-                }
-                break;
-
-                case "right": {
-                    let kw_text = { // Common fields
-                        name: "ka_text",
-                        text: text,
-                        x: 0,
-                        y: 0,
-                        fontSize: self.private._text_size
-                    };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
-                    text_element = new Konva.Text(kw_text);
-                    container.add(text_element);
-
-                    let kw_icon = { // Common fields
-                        name: "ka_icon",
-                        text: icon,
-                        x: text_element.width(),
-                        y: 0,
-                        fontSize: self.private._icon_size
-                    };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
-                    icon_element = new Konva.Text(kw_icon);
-                    container.add(icon_element);
-
-                    let max_height = Math.max(icon_element.height(), text_element.height());
-                    icon_element.height(max_height);
-                    text_element.height(max_height);
-                }
-                break;
-            }
-
-        } else if(!empty_string(icon)) {
-            let kw_icon = { // Common fields
-                name: "ka_icon",
-                text: icon,
-                x: 0,
-                y: 0,
-                fontSize: self.private._icon_size
-            };
-            json_object_update(kw_icon, self.config.kw_icon_font_properties);
-            icon_element = new Konva.Text(kw_icon);
-            container.add(icon_element);
-
-        } else if(!empty_string(text)) {
-            let kw_text = { // Common fields
-                name: "ka_text",
-                text: text,
-                x: 0,
-                y: 0,
-                fontSize: self.private._text_size
-            };
-            json_object_update(kw_text, self.config.kw_text_font_properties);
-            text_element = new Konva.Text(kw_text);
-            container.add(text_element);
-        }
-
-        // if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
-        // if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
-        // console.dir(container.getClientRect()); // TODO TEST
-
-        return container;
-    }
-
 
 
 
@@ -463,16 +212,11 @@
      ********************************************/
     function ac_icon_color(self, event, kw, src)
     {
-        let ka = self.private._ka_container.find(".ka_icon");
-        if(ka.length === 0) {
-            log_error("ka not found");
-            return -1;
-        }
         let color = kw_get_str(kw, "color", "");
         if(color) {
-            ka[0].fill(color);
+            shape_label_icon_color(self.private._ka_container, color);
         } else {
-            kw["color"] = ka[0].fill();
+            kw["color"] = shape_label_icon_color(self.private._ka_container);
         }
 
         return 0;
@@ -516,16 +260,7 @@
          *  Resize container
          */
         let ka_container = self.private._ka_container;
-        ka_container.size({
-            width: self.config.width,
-            height: self.config.height
-        });
-
-        /*
-         *  Resize background rect
-         */
-        let _ka_border_rect = self.private._ka_border_rect;
-        _ka_border_rect.size({
+        shape_label_size(ka_container, {
             width: self.config.width,
             height: self.config.height
         });
@@ -566,7 +301,7 @@
         kw["width"] = self.config.width;
         kw["height"] = self.config.height;
 
-        kw["absolute_dimension"] = self.private._ka_border_rect.getClientRect();
+        kw["absolute_dimension"] = self.private._ka_border_shape.getClientRect();
 
         return 0;
     }
@@ -740,9 +475,7 @@
             self.config.layer = self.gobj_parent().config.layer;
         }
 
-        adjust_text_and_icon_size(self);
-
-        create_shape(self); // WARNING added to layer in mt_child_added of parent
+        self.private._ka_container = create_shape(self); // WARNING added to layer in mt_child_added of parent
 
         let visible = self.config.visible;
         self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);

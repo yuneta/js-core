@@ -1,34 +1,23 @@
 /***********************************************************************
- *          Ka_button.js
+ *          shape_label_with_icons.js
  *
- *          Button
+ *          Draw a text with an icon, return the konva container
  *
- *          Based in KonvA
+ *          Pure Konva
  *
- *          Copyright (c) 2022 Niyamaka.
+ *          Copyright (c) 2023 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
     'use strict';
 
-    /********************************************
-     *      Configuration (C attributes)
-     ********************************************/
     let CONFIG = {
-        //////////////// Public Attributes //////////////////
-        subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
-        layer: null,        // Konva layer
-
-        //------------ Own Attributes ------------//
-        id: "",         // unique id (not really). If id is empty then id=action if action is a string
+        id: "",         // konva id
+        name: "shape_label_with_icon",       // konva name
         value: "",      // text of item
         icon: "",       // icon of item (from an icon font)
-        action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         shape: null,        // TODO rectangle by default, implement circle
-        disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
-        selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
-        unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
         x: 0,
         y: 0,
@@ -37,7 +26,6 @@
         background_color: "#FFF7E0",
 
         visible: true,
-        draggable: false,       // Enable (outer dragging) dragging
 
         icon_size: 18,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
@@ -70,207 +58,62 @@
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
-        },
-
-        quick_display: false,       // For debugging, draw quickly
-
-        //////////////// Private Attributes /////////////////
-        _icon_size: 0,      // Calculated by checking browser
-        _text_size: 0,      // Calculated by checking browser
-
-        _ka_container: null
+        }
     };
-
-
-
-
-                /***************************
-                 *      Local Methods
-                 ***************************/
-
-
-
-
-    /************************************************
-     *
-     ************************************************/
-    function adjust_text_and_icon_size(self)
-    {
-        self.private._text_size = adjust_font_size(
-            self.config.text_size,
-            self.config.kw_text_font_properties.fontFamily
-        );
-        self.private._icon_size = adjust_icon_size(
-            self.config.icon_size,
-            self.config.kw_icon_font_properties.fontFamily
-        );
-    }
 
     /********************************************
      *
      ********************************************/
-    function create_shape(self)
+    function create_shape_label_with_icon(config)
     {
-        let width = self.config.width;
-        let height = self.config.height;
+        let width = kw_get_int(config, "width", CONFIG.width);
+        let height = kw_get_int(config, "height", CONFIG.height);
+        let background_color = kw_get_str(config, "background_color", CONFIG.background_color);
 
         /*
          *  Container (Group)
          */
-        let ka_container = self.private._ka_container = new Konva.Group({
-            id: self.gobj_short_name(),
-            name: "ka_container",
-            x: self.config.x,
-            y: self.config.y,
+        let ka_container = new Konva.Group({
+            id: kw_get_str(config, "id", CONFIG.id),
+            name: kw_get_str(config, "name", CONFIG.name),
+            x: kw_get_int(config, "x", CONFIG.x),
+            y: kw_get_int(config, "y", CONFIG.y),
             width: width,
             height: height,
-            visible: self.config.visible,
-            draggable: self.config.draggable,
-            listening: true
+            visible: kw_get_bool(config, "visible", CONFIG.visible)
         });
-        ka_container.gobj = self; // cross-link
 
         /*
          *  Border
          */
         let kw_border_shape = __duplicate__(
-            kw_get_dict(self.config, "kw_border_shape", {}, false, false)
+            kw_get_dict(CONFIG, "kw_border_shape", {})
         );
+        json_object_update(kw_border_shape, kw_get_dict(config, "kw_border_shape", {}));
         json_object_update(
             kw_border_shape,
             {
-                name: "ka_border_rect",
+                name: "ka_border_shape",
                 x: 0,
                 y: 0,
                 width: width,
                 height: height,
-                fill: kw_get_str(self.config, "background_color", null)
+                fill: background_color,
             }
         );
-        self.private._ka_border_rect = new Konva.Rect(kw_border_shape);
-        ka_container.add(self.private._ka_border_rect);
+        let _ka_border_shape = new Konva.Rect(kw_border_shape);
+        ka_container.add(_ka_border_shape);
 
-        if(self.config.quick_display) {
-            let parent_container = self.gobj_parent().get_konva_container();
-            if(parent_container) {
-                // Quick add
-                parent_container.add(ka_container);
-                ka_container.draw();
-            } else {
-                self.config.quick_display = false;
-            }
-        }
-
-        let label = create_label(self);
+        let label = create_label(config);
         ka_container.add(label);
 
-        if(self.config.quick_display) {
-            ka_container.getStage().draw();
-        }
-
-        if(self.config.autosize) {
+        if(config.autosize) {
             let font_dimension = label.getClientRect();
-            // console.dir(font_dimension);  // TODO TEST
-            self.private._ka_border_rect.size(font_dimension);
+            _ka_border_shape.size(font_dimension);
             let ka_container_dimension = ka_container.getClientRect();
-            // console.dir(ka_container_dimension);  // TODO TEST
 
-            self.config.width = ka_container_dimension.width;
-            self.config.height = ka_container_dimension.height;
-            if(self.config.quick_display) {
-                ka_container.getStage().draw();
-            }
-        }
-
-        if (self.config.draggable) {
-            ka_container.on('dragstart', function (ev) {
-                ev.cancelBubble = true;
-                self.config.layer.getStage().container().style.cursor = "move";
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragmove', function (ev) {
-                ev.cancelBubble = true;
-                self.config.layer.getStage().container().style.cursor = "move";
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragend', function (ev) {
-                ka_container.opacity(1);
-                ev.cancelBubble = true;
-                if (self.config.action) {
-                    self.config.layer.getStage().container().style.cursor = "pointer";
-                } else {
-                    self.config.layer.getStage().container().style.cursor = "default";
-                }
-                self.gobj_publish_event("EV_MOVED", ka_container.position());
-            });
-        }
-
-        let id = kw_get_str(self.config, "id", null);
-        let action = kw_get_dict_value(self.config, "action", null);
-
-        if(is_null(id)) {
-            if(is_string(item.action)) {
-                self.config.id = action;
-            }
-        }
-
-        if(is_string(action)) {
-            let event = action;
-            self.config.action = function(e) {
-                e["__share_kw__"] = true; // TODO must be in __temp__
-                self.gobj_publish_event(event, e);
-            };
-        } else if(action && !is_function(action)) {
-            log_error("action must be a string or function");
-            return ka_container;
-        }
-
-        if (is_function(self.config.action)) {
-            ka_container.on("mouseenter", function (e) {
-                self.config.layer.getStage().container().style.cursor = "pointer";
-            });
-
-            ka_container.on("mouseleave", function (e) {
-                self.config.layer.getStage().container().style.cursor = "default";
-            });
-
-            ka_container.on("pointerdown", function (e) {
-                ka_container.opacity(0.5);
-                e.gobj = self;
-                if (self.is_tracing()) {
-                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-                        "nd_machine", "element",
-                        e.type,
-                        (e.cancelBubble) ? "Y" : "N",
-                        self.gobj_short_name(),
-                        kw_get_str(e.target.attrs, "id", ""),
-                        kw_get_str(e.target.attrs, "name", "")
-                    ));
-                }
-            });
-            ka_container.on("pointerup", function (e) {
-                ka_container.opacity(1);
-                e.cancelBubble = true;
-                e.gobj = self;
-                if (self.is_tracing()) {
-                    log_warning(sprintf("%s.%s ==> (%s), cancelBubble: %s, gobj: %s, ka_id: %s, ka_name: %s",
-                        "nd_machine", "element",
-                        e.type,
-                        (e.cancelBubble) ? "Y" : "N",
-                        self.gobj_short_name(),
-                        kw_get_str(e.target.attrs, "id", ""),
-                        kw_get_str(e.target.attrs, "name", "")
-                    ));
-                }
-                /*
-                 *  WARNING If action provoke deleting the konva item then the event is not bubbled!
-                 *  Don't worry, if the konva item is closed, and the event don't arrive to stage listener,
-                 *  the window will send a EV_DEACTIVATE and the window will be deactivated,
-                 *  so for the activation service will work well.
-                 *  BE CAREFUL with service needing bubbling.
-                 */
-                self.config.action(e);
-            });
+            config.width = ka_container_dimension.width;
+            config.height = ka_container_dimension.height;
         }
 
         return ka_container;
@@ -279,10 +122,29 @@
     /********************************************
      *
      ********************************************/
-    function create_label(self)
+    function create_label(config)
     {
-        let text = self.config.value;
-        let icon = self.config.icon;
+        let kw_text_font_properties = __duplicate__(
+            kw_get_dict(CONFIG, "kw_text_font_properties", {})
+        );
+        json_object_update(kw_text_font_properties, kw_get_dict(config, "kw_text_font_properties", {}));
+
+        let kw_icon_font_properties = __duplicate__(
+            kw_get_dict(CONFIG, "kw_icon_font_properties", {})
+        );
+        json_object_update(kw_icon_font_properties, kw_get_dict(config, "kw_icon_font_properties", {}));
+
+        let _text_size = adjust_font_size( // Calculated by checking browser
+            kw_get_int(config, "text_size", CONFIG.text_size),
+            kw_text_font_properties.fontFamily
+        );
+        let _icon_size = adjust_icon_size( // Calculated by checking browser
+            kw_get_int(config, "icon_size", CONFIG.icon_size),
+            kw_icon_font_properties.fontFamily
+        );
+
+        let text = kw_get_str(config, "value", CONFIG.value);
+        let icon = kw_get_str(config, "icon", CONFIG.icon);
 
         let container = new Konva.Group({
             name: "ka_label_container"
@@ -291,7 +153,7 @@
         let icon_element=null, text_element=null;
 
         if(!empty_string(text) && !empty_string(icon)) {
-            let icon_position = self.config.icon_position;
+            let icon_position = kw_get_str(config, "icon_position", CONFIG.icon_position);
             switch(icon_position) {
                 case "top": {
                     let kw_icon = { // Common fields
@@ -299,9 +161,9 @@
                         text: icon,
                         x: 0,
                         y: 0,
-                        fontSize: self.private._icon_size
+                        fontSize: _icon_size
                     };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    json_object_update(kw_icon, kw_icon_font_properties);
                     icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
@@ -310,11 +172,11 @@
                         text: text,
                         x: 0,
                         y: icon_element.height() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
+                            kw_get_int(kw_text_font_properties, "padding", 0),
                         lineHeight: icon_element.lineHeight(),
-                        fontSize: self.private._text_size
+                        fontSize: _text_size
                     };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    json_object_update(kw_text, kw_text_font_properties);
                     text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
@@ -330,9 +192,9 @@
                         text: text,
                         x: 0,
                         y: 0,
-                        fontSize: self.private._text_size
+                        fontSize: _text_size
                     };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    json_object_update(kw_text, kw_text_font_properties);
                     text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
@@ -341,11 +203,11 @@
                         text: icon,
                         x: 0,
                         y: text_element.height() -
-                            kw_get_int(self.config.kw_text_font_properties, "padding", 0),
+                            kw_get_int(kw_text_font_properties, "padding", 0),
                         lineHeight: text_element.lineHeight(),
-                        fontSize: self.private._icon_size
+                        fontSize: _icon_size
                     };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    json_object_update(kw_icon, kw_icon_font_properties);
                     icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
@@ -361,9 +223,9 @@
                         text: icon,
                         x: 0,
                         y: 0,
-                        fontSize: self.private._icon_size
+                        fontSize: _icon_size
                     };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    json_object_update(kw_icon, kw_icon_font_properties);
                     icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
@@ -372,9 +234,9 @@
                         text: text,
                         x: icon_element.width(),
                         y: 0,
-                        fontSize: self.private._text_size
+                        fontSize: _text_size
                     };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    json_object_update(kw_text, kw_text_font_properties);
                     text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
@@ -390,9 +252,9 @@
                         text: text,
                         x: 0,
                         y: 0,
-                        fontSize: self.private._text_size
+                        fontSize: _text_size
                     };
-                    json_object_update(kw_text, self.config.kw_text_font_properties);
+                    json_object_update(kw_text, kw_text_font_properties);
                     text_element = new Konva.Text(kw_text);
                     container.add(text_element);
 
@@ -401,9 +263,9 @@
                         text: icon,
                         x: text_element.width(),
                         y: 0,
-                        fontSize: self.private._icon_size
+                        fontSize: _icon_size
                     };
-                    json_object_update(kw_icon, self.config.kw_icon_font_properties);
+                    json_object_update(kw_icon, kw_icon_font_properties);
                     icon_element = new Konva.Text(kw_icon);
                     container.add(icon_element);
 
@@ -420,9 +282,9 @@
                 text: icon,
                 x: 0,
                 y: 0,
-                fontSize: self.private._icon_size
+                fontSize: _icon_size
             };
-            json_object_update(kw_icon, self.config.kw_icon_font_properties);
+            json_object_update(kw_icon, kw_icon_font_properties);
             icon_element = new Konva.Text(kw_icon);
             container.add(icon_element);
 
@@ -432,385 +294,57 @@
                 text: text,
                 x: 0,
                 y: 0,
-                fontSize: self.private._text_size
+                fontSize: _text_size
             };
-            json_object_update(kw_text, self.config.kw_text_font_properties);
+            json_object_update(kw_text, kw_text_font_properties);
             text_element = new Konva.Text(kw_text);
             container.add(text_element);
         }
 
-        // if(icon_element) console.dir(icon_element.getClientRect()); // TODO TEST
-        // if(text_element) console.dir(text_element.getClientRect()); // TODO TEST
-        // console.dir(container.getClientRect()); // TODO TEST
-
         return container;
     }
 
-
-
-
-            /***************************
-             *      Actions
-             ***************************/
-
-
-
-
     /********************************************
-     *  kw: {
-     *      color:
-     *  }
+     *
      ********************************************/
-    function ac_icon_color(self, event, kw, src)
+    function shape_label_icon_color(ka_container, color)
     {
-        let ka = self.private._ka_container.find(".ka_icon");
+        let ka = ka_container.find(".ka_icon");
         if(ka.length === 0) {
             log_error("ka not found");
-            return -1;
+            return null;
         }
-        let color = kw_get_str(kw, "color", "");
         if(color) {
             ka[0].fill(color);
         } else {
-            kw["color"] = ka[0].fill();
+            color = ka[0].fill();
         }
 
-        return 0;
+        return color;
     }
 
     /********************************************
-     *  kw: {
-     *      x:
-     *      y:
-     *  }
+     *
      ********************************************/
-    function ac_position(self, event, kw, src)
+    function shape_label_size(ka_container, size)
     {
-        self.config.x = kw_get_int(kw, "x", self.config.x, false, false);
-        self.config.y = kw_get_int(kw, "y", self.config.y, false, false);
-
-        /*
-         *  Move container
-         */
-        let ka_container = self.private._ka_container;
-        ka_container.position({
-            x: self.config.x,
-            y: self.config.y
-        });
-
-        return 0;
-    }
-
-    /********************************************
-     *  kw: {
-     *      width:
-     *      height:
-     *  }
-     ********************************************/
-    function ac_size(self, event, kw, src)
-    {
-        self.config.width = kw_get_int(kw, "width", self.config.width, false, false);
-        self.config.height = kw_get_int(kw, "height", self.config.height, false, false);
-
-        /*
-         *  Resize container
-         */
-        let ka_container = self.private._ka_container;
-        ka_container.size({
-            width: self.config.width,
-            height: self.config.height
-        });
+        ka_container.size(size);
 
         /*
          *  Resize background rect
          */
-        let _ka_border_rect = self.private._ka_border_rect;
-        _ka_border_rect.size({
-            width: self.config.width,
-            height: self.config.height
-        });
-
-        return 0;
-    }
-
-    /********************************************
-     *  Return dimensions:
-     *      - configured position and size (relative to parent)
-     *      - absolute position (relative to screen)
-     *
-     *  kw: {
-     *      x:
-     *      y:
-     *      width:
-     *      height:
-     *
-     *      absolute_dimension: {
-     *          x:
-     *          y:
-     *          width:
-     *          height:
-     *      }
-     *  }
-     *
-     ********************************************/
-    function ac_get_dimension(self, event, kw, src)
-    {
-        if(!is_object(kw)) {
-            log_error(sprintf("%s: get_dimension(): kw not an object, from %s",
-                self.gobj_short_name(), src.gobj_short_name()
-            ));
-            return -1;
+        let ka = ka_container.find(".ka_border_shape");
+        if(ka.length === 0) {
+            log_error("ka not found");
+            return;
         }
-        kw["x"] = self.config.x;
-        kw["y"] = self.config.y;
-        kw["width"] = self.config.width;
-        kw["height"] = self.config.height;
-
-        kw["absolute_dimension"] = self.private._ka_border_rect.getClientRect();
-
-        return 0;
+        ka.size(size);
     }
-
-    /********************************************
-     *  Select
-     ********************************************/
-    function ac_select(self, event, kw, src)
-    {
-        // TODO change appearance
-        self.config.selected = true;
-        return 0;
-    }
-
-    /********************************************
-     *  Unselect
-     ********************************************/
-    function ac_unselect(self, event, kw, src)
-    {
-        // TODO change appearance
-        self.config.selected = false;
-        return 0;
-    }
-
-    /********************************************
-     *  Enable
-     ********************************************/
-    function ac_enable(self, event, kw, src)
-    {
-        // TODO change appearance
-        self.config.disabled = false;
-        return 0;
-    }
-
-    /********************************************
-     *  Disable
-     ********************************************/
-    function ac_disable(self, event, kw, src)
-    {
-        // TODO change appearance
-        self.config.disabled = true;
-        return 0;
-    }
-
-    /********************************************
-     *  Lock design
-     ********************************************/
-    function ac_lock(self, event, kw, src)
-    {
-        // TODO change appearance
-        return 0;
-    }
-
-    /********************************************
-     *  Unlock design
-     ********************************************/
-    function ac_unlock(self, event, kw, src)
-    {
-        // TODO change appearance
-        return 0;
-    }
-
-    /************************************************
-     *
-     ************************************************/
-    function ac_timeout(self, event, kw, src)
-    {
-        return 0;
-    }
-
-    /********************************************
-     *  Top order
-     ********************************************/
-    function ac_resize(self, event, kw, src)
-    {
-        return 0;
-    }
-
-
-
-
-            /***************************
-             *      GClass/Machine
-             ***************************/
-
-
-
-
-    let FSM = {
-        "event_list": [
-            "EV_ICON_COLOR",
-            "EV_POSITION",
-            "EV_SIZE",
-            "EV_GET_DIMENSION",
-            "EV_SELECT",
-            "EV_UNSELECT",
-            "EV_ENABLE",
-            "EV_DISABLE",
-            "EV_LOCK",
-            "EV_UNLOCK",
-            "EV_MOVING: output no_warn_subs",
-            "EV_MOVED: output no_warn_subs",
-            "EV_TIMEOUT",
-            "EV_RESIZE"
-        ],
-        "state_list": [
-            "ST_IDLE"
-        ],
-        "machine": {
-            "ST_IDLE":
-            [
-                ["EV_ICON_COLOR",           ac_icon_color,          undefined],
-                ["EV_POSITION",             ac_position,            undefined],
-                ["EV_SIZE",                 ac_size,                undefined],
-                ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
-                ["EV_SELECT",               ac_select,              undefined],
-                ["EV_UNSELECT",             ac_unselect,            undefined],
-                ["EV_ENABLE",               ac_enable,              undefined],
-                ["EV_DISABLE",              ac_disable,             undefined],
-                ["EV_LOCK",                 ac_lock,                undefined],
-                ["EV_UNLOCK",               ac_unlock,              undefined],
-                ["EV_TIMEOUT",              ac_timeout,             undefined],
-                ["EV_RESIZE",               ac_resize,              undefined]
-            ]
-        }
-    };
-
-    let Ka_button = GObj.__makeSubclass__();
-    let proto = Ka_button.prototype; // Easy access to the prototype
-    proto.__init__= function(name, kw) {
-        GObj.prototype.__init__.call(
-            this,
-            FSM,
-            CONFIG,
-            name,
-            "Ka_button",
-            kw,
-            gcflag_no_check_output_events
-        );
-        return this;
-    };
-    gobj_register_gclass(Ka_button, "Ka_button");
-
-
-
-
-            /***************************
-             *      Framework Methods
-             ***************************/
-
-
-
-
-    /************************************************
-     *      Framework Method create
-     ************************************************/
-    proto.mt_create = function(kw)
-    {
-        let self = this;
-
-        /*
-         *  CHILD subscription model
-         */
-        let subscriber = self.gobj_read_attr("subscriber");
-        if(!subscriber) {
-            subscriber = self.gobj_parent();
-        }
-        self.gobj_subscribe_event(null, null, subscriber);
-
-        if(!self.config.layer) {
-            self.config.layer = self.gobj_parent().config.layer;
-        }
-
-        adjust_text_and_icon_size(self);
-
-        create_shape(self); // WARNING added to layer in mt_child_added of parent
-
-        let visible = self.config.visible;
-        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
-        if(visible) {
-            self.gobj_send_event("EV_SHOW", {}, self);
-        }
-    };
-
-    /************************************************
-     *      Framework Method destroy
-     *      In this point, all childs
-     *      and subscriptions are already deleted.
-     ************************************************/
-    proto.mt_destroy = function()
-    {
-        let self = this;
-
-        if(self.private._ka_container) {
-            self.private._ka_container.destroy();
-            self.private._ka_container = null;
-        }
-    };
-
-    /************************************************
-     *      Framework Method start
-     ************************************************/
-    proto.mt_start = function(kw)
-    {
-        let self = this;
-    };
-
-    /************************************************
-     *      Framework Method stop
-     ************************************************/
-    proto.mt_stop = function(kw)
-    {
-        let self = this;
-    };
-
-    /************************************************
-     *      Framework Method writing
-     ************************************************/
-    proto.mt_writing = function(name)
-    {
-        let self = this;
-        // TODO if(name == "disabled" "selected" "unlocked")
-        // Simulate events:
-        //     "EV_SELECT",
-        //     "EV_UNSELECT",
-        //     "EV_ENABLE",
-        //     "EV_DISABLE",
-        //     "EV_LOCK",
-        //     "EV_UNLOCK",
-    };
-
-    /************************************************
-     *      Local Method
-     ************************************************/
-    proto.get_konva_container = function()
-    {
-        let self = this;
-        return self.private._ka_container;
-    };
-
 
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ka_button = Ka_button;
-
+    exports.create_shape_label_with_icon = create_shape_label_with_icon;
+    exports.shape_label_icon_color = shape_label_icon_color;
+    exports.shape_label_size = shape_label_size;
 })(this);
