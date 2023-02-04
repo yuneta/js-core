@@ -104,10 +104,9 @@
         let cloneObj = cloneRecursive(obj);
 
         //remove the unique ids
-        for (let i = 0; i < originalObjectsArray.length; i++)
-        {
+        for (let i = 0; i < originalObjectsArray.length; i++) {
             delete originalObjectsArray[i].__obj_id;
-        };
+        }
 
         return cloneObj;
     }

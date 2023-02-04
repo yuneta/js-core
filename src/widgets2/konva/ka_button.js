@@ -35,6 +35,7 @@
         width: 150,
         height: 40,
         background_color: "#FFF7E0",
+        color: "black",
 
         visible: true,
         draggable: false,       // Enable (outer dragging) dragging
@@ -301,7 +302,7 @@
         kw["width"] = self.config.width;
         kw["height"] = self.config.height;
 
-        kw["absolute_dimension"] = self.private._ka_border_shape.getClientRect();
+        kw["absolute_dimension"] = self.get_konva_container().getClientRect();
 
         return 0;
     }

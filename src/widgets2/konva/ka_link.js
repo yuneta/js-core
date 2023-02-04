@@ -151,13 +151,13 @@
      ********************************************/
     function update_link_path(self)
     {
-        let target_gobj = self.config.target_gobj;
-        let source_gobj = self.config.source_gobj;
+        let source_port = self.config.source_port;
+        let target_port = self.config.target_port;
 
         let kw_source_dim = {};
         let kw_target_dim = {};
-        source_gobj.gobj_send_event("EV_GET_DIMENSION", kw_source_dim, self);
-        target_gobj.gobj_send_event("EV_GET_DIMENSION", kw_target_dim, self);
+        source_port.gobj_send_event("EV_GET_DIMENSION", kw_source_dim, self);
+        target_port.gobj_send_event("EV_GET_DIMENSION", kw_target_dim, self);
         const points = getConnectorPoints(
             "center",
             kw_source_dim,
