@@ -402,38 +402,38 @@ let __inside_event_loop__ = 0;
          *  Check the system keys of the jn_filter used in find loop
          */
         if(__gclass_name__) {
-            if(__gclass_name__ != this.gclass_name) {
+            if(__gclass_name__ !== this.gclass_name) {
                 return false;
             }
         }
         if(__gobj_name__) {
-            if(__gobj_name__ != this.name) {
+            if(__gobj_name__ !== this.name) {
                 return false;
             }
         }
         if(__prefix_gobj_name__) {
             let l = __prefix_gobj_name__.length;
             let name = this.name.substring(0, l);
-            if(__prefix_gobj_name__ != name) {
+            if(__prefix_gobj_name__ !== name) {
                 return false;
             }
         }
         if(__state__) {
             let state = this.gobj_current_state();
-            if(__state__ != state) {
+            if(__state__ !== state) {
                 return false;
             }
         }
 
         for(let key in properties) {
-            if(key == "__gclass_name__" ||
-                    key == "__gobj_name__" ||
-                    key == "__prefix_gobj_name__" ||
-                    key == "__state__") {
+            if(key === "__gclass_name__" ||
+                    key === "__gobj_name__" ||
+                    key === "__prefix_gobj_name__" ||
+                    key === "__state__") {
                 continue;
             }
             if(this.gobj_has_attr(key)) {
-                if(this.config[key] != properties[key]) {
+                if(this.config[key] !== properties[key]) {
                     return false;
                 }
             }

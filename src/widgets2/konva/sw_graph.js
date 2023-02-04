@@ -41,6 +41,7 @@
         draggable: false,       // Enable (outer dragging) dragging
 
         fix_dimension_to_screen: false,
+        grid: 10,               // If not 0 then fix the position to near grid position
 
         enable_vscroll: true,       // Enable content vertical scrolling, default true
         enable_hscroll: true,       // Enable content horizontal scrolling, default true
@@ -191,7 +192,7 @@
         let name = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
         if(!empty_string(name)) {
             if(event === "EV_SHOW") {
-                let gobj = find_gobj_in_list(self.private._views, name);
+                let gobj = self.gobj_child_by_name(name);
                 if(gobj) {
                     gobj.get_konva_container().moveToTop();
                     __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj);
@@ -201,7 +202,7 @@
         }
 
         /*-----------------------------*
-         *  Show/Hide self multiview
+         *  Show/Hide self
          *-----------------------------*/
         let position = kw;
         let node_dimension = {};
@@ -331,7 +332,7 @@
      ********************************************/
     function ac_panning(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self panning
         }
         return 0;
@@ -342,11 +343,11 @@
      ********************************************/
     function ac_moving(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self moving
         } else {
             // Child moving
-            if(strcmp(event, "EV_MOVED")==0) {
+            if(strcmp(event, "EV_MOVED")===0) {
                 if(kw.x < 0 || kw.y < 0) {
                     // Refuse negative logic
                     if(kw.x < 0) {
@@ -355,6 +356,12 @@
                     if(kw.y < 0) {
                         kw.y = 0;
                     }
+                    src.gobj_send_event("EV_POSITION", kw, self);
+                }
+                let grid = self.config.grid;
+                if(grid > 0) {
+                    kw.x = Math.round(kw.x/grid) * grid;
+                    kw.y = Math.round(kw.y/grid) * grid;
                     src.gobj_send_event("EV_POSITION", kw, self);
                 }
                 self.private._gobj_ka_scrollview.gobj_send_event(

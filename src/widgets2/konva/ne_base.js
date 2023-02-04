@@ -79,6 +79,8 @@
         visible: true,
         draggable: true,   // Enable (outer dragging) dragging
 
+        top_on_activate: false,     // Move node to the top of its siblings on activation
+
         disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
@@ -275,6 +277,49 @@
         ka_container.add(self.private._ka_title);
 
         /*----------------------------*
+         *  Ports: input
+         *----------------------------*/
+        // input_ports: [],
+
+        /*----------------------------*
+         *  Ports: output
+         *----------------------------*/
+        // output_ports: [],
+
+        /*----------------------------*
+         *  Ports: top
+         *----------------------------*/
+        // top_ports: [],
+
+        /*----------------------------*
+         *  Ports: bottom
+         *----------------------------*/
+        // bottom_ports: [],
+
+        /*----------------------------*
+         *  Corner Button: top-left
+         *----------------------------*/
+        // btn_top_left: {},
+        /*----------------------------*
+         *  Corner Button: top-right
+         *----------------------------*/
+        // btn_top_right: {},
+
+        /*-------------------------------*
+         *  Corner Button: bottom-left
+         *-------------------------------*/
+        // btn_bottom_left: {},
+        /*--------------------------------*
+         *  Corner Button: bottom-right
+         *--------------------------------*/
+        // btn_bottom_right: {},
+
+        /*--------------------------------------------*
+         *  Corner Button: scrollview center itema
+         *--------------------------------------------*/
+        // sw_center_items: [],
+
+        /*----------------------------*
          *  Dragg events
          *----------------------------*/
         if (self.config.draggable) {
@@ -466,9 +511,34 @@
      ********************************************/
     function ac_activate(self, event, kw, src)
     {
-        // TODO ???
-        // self.get_konva_container().moveToTop();
-        // self.private._gobj_ka_scrollview.gobj_send_event("EV_ACTIVATE", {}, self);
+        if(self.config.top_on_activate) {
+            self.private._ka_container.moveToTop();
+        }
+
+        /*
+         *  Only used: stroke, opacity, shadowBlur, shadowColor
+         */
+        let kw_rect = self.config.kw_border_shape_actived;
+
+        let stroke = kw_get_str(kw_rect,"stroke",null);
+        if(!is_null(stroke)) {
+            self.private._ka_border_rect.stroke(stroke);
+        }
+
+        let opacity = kw_get_real(kw_rect, "opacity", null);
+        if(!is_null(opacity)) {
+            self.private._ka_border_rect.opacity(opacity);
+        }
+
+        let shadowBlur = kw_get_int(kw_rect, "shadowBlur", null);
+        if(!is_null(shadowBlur)) {
+            self.private._ka_border_rect.shadowBlur(shadowBlur);
+        }
+
+        let shadowColor = kw_get_str(kw_rect, "shadowColor", null);
+        if(!is_null(shadowColor)) {
+            self.private._ka_border_rect.shadowColor(shadowColor);
+        }
 
         return 0;
     }
@@ -479,8 +549,30 @@
      ********************************************/
     function ac_deactivate(self, event, kw, src)
     {
-        // TODO ???
-        // self.private._gobj_ka_scrollview.gobj_send_event("EV_DEACTIVATE", {}, self);
+        /*
+         *  Only used: stroke, opacity, shadowBlur, shadowColor
+         */
+        let kw_rect = self.config.kw_border_shape;
+
+        let stroke = kw_get_str(kw_rect,"stroke",null);
+        if(!is_null(stroke)) {
+            self.private._ka_border_rect.stroke(stroke);
+        }
+
+        let opacity = kw_get_real(kw_rect, "opacity", null);
+        if(!is_null(opacity)) {
+            self.private._ka_border_rect.opacity(opacity);
+        }
+
+        let shadowBlur = kw_get_int(kw_rect, "shadowBlur", null);
+        if(!is_null(shadowBlur)) {
+            self.private._ka_border_rect.shadowBlur(shadowBlur);
+        }
+
+        let shadowColor = kw_get_str(kw_rect, "shadowColor", null);
+        if(!is_null(shadowColor)) {
+            self.private._ka_border_rect.shadowColor(shadowColor);
+        }
 
         return 0;
     }
@@ -508,7 +600,7 @@
         let name = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
         if(!empty_string(name)) {
             if(event === "EV_SHOW") {
-                let gobj = find_gobj_in_list(self.private._views, name);
+                let gobj = self.gobj_child_by_name(name);
                 if(gobj) {
                     gobj.get_konva_container().moveToTop();
                     __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj);
@@ -518,28 +610,36 @@
         }
 
         /*-----------------------------*
-         *  Show/Hide self multiview
+         *  Show/Hide self
          *-----------------------------*/
-        let position = kw;
-        let node_dimension = {};
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_GET_DIMENSION", node_dimension, self);
+        switch(event) {
+            case "EV_TOGGLE":
+                if(self.private._ka_container.isVisible()) {
+                    self.private._ka_container.hide();
+                } else {
+                    self.private._ka_container.show();
+                }
+                break;
+            case "EV_SHOW":
+                self.private._ka_container.show();
+                break;
+            case "EV_HIDE":
+                self.private._ka_container.hide();
+                break;
+        }
 
-        self.config.x = kw_get_int(position, "x", node_dimension.x, true, false);
-        self.config.y = kw_get_int(position, "y", node_dimension.y, true, false);
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_POSITION", position, self);
-        self.private._gobj_ka_scrollview.gobj_send_event(event, kw, self);
+        if(self.private._ka_container.isVisible()) {
+            self.gobj_publish_event("EV_SHOWED", {});
 
-        /*
-         *  Global event to close popup window when hit outside
-         */
-        if(self.private._gobj_ka_scrollview.isVisible()) {
             /*
              *  Window visible
              */
-            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self);
+            __ka_main__.gobj_send_event("EV_ACTIVATE", {}, self); // TODO is necessary?
 
         } else {
-            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self);
+            self.gobj_publish_event("EV_HIDDEN", {});
+
+            __ka_main__.gobj_send_event("EV_DEACTIVATE", {}, self); // TODO is necessary?
         }
 
         return 0;
@@ -556,12 +656,15 @@
         self.config.x = kw_get_int(kw, "x", self.config.x, false, false);
         self.config.y = kw_get_int(kw, "y", self.config.y, false, false);
 
-        let position = {
+        /*
+         *  Move container
+         */
+        let ka_container = self.private._ka_container;
+        ka_container.position({
             x: self.config.x,
             y: self.config.y
-        };
+        });
 
-        self.private._gobj_ka_scrollview.gobj_send_event(event, position, self);
         return 0;
     }
 
@@ -576,12 +679,15 @@
         self.config.width = kw_get_int(kw, "width", self.config.width, false, false);
         self.config.height = kw_get_int(kw, "height", self.config.height, false, false);
 
-        let size = {
+        /*
+         *  Resize container
+         */
+        let ka_container = self.private._ka_container;
+        shape_label_size(ka_container, {
             width: self.config.width,
             height: self.config.height
-        };
+        });
 
-        self.private._gobj_ka_scrollview.gobj_send_event(event, size, self);
         return 0;
     }
 
@@ -590,24 +696,6 @@
      ********************************************/
     function ac_resize(self, event, kw, src)
     {
-        self.config.x = kw_get_int(kw, "x", self.config.x);
-        self.config.y = kw_get_int(kw, "y", self.config.y);
-        self.config.wide = kw_get_int(kw, "wide", self.config.wide);
-        self.config.long = kw_get_int(kw, "long", self.config.long);
-
-        calculate_dimension(self);
-
-        self.private._gobj_ka_scrollview.gobj_send_event(
-            "EV_RESIZE",
-            {
-                x: self.config.x,
-                y: self.config.y,
-                width: self.config.width,
-                height: self.config.height
-            },
-            self
-        );
-
         return 0;
     }
 
@@ -659,64 +747,6 @@
         return 0;
     }
 
-    /********************************************
-     *  Child panning/panned
-     ********************************************/
-    function ac_panning(self, event, kw, src)
-    {
-        if(src === self.private._gobj_ka_scrollview) {
-            // Self panning
-        }
-        return 0;
-    }
-
-    /********************************************
-     *  Child moving/moved
-     ********************************************/
-    function ac_moving(self, event, kw, src)
-    {
-        if(src === self.private._gobj_ka_scrollview) {
-            // Self moving
-        } else {
-            // Child moving
-            if(strcmp(event, "EV_MOVED")===0) {
-                if(kw.x < 0 || kw.y < 0) {
-                    // Refuse negative logic
-                    if(kw.x < 0) {
-                        kw.x = 0;
-                    }
-                    if(kw.y < 0) {
-                        kw.y = 0;
-                    }
-                    src.gobj_send_event("EV_POSITION", kw, self);
-                }
-                self.private._gobj_ka_scrollview.gobj_send_event(
-                    "EV_RESIZE",
-                    {
-                    },
-                    self
-                );
-            }
-        }
-        return 0;
-    }
-
-    /********************************************
-     *  Child showed
-     ********************************************/
-    function ac_showed(self, event, kw, src)
-    {
-        return 0;
-    }
-
-    /********************************************
-     *  Child hidden
-     ********************************************/
-    function ac_hidden(self, event, kw, src)
-    {
-        return 0;
-    }
-
 
 
 
@@ -744,12 +774,7 @@
             "EV_RESIZE",
 
             "EV_LINK",
-            "EV_UNLINK",
-
-            "EV_PANNING",
-            "EV_PANNED",
-            "EV_SHOWED",
-            "EV_HIDDEN"
+            "EV_UNLINK"
         ],
         "state_list": [
             "ST_IDLE"
@@ -772,14 +797,7 @@
                 ["EV_RESIZE",           ac_resize,              undefined],
 
                 ["EV_LINK",             ac_link,                undefined],
-                ["EV_UNLINK",           ac_unlink,              undefined],
-
-                ["EV_PANNING",          ac_panning,             undefined],
-                ["EV_PANNED",           ac_panning,             undefined],
-                ["EV_MOVING",           ac_moving,              undefined],
-                ["EV_MOVED",            ac_moving,              undefined],
-                ["EV_SHOWED",           ac_showed,              undefined],
-                ["EV_HIDDEN",           ac_hidden,              undefined],
+                ["EV_UNLINK",           ac_unlink,              undefined]
             ]
         }
     };

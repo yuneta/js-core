@@ -408,7 +408,9 @@
                 if(node_info) {
                     let id = e.target.id && e.target.id();
                     if(id !== "__debug_dimensions__") {
-                        let dim_abs = e.target.getClientRect();
+                        let gobj = find_bind_gobj(e.target);
+                        let gobj_name = gobj?gobj.gobj_short_name():"";
+                        let dim_abs = e.target.getClientRect({skipShadow:true, skipStroke:true});
                         let dim_rel = e.target.getClientRect({relativeTo: e.target.getParent()});
                         let info = sprintf("(x %f, y %f, w %f, h %f),(x %f, y %f, w %f, h %f) stroke %d, blur %d, %s %s %s",
                             dim_abs.x, dim_abs.y, dim_abs.width, dim_abs.height,
@@ -417,7 +419,7 @@
                             e.target.shadowBlur?e.target.shadowBlur():0,
                             e.target.id(),
                             e.target.name(),
-                            e.target.gobj?e.target.gobj.gobj_short_name():""
+                            gobj_name
                         );
                         node_info.moveToTop();
                         dim_abs = e.target.getClientRect(); // Get absolute coords
@@ -818,5 +820,5 @@
     //      Expose the class via the global object
     //=======================================================================
     exports.Ka_main = Ka_main;
-
+    exports.find_bind_gobj = find_bind_gobj;
 })(this);
