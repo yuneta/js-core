@@ -33,7 +33,7 @@
         y: 100,
         width: 240,
         height: 240,
-        padding: 10,
+        padding: 0,
         background_color: "#cccccc",
 
         visible: true,

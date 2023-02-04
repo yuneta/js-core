@@ -7,17 +7,17 @@
  *
 
 
-                                ┌── Ports 'top_ports'
-        Button 'btn_top_left'   │                   ┌──────── Button 'btn_top_right'
+                                ┌── Top Ports 'top'
+        Button 'top_left'       │                   ┌──────── Button 'top_right'
               │                 ▼                   ▼
               │      ┌─────┬──┬──┬──┬──┬──┬──┬──┬─────┐
               └────► │     │  │  │  │  │  │  │  │     │
                      ├─────┼──┴──┴──┴──┴──┴──┴──┼─────┤
                      │     │     'title'        │     │
                      ├─────┤                    ├─────┤
-           ┌───────► │     │                    │     │ ─────► Ports 'output_ports'
+           ┌───────► │     │                    │     │ ─────► Output Ports 'output'
            │         ├─────┤     Scrollview     ├─────┤
- Ports 'input_ports' │     │     'sw_center'    │     │
+ Input Ports 'input' │     │     'center'       │     │
                      ├─────┤                    ├─────┤
                      │     │                    │     │
                      ├─────┤                    ├─────┤
@@ -27,8 +27,8 @@
                      └─────┴──┴──┴──┴──┴──┴──┴──┴─────┘
                       ▲         ▲                    ▲
    Button             │         │                    │
-  'btn_bottom_left' ──┘         │                    └─────── Button 'btn_bottom_right'
-                                └─── Ports 'bottom_ports'
+      'bottom_left' ──┘         │                    └─────── Button 'bottom_right'
+                                └─── Bottom Ports 'bottom'
 
 
  *          Copyright (c) 2023 Niyamaka.
@@ -57,24 +57,11 @@
         height: 250,
         shape: "rect",      /* "rect" or "circle" */
 
-        padding: 20,        /* Padding: left space to ports */
-        offset: 0,          /* Offset for ports position */
+        padding: 30,        /* Padding: left space to ports */
+        offset: 5,          /* Offset for ports position */
 
         background_color: "#FFF7E0",
         color: "red",       /* Default color for texts */
-
-        title: {
-            height: 40
-        },
-        input_ports: [],
-        output_ports: [],
-        top_ports: [],
-        bottom_ports: [],
-        btn_top_left: {},
-        btn_top_right: {},
-        btn_bottom_left: {},
-        btn_bottom_right: {},
-        sw_center_items: [],
 
         visible: true,
         draggable: true,   // Enable (outer dragging) dragging
@@ -97,6 +84,37 @@
         kw_border_shape_actived: { /* Border shape for active windows */
             // Only used: stroke, opacity, shadowBlur, shadowColor
         },
+
+        //------------ Components ------------//
+        title: { // HACK See shape_label_with_icon attributes
+            height: 40
+        },
+        input: {
+            width: 15,
+            height: 15,
+            radius: 15,
+        },
+        output: {
+            width: 15,
+            height: 15,
+            radius: 15,
+        },
+        top: {
+            width: 15,
+            height: 15,
+            radius: 15,
+        },
+        bottom: {
+            width: 15,
+            height: 15,
+            radius: 15,
+        },
+
+        top_left: {},
+        top_right: {},
+        bottom_left: {},
+        bottom_right: {},
+        center: {},
 
         //////////////// Private Attributes /////////////////
         _ka_container: null,
@@ -251,9 +269,14 @@
         ka_container.add(self.private._ka_border_shape);
 
         /*----------------------------*
-         *  Title
+         *  Control of positions
          *----------------------------*/
         let padding = kw_get_int(self.config, "padding", 0);
+        let offset = kw_get_int(self.config, "offset", 0);
+
+        /*----------------------------*
+         *  Title
+         *----------------------------*/
         let kw_title = __duplicate__(
             kw_get_dict(self.config, "title", {}, false, false)
         );
@@ -273,51 +296,74 @@
         kw_text_font_properties.width = title_width;
         kw_text_font_properties.height = title_height;
 
-        self.private._ka_title = create_title(self, kw_title);
+        self.private._ka_title = create_shape_label_with_icon(kw_title);
         ka_container.add(self.private._ka_title);
 
         /*----------------------------*
          *  Ports: input
          *----------------------------*/
-        // input_ports: [],
+        let kw_input = __duplicate__(
+            kw_get_dict(self.config, "input", {}, false, false)
+        );
+        let input_width = kw_get_int(kw_input, "width", width);
+        let input_height = kw_get_int(kw_input, "height", height);
+        json_object_update(
+            kw_input,
+            {
+                name: "ka_input",
+                x: offset,
+                y: offset,
+                width: input_width,
+                height: input_height
+            }
+        );
+        kw_text_font_properties = kw_get_dict(kw_input, "kw_text_font_properties", {}, true);
+        kw_text_font_properties.width = input_width;
+        kw_text_font_properties.height = input_height;
+
+        self.private._ka_input = create_shape_label_with_icon(kw_input);
+        ka_container.add(self.private._ka_input);
+
 
         /*----------------------------*
          *  Ports: output
          *----------------------------*/
-        // output_ports: [],
+        // TODO
 
         /*----------------------------*
          *  Ports: top
          *----------------------------*/
-        // top_ports: [],
+        // TODO
 
         /*----------------------------*
          *  Ports: bottom
          *----------------------------*/
-        // bottom_ports: [],
+        // TODO
 
         /*----------------------------*
-         *  Corner Button: top-left
+         *  Corner Button: top_left
          *----------------------------*/
-        // btn_top_left: {},
+        // TODO
+
         /*----------------------------*
-         *  Corner Button: top-right
+         *  Corner Button: top_right
          *----------------------------*/
-        // btn_top_right: {},
+        // TODO
 
         /*-------------------------------*
-         *  Corner Button: bottom-left
+         *  Corner Button: bottom_left
          *-------------------------------*/
-        // btn_bottom_left: {},
+        // TODO
+
         /*--------------------------------*
-         *  Corner Button: bottom-right
+         *  Corner Button: bottom_right
          *--------------------------------*/
-        // btn_bottom_right: {},
+        // TODO
 
         /*--------------------------------------------*
-         *  Corner Button: scrollview center itema
+         *  Scrollview: center
          *--------------------------------------------*/
-        // sw_center_items: [],
+        // TODO
 
         /*----------------------------*
          *  Dragg events
@@ -346,15 +392,6 @@
         }
 
         return ka_container;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function create_title(self, title)
-    {
-        let container = create_shape_label_with_icon(title);
-        return container;
     }
 
 

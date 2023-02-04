@@ -411,10 +411,18 @@
                         let gobj = find_bind_gobj(e.target);
                         let gobj_name = gobj?gobj.gobj_short_name():"";
                         let dim_abs = e.target.getClientRect({skipShadow:true, skipStroke:true});
-                        let dim_rel = e.target.getClientRect({relativeTo: e.target.getParent()});
+                        let parent_container;
+                        try {
+                            parent_container = gobj.gobj_parent().get_konva_container();
+                        } catch(xx) {
+                            parent_container = e.target.getParent();
+                        }
+                        let dim_rel = e.target.getClientRect({
+                            skipShadow:true, skipStroke:true, relativeTo: parent_container
+                        });
                         let info = sprintf("(x %f, y %f, w %f, h %f),(x %f, y %f, w %f, h %f) stroke %d, blur %d, %s %s %s",
-                            dim_abs.x, dim_abs.y, dim_abs.width, dim_abs.height,
                             dim_rel.x, dim_rel.y, dim_rel.width, dim_rel.height,
+                            dim_abs.x, dim_abs.y, dim_abs.width, dim_abs.height,
                             e.target.strokeWidth?e.target.strokeWidth():0,
                             e.target.shadowBlur?e.target.shadowBlur():0,
                             e.target.id(),
