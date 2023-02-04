@@ -151,8 +151,8 @@
      ********************************************/
     function update_link_path(self)
     {
-        let source_port = self.config.source_port;
-        let target_port = self.config.target_port;
+        let source_port = self.private._source_port;
+        let target_port = self.private._target_port;
 
         let kw_source_dim = {};
         let kw_target_dim = {};

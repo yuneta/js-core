@@ -137,22 +137,29 @@
          */
         let gobj_link = self.yuno.gobj_find_unique_gobj(id);
         if(gobj_link) {
-            log_error(sprintf("ne_base: link already exists '%s'", id));
+            log_error(sprintf("%s: link already exists '%s'", self.gobj_short_name(), id));
+            return null;
+        }
+
+        let source_port_name = kw_get_dict_value(kw, "source_port", id);
+        let source_port = get_child_gobj(
+            self, self, source_port_name
+        );
+        if(!source_port) {
+            log_error(sprintf("%s: source_port not found '%s'", self.gobj_short_name(), source_port_name));
             return null;
         }
 
         let target_gobj = get_unique_gobj(
             self,
-            kw_get_dict_value(kw, "target_gobj", null, false, true)
+            kw_get_dict_value(kw, "target_gobj", null)
         );
-        let source_port = get_child_gobj(
-            self, self, kw_get_dict_value(kw, "source_port", id, false, true)
-        );
+        let target_port_name = kw_get_dict_value(kw, "target_port", id);
         let target_port = get_child_gobj(
-            self, target_gobj, kw_get_dict_value(kw, "target_port", id, false, true)
+            self, target_gobj, target_port_name
         );
-        if(!source_gobj || !target_gobj || !source_port || !target_port) {
-            // Error already logged
+        if(!target_port) {
+            log_error(sprintf("ne_base: target_port not found '%s'", target_port_name));
             return null;
         }
 
@@ -802,7 +809,8 @@
              */
             return create_link(self, kw);
         } else {
-            for(let link in links) {
+            for(let i=0; i<links.length; i++) {
+                let link =  links[i];
                 create_link(self, link);
             }
         }

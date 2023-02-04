@@ -313,14 +313,25 @@
             gobj.__volatil__ = false;
         }
 
-        if (parent) {
+        /*--------------------------------------*
+         *      Add to parent
+         *--------------------------------------*/
+        if(parent) {
             parent._add_child(gobj);
         }
-        if (gobj.mt_create) {
+
+        /*--------------------------------*
+         *      Exec mt_create
+         *--------------------------------*/
+        if(gobj.mt_create) {
             gobj.mt_create(kw);
         }
 
-        if (parent && parent.mt_child_added) {
+        /*--------------------------------------*
+         *  Inform to parent
+         *  when the child is full operative
+         *-------------------------------------*/
+        if(parent && parent.mt_child_added) {
             if (this.config.trace_creation) {
                 log_debug(sprintf("👦👦🔵 child_added(%s): %s", parent.gobj_full_name(), gobj.gobj_short_name()));
             }
