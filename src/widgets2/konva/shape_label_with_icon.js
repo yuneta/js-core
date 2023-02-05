@@ -14,8 +14,7 @@
     let CONFIG = {
         id: "",         // konva id
         name: "shape_label_with_icon",       // konva name
-        value: "",      // text of item
-        label: "",      // text of item, alternative to value
+        label: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         shape: null,        // TODO rectangle by default, implement circle
@@ -157,7 +156,7 @@
             kw_icon_font_properties.fontFamily
         );
 
-        let text = kw_get_str(config, "value", kw_get_str(config, "label", CONFIG.value));
+        let text = kw_get_str(config, "label", CONFIG.label);
         let icon = kw_get_str(config, "icon", CONFIG.icon);
 
         let container = new Konva.Group({

@@ -1,11 +1,11 @@
 /***********************************************************************
- *          Ka_button.js
+ *          Ka_port.js
  *
- *          Button
+ *          Port
  *
  *          Based in KonvA
  *
- *          Copyright (c) 2022 Niyamaka.
+ *          Copyright (c) 2023 Niyamaka.
  *          All Rights Reserved.
  ***********************************************************************/
 (function (exports) {
@@ -21,14 +21,13 @@
 
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
-        label: "",      // text of item
-        value: null,    // Value for some buttons type
+        value: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         shape: null,        // TODO rectangle by default, implement circle
-        disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
-        selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
+        disabled: false,    // When True the port is disabled, managed by EV_DISABLE/EV_ENABLE too
+        selected: false,    // When True the port is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
         x: 0,
@@ -431,21 +430,21 @@
         }
     };
 
-    let Ka_button = GObj.__makeSubclass__();
-    let proto = Ka_button.prototype; // Easy access to the prototype
+    let Ka_port = GObj.__makeSubclass__();
+    let proto = Ka_port.prototype; // Easy access to the prototype
     proto.__init__= function(name, kw) {
         GObj.prototype.__init__.call(
             this,
             FSM,
             CONFIG,
             name,
-            "Ka_button",
+            "Ka_port",
             kw,
             gcflag_no_check_output_events
         );
         return this;
     };
-    gobj_register_gclass(Ka_button, "Ka_button");
+    gobj_register_gclass(Ka_port, "Ka_port");
 
 
 
@@ -540,6 +539,6 @@
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
-    exports.Ka_button = Ka_button;
+    exports.Ka_port = Ka_port;
 
 })(this);
