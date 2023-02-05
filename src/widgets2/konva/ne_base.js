@@ -370,7 +370,7 @@
             kw_port.y = input_y;
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
-                Ka_button,
+                Ka_port,
                 kw_port,
                 self
             );
@@ -407,7 +407,7 @@
             kw_port.y = output_y;
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
-                Ka_button,
+                Ka_port,
                 kw_port,
                 self
             );

@@ -21,7 +21,8 @@
 
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
-        value: "",      // text of item
+        label: "",      // text of item
+        value: null,    // Value for some buttons type TODO
         icon: "",       // icon of item (from an icon font)
         action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
