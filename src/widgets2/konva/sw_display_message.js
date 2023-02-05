@@ -72,15 +72,15 @@
         let max_width = 0;
         for(let i=0; i<items.length; i++) {
             let item = items[i];
-            let value = kw_get_str(item, "value", "", false, true);
+            let label = kw_get_str(item, "label", "", false, true);
             let kw_text = kw_get_dict(item, "kw_text", {}, false, false);
-            if(empty_string(value)) {
+            if(empty_string(label)) {
                 continue;
             }
             kw_text.fontSize = adjust_font_size(kw_text.fontSize, kw_text.fontFamily, kw_text.padding);
 
             let text_size = get_text_size(
-                value, kw_text.fontFamily, kw_text.fontSize, kw_text.padding, true
+                label, kw_text.fontFamily, kw_text.fontSize, kw_text.padding, true
             );
             if(text_size.width > max_width) {
                 max_width = text_size.width;
@@ -124,7 +124,7 @@
      *      {
      *          "id": unique id (not really). If id is empty id=action if it's actions is a string
      *          "name": non-unique name
-     *          "value":  text of menu item
+     *          "label":  text of menu item
      *          "icon":
      *          "action": function(item) | string (event to publish when hit item),
      *          "disabled": bool
@@ -135,8 +135,8 @@
     {
         let id = kw_get_str(record, "id", "", false, false);
         let name = kw_get_str(record, "name", "", false, false);
-        let value = kw_get_str(record, "value", "", false, true);
-        if(empty_string(value)) {
+        let label = kw_get_str(record, "label", "", false, true);
+        if(empty_string(label)) {
             return null;
         }
         let icon = kw_get_str(record, "icon", "", false, false); // TODO draw icon
@@ -169,7 +169,7 @@
             {
                 x: 0,
                 y: 0,
-                text: value,
+                text: label,
                 width: width
             }
         );
@@ -319,7 +319,7 @@
      *          {
      *              "id": unique id (not really). If id is empty id=action if it's actions is a string
      *              "name": non-unique name
-     *              "value":  text of menu item
+     *              "label":  text of menu item
      *              "icon":
      *              "action": function(item) | string (event to publish when hit item),
      *              "disabled": bool
@@ -770,7 +770,7 @@
 
         let items = [
             {
-                "value":  title,
+                "label":  title,
                 kw_text: {
                     fontFamily: "sans-serif",
                     fontSize: 30,
@@ -783,7 +783,7 @@
                 }
             },
             {
-                "value":  text,
+                "label":  text,
                 "kw_text": {
                     fontFamily: "sans-serif",
                     fontSize: 20,
@@ -797,7 +797,7 @@
             },
             {
                 "id": "submit",
-                "value":  t(ok),
+                "label":  t(ok),
                 "icon": "",
                 "kw_text": {
                     fontFamily: "sans-serif",

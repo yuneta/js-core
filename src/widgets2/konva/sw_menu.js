@@ -31,7 +31,7 @@
         /*  Item:
          *      {
          *          "id": unique id (not really). If id is empty id=action if action is a string
-         *          "value":  text of menu item
+         *          "label":  text of menu item
          *          "icon":
          *          "action": function(item) | string (event to publish when hit item),
          *          "disabled": bool
@@ -126,7 +126,7 @@
      *  konva item: menu item
      *      {
      *          "id": unique id (not really). If id is empty id=action if action is a string
-     *          "value":  text of menu item
+     *          "label":  text of menu item
      *          "icon":
      *          "action": function(item) | string (event to publish when hit item),
      *          "disabled": bool
@@ -136,8 +136,8 @@
     function create_konva_item(self, record, y, width)
     {
         let id = kw_get_str(record, "id", "", false, false);
-        let value = kw_get_str(record, "value", "", false, true);
-        if(empty_string(value)) {
+        let label = kw_get_str(record, "label", "", false, true);
+        if(empty_string(label)) {
             return null;
         }
         let icon = kw_get_str(record, "icon", "", false, false); // TODO draw icon
@@ -176,7 +176,7 @@
             {
                 x: 0,
                 y: 0,
-                text: value,
+                text: label,
                 width: width
             }
         );
@@ -331,7 +331,7 @@
      *      "items": [
      *          {
      *              "id": unique id (not really). If id is empty id=action if action is a string
-     *              "value":  text of menu item
+     *              "label":  text of menu item
      *              "icon":
      *              "action": function(item) | string (event to publish when hit item),
      *              "disabled": bool
