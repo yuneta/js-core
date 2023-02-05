@@ -1,7 +1,7 @@
 /***********************************************************************
  *          Ka_links_root.js
  *
- *          Root of link's gobjs
+ *          Root of link's gobjs. See ka_links.js
  *
  *          Based in KonvA
  *
@@ -25,7 +25,7 @@
 
         //------------ Own Attributes ------------//
         visible: true,
-        draggable: true,       // Enable (outer dragging) dragging
+        draggable: false,   // Enable (outer dragging) dragging
 
         fontFamily: "sans-serif", // "OpenSans"
         icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
@@ -64,95 +64,11 @@
             return null;
         }
 
-        let source_gobj = get_unique_gobj(
-            self,
-            kw_get_dict_value(kw, "source_gobj", null)
-        );
+        // 'id' or 'name' can be use as all port names
+        kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
+        kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
 
-        let source_port_name = kw_get_dict_value(kw, "source_port", id);
-        let source_port = get_child_gobj(
-            self, source_gobj, source_port_name
-        );
-        if(!source_port) {
-            log_error(sprintf("%s: source_port not found '%s'", self.gobj_short_name(), source_port_name));
-            return null;
-        }
-
-        let target_gobj = get_unique_gobj(
-            self,
-            kw_get_dict_value(kw, "target_gobj", null)
-        );
-        let target_port_name = kw_get_dict_value(kw, "target_port", id);
-        let target_port = get_child_gobj(
-            self, target_gobj, target_port_name
-        );
-        if(!target_port) {
-            log_error(sprintf("ne_base: target_port not found '%s'", target_port_name));
-            return null;
-        }
-
-        return self.yuno.gobj_create(
-            id,
-            Ka_link,
-            {
-                source_gobj: source_gobj,
-                source_port: source_port,
-                target_gobj: target_gobj,
-                target_port: target_port
-            },
-            self
-        );
-    }
-
-    /********************************************
-     *  Return the unique gobj, null if error
-     ********************************************/
-    function get_unique_gobj(self, name)
-    {
-        let target_gobj;
-
-        if (is_string(name)) {
-            target_gobj = self.yuno.gobj_find_unique_gobj(name);
-            if (!target_gobj) {
-                log_error(sprintf("get_unique_gobj(): gobj must be an unique gobj: '%s'",name));
-                return null;
-            }
-        } else if (is_gobj(name)) {
-            target_gobj = name;
-        } else {
-            target_gobj = null;
-            log_error(sprintf("get_unique_gobj(): name must be an string or gobj"));
-        }
-
-        return target_gobj;
-    }
-
-    /********************************************
-     *  Return the child gobj, null if error
-     ********************************************/
-    function get_child_gobj(self, gobj_parent, name)
-    {
-        let child_gobj;
-
-        if (is_string(name)) {
-            child_gobj = gobj_parent.gobj_child_by_name(name);
-            if (!child_gobj) {
-                log_error(
-                    sprintf("get_child_gobj(): child_gobj not found: parent '%s', child '%s'",
-                        gobj_parent.gobj_short_name(),
-                        name
-                    )
-                );
-                return null;
-            }
-        } else if (is_gobj(name)) {
-            child_gobj = name;
-        } else {
-            child_gobj = null;
-            log_error(sprintf("get_child_gobj(): child_gobj must be an string or gobj"));
-        }
-
-        return child_gobj;
+        return self.yuno.gobj_create(id, Ka_link, kw, self);
     }
 
 
@@ -173,7 +89,7 @@
      *  id/name:
      *      name of link gobj, and name of source_port/target_port if they are empty.
      *
-     *  target_gobj:
+     *  target_node:
      *      - string: name of target gobj (unique or service gobj)
      *      - gobj: target gobj, must be an unique gobj.
      *
@@ -182,8 +98,8 @@
      *      - gobj: source port gobj, must be a child of self
      *
      *  target_port: Use `id` if target_port is an empty string
-     *      - string: name of target port gobj, must be a child of target_gobj
-     *      - gobj: target port gobj, must be a child of target_gobj
+     *      - string: name of target port gobj, must be a child of target_node
+     *      - gobj: target port gobj, must be a child of target_node
      *
      ********************************************/
     function ac_link(self, event, kw, src)
@@ -193,7 +109,8 @@
             /*
              *  Single link
              */
-            return create_link(self, kw);
+            create_link(self, kw);
+
         } else {
             for(let i=0; i<links.length; i++) {
                 let link =  links[i];
@@ -209,7 +126,7 @@
      ********************************************/
     function ac_unlink(self, event, kw, src)
     {
-        let source_gobj = kw_get_dict_value(kw, "source_gobj", src);
+        let source_node = kw_get_dict_value(kw, "source_node", src);
         // TODO
         return 0;
     }

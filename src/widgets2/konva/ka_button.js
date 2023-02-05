@@ -393,6 +393,8 @@
 
     let FSM = {
         "event_list": [
+            "EV_MOVING: output no_warn_subs",
+            "EV_MOVED: output no_warn_subs",
             "EV_ICON_COLOR",
             "EV_POSITION",
             "EV_SIZE",
@@ -403,8 +405,6 @@
             "EV_DISABLE",
             "EV_LOCK",
             "EV_UNLOCK",
-            "EV_MOVING: output no_warn_subs",
-            "EV_MOVED: output no_warn_subs",
             "EV_TIMEOUT",
             "EV_RESIZE"
         ],

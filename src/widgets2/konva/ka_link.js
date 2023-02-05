@@ -2,12 +2,18 @@
  *          Ka_link.js
  *
  *          Node's Link
- *          Link two gobj's
+ *          Link two nodes through their ports
  *
- *          HACK: GObj's to be linked must support:
+ *          source_node             target_node
+ *                  ▼                       ▼
+ *              source_port ──────────► target_port
+ *
+ *          A node must be an unique gobj supporting the events:
  *              - publishing of EV_MOVING/EV_MOVED events
  *              - input event EV_GET_DIMENSION
- *          See ka_button.js example
+ *
+ *          A node is a gobj publishing their movements that has child gobjs with the role of ports.
+ *          A node is a gobj that can be connected with another gobj through their ports.
  *
  *          Based in KonvA
  *
@@ -29,13 +35,12 @@
         subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,        // Konva layer
 
-        // source_port/target_port must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
+        // source_node/target_node must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
         // these gobj/ports can be strings or gobjs
-        // gobj of port's is the goal parameter, but you can pass the parent/child pair as string or gobj
-        source_port: null,
-        target_port: null,
-        source_gobj: null,
-        target_gobj: null,
+        source_node: null,  // unique gobj (or his name) with 'node' role
+        source_port: null,  // child gobj of source_node with 'port' role
+        target_node: null,  // unique gobj (or his name) with 'node' role
+        target_port: null,  // child gobj or target_node with 'port' role
 
         //------------ Own Attributes ------------//
         background_color: "black",
@@ -61,6 +66,10 @@
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
+        _source_node: null,
+        _source_port: null,
+        _target_node: null,
+        _target_port: null,
 
         _ka_container: null
     };
@@ -82,38 +91,6 @@
     {
         self.private._text_size = adjust_font_size(self.config.text_size, self.config.fontFamily);
         self.private._icon_size = adjust_font_size(self.config.icon_size, self.config.fontFamily);
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function get_port_gobj(self, parent, port)
-    {
-        if(is_gobj(port)) {
-            return port;
-        }
-        if(!is_string(port)) {
-            log_error(sprintf("ka_link: port must be a string or gobj: '%s'", port));
-            return null;
-        }
-        let gobj = parent;
-        if(is_string(parent)) {
-            gobj = self.yuno.gobj_find_unique_gobj(parent, false);
-            if(!gobj) {
-                log_error(sprintf("ka_link: gobj must be a unique gobj: '%s'", parent));
-                return null;
-            }
-        }
-        if(!is_gobj(gobj)) {
-            log_error("ka_link: parent gobj is null");
-            return null;
-        }
-        let child = gobj.gobj_child_by_name(port);
-        if(!child) {
-            log_error(sprintf("ka_link: child gobj not found: '%s' -> '%s'", gobj.gobj_name(), port));
-            return null;
-        }
-        return child;
     }
 
     /********************************************
@@ -166,6 +143,114 @@
         self.private._ka_border_arrow.points(points);
     }
 
+    /************************************************
+     *
+     ************************************************/
+    function link_ports(self)
+    {
+        let name = self.config.source_node;
+        self.private._source_node = get_unique_gobj(self, name);
+        if(!self.private._source_node) {
+            log_error(sprintf("%s: unique source node not found: '%s'",
+                self.gobj_short_name(),
+                is_gobj(name)?name.gobj_short_name():name
+            ));
+            return null;
+        }
+
+        name = self.config.target_node;
+        self.private._target_node = get_unique_gobj(self, name);
+        if(!self.private._target_node) {
+            log_error(sprintf("%s: unique target node not found: '%s'",
+                self.gobj_short_name(),
+                is_gobj(name)?name.gobj_short_name():name
+            ));
+            return null;
+        }
+
+        name = self.config.source_port;
+        self.private._source_port = get_child_gobj(
+            self,
+            self.private._source_node,
+            name
+        );
+        if(!self.private._source_port) {
+            log_error(sprintf("%s: source port not found: '%s'",
+                self.gobj_short_name(),
+                is_gobj(name)?name.gobj_short_name():name
+            ));
+            return null;
+        }
+
+        name = self.config.target_port;
+        self.private._target_port = get_child_gobj(
+            self,
+            self.private._target_node,
+            name
+        );
+        if(!self.private._target_port) {
+            log_error(sprintf("%s: target port not found: '%s'",
+                self.gobj_short_name(),
+                is_gobj(name)?name.gobj_short_name():name
+            ));
+            return null;
+        }
+
+        self.private._source_node.gobj_subscribe_event("EV_MOVING", {}, self);
+        self.private._source_node.gobj_subscribe_event("EV_MOVED", {}, self);
+        self.private._target_node.gobj_subscribe_event("EV_MOVING", {}, self);
+        self.private._target_node.gobj_subscribe_event("EV_MOVED", {}, self);
+
+        update_link_path(self); // Update the arrow
+    }
+
+    /********************************************
+     *  Return the unique gobj, null if error
+     ********************************************/
+    function get_unique_gobj(self, name)
+    {
+        let node;
+
+        if (is_string(name)) {
+            node = self.yuno.gobj_find_unique_gobj(name);
+            if (!node) {
+                return null;
+            }
+        } else if(is_gobj(name)) {
+            node = name;
+            if(!node.gobj_is_unique(node)) {
+                node = null;
+            }
+        } else {
+            node = null;
+        }
+
+        return node;
+    }
+
+    /********************************************
+     *  Return the child gobj, null if error
+     ********************************************/
+    function get_child_gobj(self, gobj_parent, name)
+    {
+        let child_gobj;
+
+        if (is_string(name)) {
+            child_gobj = gobj_parent.gobj_child_by_name(name);
+            if (!child_gobj) {
+                return null;
+            }
+        } else if (is_gobj(name)) {
+            child_gobj = name;
+            if(!gobj_parent.gobj_child_by_name(child_gobj.gobj_name())) {
+                child_gobj = null;
+            }
+        } else {
+            child_gobj = null;
+        }
+
+        return child_gobj;
+    }
     /********************************************
      *
      ********************************************/
@@ -234,7 +319,7 @@
      ********************************************/
     function ac_moving(self, event, kw, src)
     {
-        update_link_path(self); // Draw the arrow
+        update_link_path(self); // Update the arrow
         return 0;
     }
 
@@ -243,7 +328,7 @@
      ********************************************/
     function ac_moved(self, event, kw, src)
     {
-        update_link_path(self); // Draw the arrow
+        update_link_path(self); // Update the arrow
         return 0;
     }
 
@@ -321,24 +406,8 @@
         }
 
         adjust_text_and_icon_size(self);
-
         create_shape(self);
-
-        let source_port = self.private._source_port = get_port_gobj(
-            self, self.config.source_gobj, self.config.source_port
-        );
-        let target_port = self.private._target_port = get_port_gobj(
-            self, self.config.target_gobj, self.config.target_port
-        );
-        if(source_port && target_port) {
-            source_port.gobj_subscribe_event("EV_MOVING", {}, self);
-            target_port.gobj_subscribe_event("EV_MOVING", {}, self);
-            source_port.gobj_subscribe_event("EV_MOVED", {}, self);
-            target_port.gobj_subscribe_event("EV_MOVED", {}, self);
-            update_link_path(self); // Draw the arrow
-        } else {
-            log_error("ka_link: source_port or target port not found");
-        }
+        link_ports(self);
     };
 
     /************************************************
