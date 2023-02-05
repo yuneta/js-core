@@ -26,7 +26,6 @@
         icon: "",       // icon of item (from an icon font)
         action: null,   // function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
-        shape: null,        // TODO rectangle by default, implement circle
         disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too

@@ -22,19 +22,17 @@
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
         label: "",      // text of item
-        value: null,    // Value for some buttons type TODO
-        icon: "",       // icon of item (from an icon font)
+        value: null,    // Value for some ports type TODO
         action: null,   // function(e) | string (event to publish when hit item),
-        icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
-        shape: null,        // TODO rectangle by default, implement circle
         disabled: false,    // When True the port is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the port is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
         x: 0,
         y: 0,
-        width: 150,
-        height: 40,
+        width: 15,
+        height: 15,
+        radius: 15,
         background_color: "#FFF7E0",
         color: "black",
 
@@ -98,8 +96,44 @@
      ********************************************/
     function create_shape(self)
     {
-        let ka_container = create_shape_label_with_icon(self.config);
+        let width = kw_get_int(config, "width", self.config.width);
+        let height = kw_get_int(config, "height", self.config.height);
+        let background_color = kw_get_str(config, "background_color", self.config.background_color);
+
+        /*
+         *  Container (Group)
+         */
+        let ka_container = new Konva.Group({
+            id: kw_get_str(config, "id", self.config.id),
+            name: kw_get_str(config, "name", self.config.name),
+            x: kw_get_int(config, "x", self.config.x),
+            y: kw_get_int(config, "y", self.config.y),
+            width: width,
+            height: height,
+            visible: kw_get_bool(config, "visible", self.config.visible)
+        });
         ka_container.gobj = self; // cross-link
+
+        /*
+         *  Shape
+         */
+        let kw_border_shape = __duplicate__(
+            kw_get_dict(CONFIG, "kw_border_shape", {})
+        );
+        json_object_update(kw_border_shape, kw_get_dict(config, "kw_border_shape", {}));
+        json_object_update(
+            kw_border_shape,
+            {
+                name: "ka_border_shape",
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+                fill: background_color,
+            }
+        );
+        let _ka_border_shape = new Konva.Rect(kw_border_shape);
+        ka_container.add(_ka_border_shape);
 
         if (self.config.draggable) {
             ka_container.draggable(true);

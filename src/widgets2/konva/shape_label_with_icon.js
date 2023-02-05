@@ -17,7 +17,6 @@
         label: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
-        shape: null,        // TODO rectangle by default, implement circle
 
         x: 0,
         y: 0,

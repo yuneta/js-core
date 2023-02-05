@@ -57,7 +57,6 @@
         y: 0,
         width: 400,
         height: 250,
-        shape: "rect",      /* "rect" or "circle" */
 
         padding: 30,        /* Padding: left space to ports */
         offset: 5,          /* Offset for ports position */
