@@ -38,7 +38,7 @@
         color: "black",
 
         visible: true,
-        draggable: false,       // Enable (outer dragging) dragging
+        draggable: true,       // Enable (outer dragging) dragging
 
         icon_size: 18,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
@@ -148,14 +148,24 @@
         /*----------------------------*
          *      Label
          *----------------------------*/
+self.gobj_parent().get_konva_container().add(ka_container);
+self.config.layer.getStage().draw(); // TODO TEST
         let label = self.config.label;
         if(is_string(label)) {
             label = {
                 label: self.config.label,
                 autosize: true,
                 background_color: "#00000000",
+                y: self.config.shape === "circle"? -height/2: 0,
                 kw_border_shape: {
-                    strokeWidth: 0
+                    strokeWidth: 1,
+                    cornerRadius: 0
+                },
+                kw_text_font_properties: {
+                    padding: 0
+                },
+                kw_icon_font_properties: {
+                    padding: 0
                 }
             };
         } else if(!is_object(label)) {
@@ -166,13 +176,12 @@
             switch(self.config.position) {
                 case "left":
                     self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label.x(width);
                     break;
                 case "right":
                     self.private._ka_label = create_shape_label_with_icon(label);
-                    self.private._ka_label.position({
-                        x: self.private._ka_label.x() - self.private._ka_label.width(),
-                        y: self.private._ka_label.y()
-                    });
+                    let x = self.private._ka_label.width();
+                    self.private._ka_label.x(-x);
                     break;
                 case "top":
                     self.private._ka_label = create_shape_label_with_icon(label);
@@ -185,6 +194,8 @@
                 ka_container.add(self.private._ka_label);
             }
         }
+
+self.config.layer.getStage().draw(); // TODO TEST
 
         /*----------------------------*
          *      Events

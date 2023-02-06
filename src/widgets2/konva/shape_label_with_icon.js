@@ -110,6 +110,7 @@
         if(config.autosize) {
             let font_dimension = label.getClientRect();
             _ka_border_shape.size(font_dimension);
+            ka_container.size(font_dimension);
             let ka_container_dimension = ka_container.getClientRect();
 
             config.width = ka_container_dimension.width;

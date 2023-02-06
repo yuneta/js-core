@@ -221,6 +221,9 @@
         self.private._ka_title = create_shape_label_with_icon(kw_title);
         ka_container.add(self.private._ka_title);
 
+self.config.layer.add(ka_container); // TODO TEST
+self.config.layer.getStage().draw(); // TODO TEST
+
         /*----------------------------*
          *  Corner Button: top_left
          *----------------------------*/
@@ -378,6 +381,7 @@
             kw_common.y = port_y;
             json_object_update_missing(kw_port, kw_common);
 
+    self.config.layer.getStage().draw(); // TODO TEST
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
                 Ka_port,
@@ -385,7 +389,7 @@
                 self
             );
 
-            self.config.layer.getStage().draw(); // TODO TEST
+    self.config.layer.getStage().draw(); // TODO TEST
         }
     }
 
