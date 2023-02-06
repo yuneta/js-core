@@ -148,8 +148,6 @@
         /*----------------------------*
          *      Label
          *----------------------------*/
-self.gobj_parent().get_konva_container().add(ka_container);
-self.config.layer.getStage().draw(); // TODO TEST
         let label = self.config.label;
         if(is_string(label)) {
             label = {
@@ -223,8 +221,6 @@ self.config.layer.getStage().draw(); // TODO TEST
                 ka_container.add(self.private._ka_label);
             }
         }
-
-self.config.layer.getStage().draw(); // TODO TEST
 
         /*----------------------------*
          *      Events
