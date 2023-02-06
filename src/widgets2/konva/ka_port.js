@@ -20,7 +20,7 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
-        shape: "circle",// "circle" of "rect"
+        port_shape: "circle",   // "circle" of "rect"
         position: "",   // "left", "right", "top", "bottom"
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
         label: {},      // optional label, see create_shape_label_with_icon()
@@ -38,7 +38,7 @@
         color: "black",
 
         visible: true,
-        draggable: true,       // Enable (outer dragging) dragging
+        draggable: false,   // Enable (outer dragging) dragging
 
         icon_size: 18,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
@@ -135,7 +135,7 @@
             }
         );
 
-        switch(self.config.shape) {
+        switch(self.config.port_shape) {
             case "rect":
                 self.private._ka_border_shape = new Konva.Rect(kw_border_shape);
                 break;
@@ -156,7 +156,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                 label: self.config.label,
                 autosize: true,
                 background_color: "#00000000",
-                y: self.config.shape === "circle"? -height/2: 0,
+                y: self.config.port_shape === "circle"? -height/2: 0,
                 kw_border_shape: {
                     strokeWidth: 0,
                     cornerRadius: 0
@@ -173,12 +173,13 @@ self.config.layer.getStage().draw(); // TODO TEST
         }
 
         if(label) {
-            let x;
+            let x = 0;
+            let y = 0;
             switch(self.config.position) {
                 case "left":
                     self.private._ka_label = create_shape_label_with_icon(label);
                     x = width;
-                    if(self.config.shape === "circle") {
+                    if(self.config.port_shape === "circle") {
                         x = width/2 + 5;
                     } else {
                         x += 5;
@@ -188,16 +189,34 @@ self.config.layer.getStage().draw(); // TODO TEST
                 case "right":
                     self.private._ka_label = create_shape_label_with_icon(label);
                     x = self.private._ka_label.width() + 5;
-                    if(self.config.shape === "circle") {
+                    if(self.config.port_shape === "circle") {
                         x += width/2;
                     }
                     self.private._ka_label.x(-x);
                     break;
                 case "top":
                     self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label.rotation(-45);
+                    if(self.config.port_shape === "circle") {
+                        y = height + 5;
+                        x = 0;
+                    } else {
+                        x = width/2;
+                        y = height;
+                    }
+                    self.private._ka_label.position({x: x, y: -y});
                     break;
                 case "bottom":
                     self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label.rotation(45);
+                    if(self.config.port_shape === "circle") {
+                        y = height/2 + 5;
+                        x = 5;
+                    } else {
+                        y = height+5;
+                        x = width;
+                    }
+                    self.private._ka_label.position({x: x, y: y});
                     break;
             }
             if(self.private._ka_label) {

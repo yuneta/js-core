@@ -315,8 +315,8 @@ self.config.layer.getStage().draw(); // TODO TEST
 
         let port_width = kw_get_int(kw_common, "width", self.config.port_width);
         let port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        let port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
         let port_offset = kw_get_int(kw_common, "port_offset", self.config.port_offset);
+        let port_shape = kw_get_str(kw_common, "port_shape", self.config.port_shape);
 
         json_object_update(
             kw_common,
@@ -325,7 +325,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                 subscriber: self.config.subscriber,
                 width: port_width,
                 height: port_height,
-                shape: port_shape,
+                port_shape: port_shape,
                 position: position
             }
         );
@@ -333,11 +333,11 @@ self.config.layer.getStage().draw(); // TODO TEST
         for (let i = 0; i < ports.length; i++) {
             let kw_port = ports[i];
 
-            let shape = kw_get_str(kw_port, "shape", port_shape);
+            let port_shape2 = kw_get_str(kw_port, "port_shape", port_shape);
 
             switch(position) {
                 case "left":
-                    if(shape === "circle") {
+                    if(port_shape2 === "circle") {
                         port_x = 0;
                     } else {
                         port_x = -port_width/2;
@@ -347,7 +347,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                     port_y += port_size*i;
                     break;
                 case "right":
-                    if(shape === "circle") {
+                    if(port_shape2 === "circle") {
                         port_x = node_width;
                     } else {
                         port_x = node_width -port_width/2;
@@ -357,7 +357,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                     port_y += port_size*i;
                     break;
                 case "top":
-                    if(shape === "circle") {
+                    if(port_shape2 === "circle") {
                         port_y = 0;
                     } else {
                         port_y = -port_height/2;
@@ -367,8 +367,8 @@ self.config.layer.getStage().draw(); // TODO TEST
                     port_x += port_size*i;
                     break;
                 case "bottom":
-                    if(shape === "circle") {
-                        port_y = 0;
+                    if(port_shape2 === "circle") {
+                        port_y = node_height;
                     } else {
                         port_y = node_height -port_width/2;
                     }
@@ -491,7 +491,7 @@ self.config.layer.getStage().draw(); // TODO TEST
 
         port_width = kw_get_int(kw_common, "width", self.config.port_width);
         port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+        port_shape = kw_get_int(kw_common, "port_shape", self.config.port_shape);
 
 
         json_object_update(
@@ -502,8 +502,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                 x: port_x,
                 y: port_y,
                 width: port_width,
-                height: port_height,
-                shape: port_shape
+                height: port_height
             }
         );
 
@@ -531,7 +530,7 @@ self.config.layer.getStage().draw(); // TODO TEST
 
         port_width = kw_get_int(kw_common, "width", self.config.port_width);
         port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+        port_shape = kw_get_int(kw_common, "port_shape", self.config.port_shape);
 
 
         json_object_update(
@@ -542,8 +541,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                 x: port_x,
                 y: port_y,
                 width: port_width,
-                height: port_height,
-                shape: port_shape
+                height: port_height
             }
         );
 
