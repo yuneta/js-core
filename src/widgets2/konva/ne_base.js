@@ -322,7 +322,8 @@
                 subscriber: self.config.subscriber,
                 width: port_width,
                 height: port_height,
-                shape: port_shape
+                shape: port_shape,
+                position: position
             }
         );
 

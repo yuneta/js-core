@@ -208,16 +208,30 @@
 
     /********************************************
      *  kw: {
+     *      what: "icon" | "text"
      *      color:
      *  }
      ********************************************/
-    function ac_icon_color(self, event, kw, src)
+    function ac_color(self, event, kw, src)
     {
         let color = kw_get_str(kw, "color", "");
-        if(color) {
-            shape_label_icon_color(self.private._ka_container, color);
-        } else {
-            kw["color"] = shape_label_icon_color(self.private._ka_container);
+        switch(kw.what) {
+            case "text":
+                if(color) {
+                    shape_label_text_color(self.private._ka_container, color);
+                } else {
+                    kw["color"] = shape_label_text_color(self.private._ka_container);
+                }
+                break;
+
+            case "icon":
+            default:
+                if(color) {
+                    shape_label_icon_color(self.private._ka_container, color);
+                } else {
+                    kw["color"] = shape_label_icon_color(self.private._ka_container);
+                }
+                break;
         }
 
         return 0;
@@ -395,7 +409,7 @@
         "event_list": [
             "EV_MOVING: output no_warn_subs",
             "EV_MOVED: output no_warn_subs",
-            "EV_ICON_COLOR",
+            "EV_COLOR",
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
@@ -414,7 +428,7 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_ICON_COLOR",           ac_icon_color,          undefined],
+                ["EV_COLOR",                ac_color,               undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],

@@ -21,8 +21,9 @@
 
         //------------ Own Attributes ------------//
         shape: "circle",// "circle" of "rect"
+        position: "",   // "left", "right", "top", "bottom"
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
-        label: "",      // text of item
+        label: {},      // optional label, see create_shape_label_with_icon()
         value: null,    // Value for some ports type TODO
         action: null,   // function(e) | string (event to publish when hit item),
         disabled: false,    // When True the port is disabled, managed by EV_DISABLE/EV_ENABLE too
@@ -77,7 +78,9 @@
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
 
-        _ka_container: null
+        _ka_container: null,
+        _ka_border_shape: null,
+        _ka_label: null
     };
 
 
@@ -99,9 +102,9 @@
         let height = kw_get_int(self.config, "height", 20);
         let background_color = kw_get_str(self.config, "background_color", "white");
 
-        /*
-         *  Container (Group)
-         */
+        /*----------------------------*
+         *      Container (Group)
+         *----------------------------*/
         let ka_container = new Konva.Group({
             id: kw_get_str(self.config, "id", ""),
             name: kw_get_str(self.config, "name", ""),
@@ -113,9 +116,9 @@
         });
         ka_container.gobj = self; // cross-link
 
-        /*
-         *  Shape
-         */
+        /*----------------------------*
+         *      Shape
+         *----------------------------*/
         let kw_border_shape = __duplicate__(
             kw_get_dict(CONFIG, "kw_border_shape", {})
         );
@@ -132,17 +135,60 @@
             }
         );
 
-        let _ka_border_shape;
         switch(self.config.shape) {
             case "rect":
-                _ka_border_shape = new Konva.Rect(kw_border_shape);
+                self.private._ka_border_shape = new Konva.Rect(kw_border_shape);
                 break;
             case "circle":
             default:
-                _ka_border_shape = new Konva.Circle(kw_border_shape);
+                self.private._ka_border_shape = new Konva.Circle(kw_border_shape);
         }
-        ka_container.add(_ka_border_shape);
+        ka_container.add(self.private._ka_border_shape);
 
+        /*----------------------------*
+         *      Label
+         *----------------------------*/
+        let label = self.config.label;
+        if(is_string(label)) {
+            label = {
+                label: self.config.label,
+                autosize: true,
+                background_color: "#00000000",
+                kw_border_shape: {
+                    strokeWidth: 0
+                }
+            };
+        } else if(!is_object(label)) {
+            label = null;
+        }
+
+        if(label) {
+            switch(self.config.position) {
+                case "left":
+                    self.private._ka_label = create_shape_label_with_icon(label);
+                    break;
+                case "right":
+                    self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label.position({
+                        x: self.private._ka_label.x() - self.private._ka_label.width(),
+                        y: self.private._ka_label.y()
+                    });
+                    break;
+                case "top":
+                    self.private._ka_label = create_shape_label_with_icon(label);
+                    break;
+                case "bottom":
+                    self.private._ka_label = create_shape_label_with_icon(label);
+                    break;
+            }
+            if(self.private._ka_label) {
+                ka_container.add(self.private._ka_label);
+            }
+        }
+
+        /*----------------------------*
+         *      Events
+         *----------------------------*/
         if (self.config.draggable) {
             ka_container.draggable(true);
 
@@ -251,16 +297,42 @@
 
     /********************************************
      *  kw: {
+     *      what: "port" | "icon" | "text"
      *      color:
      *  }
      ********************************************/
-    function ac_icon_color(self, event, kw, src)
+    function ac_color(self, event, kw, src)
     {
         let color = kw_get_str(kw, "color", "");
-        if(color) {
-            shape_label_icon_color(self.private._ka_container, color);
-        } else {
-            kw["color"] = shape_label_icon_color(self.private._ka_container);
+        switch(kw.what) {
+            case "text":
+                if(self.private._ka_label) {
+                    if(color) {
+                        shape_label_text_color(self.private._ka_label, color);
+                    } else {
+                        kw["color"] = shape_label_text_color(self.private._ka_label);
+                    }
+                }
+                break;
+
+            case "icon":
+                if(self.private._ka_label) {
+                    if (color) {
+                        shape_label_icon_color(self.private._ka_label, color);
+                    } else {
+                        kw["color"] = shape_label_icon_color(self.private._ka_label);
+                    }
+                }
+                break;
+
+            case "port":
+            default:
+                if(color) {
+                    self.private._ka_border_shape.fill(color);
+                } else {
+                    kw["color"] = self.private._ka_border_shape.fill();
+                }
+                break;
         }
 
         return 0;
@@ -299,15 +371,7 @@
     {
         self.config.width = kw_get_int(kw, "width", self.config.width, false, false);
         self.config.height = kw_get_int(kw, "height", self.config.height, false, false);
-
-        /*
-         *  Resize container
-         */
-        let ka_container = self.private._ka_container;
-        shape_label_size(ka_container, {
-            width: self.config.width,
-            height: self.config.height
-        });
+        // TODO
 
         return 0;
     }
@@ -345,7 +409,8 @@
         kw["width"] = self.config.width;
         kw["height"] = self.config.height;
 
-        kw["absolute_dimension"] = self.get_konva_container().getClientRect();
+        // HACK consider only the port shape, exclude label
+        kw["absolute_dimension"] = self.private._ka_border_shape.getClientRect();
 
         return 0;
     }
@@ -438,7 +503,7 @@
         "event_list": [
             "EV_MOVING: output no_warn_subs",
             "EV_MOVED: output no_warn_subs",
-            "EV_ICON_COLOR",
+            "EV_COLOR",
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
@@ -457,7 +522,7 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_ICON_COLOR",           ac_icon_color,          undefined],
+                ["EV_COLOR",                ac_color,               undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
