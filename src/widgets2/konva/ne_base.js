@@ -58,11 +58,11 @@
         width: 400,
         height: 250,
 
-        padding: 30,        /* Padding: left space to ports */
+        padding: 20,        /* Padding: left space to ports, title and center will decrease in padding size */
         offset: 0,          /* Offset for ports position */
 
         background_color: "#FFF7E0",
-        color: "red",       /* Default color for texts */
+        color: "black",       /* Default color for texts */
 
         visible: true,
         draggable: true,   // Enable (outer dragging) dragging
@@ -89,11 +89,10 @@
         //------------ Components ------------//
         port_width: 20,
         port_height: 20,
-        port_radius: 10,
         port_shape: "circle",
 
         title: { // HACK See shape_label_with_icon attributes
-            height: 40
+            height: 30
         },
         input: {
         },
@@ -276,6 +275,97 @@
         return ka_container;
     }
 
+    /********************************************
+     *
+     ********************************************/
+    function create_ports(self, position, kw_common)
+    {
+        let node_width = self.config.width;
+        let node_height = self.config.height;
+        let title_height = self.private._ka_title.height();
+
+        /*----------------------------*
+         *  Control of positions
+         *----------------------------*/
+        let padding = kw_get_int(self.config, "padding", 0);
+        let offset = kw_get_int(self.config, "offset", 0);
+
+        /*----------------------------*
+         *  Ports
+         *----------------------------*/
+        let ports = kw_get_list(kw_common, "ports", []);
+        let port_x, port_y, port_size;
+
+        switch(position) {
+            case "left":
+                port_size = (node_height - (3*padding + title_height))/(ports.length);
+                break;
+            case "right":
+                port_size = (node_height - (3*padding + title_height))/(ports.length);
+                break;
+            case "top":
+                port_size = (node_width - (3*padding))/(ports.length);
+                break;
+            case "bottom":
+                port_size = (node_width - (3*padding))/(ports.length);
+                break;
+        }
+
+        let port_width = kw_get_int(kw_common, "width", self.config.port_width);
+        let port_height = kw_get_int(kw_common, "height", self.config.port_height);
+        let port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+
+        json_object_update(
+            kw_common,
+            {
+                layer: self.config.layer,
+                subscriber: self.config.subscriber,
+                width: port_width,
+                height: port_height,
+                shape: port_shape
+            }
+        );
+
+        for (let i = 0; i < ports.length; i++) {
+            let kw_port = ports[i];
+
+            switch(position) {
+                case "left":
+                    port_x = kw_get_int(kw_common, "x", offset);
+                    port_y = padding*2 + title_height;
+                    port_y += port_size*i;
+                    break;
+                case "right":
+                    port_x = node_width - (padding - offset) + kw_get_int(kw_common, "x", 0);
+                    port_y = padding*2 + title_height;
+                    port_y += port_size*i;
+                    break;
+                case "top":
+                    port_x = kw_get_int(kw_common, "x", offset);
+                    port_y = kw_get_int(kw_common, "y", offset);
+                    port_x += port_size*i;
+                    break;
+                case "bottom":
+                    port_x = kw_get_int(kw_common, "x", offset);
+                    port_y = node_width - (padding - offset) + kw_get_int(kw_common, "y", 0);
+                    port_x += port_size*i;
+                    break;
+            }
+            kw_common.y = port_y;
+            kw_common.x = port_x;
+            json_object_update_missing(kw_port, kw_common);
+
+            self.yuno.gobj_create(
+                kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
+                Ka_port,
+                kw_port,
+                self
+            );
+
+            self.config.layer.getStage().draw(); // TODO TEST
+        }
+    }
+
 
 
 
@@ -329,9 +419,29 @@
      ********************************************/
     function ac_add_port(self, event, kw, src)
     {
+        let input_ports = kw_get_list(kw, "input`ports", []);
+        if(input_ports.length > 0) {
+            create_ports(self, "left", kw.input);
+        }
+        let output_ports = kw_get_list(kw, "output`ports", []);
+        if(output_ports.length > 0) {
+            create_ports(self, "right", kw.output);
+        }
+        let top_ports = kw_get_list(kw, "top`ports", []);
+        if(top_ports.length > 0) {
+            create_ports(self, "top", kw.top);
+        }
+        let bottom_ports = kw_get_list(kw, "bottom`ports", []);
+        if(bottom_ports.length > 0) {
+            create_ports(self, "bottom", kw.bottom);
+        }
+
+        return 0;
+
+
         let kw_common;
         let ports;
-        let port_x, port_y, port_width, port_height, port_radius;
+        let port_x, port_y, port_width, port_height;
         let port_size, port_shape;
         let width = self.config.width;
         let height = self.config.height;
@@ -350,13 +460,12 @@
         ports = kw_get_list(kw_common, "ports", []);
         port_size = (height - (padding + title_height))/(ports.length + 2);
         port_y = padding + title_height + port_size;
+        port_x = kw_get_int(kw_common, "x", offset);
 
         port_width = kw_get_int(kw_common, "width", self.config.port_width);
         port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        port_radius = kw_get_int(kw_common, "radius", self.config.port_radius);
         port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
 
-        port_x = kw_get_int(kw_common, "x", offset);
 
         json_object_update(
             kw_common,
@@ -367,7 +476,6 @@
                 y: port_y,
                 width: port_width,
                 height: port_height,
-                radius: port_radius,
                 shape: port_shape
             }
         );
@@ -392,22 +500,22 @@
         ports = kw_get_list(kw_common, "ports", []);
         port_size = (height - (padding + title_height))/(ports.length + 2);
         port_y = padding + title_height + port_size;
+        port_x = width - (padding - offset) + kw_get_int(kw_common, "x", 0);
 
         port_width = kw_get_int(kw_common, "width", self.config.port_width);
         port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        port_radius = kw_get_int(kw_common, "radius", self.config.port_radius);
         port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+
 
         json_object_update(
             kw_common,
             {
                 layer: self.config.layer,
                 subscriber: self.config.subscriber,
-                x: width - (padding - offset) + kw_get_int(kw_common, "x", 0),
+                x: port_x,
                 y: port_y,
                 width: port_width,
                 height: port_height,
-                radius: port_radius,
                 shape: port_shape
             }
         );

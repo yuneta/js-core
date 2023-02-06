@@ -33,8 +33,7 @@
         y: 0,
         width: 20,
         height: 20,
-        radius: 10,
-        background_color: "#FFF7E0",
+        background_color: "#FFEEAA",
         color: "black",
 
         visible: true,
@@ -98,7 +97,6 @@
     {
         let width = kw_get_int(self.config, "width", 20);
         let height = kw_get_int(self.config, "height", 20);
-        let radius = kw_get_int(self.config, "radius", 20);
         let background_color = kw_get_str(self.config, "background_color", "white");
 
         /*
@@ -130,7 +128,6 @@
                 y: 0,
                 width: width,
                 height: height,
-                radius: radius,
                 fill: background_color,
             }
         );
