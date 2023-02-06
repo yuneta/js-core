@@ -158,7 +158,7 @@ self.config.layer.getStage().draw(); // TODO TEST
                 background_color: "#00000000",
                 y: self.config.shape === "circle"? -height/2: 0,
                 kw_border_shape: {
-                    strokeWidth: 1,
+                    strokeWidth: 0,
                     cornerRadius: 0
                 },
                 kw_text_font_properties: {
@@ -173,14 +173,24 @@ self.config.layer.getStage().draw(); // TODO TEST
         }
 
         if(label) {
+            let x;
             switch(self.config.position) {
                 case "left":
                     self.private._ka_label = create_shape_label_with_icon(label);
-                    self.private._ka_label.x(width);
+                    x = width;
+                    if(self.config.shape === "circle") {
+                        x = width/2 + 5;
+                    } else {
+                        x += 5;
+                    }
+                    self.private._ka_label.x(x);
                     break;
                 case "right":
                     self.private._ka_label = create_shape_label_with_icon(label);
-                    let x = self.private._ka_label.width();
+                    x = self.private._ka_label.width() + 5;
+                    if(self.config.shape === "circle") {
+                        x += width/2;
+                    }
                     self.private._ka_label.x(-x);
                     break;
                 case "top":
