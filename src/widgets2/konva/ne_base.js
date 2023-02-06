@@ -59,7 +59,6 @@
         height: 250,
 
         padding: 20,        /* Padding: left space to ports, title and center will decrease in padding size */
-        offset: 0,          /* Offset for ports position */
 
         background_color: "#FFF7E0",
         color: "black",       /* Default color for texts */
@@ -90,6 +89,7 @@
         port_width: 20,
         port_height: 20,
         port_shape: "circle",
+        port_offset: 0,
 
         title: { // HACK See shape_label_with_icon attributes
             height: 30
@@ -288,7 +288,6 @@
          *  Control of positions
          *----------------------------*/
         let padding = kw_get_int(self.config, "padding", 0);
-        let offset = kw_get_int(self.config, "offset", 0);
 
         /*----------------------------*
          *  Ports
@@ -314,6 +313,7 @@
         let port_width = kw_get_int(kw_common, "width", self.config.port_width);
         let port_height = kw_get_int(kw_common, "height", self.config.port_height);
         let port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+        let port_offset = kw_get_int(kw_common, "port_offset", self.config.port_offset);
 
         json_object_update(
             kw_common,
@@ -329,30 +329,52 @@
         for (let i = 0; i < ports.length; i++) {
             let kw_port = ports[i];
 
+            let shape = kw_get_str(kw_port, "shape", port_shape);
+
             switch(position) {
                 case "left":
-                    port_x = kw_get_int(kw_common, "x", offset);
+                    if(shape === "circle") {
+                        port_x = 0;
+                    } else {
+                        port_x = -port_width/2;
+                    }
+                    port_x -= kw_get_int(kw_port, "port_offset", port_offset);
                     port_y = padding*2 + title_height;
                     port_y += port_size*i;
                     break;
                 case "right":
-                    port_x = node_width - (padding - offset) + kw_get_int(kw_common, "x", 0);
+                    if(shape === "circle") {
+                        port_x = node_width;
+                    } else {
+                        port_x = node_width -port_width/2;
+                    }
+                    port_x += kw_get_int(kw_port, "port_offset", port_offset);
                     port_y = padding*2 + title_height;
                     port_y += port_size*i;
                     break;
                 case "top":
-                    port_x = kw_get_int(kw_common, "x", offset);
-                    port_y = kw_get_int(kw_common, "y", offset);
+                    if(shape === "circle") {
+                        port_y = 0;
+                    } else {
+                        port_y = -port_height/2;
+                    }
+                    port_y -= kw_get_int(kw_port, "port_offset", port_offset);
+                    port_x = padding*2;
                     port_x += port_size*i;
                     break;
                 case "bottom":
-                    port_x = kw_get_int(kw_common, "x", offset);
-                    port_y = node_width - (padding - offset) + kw_get_int(kw_common, "y", 0);
+                    if(shape === "circle") {
+                        port_y = 0;
+                    } else {
+                        port_y = node_height -port_width/2;
+                    }
+                    port_y += kw_get_int(kw_port, "port_offset", port_offset);
+                    port_x = padding*2;
                     port_x += port_size*i;
                     break;
             }
-            kw_common.y = port_y;
             kw_common.x = port_x;
+            kw_common.y = port_y;
             json_object_update_missing(kw_port, kw_common);
 
             self.yuno.gobj_create(
@@ -451,7 +473,7 @@
          *  Control of positions
          *----------------------------*/
         let padding = kw_get_int(self.config, "padding", 0);
-        let offset = kw_get_int(self.config, "offset", 0);
+        let offset = kw_get_int(self.config, "port_offset", 0);
 
         /*----------------------------*
          *  Ports: input
