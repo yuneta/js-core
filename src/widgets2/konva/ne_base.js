@@ -59,7 +59,7 @@
         height: 250,
 
         padding: 30,        /* Padding: left space to ports */
-        offset: 5,          /* Offset for ports position */
+        offset: 0,          /* Offset for ports position */
 
         background_color: "#FFF7E0",
         color: "red",       /* Default color for texts */
@@ -87,9 +87,10 @@
         },
 
         //------------ Components ------------//
-        port_width: 15,
-        port_height: 15,
-        port_radius: 15,
+        port_width: 20,
+        port_height: 20,
+        port_radius: 10,
+        port_shape: "circle",
 
         title: { // HACK See shape_label_with_icon attributes
             height: 40
@@ -197,7 +198,6 @@
          *  Control of positions
          *----------------------------*/
         let padding = kw_get_int(self.config, "padding", 0);
-        let offset = kw_get_int(self.config, "offset", 0);
 
         /*----------------------------*
          *  Title
@@ -329,6 +329,10 @@
      ********************************************/
     function ac_add_port(self, event, kw, src)
     {
+        let kw_common;
+        let ports;
+        let port_x, port_y, port_width, port_height, port_radius;
+        let port_size, port_shape;
         let width = self.config.width;
         let height = self.config.height;
         let title_height = self.private._ka_title.height();
@@ -342,75 +346,83 @@
         /*----------------------------*
          *  Ports: input
          *----------------------------*/
-        let kw_input = kw_get_dict(kw, "input", {}, false, false);
-        let input_ports = kw_get_list(kw_input, "ports", []);
-        let input_size = (height - (padding + title_height))/(input_ports.length + 2);
-        let input_y = padding + title_height + input_size;
+        kw_common = kw_get_dict(kw, "input", {}, false, false);
+        ports = kw_get_list(kw_common, "ports", []);
+        port_size = (height - (padding + title_height))/(ports.length + 2);
+        port_y = padding + title_height + port_size;
 
-        let input_width = kw_get_int(kw_input, "width", self.config.port_width);
-        let input_height = kw_get_int(kw_input, "height", self.config.port_height);
-        let input_radius = kw_get_int(kw_input, "radius", self.config.port_radius);
+        port_width = kw_get_int(kw_common, "width", self.config.port_width);
+        port_height = kw_get_int(kw_common, "height", self.config.port_height);
+        port_radius = kw_get_int(kw_common, "radius", self.config.port_radius);
+        port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+
+        port_x = kw_get_int(kw_common, "x", offset);
+
         json_object_update(
-            kw_input,
+            kw_common,
             {
                 layer: self.config.layer,
                 subscriber: self.config.subscriber,
-                x: kw_get_int(kw_input, "x", offset),
-                y: input_y,
-                width: input_width,
-                height: input_height,
-                radius: input_radius
+                x: port_x,
+                y: port_y,
+                width: port_width,
+                height: port_height,
+                radius: port_radius,
+                shape: port_shape
             }
         );
 
-        for(let i=0; i<input_ports.length; i++) {
-            let kw_port = input_ports[i];
-            json_object_update_missing(kw_port, kw_input);
-            kw_port.y = input_y;
+        for(let i=0; i<ports.length; i++) {
+            let kw_port = ports[i];
+            json_object_update_missing(kw_port, kw_common);
+            kw_port.y = port_y;
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
                 Ka_port,
                 kw_port,
                 self
             );
-            input_y += input_size;
+            port_y += port_size;
         }
 
         /*----------------------------*
          *  Ports: output
          *----------------------------*/
-        let kw_output = kw_get_dict(kw, "output", {}, false, false);
-        let output_ports = kw_get_list(kw_output, "ports", []);
-        let output_size = (height - (padding + title_height))/(output_ports.length + 2);
-        let output_y = padding + title_height + output_size;
+        kw_common = kw_get_dict(kw, "output", {}, false, false);
+        ports = kw_get_list(kw_common, "ports", []);
+        port_size = (height - (padding + title_height))/(ports.length + 2);
+        port_y = padding + title_height + port_size;
 
-        let output_width = kw_get_int(kw_output, "width", self.config.port_width);
-        let output_height = kw_get_int(kw_output, "height", self.config.port_height);
-        let output_radius = kw_get_int(kw_output, "radius", self.config.port_radius);
+        port_width = kw_get_int(kw_common, "width", self.config.port_width);
+        port_height = kw_get_int(kw_common, "height", self.config.port_height);
+        port_radius = kw_get_int(kw_common, "radius", self.config.port_radius);
+        port_shape = kw_get_int(kw_common, "shape", self.config.port_shape);
+
         json_object_update(
-            kw_output,
+            kw_common,
             {
                 layer: self.config.layer,
                 subscriber: self.config.subscriber,
-                x: width - (padding - offset) + kw_get_int(kw_output, "x", 0),
-                y: output_y,
-                width: output_width,
-                height: output_height,
-                radius: output_radius
+                x: width - (padding - offset) + kw_get_int(kw_common, "x", 0),
+                y: port_y,
+                width: port_width,
+                height: port_height,
+                radius: port_radius,
+                shape: port_shape
             }
         );
 
-        for(let i=0; i<output_ports.length; i++) {
-            let kw_port = output_ports[i];
-            json_object_update_missing(kw_port, kw_output);
-            kw_port.y = output_y;
+        for(let i=0; i<ports.length; i++) {
+            let kw_port = ports[i];
+            json_object_update_missing(kw_port, kw_common);
+            kw_port.y = port_y;
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
                 Ka_port,
                 kw_port,
                 self
             );
-            output_y += output_size;
+            port_y += port_size;
         }
 
         /*----------------------------*

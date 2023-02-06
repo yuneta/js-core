@@ -20,6 +20,7 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
+        shape: "circle",// "circle" of "rect"
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
         label: "",      // text of item
         value: null,    // Value for some ports type TODO
@@ -30,9 +31,9 @@
 
         x: 0,
         y: 0,
-        width: 15,
-        height: 15,
-        radius: 15,
+        width: 20,
+        height: 20,
+        radius: 10,
         background_color: "#FFF7E0",
         color: "black",
 
@@ -63,8 +64,7 @@
         },
 
         kw_border_shape: { /* Border shape */
-            cornerRadius: 10,
-            strokeWidth: 2,
+            strokeWidth: 1,
             stroke: "#f5c211ff",
             opacity: 1,
             shadowBlur: 0,
@@ -96,21 +96,22 @@
      ********************************************/
     function create_shape(self)
     {
-        let width = kw_get_int(config, "width", self.config.width);
-        let height = kw_get_int(config, "height", self.config.height);
-        let background_color = kw_get_str(config, "background_color", self.config.background_color);
+        let width = kw_get_int(self.config, "width", 20);
+        let height = kw_get_int(self.config, "height", 20);
+        let radius = kw_get_int(self.config, "radius", 20);
+        let background_color = kw_get_str(self.config, "background_color", "white");
 
         /*
          *  Container (Group)
          */
         let ka_container = new Konva.Group({
-            id: kw_get_str(config, "id", self.config.id),
-            name: kw_get_str(config, "name", self.config.name),
-            x: kw_get_int(config, "x", self.config.x),
-            y: kw_get_int(config, "y", self.config.y),
+            id: kw_get_str(self.config, "id", ""),
+            name: kw_get_str(self.config, "name", ""),
+            x: kw_get_int(self.config, "x", 0),
+            y: kw_get_int(self.config, "y", 0),
             width: width,
             height: height,
-            visible: kw_get_bool(config, "visible", self.config.visible)
+            visible: kw_get_bool(self.config, "visible", true)
         });
         ka_container.gobj = self; // cross-link
 
@@ -120,7 +121,7 @@
         let kw_border_shape = __duplicate__(
             kw_get_dict(CONFIG, "kw_border_shape", {})
         );
-        json_object_update(kw_border_shape, kw_get_dict(config, "kw_border_shape", {}));
+        json_object_update(kw_border_shape, kw_get_dict(self.config, "kw_border_shape", {}));
         json_object_update(
             kw_border_shape,
             {
@@ -129,10 +130,20 @@
                 y: 0,
                 width: width,
                 height: height,
+                radius: radius,
                 fill: background_color,
             }
         );
-        let _ka_border_shape = new Konva.Rect(kw_border_shape);
+
+        let _ka_border_shape;
+        switch(self.config.shape) {
+            case "rect":
+                _ka_border_shape = new Konva.Rect(kw_border_shape);
+                break;
+            case "circle":
+            default:
+                _ka_border_shape = new Konva.Circle(kw_border_shape);
+        }
         ka_container.add(_ka_border_shape);
 
         if (self.config.draggable) {
