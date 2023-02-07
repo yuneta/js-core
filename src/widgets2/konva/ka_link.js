@@ -43,18 +43,25 @@
         target_port: null,  // child gobj or target_node with 'port' role
 
         //------------ Own Attributes ------------//
+        shape: "line",  /* "bezier", "arrow", "line" */
+        connection_point: "center",
+        connection_margin: 0,
         background_color: "black",
 
         visible: true,
-        draggable: false,   // Enable (outer dragging) dragging
+        draggable: true,  // TODO TEST pon a false // Enable (outer dragging) dragging
 
         fontFamily: "sans-serif", // "OpenSans"
         icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
 
         kw_border_shape: { /* Border shape */
-            strokeWidth: 2,
-            stroke: "black",
+            strokeWidth: 4,
+            stroke: "gray",
+            pointerLength: 5,
+            pointerWidth: 5,
+            pointerAtBeginning: false,
+            pointerAtEnding: true,
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
@@ -96,11 +103,13 @@
     /********************************************
      *
      ********************************************/
-    function getConnectorPoints(type, from, to)
+    function getConnectorPoints(self, from, to)
     {
-        let to_x, from_x, to_y, from_y;
+        let from_x, from_y, to_x, to_y;
 
-        switch(type) {
+        const radius = self.config.connection_margin;
+
+        switch(self.config.connection_point) {
             case "center":
             default:
                 from_x = from.absolute_dimension.x + from.absolute_dimension.width/2;
@@ -109,18 +118,39 @@
                 to_y = to.absolute_dimension.y + to.absolute_dimension.height/2;
         }
 
-        const dx = to_x - from_x;
-        const dy = to_y - from_y;
-        let angle = Math.atan2(-dy, dx);
+        switch(self.config.shape) {
+            case "bezier": {
+                const dx = to_x - from_x;
+                const dy = to_y - from_y;
+                let angle = Math.atan2(-dy, dx);
 
-        const radius = 0;
+                return [
+                    from_x + -radius * Math.cos(angle + Math.PI),
+                    from_y + radius * Math.sin(angle + Math.PI),
+                    // control1.x,
+                    // control1.y,
+                    // control2.x,
+                    // control2.y,
+                    to_x + -radius * Math.cos(angle),
+                    to_y + radius * Math.sin(angle)
+                ];
+            }
 
-        return [
-            from_x + -radius * Math.cos(angle + Math.PI),
-            from_y + radius * Math.sin(angle + Math.PI),
-            to_x + -radius * Math.cos(angle),
-            to_y + radius * Math.sin(angle),
-        ];
+            case "arrow":
+            case "line":
+            default: {
+                const dx = to_x - from_x;
+                const dy = to_y - from_y;
+                let angle = Math.atan2(-dy, dx);
+
+                return [
+                    from_x + -radius * Math.cos(angle + Math.PI),
+                    from_y + radius * Math.sin(angle + Math.PI),
+                    to_x + -radius * Math.cos(angle),
+                    to_y + radius * Math.sin(angle)
+                ];
+            }
+        }
     }
 
     /********************************************
@@ -135,11 +165,16 @@
         let kw_target_dim = {};
         source_port.gobj_send_event("EV_GET_DIMENSION", kw_source_dim, self);
         target_port.gobj_send_event("EV_GET_DIMENSION", kw_target_dim, self);
+
+        kw_source_dim.position = source_port.position;
+        kw_target_dim.position = target_port.position;
+
         const points = getConnectorPoints(
-            "center",
+            self,
             kw_source_dim,
             kw_target_dim
         );
+
         self.private._ka_border_arrow.points(points);
     }
 
@@ -282,7 +317,26 @@
                 fill: kw_get_str(self.config, "background_color", null, false, false)
             }
         );
-        self.private._ka_border_arrow = new Konva.Arrow(kw_border_shape);
+        switch(self.config.shape) {
+            case "bezier":
+                json_object_update(
+                    kw_border_shape,
+                    {
+                        bezier: true
+                    }
+                );
+                self.private._ka_border_arrow = new Konva.Line(kw_border_shape);
+                break;
+
+            case "line":
+                self.private._ka_border_arrow = new Konva.Line(kw_border_shape);
+                break;
+
+            case "arrow":
+            default:
+                self.private._ka_border_arrow = new Konva.Arrow(kw_border_shape);
+                break;
+        }
         ka_container.add(self.private._ka_border_arrow);
 
         if (self.config.draggable) {
