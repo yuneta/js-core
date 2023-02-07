@@ -154,6 +154,7 @@
                 label: self.config.label,
                 autosize: true,
                 background_color: "#00000000",
+                color: self.config.color,
                 y: self.config.port_shape === "circle"? -height/2: 0,
                 kw_border_shape: {
                     strokeWidth: 0,
