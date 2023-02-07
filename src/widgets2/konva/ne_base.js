@@ -64,7 +64,7 @@
         color: "black",       /* Default color for texts */
 
         visible: true,
-        draggable: true,   // Enable (outer dragging) dragging
+        draggable: false,   // Enable (outer dragging) dragging
 
         top_on_activate: false,     // Move node to the top of its siblings on activation
 

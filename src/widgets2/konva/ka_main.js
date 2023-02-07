@@ -41,7 +41,7 @@
         autoclose: false,   // Activation SERVICE: Close window on pointerup bubbling to stage or Esc key
     };
 
-
+    let first_resize = true;
 
 
             /***************************
@@ -474,7 +474,7 @@
             );
         }
 
-        resize();
+        //resize();
     }
 
 
@@ -629,15 +629,38 @@
         // draw both scene and hit graphs.
         // If the node being drawn is the stage, all the layers will be cleared and redrawn
         // set size of stage: HACK all their layers will be set at the same size
-        self.config.stage.size({
-            width: kw.width,
-            height: kw.height
-        });
 
-        // Send directly to childs events and publish for others
-        self.gobj_send_event_to_childs(event, kw, src);
-        self.gobj_publish_event(event, kw, src);
-        self.config.stage.draw();
+        let new_width = kw.width;
+        let new_height = kw.height;
+
+        if(first_resize) {
+            if(new_width > 0 && new_height > 0) {
+                self.config.stage.size({
+                    width: new_width,
+                    height: new_height
+                });
+
+                // Send directly to childs events and publish for others
+                self.gobj_send_event_to_childs(event, kw, src);
+                self.gobj_publish_event(event, kw, src);
+                self.config.stage.draw();
+                first_resize = false;
+            }
+        } else {
+            if(new_width !== self.config.stage.width() || new_height !== self.config.stage.height()) {
+                let old_size = self.config.stage.size();
+                self.config.stage.size({
+                    width: new_width,
+                    height: new_height
+                });
+
+                self.config.stage.scale({
+                    x: new_width / old_size.width,
+                    y: new_height / old_size.height
+                });
+            }
+        }
+
         return 0;
     }
 

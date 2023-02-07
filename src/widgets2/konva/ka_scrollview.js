@@ -59,7 +59,7 @@ Group(_ka_container)
 
         visible: true,
         panning: true,             // Enable (inner dragging) panning, default true
-        draggable: true,           // Enable (outer dragging) dragging, default false
+        draggable: false,           // Enable (outer dragging) dragging, default false
 
         autosize: false,            // Change dimension to fix all content visible
         fix_dimension_to_screen: false,  // Change dimension to fix window inside screen

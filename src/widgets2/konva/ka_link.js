@@ -49,7 +49,7 @@
         background_color: "black",
 
         visible: true,
-        draggable: true,  // TODO TEST pon a false // Enable (outer dragging) dragging
+        draggable: false,   // Enable (outer dragging) dragging
 
         fontFamily: "sans-serif", // "OpenSans"
         icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
