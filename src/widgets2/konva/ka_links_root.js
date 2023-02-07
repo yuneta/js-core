@@ -51,7 +51,7 @@
     /************************************************
      *  Return the link gobj, null if error
      ************************************************/
-    function create_link(self, kw)
+    function create_link(self, kw, common)
     {
         let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
 
@@ -67,6 +67,8 @@
         // 'id' or 'name' can be use as all port names
         kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
         kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
+
+        json_object_update_missing(kw, common);
 
         return self.yuno.gobj_create(id, Ka_link, kw, self);
     }
@@ -109,12 +111,12 @@
             /*
              *  Single link
              */
-            create_link(self, kw);
+            create_link(self, kw, {});
 
         } else {
             for(let i=0; i<links.length; i++) {
                 let link =  links[i];
-                create_link(self, link);
+                create_link(self, link, kw);
             }
         }
 
