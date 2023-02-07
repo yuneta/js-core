@@ -43,7 +43,7 @@
         target_port: null,  // child gobj or target_node with 'port' role
 
         //------------ Own Attributes ------------//
-        shape: "line",  /* "bezier", "arrow", "line" */
+        shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_point: "center",
         connection_margin: 0,
         background_color: "black",
@@ -57,7 +57,7 @@
 
         kw_border_shape: { /* Border shape */
             strokeWidth: 4,
-            stroke: "gray",
+            stroke: "#00000070",
             pointerLength: 5,
             pointerWidth: 5,
             pointerAtBeginning: false,
@@ -103,6 +103,171 @@
     /********************************************
      *
      ********************************************/
+    function get_control_point(from, to, number)
+    {
+        let x = 0;
+        let y = 0;
+
+        switch(from.position) {
+            case "left":
+                switch(to.position) {
+                    case "left":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "right":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "top":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "bottom":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                }
+                break;
+            case "right":
+                switch(to.position) {
+                    case "left":
+                        switch(number) {
+                            case 1:
+                                x = to.x;
+                                y = from.y;
+                                break;
+                            case 2:
+                                x = from.x;
+                                y = to.y;
+                                break;
+                        }
+                        break;
+                    case "right":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "top":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "bottom":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                }
+                break;
+            case "top":
+                switch(to.position) {
+                    case "left":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "right":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "top":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "bottom":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                }
+                break;
+            case "bottom":
+                switch(to.position) {
+                    case "left":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "right":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "top":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                    case "bottom":
+                        switch(number) {
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                        }
+                        break;
+                }
+                break;
+        }
+
+        return {
+            x: x,
+            y: y
+        };
+    }
+
+    /********************************************
+     *
+     ********************************************/
     function getConnectorPoints(self, from, to)
     {
         let from_x, from_y, to_x, to_y;
@@ -123,16 +288,29 @@
                 const dx = to_x - from_x;
                 const dy = to_y - from_y;
                 let angle = Math.atan2(-dy, dx);
+                let from_ = {
+                    x: from_x + -radius * Math.cos(angle + Math.PI),
+                    y: from_y + radius * Math.sin(angle + Math.PI),
+                    position: from.position
+                };
+                let to_ = {
+                    x: to_x + -radius * Math.cos(angle),
+                    y: to_y + radius * Math.sin(angle),
+                    position: to.position
+                };
+
+                let control1 = get_control_point(from_, to_, 1);
+                let control2 = get_control_point(from_, to_, 2);
 
                 return [
-                    from_x + -radius * Math.cos(angle + Math.PI),
-                    from_y + radius * Math.sin(angle + Math.PI),
-                    // control1.x,
-                    // control1.y,
-                    // control2.x,
-                    // control2.y,
-                    to_x + -radius * Math.cos(angle),
-                    to_y + radius * Math.sin(angle)
+                    from_.x,
+                    from_.y,
+                    control1.x,
+                    control1.y,
+                    control2.x,
+                    control2.y,
+                    to_.x,
+                    to_.y
                 ];
             }
 
@@ -166,8 +344,8 @@
         source_port.gobj_send_event("EV_GET_DIMENSION", kw_source_dim, self);
         target_port.gobj_send_event("EV_GET_DIMENSION", kw_target_dim, self);
 
-        kw_source_dim.position = source_port.position;
-        kw_target_dim.position = target_port.position;
+        kw_source_dim.position = source_port.config.position;
+        kw_target_dim.position = target_port.config.position;
 
         const points = getConnectorPoints(
             self,
