@@ -633,7 +633,7 @@
         let new_width = kw.width;
         let new_height = kw.height;
 
-        if(first_resize) {
+        if(first_resize || 1) {
             if(new_width > 0 && new_height > 0) {
                 self.config.stage.size({
                     width: new_width,
