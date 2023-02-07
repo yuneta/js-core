@@ -103,165 +103,73 @@
     /********************************************
      *
      ********************************************/
-    function get_control_point(from, to, number)
+    function get_control_points(from, to)
     {
-        let x = 0;
-        let y = 0;
+        let x1 = 0;
+        let y1 = 0;
+        let x2 = 0;
+        let y2 = 0;
 
         switch(from.position) {
             case "left":
                 switch(to.position) {
                     case "left":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "right":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "top":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "bottom":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                 }
                 break;
             case "right":
                 switch(to.position) {
                     case "left":
-                        switch(number) {
-                            case 1:
-                                x = to.x;
-                                y = from.y;
-                                break;
-                            case 2:
-                                x = from.x;
-                                y = to.y;
-                                break;
-                        }
+                        x1 = from.x + (to.x - from.x)/3 * 2;
+                        y1 = from.y;
+                        x2 = from.x + (to.x - from.x)/3;
+                        y2 = to.y;
                         break;
                     case "right":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "top":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "bottom":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                 }
                 break;
             case "top":
                 switch(to.position) {
                     case "left":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "right":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "top":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "bottom":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                 }
                 break;
             case "bottom":
                 switch(to.position) {
                     case "left":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "right":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "top":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                     case "bottom":
-                        switch(number) {
-                            case 1:
-                                break;
-                            case 2:
-                                break;
-                        }
                         break;
                 }
                 break;
         }
 
         return {
-            x: x,
-            y: y
+            x1: x1,
+            y1: y1,
+            x2: x2,
+            y2: y2
         };
     }
 
@@ -299,16 +207,15 @@
                     position: to.position
                 };
 
-                let control1 = get_control_point(from_, to_, 1);
-                let control2 = get_control_point(from_, to_, 2);
+                let control_points = get_control_points(from_, to_);
 
                 return [
                     from_.x,
                     from_.y,
-                    control1.x,
-                    control1.y,
-                    control2.x,
-                    control2.y,
+                    control_points.x1,
+                    control_points.y1,
+                    control_points.x2,
+                    control_points.y2,
                     to_.x,
                     to_.y
                 ];
