@@ -346,9 +346,9 @@
             case "text":
                 if(self.private._ka_label) {
                     if(color) {
-                        shape_label_text_color(self.private._ka_label, color);
+                        self.private._ka_label.shape_label_text_color(color);
                     } else {
-                        kw["color"] = shape_label_text_color(self.private._ka_label);
+                        kw["color"] = self.private._ka_label.shape_label_text_color();
                     }
                 }
                 break;
@@ -356,9 +356,9 @@
             case "icon":
                 if(self.private._ka_label) {
                     if (color) {
-                        shape_label_icon_color(self.private._ka_label, color);
+                        self.private._ka_label.shape_label_icon_color(color);
                     } else {
-                        kw["color"] = shape_label_icon_color(self.private._ka_label);
+                        kw["color"] = self.private._ka_label.shape_label_icon_color();
                     }
                 }
                 break;

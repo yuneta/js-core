@@ -117,6 +117,72 @@
             config.height = ka_container_dimension.height;
         }
 
+        /*-------------------------------*
+         *      Functions
+         *-------------------------------*/
+        ka_container.shape_label_background_color = function(color)
+        {
+            let ka = ka_container.find(".ka_border_shape");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return null;
+            }
+            if(color) {
+                ka[0].fill(color);
+            } else {
+                color = ka[0].fill();
+            }
+
+            return color;
+        };
+
+        ka_container.shape_label_icon_color = function(color)
+        {
+            let ka = ka_container.find(".ka_icon");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return null;
+            }
+            if(color) {
+                ka[0].fill(color);
+            } else {
+                color = ka[0].fill();
+            }
+
+            return color;
+        };
+
+        ka_container.shape_label_text_color = function(color)
+        {
+            let ka = ka_container.find(".ka_text");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return null;
+            }
+            if(color) {
+                ka[0].fill(color);
+            } else {
+                color = ka[0].fill();
+            }
+
+            return color;
+        };
+
+        ka_container.shape_label_size = function(size)
+        {
+            ka_container.size(size);
+
+            /*
+             *  Resize background rect
+             */
+            let ka = ka_container.find(".ka_border_shape");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return;
+            }
+            ka.size(size);
+        };
+
         return ka_container;
     }
 
@@ -324,67 +390,8 @@
         return container;
     }
 
-    /********************************************
-     *
-     ********************************************/
-    function shape_label_icon_color(ka_container, color)
-    {
-        let ka = ka_container.find(".ka_icon");
-        if(ka.length === 0) {
-            log_error("ka not found");
-            return null;
-        }
-        if(color) {
-            ka[0].fill(color);
-        } else {
-            color = ka[0].fill();
-        }
-
-        return color;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function shape_label_text_color(ka_container, color)
-    {
-        let ka = ka_container.find(".ka_text");
-        if(ka.length === 0) {
-            log_error("ka not found");
-            return null;
-        }
-        if(color) {
-            ka[0].fill(color);
-        } else {
-            color = ka[0].fill();
-        }
-
-        return color;
-    }
-
-    /********************************************
-     *
-     ********************************************/
-    function shape_label_size(ka_container, size)
-    {
-        ka_container.size(size);
-
-        /*
-         *  Resize background rect
-         */
-        let ka = ka_container.find(".ka_border_shape");
-        if(ka.length === 0) {
-            log_error("ka not found");
-            return;
-        }
-        ka.size(size);
-    }
-
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
     exports.create_shape_label_with_icon = create_shape_label_with_icon;
-    exports.shape_label_icon_color = shape_label_icon_color;
-    exports.shape_label_text_color = shape_label_text_color;
-    exports.shape_label_size = shape_label_size;
 })(this);

@@ -892,6 +892,15 @@
         return self.private._ka_container;
     };
 
+    /************************************************
+     *      Local Method
+     ************************************************/
+    proto.get_ka_title_label = function()
+    {
+        let self = this;
+        return self.private._ka_title;
+    };
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================

@@ -218,18 +218,18 @@
         switch(kw.what) {
             case "text":
                 if(color) {
-                    shape_label_text_color(self.private._ka_container, color);
+                    self.private._ka_container.shape_label_text_color(color);
                 } else {
-                    kw["color"] = shape_label_text_color(self.private._ka_container);
+                    kw["color"] = self.private._ka_container.shape_label_text_color();
                 }
                 break;
 
             case "icon":
             default:
                 if(color) {
-                    shape_label_icon_color(self.private._ka_container, color);
+                    self.private._ka_container.shape_label_icon_color(color);
                 } else {
-                    kw["color"] = shape_label_icon_color(self.private._ka_container);
+                    kw["color"] = self.private._ka_container.shape_label_icon_color();
                 }
                 break;
         }
@@ -275,7 +275,7 @@
          *  Resize container
          */
         let ka_container = self.private._ka_container;
-        shape_label_size(ka_container, {
+        ka_container.shape_label_size({
             width: self.config.width,
             height: self.config.height
         });
