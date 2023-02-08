@@ -122,7 +122,6 @@
                 },
                 self
             );
-self.config.layer.draw(); // TODO TEST quitalo
         }
 
         return 0;

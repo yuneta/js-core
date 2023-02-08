@@ -244,8 +244,6 @@
      ********************************************/
     function update_link_path(self)
     {
-        self.config.layer.draw(); // TODO TEST quitalo
-
         let source_port = self.private._source_port;
         let target_port = self.private._target_port;
 
@@ -264,8 +262,6 @@
         );
 
         self.private._ka_border_arrow.points(points);
-
-        self.config.layer.draw(); // TODO TEST quitalo
     }
 
     /************************************************
@@ -445,7 +441,6 @@
             //     self.gobj_publish_event("EV_MOVED", ka_container.position());
             // });
         }
-self.config.layer.draw(); // TODO TEST quitalo
     }
 
 
@@ -553,11 +548,8 @@ self.config.layer.draw(); // TODO TEST quitalo
         }
 
         adjust_text_and_icon_size(self);
-self.config.layer.draw(); // TODO TEST quitalo
         create_shape(self);
-self.config.layer.draw(); // TODO TEST quitalo
         link_ports(self);
-self.config.layer.draw(); // TODO TEST quitalo
     };
 
     /************************************************
