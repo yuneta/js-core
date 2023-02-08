@@ -424,7 +424,7 @@
      *      width:
      *      height:
      *
-     *      absolute_dimension: {
+     *      absolute_dimension: { // To layer
      *          x:
      *          y:
      *          width:

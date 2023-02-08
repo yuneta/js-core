@@ -1464,6 +1464,12 @@ Group(_ka_container)
      *          width:
      *          height:
      *      }
+     *      absolute_dimension: { // To layer
+     *          x:
+     *          y:
+     *          width:
+     *          height:
+     *      }
      *  }
      *
      ********************************************/
@@ -1480,7 +1486,7 @@ Group(_ka_container)
         kw["width"] = self.config.width;
         kw["height"] = self.config.height;
 
-        kw["absolute_dimension"] = self.get_konva_container().getClientRect();
+        kw["absolute_dimension"] = self.private._ka_container.getClientRect();
 
         kw["_original_x"] = self.private._original_x;
         kw["_original_y"] = self.private._original_y;

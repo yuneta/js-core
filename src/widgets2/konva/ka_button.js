@@ -294,13 +294,12 @@
      *      width:
      *      height:
      *
-     *      absolute_dimension: {
+     *      absolute_dimension: { // To layer
      *          x:
      *          y:
      *          width:
      *          height:
      *      }
-     *  }
      *
      ********************************************/
     function ac_get_dimension(self, event, kw, src)
@@ -316,7 +315,7 @@
         kw["width"] = self.config.width;
         kw["height"] = self.config.height;
 
-        kw["absolute_dimension"] = self.get_konva_container().getClientRect();
+        kw["absolute_dimension"] = self.private._ka_container.getClientRect();
 
         return 0;
     }
