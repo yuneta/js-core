@@ -125,7 +125,9 @@
      ********************************************/
     function create_label(config)
     {
-        let color = kw_get_str(config, "color", null);
+        let width = kw_get_int(config, "width", CONFIG.width);
+        let height = kw_get_int(config, "height", CONFIG.height);
+        let color = kw_get_str(config, "color", CONFIG.color);
 
         let kw_text_font_properties = __duplicate__(
             kw_get_dict(CONFIG, "kw_text_font_properties", {})
@@ -309,6 +311,11 @@
                 y: 0,
                 fontSize: _text_size
             };
+            if(!config.autosize) {
+                kw_text.width = width;
+                kw_text.height = height;
+            }
+
             json_object_update(kw_text, kw_text_font_properties);
             text_element = new Konva.Text(kw_text);
             container.add(text_element);
