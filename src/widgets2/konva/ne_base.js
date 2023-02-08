@@ -50,7 +50,7 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,       // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,            // Konva layer
-        view: null,             // View containing the node
+        view: null,             // View containing the node (default the parent)
 
         //------------ Own Attributes ------------//
         x: 0,
@@ -146,6 +146,7 @@
         // 'id' or 'name' can be use as all port names
         kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
         kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
+        kw["view"] = self.config.view;
 
         json_object_update_missing(kw, common);
 
@@ -379,7 +380,6 @@
             kw_common.x = port_x;
             kw_common.y = port_y;
             json_object_update_missing(kw_port, kw_common);
-
             kw_port.view = self.config.view;
 
             self.yuno.gobj_create(
@@ -806,6 +806,9 @@
 
         if(!self.config.layer) {
             self.config.layer = self.gobj_parent().config.layer;
+        }
+        if(!self.config.view) {
+            self.config.view = self.gobj_parent();
         }
 
         create_shape(self);

@@ -548,6 +548,9 @@ self.config.layer.draw(); // TODO TEST quitalo
         if(!self.config.layer) {
             self.config.layer = self.gobj_parent().config.layer;
         }
+        if(!self.config.view) {
+            self.config.view = self.gobj_parent();
+        }
 
         adjust_text_and_icon_size(self);
 self.config.layer.draw(); // TODO TEST quitalo

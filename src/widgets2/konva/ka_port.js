@@ -455,9 +455,13 @@
 
         // HACK consider only the port shape, exclude label
         kw["absolute_dimension"] = self.private._ka_border_shape.getClientRect();
+
+        if(!self.config.view) {
+            log_error(sprintf("%s: view of port NULL", self.gobj_short_name()));
+        }
         kw["relative_dimension"] = self.private._ka_border_shape.getClientRect(
             {
-                relativeTo:self.config.view
+                relativeTo:self.config.view.get_konva_container()
             }
         );
 

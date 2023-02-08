@@ -102,7 +102,6 @@
 
             } else if(is_object(item)) {
                 let kw_node = kw_get_dict(item, "kw", {});
-                kw_node.view = self;
                 gobj_node = self.yuno.gobj_create(
                     kw_get_str(item, "id", kw_get_str(item, "name", "")),
                     kw_get_dict_value(item, "gclass", null),
