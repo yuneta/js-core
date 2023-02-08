@@ -1178,10 +1178,10 @@ Group(_ka_container)
      *      "items": [{"__ka_node__":__ka_node__}, ...]
      *  }
      ****************************************************/
-    function ac_add_items(self, event, kw, src)
+    function ac_add_item(self, event, kw, src)
     {
         if (!self.private._ka_container) {
-            log_error("ka_scrollview.ac_add_items(): _ka_container not defined");
+            log_error("ka_scrollview.ac_add_item(): _ka_container not defined");
             return -1;
         }
 
@@ -1210,7 +1210,7 @@ Group(_ka_container)
                     self.private._ka_content_group.add(__ka_node__);
                 }
             } else {
-                log_error("ka_scrollview.ac_add_items(): what fuck is it?");
+                log_error("ka_scrollview.ac_add_item(): what fuck is it?");
             }
             if(self.config.quick_display) {
                 self.private._ka_container.draw();
@@ -1262,10 +1262,10 @@ Group(_ka_container)
      *      if not found then a search
      *      with `id` and/or `name` will be used
      ******************************************************/
-    function ac_remove_items(self, event, kw, src)
+    function ac_remove_item(self, event, kw, src)
     {
         if (!self.private._ka_container) {
-            log_error("ka_scrollview.ac_remove_items(): _ka_container not defined");
+            log_error("ka_scrollview.ac_remove_item(): _ka_container not defined");
             return -1;
         }
 
@@ -1580,8 +1580,8 @@ Group(_ka_container)
 
     let FSM = {
         "event_list": [
-            "EV_ADD_ITEMS",
-            "EV_REMOVE_ITEMS",
+            "EV_ADD_ITEM",
+            "EV_REMOVE_ITEM",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_POSITION",
@@ -1604,8 +1604,8 @@ Group(_ka_container)
         "machine": {
             "ST_IDLE":
             [
-                ["EV_ADD_ITEMS",        ac_add_items,           undefined],
-                ["EV_REMOVE_ITEMS",     ac_remove_items,        undefined],
+                ["EV_ADD_ITEM",         ac_add_item,            undefined],
+                ["EV_REMOVE_ITEM",      ac_remove_item,         undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
                 ["EV_POSITION",         ac_position,            undefined],

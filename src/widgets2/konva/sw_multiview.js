@@ -113,7 +113,7 @@
 
             let k = child.get_konva_container();
             self.private._gobj_ka_scrollview.gobj_send_event(
-                "EV_ADD_ITEMS",
+                "EV_ADD_ITEM",
                 {
                     items: [k]
                 },
@@ -155,7 +155,7 @@
             for(let child in childs) {
                 let k = child.get_konva_container();
                 self.private._gobj_ka_scrollview.gobj_send_event(
-                    "EV_REMOVE_ITEMS",
+                    "EV_REMOVE_ITEM",
                     {
                         items: [k]
                     },

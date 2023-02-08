@@ -50,6 +50,7 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,       // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,            // Konva layer
+        view: null,             // View containing the node
 
         //------------ Own Attributes ------------//
         x: 0,
@@ -379,6 +380,8 @@
             kw_common.y = port_y;
             json_object_update_missing(kw_port, kw_common);
 
+            kw_port.view = self.config.view;
+
             self.yuno.gobj_create(
                 kw_get_str(kw_port, "id", kw_get_str(kw_port, "name", "")),
                 Ka_port,
@@ -543,24 +546,14 @@
     }
 
     /********************************************
-     *  To show a view of multiview:
-     *      {
-     *          "id":
-     *          or
-     *          "name:
-     *      }
-     *  else (to show or hide the multiview self):
-     *      {
-     *          x:
-     *          y:
-     *      }
+     *  TODO review (ka_link too)
      ********************************************/
     function ac_show_or_hide(self, event, kw, src)
     {
         let __ka_main__ = self.yuno.gobj_find_service("__ka_main__", true);
 
         /*--------------------------------------*
-         *  Check if it's the show for a view
+         *  Check if it's the show for a item
          *--------------------------------------*/
         let name = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
         if(!empty_string(name)) {

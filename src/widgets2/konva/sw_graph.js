@@ -26,7 +26,8 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
-        views: [],
+        nodes: [],
+        links: [],
 
         //------- Ka_scrollview Attributes --- HACK use ka_scrollview directly ---------//
         x: 100,
@@ -80,39 +81,43 @@
 
 
     /********************************************
-     *  EV_ADD_VIEW {
-     *      "views": [{id:, gclass:, kw: }, ...]
+     *  EV_ADD_ITEM {
+     *      "items": [{id:, gclass:, kw: }, ...]
      *      or
-     *      "views": [gobj, ...]
+     *      "items": [gobj, ...]
      *  }
      *
      *  You can use "name" instead of "id"
      *
      ********************************************/
-    function ac_add_view(self, event, kw, src)
+    function ac_add_item(self, event, kw, src)
     {
-        let views = kw_get_dict_value(kw, "views", null, false, false);
+        let items = kw_get_dict_value(kw, "items", null, false, false);
 
-        for(let view of views) {
+        for(let item of items) {
             let gobj_node = null;
-            if(is_gobj(view)) {
-                gobj_node = view;
-            } else if(is_object(view)) {
+            if(is_gobj(item)) {
+                gobj_node = item;
+                gobj_node.gobj_write_attr("view", self);
+
+            } else if(is_object(item)) {
+                let kw_node = kw_get_dict(item, "kw", {});
+                kw_node.view = self;
                 gobj_node = self.yuno.gobj_create(
-                    kw_get_str(view, "id", kw_get_str(view, "name", "")),
-                    kw_get_dict_value(view, "gclass", null),
-                    kw_get_dict(view, "kw", {}),
+                    kw_get_str(item, "id", kw_get_str(item, "name", "")),
+                    kw_get_dict_value(item, "gclass", null),
+                    kw_node,
                     self
                 );
-                continue; // goes recurrent ac_add_view() by mt_child_added()
+                continue; // goes recurrent ac_add_item() by mt_child_added()
             } else {
-                log_error("What is it?" + view);
+                log_error("What is it?" + item);
                 continue;
             }
 
             let k = gobj_node.get_konva_container();
             self.private._gobj_ka_scrollview.gobj_send_event(
-                "EV_ADD_ITEMS",
+                "EV_ADD_ITEM",
                 {
                     items: [k]
                 },
@@ -125,37 +130,37 @@ self.config.layer.draw(); // TODO TEST quitalo
     }
 
     /********************************************
-     *  EV_REMOVE_VIEW {
-     *      "views": ["id", ...]
+     *  EV_REMOVE_ITEM {
+     *      "items": ["id", ...]
      *      or
-     *      "views": [{id: "id", }, ...]
+     *      "items": [{id: "id", }, ...]
      *      or
-     *      "views": [gobj, ...]
+     *      "items": [gobj, ...]
      *  }
      ********************************************/
-    function ac_remove_view(self, event, kw, src)
+    function ac_remove_item(self, event, kw, src)
     {
-        let views = kw_get_dict_value(kw, "views", null, false, false);
+        let items = kw_get_dict_value(kw, "items", null, false, false);
 
-        for(let view of views) {
+        for(let item of items) {
             let childs = null;
-            if(is_string(view)) {
-                let name = view;
+            if(is_string(item)) {
+                let name = item;
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_object(view)) {
-                let name = kw_get_str(view, "id", kw_get_str(view, "name", ""));
+            } else if(is_object(item)) {
+                let name = kw_get_str(item, "id", kw_get_str(item, "name", ""));
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_gobj(view)) {
-                childs = [view];
+            } else if(is_gobj(item)) {
+                childs = [item];
             } else {
-                log_error("What is?" + view);
+                log_error("What is?" + item);
                 continue;
             }
 
             for(let child in childs) {
                 let k = child.get_konva_container();
                 self.private._gobj_ka_scrollview.gobj_send_event(
-                    "EV_REMOVE_ITEMS",
+                    "EV_REMOVE_ITEM",
                     {
                         items: [k]
                     },
@@ -171,17 +176,7 @@ self.config.layer.draw(); // TODO TEST quitalo
     }
 
     /********************************************
-     *  To show a view of multiview:
-     *      {
-     *          "id":
-     *          or
-     *          "name:
-     *      }
-     *  else (to show or hide the multiview self):
-     *      {
-     *          x:
-     *          y:
-     *      }
+     *  TODO review
      ********************************************/
     function ac_show_or_hide(self, event, kw, src)
     {
@@ -405,8 +400,8 @@ self.config.layer.draw(); // TODO TEST quitalo
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_VIEW",
-            "EV_REMOVE_VIEW",
+            "EV_ADD_ITEM",
+            "EV_REMOVE_ITEM",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -430,8 +425,8 @@ self.config.layer.draw(); // TODO TEST quitalo
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_VIEW",         ac_add_view,            undefined],
-                ["EV_REMOVE_VIEW",      ac_remove_view,         undefined],
+                ["EV_ADD_ITEM",         ac_add_item,            undefined],
+                ["EV_REMOVE_ITEM",      ac_remove_item,         undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
 
@@ -539,7 +534,8 @@ self.config.layer.draw(); // TODO TEST quitalo
         );
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
-        self.gobj_send_event("EV_ADD_VIEW", {views: self.config.views}, self);
+        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.nodes}, self);
+        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.links}, self);
         if(visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
@@ -579,9 +575,9 @@ self.config.layer.draw(); // TODO TEST quitalo
         let self = this;
         if(self.private._gobj_ka_scrollview) {
             self.gobj_send_event(
-                "EV_ADD_VIEW",
+                "EV_ADD_ITEM",
                 {
-                    views: [child]
+                    items: [child]
                 },
                 self
             );
@@ -595,9 +591,9 @@ self.config.layer.draw(); // TODO TEST quitalo
     {
         let self = this;
         self.gobj_send_event(
-            "EV_REMOVE_VIEW",
+            "EV_REMOVE_ITEM",
             {
-                views: [child]
+                items: [child]
             },
             self
         );

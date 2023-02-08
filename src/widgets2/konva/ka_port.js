@@ -18,6 +18,7 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,        // Konva layer
+        view: null,         // View containing the link's port
 
         //------------ Own Attributes ------------//
         port_shape: "circle",   // "circle" of "rect"
@@ -430,6 +431,12 @@
      *          width:
      *          height:
      *      }
+     *      relative_dimension: { // To view
+     *          x:
+     *          y:
+     *          width:
+     *          height:
+     *      }
      *  }
      *
      ********************************************/
@@ -448,6 +455,11 @@
 
         // HACK consider only the port shape, exclude label
         kw["absolute_dimension"] = self.private._ka_border_shape.getClientRect();
+        kw["relative_dimension"] = self.private._ka_border_shape.getClientRect(
+            {
+                relativeTo:self.config.view
+            }
+        );
 
         return 0;
     }

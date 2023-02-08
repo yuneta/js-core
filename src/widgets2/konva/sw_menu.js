@@ -340,7 +340,7 @@
      *      ]
      *  }
      ********************************************/
-    function ac_add_items(self, event, kw, src)
+    function ac_add_item(self, event, kw, src)
     {
         let items = kw_get_list(kw, "items", [], false, true);
 
@@ -387,7 +387,7 @@
          *  Repaint scrollview
          */
         self.private._gobj_ka_scrollview.gobj_send_event(
-            "EV_ADD_ITEMS",
+            "EV_ADD_ITEM",
             {
                 items: self.private._ka_list
             },
@@ -400,7 +400,7 @@
     /********************************************
      *
      ********************************************/
-    function ac_remove_items(self, event, kw, src)
+    function ac_remove_item(self, event, kw, src)
     {
         let items = kw_get_list(kw, "items", [], false, true);
 
@@ -436,7 +436,7 @@
          *  Repaint scrollview
          */
         self.private._gobj_ka_scrollview.gobj_send_event(
-            "EV_ADD_ITEMS",
+            "EV_ADD_ITEM",
             {
                 items: self.private._ka_list
             },
@@ -668,8 +668,8 @@
 
             "EV_ENABLE_ITEMS",
             "EV_DISABLE_ITEMS",
-            "EV_ADD_ITEMS",
-            "EV_REMOVE_ITEMS",
+            "EV_ADD_ITEM",
+            "EV_REMOVE_ITEM",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -688,8 +688,8 @@
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_ITEMS",        ac_add_items,           undefined],
-                ["EV_REMOVE_ITEMS",     ac_remove_items,        undefined],
+                ["EV_ADD_ITEM",         ac_add_item,            undefined],
+                ["EV_REMOVE_ITEM",      ac_remove_item,         undefined],
                 ["EV_ENABLE_ITEMS",     ac_enable_items,        undefined],
                 ["EV_DISABLE_ITEMS",    ac_disable_items,       undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
@@ -796,7 +796,7 @@
 
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
-        self.gobj_send_event("EV_ADD_ITEMS", {items: self.config.items}, self);
+        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.items}, self);
 
         if(self.config.visible) {
             self.gobj_send_event("EV_SHOW", {}, self);

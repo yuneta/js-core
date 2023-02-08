@@ -34,6 +34,7 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,   // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,        // Konva layer
+        view: null,         // View containing the link
 
         // source_node/target_node must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
         // these gobj/ports can be strings or gobjs
@@ -185,10 +186,10 @@
         switch(self.config.connection_point) {
             case "center":
             default:
-                from_x = from.absolute_dimension.x + from.absolute_dimension.width/2;
-                from_y = from.absolute_dimension.y + from.absolute_dimension.height/2;
-                to_x = to.absolute_dimension.x + to.absolute_dimension.width/2;
-                to_y = to.absolute_dimension.y + to.absolute_dimension.height/2;
+                from_x = from.relative_dimension.x + from.relative_dimension.width/2;
+                from_y = from.relative_dimension.y + from.relative_dimension.height/2;
+                to_x = to.relative_dimension.x + to.relative_dimension.width/2;
+                to_y = to.relative_dimension.y + to.relative_dimension.height/2;
         }
 
         switch(self.config.shape) {

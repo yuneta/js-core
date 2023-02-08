@@ -328,7 +328,7 @@
      *      ]
      *  }
      ********************************************/
-    function ac_add_items(self, event, kw, src)
+    function ac_add_item(self, event, kw, src)
     {
         let items_ = kw_get_list(kw, "items", [], false, true);
         let items = __duplicate__(items_);
@@ -358,7 +358,7 @@
          *  Repaint scrollview
          */
         self.private._gobj_ka_scrollview.gobj_send_event(
-            "EV_ADD_ITEMS",
+            "EV_ADD_ITEM",
             {
                 items: self.private._ka_list
             },
@@ -555,7 +555,7 @@
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_ITEMS",
+            "EV_ADD_ITEM",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -574,7 +574,7 @@
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_ITEMS",        ac_add_items,           undefined],
+                ["EV_ADD_ITEM",         ac_add_item,            undefined],
                 ["EV_ACTIVATE",         ac_activate,            undefined],
                 ["EV_DEACTIVATE",       ac_deactivate,          undefined],
                 ["EV_TOGGLE",           ac_show_or_hide,        undefined],
@@ -678,7 +678,7 @@
         );
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
-        self.gobj_send_event("EV_ADD_ITEMS", {items: self.config.items}, self);
+        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.items}, self);
         self.gobj_send_event("EV_SHOW", {}, self);
     };
 
