@@ -168,6 +168,16 @@
             return color;
         };
 
+        ka_container.shape_label_color = function(color)
+        {
+            let ka = ka_container.find(".ka_icon, .ka_text");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return null;
+            }
+            ka.fill(color);
+        };
+
         ka_container.shape_label_size = function(size)
         {
             ka_container.size(size);
