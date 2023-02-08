@@ -50,7 +50,6 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,       // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,            // Konva layer
-        gobj_links_root: null,  // Root gobj of links
 
         //------------ Own Attributes ------------//
         x: 0,
@@ -149,7 +148,7 @@
 
         json_object_update_missing(kw, common);
 
-        return self.yuno.gobj_create(id, Ka_link, kw, self.config.gobj_links_root);
+        return self.yuno.gobj_create(id, Ka_link, kw, self.gobj_parent());
     }
 
     /********************************************
@@ -814,12 +813,6 @@
 
         if(!self.config.layer) {
             self.config.layer = self.gobj_parent().config.layer;
-        }
-        if(!self.config.gobj_links_root) {
-            self.config.gobj_links_root = self.yuno.gobj_find_service("__links_root__", true);
-            if(!self.config.gobj_links_root) {
-                log_error("gobj_links_root MISSING");
-            }
         }
 
         create_shape(self);

@@ -25,7 +25,6 @@
         stage: null,        // Main Konva Stage
         main_layer: null,   // Main Konva Layer
         static_layer: null, // Top Konva Layer
-        link_layer: null,   // Link Konva Layer
         modal_layer: null,  // Modal Konva Layer
         debug_dimensions: false, // paint dimension on mouseenter to konva's nodes
 
@@ -333,11 +332,6 @@
         });
         main_layer.gobj = self;
 
-        let link_layer = self.config.link_layer = new Konva.Layer({
-            id: "link_layer"
-        });
-        link_layer.gobj = self;
-
         let static_layer = self.config.static_layer = new Konva.Layer({
             id: "static_layer"
         });
@@ -347,7 +341,6 @@
          *  add layers to the stage
          *--------------------------*/
         stage.add(main_layer);
-        stage.add(link_layer);
         stage.add(modal_layer);
         stage.add(static_layer);
 
@@ -741,15 +734,6 @@
         create_canvas(self);
         create_layers(self);
 
-        self.yuno.gobj_create_service(
-            "__links_root__",
-            Ka_links_root,
-            {
-                layer: self.get_link_layer()
-            },
-            self
-        );
-
         subscribe_to_system_resize(self);
     };
 
@@ -836,15 +820,6 @@
     {
         let self = this;
         return self.config.static_layer;
-    };
-
-    /************************************************
-     *      Local Method
-     ************************************************/
-    proto.get_link_layer = function()
-    {
-        let self = this;
-        return self.config.link_layer;
     };
 
     //=======================================================================
