@@ -179,6 +179,7 @@
             if(ka.length > 0) {
                 ka[0].fill(color);
             }
+            return ka_container;
         };
 
         ka_container.shape_label_size = function(size)
@@ -191,9 +192,10 @@
             let ka = ka_container.find(".ka_border_shape");
             if(ka.length === 0) {
                 log_error("ka not found");
-                return;
+                return ka_container;
             }
-            ka.size(size);
+            ka[0].size(size);
+            return ka_container;
         };
 
         return ka_container;
