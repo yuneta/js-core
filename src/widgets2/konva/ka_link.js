@@ -47,7 +47,7 @@
         shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_point: "center",
         connection_margin: 0,
-        background_color: "black",
+        background_color: "#00000070",
 
         visible: true,
         draggable: false,   // Enable (outer dragging) dragging
@@ -58,7 +58,6 @@
 
         kw_border_shape: { /* Border shape */
             strokeWidth: 4,
-            stroke: "#00000070",
             pointerLength: 5,
             pointerWidth: 5,
             pointerAtBeginning: false,
@@ -395,11 +394,11 @@
         let kw_border_shape = __duplicate__(
             kw_get_dict(self.config, "kw_border_shape", {}, false, false)
         );
-        json_object_update(
+        json_object_update_missing(
             kw_border_shape,
             {
                 name: "ka_border_arrow",
-                fill: kw_get_str(self.config, "background_color", null, false, false)
+                stroke: kw_get_str(self.config, "background_color", null)
             }
         );
         switch(self.config.shape) {

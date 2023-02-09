@@ -124,7 +124,7 @@
             kw_get_dict(CONFIG, "kw_border_shape", {})
         );
         json_object_update(kw_border_shape, kw_get_dict(self.config, "kw_border_shape", {}));
-        json_object_update(
+        json_object_update_missing(
             kw_border_shape,
             {
                 name: "ka_border_shape",
