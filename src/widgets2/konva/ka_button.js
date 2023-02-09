@@ -128,24 +128,29 @@
         let id = kw_get_str(self.config, "id", null);
         let action = kw_get_dict_value(self.config, "action", null);
 
-        if(is_null(id)) {
-            if(is_string(item.action)) {
-                self.config.id = action;
+        if(empty_string(id)) {
+            if(!empty_string(action)) {
+                id = action;
+            }
+        }
+        if(is_null(action)) {
+            if(!empty_string(id)) {
+                action = id;
             }
         }
 
         if(is_string(action)) {
             let event = action;
-            self.config.action = function(e) {
+            action = function(e) {
                 e["__share_kw__"] = true; // TODO must be in __temp__
                 self.gobj_publish_event(event, e);
             };
-        } else if(action && !is_function(action)) {
+        } else if(!is_function(action)) {
             log_error("action must be a string or function");
             return ka_container;
         }
 
-        if (is_function(self.config.action)) {
+        if(is_function(action)) {
             ka_container.on("mouseenter", function (e) {
                 self.config.layer.getStage().container().style.cursor = "pointer";
             });
@@ -189,7 +194,7 @@
                  *  so for the activation service will work well.
                  *  BE CAREFUL with service needing bubbling.
                  */
-                self.config.action(e);
+                action(e);
             });
         }
 
