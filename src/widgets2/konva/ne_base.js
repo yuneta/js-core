@@ -150,7 +150,7 @@
 
         json_object_update_missing(kw, common);
 
-        return self.yuno.gobj_create(id, Ka_link, kw, self.gobj_parent());
+        return self.yuno.gobj_create_unique(id, Ka_link, kw, self.gobj_parent());
     }
 
     /********************************************

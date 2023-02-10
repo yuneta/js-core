@@ -272,7 +272,9 @@
 
         if (this.config.trace_creation) {
             let gclass_name = gobj.gclass_name || '';
-            log_debug("💙💙⏩ creating: " + gclass_name + "^" + name);
+            log_debug(sprintf("💙💙⏩ creating: %s%s %s^%s",
+                is_service?"service":"", is_unique?"unique":"", gclass_name, name
+            ));
         }
 
         if(!gobj.gobj_load_persistent_attrs) {
@@ -565,20 +567,11 @@
      ************************************************************/
     proto.gobj_find_unique_gobj = function (gobj_name, verbose)
     {
-        let named_gobj = null;
-
-        try {
-            named_gobj = this._unique_gobjs[gobj_name];
-        } catch (e) {
-            log_warning("gobj unique not found: '" + gobj_name + "'" );
-            return null;
+        let named_gobj = this._unique_gobjs[gobj_name];
+        if(named_gobj) {
+            return named_gobj;
         }
-        try {
-            named_gobj = this._service_gobjs[gobj_name];
-        } catch (e) {
-            log_warning("gobj unique not found: '" + gobj_name + "'" );
-            return null;
-        }
+        named_gobj = this._service_gobjs[gobj_name];
         if(!named_gobj && verbose) {
             log_warning("gobj unique not found: '" + gobj_name + "'" );
         }
@@ -590,14 +583,7 @@
      ************************************************************/
     proto.gobj_find_service = function (service_name, verbose)
     {
-        let service_gobj = null;
-
-        try {
-            service_gobj = this._service_gobjs[service_name];
-        } catch (e) {
-            log_warning("gobj service not found: '" + service_name + "'" );
-            return null;
-        }
+        let service_gobj = this._service_gobjs[service_name];
         if(!service_gobj && verbose) {
             log_warning("gobj service not found: '" + service_name + "'" );
         }
@@ -609,21 +595,21 @@
      ************************************************************/
     function its_me(gobj, shortname)
     {
-        var n = shortname.split("^");
-        var gobj_name =null;
-        var gclass_name = null;
-        if(n.length == 2) {
+        let n = shortname.split("^");
+        let gobj_name =null;
+        let gclass_name = null;
+        if(n.length === 2) {
             gclass_name = n[0];
             gobj_name = n[1];
-            if(gclass_name != gobj.gobj_gclass_name()) {
+            if(gclass_name !== gobj.gobj_gclass_name()) {
                 return false;
             }
-        } else if(n.length == 1){
+        } else if(n.length === 1){
             gobj_name = n[0];
         } else {
             return false;
         }
-        if(gobj_name == gobj.gobj_name()) {
+        if(gobj_name === gobj.gobj_name()) {
             return true;
         }
         return false;
