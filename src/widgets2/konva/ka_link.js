@@ -495,7 +495,6 @@
     function ac_start_animation(self, event, kw, src)
     {
         if(!self.private._ka_photon) {
-
             let kw_photon_shape = __duplicate__(
                 kw_get_dict(self.config, "kw_photon_shape", {}, false, false)
             );
@@ -507,7 +506,12 @@
                 }
             );
 
+
+            // TODO debe ser otro gobj Ka_photon (similar a Ka_port)
             self.private._ka_photon = new Konva.Circle(kw_photon_shape);
+            self.config.layer.add(self.private._ka_photon);
+
+
         }
         self.private._path_length = self.private._ka_path.getLength();
         self.private._photon_idx = 0;
