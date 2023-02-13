@@ -45,7 +45,6 @@
 
         //------------ Own Attributes ------------//
         shape: "bezier",  /* "bezier", "arrow", "line" */
-        connection_point: "center", /* "center" TODO usar el margen, siempre va a ser el center */
         connection_margin: 0,
         background_color: "#00000070",
         speed: 50,      /* pixels by second */
@@ -201,14 +200,10 @@
     {
         let from_x, from_y, to_x, to_y;
 
-        switch(self.config.connection_point) {
-            case "center":
-            default:
-                from_x = from.relative_dimension.x + from.relative_dimension.width/2;
-                from_y = from.relative_dimension.y + from.relative_dimension.height/2;
-                to_x = to.relative_dimension.x + to.relative_dimension.width/2;
-                to_y = to.relative_dimension.y + to.relative_dimension.height/2;
-        }
+        from_x = from.relative_dimension.x + from.relative_dimension.width/2;
+        from_y = from.relative_dimension.y + from.relative_dimension.height/2;
+        to_x = to.relative_dimension.x + to.relative_dimension.width/2 + 1;
+        to_y = to.relative_dimension.y + to.relative_dimension.height/2 + 1;
 
         switch(self.config.shape) {
             case "bezier": {
@@ -230,7 +225,7 @@
 
                 let control_points = get_control_points(from_, to_);
 
-                return [
+                let points = [
                     from_.x,
                     from_.y,
                     control_points.x1,
@@ -240,6 +235,16 @@
                     to_.x,
                     to_.y
                 ];
+                return sprintf("M %d %d C %d %d %d %d %d %d",
+                    points[0],
+                    points[1],
+                    points[2],
+                    points[3],
+                    points[4],
+                    points[5],
+                    points[6],
+                    points[7],
+                );
             }
 
             case "arrow":
@@ -251,12 +256,19 @@
                 let from_radius = from.relative_dimension.width/2 + self.config.connection_margin;
                 let to_radius = to.relative_dimension.width/2 + self.config.connection_margin;
 
-                return [
+                let points = [
                     from_x + -from_radius * Math.cos(angle + Math.PI),
                     from_y + from_radius * Math.sin(angle + Math.PI),
                     to_x + -to_radius * Math.cos(angle),
                     to_y + to_radius * Math.sin(angle)
                 ];
+
+                return sprintf("M %d %d L %d %d",
+                    points[0],
+                    points[1],
+                    points[2],
+                    points[3]
+                );
             }
         }
     }
@@ -283,7 +295,7 @@
             kw_target_dim
         );
 
-        self.private._ka_path.points(path);
+        self.private._ka_path.data(path);
     }
 
     /************************************************
