@@ -45,7 +45,7 @@
 
         //------------ Own Attributes ------------//
         shape: "bezier",  /* "bezier", "arrow", "line" */
-        connection_point: "center",
+        connection_point: "center", /* "center" TODO usar el margen, siempre va a ser el center */
         connection_margin: 0,
         background_color: "#00000070",
         speed: 50,      /* pixels by second */
@@ -80,7 +80,7 @@
         _target_port: null,
 
         _ka_container: null,
-        _ka_line: null,
+        _ka_path: null,
         _path_length: 0,
         _ka_animation: null,
         _ka_photon: null,
@@ -90,9 +90,9 @@
 
 
 
-            /***************************
-             *      Local Methods
-             ***************************/
+    /***************************
+     *      Local Methods
+     ***************************/
 
 
 
@@ -120,12 +120,16 @@
             case "left":
                 switch(to.position) {
                     case "left":
+                        // TODO
                         break;
                     case "right":
+                        // TODO
                         break;
                     case "top":
+                        // TODO
                         break;
                     case "bottom":
+                        // TODO
                         break;
                 }
                 break;
@@ -138,34 +142,45 @@
                         y2 = to.y;
                         break;
                     case "right":
+                        // TODO
                         break;
                     case "top":
+                        // TODO
                         break;
                     case "bottom":
+                        // TODO
                         break;
                 }
                 break;
             case "top":
                 switch(to.position) {
                     case "left":
+                        // TODO
                         break;
                     case "right":
+                        // TODO
                         break;
                     case "top":
+                        // TODO
                         break;
                     case "bottom":
+                        // TODO
                         break;
                 }
                 break;
             case "bottom":
                 switch(to.position) {
                     case "left":
+                        // TODO
                         break;
                     case "right":
+                        // TODO
                         break;
                     case "top":
+                        // TODO
                         break;
                     case "bottom":
+                        // TODO
                         break;
                 }
                 break;
@@ -182,11 +197,9 @@
     /********************************************
      *
      ********************************************/
-    function getConnectorPoints(self, from, to)
+    function getConnectorPath(self, from, to)
     {
         let from_x, from_y, to_x, to_y;
-
-        const radius = self.config.connection_margin;
 
         switch(self.config.connection_point) {
             case "center":
@@ -202,14 +215,16 @@
                 const dx = to_x - from_x;
                 const dy = to_y - from_y;
                 let angle = Math.atan2(-dy, dx);
+                let from_radius = from.relative_dimension.width/2 + self.config.connection_margin;
                 let from_ = {
-                    x: from_x + -radius * Math.cos(angle + Math.PI),
-                    y: from_y + radius * Math.sin(angle + Math.PI),
+                    x: from_x + -from_radius * Math.cos(angle + Math.PI),
+                    y: from_y + from_radius * Math.sin(angle + Math.PI),
                     position: from.position
                 };
+                let to_radius = to.relative_dimension.width/2 + self.config.connection_margin;
                 let to_ = {
-                    x: to_x + -radius * Math.cos(angle),
-                    y: to_y + radius * Math.sin(angle),
+                    x: to_x + -to_radius * Math.cos(angle),
+                    y: to_y + to_radius * Math.sin(angle),
                     position: to.position
                 };
 
@@ -233,12 +248,14 @@
                 const dx = to_x - from_x;
                 const dy = to_y - from_y;
                 let angle = Math.atan2(-dy, dx);
+                let from_radius = from.relative_dimension.width/2 + self.config.connection_margin;
+                let to_radius = to.relative_dimension.width/2 + self.config.connection_margin;
 
                 return [
-                    from_x + -radius * Math.cos(angle + Math.PI),
-                    from_y + radius * Math.sin(angle + Math.PI),
-                    to_x + -radius * Math.cos(angle),
-                    to_y + radius * Math.sin(angle)
+                    from_x + -from_radius * Math.cos(angle + Math.PI),
+                    from_y + from_radius * Math.sin(angle + Math.PI),
+                    to_x + -to_radius * Math.cos(angle),
+                    to_y + to_radius * Math.sin(angle)
                 ];
             }
         }
@@ -260,13 +277,13 @@
         kw_source_dim.position = source_port.config.position;
         kw_target_dim.position = target_port.config.position;
 
-        const points = getConnectorPoints(
+        const path = getConnectorPath(
             self,
             kw_source_dim,
             kw_target_dim
         );
 
-        self.private._ka_line.points(points);
+        self.private._ka_path.points(path);
     }
 
     /************************************************
@@ -407,27 +424,8 @@
                 stroke: kw_get_str(self.config, "background_color", null)
             }
         );
-        switch(self.config.shape) {
-            case "bezier":
-                json_object_update(
-                    kw_border_shape,
-                    {
-                        bezier: true
-                    }
-                );
-                self.private._ka_line = new Konva.Line(kw_border_shape);
-                break;
-
-            case "line":
-                self.private._ka_line = new Konva.Line(kw_border_shape);
-                break;
-
-            case "arrow":
-            default:
-                self.private._ka_line = new Konva.Arrow(kw_border_shape);
-                break;
-        }
-        ka_container.add(self.private._ka_line);
+        self.private._ka_path = new Konva.Path(kw_border_shape);
+        ka_container.add(self.private._ka_path);
 
         if (self.config.draggable) {
             // TODO cuando editar los link desde el grafo hay que entrar por aquí
@@ -451,9 +449,9 @@
 
 
 
-            /***************************
-             *      Actions
-             ***************************/
+    /***************************
+     *      Actions
+     ***************************/
 
 
 
@@ -491,7 +489,7 @@
         }
 
         if(!self.private._ka_animation) {
-            self.private._path_length = self.private._ka_line.getLength(); // TODO move a creacion de line
+            self.private._path_length = self.private._ka_path.getLength(); // TODO move a creacion de line
 
             self.private._ka_animation = new Konva.Animation(
                 function(frame) {
@@ -500,7 +498,7 @@
                     if(self.private._photon_idx >= self.private._path_length) {
                         self.private._photon_idx = 0;
                     }
-                    let position = self.private._ka_line.getPointAtLength(self.private._photon_idx);
+                    let position = self.private._ka_path.getPointAtLength(self.private._photon_idx);
 
                     self.private._ka_photon.setX(position.x);
                     self.private._ka_photon.setY(position.y);
@@ -525,9 +523,9 @@
 
 
 
-            /***************************
-             *      GClass/Machine
-             ***************************/
+    /***************************
+     *      GClass/Machine
+     ***************************/
 
 
 
@@ -544,12 +542,12 @@
         ],
         "machine": {
             "ST_IDLE":
-            [
-                ["EV_MOVING",               ac_moving,              undefined],
-                ["EV_MOVED",                ac_moved,               undefined],
-                ["EV_START_ANIMATION",      ac_start_animation,     undefined],
-                ["EV_STOP_ANIMATION",       ac_stop_animation,      undefined]
-            ]
+                [
+                    ["EV_MOVING",               ac_moving,              undefined],
+                    ["EV_MOVED",                ac_moved,               undefined],
+                    ["EV_START_ANIMATION",      ac_start_animation,     undefined],
+                    ["EV_STOP_ANIMATION",       ac_stop_animation,      undefined]
+                ]
         }
     };
 
@@ -572,9 +570,9 @@
 
 
 
-            /***************************
-             *      Framework Methods
-             ***************************/
+    /***************************
+     *      Framework Methods
+     ***************************/
 
 
 
