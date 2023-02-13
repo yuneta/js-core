@@ -2891,7 +2891,7 @@
      ***************************************************************************/
     function find_gobj_in_list(list, name) // TODO elimina, usa gobj api
     {
-        for(gobj of list) {
+        for(let gobj of list) {
             if(!is_gobj(gobj)) {
                 continue;
             }
@@ -2900,6 +2900,31 @@
             }
         }
         return null;
+    }
+
+    /***************************************************************************
+     *
+     ***************************************************************************/
+    function get_str_list_difference(array1, array2)
+    {
+        let difference1 = [];
+        for (let i = 0; i < array1.length; i++) {
+            if (!array2.includes(array1[i])) {
+                difference1.push(array1[i]);
+            }
+        }
+
+        let difference2 = [];
+        for (let i = 0; i < array2.length; i++) {
+            if (!array1.includes(array2[i])) {
+                difference2.push(array2[i]);
+            }
+        }
+
+        return {
+            array1: difference1,
+            array2: difference2
+        };
     }
 
     //=======================================================================
@@ -3022,5 +3047,6 @@
     exports.is_private_key = is_private_key;
     exports.icono = icono;
     exports.find_gobj_in_list = find_gobj_in_list; // TODO elimina, usa gobj api
+    exports.get_str_list_difference = get_str_list_difference;
 
 })(this);

@@ -258,7 +258,7 @@
         let name = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
         if(!empty_string(name)) {
             if(event === "EV_SHOW") {
-                let gobj = find_gobj_in_list(self.private._views, name);
+                let gobj = find_gobj_in_list(self.private._views, name); // TODO elimina, usa gobj api
                 if(gobj) {
                     gobj.get_konva_container().moveToTop();
                     __ka_main__.gobj_send_event("EV_ACTIVATE", {}, gobj);

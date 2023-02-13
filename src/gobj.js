@@ -1347,7 +1347,8 @@ let __inside_event_loop__ = 0;
         }
         set_event_names = __set__(set_event_names);
         if (event_names.length !== set_event_names.length) {
-            log_error(this.gclass_name + ": event-list OVERFILLED: /" + event_names + " /" + set_event_names);
+            let diff = get_str_list_difference(event_names, set_event_names);
+            log_error(sprintf("%s: event-list OVERFILLED: %j", this.gclass_name, diff));
         }
 
         // check next state names and actions

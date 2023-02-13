@@ -48,6 +48,7 @@
         connection_point: "center",
         connection_margin: 0,
         background_color: "#00000070",
+        speed: 50,      /* pixels by second */
 
         visible: true,
         draggable: false,   // Enable (outer dragging) dragging
@@ -78,7 +79,12 @@
         _target_node: null,
         _target_port: null,
 
-        _ka_container: null
+        _ka_container: null,
+        _ka_line: null,
+        _path_length: 0,
+        _ka_animation: null,
+        _ka_photon: null,
+        _photon_idx: 0
     };
 
 
@@ -260,7 +266,7 @@
             kw_target_dim
         );
 
-        self.private._ka_border_arrow.points(points);
+        self.private._ka_line.points(points);
     }
 
     /************************************************
@@ -409,19 +415,19 @@
                         bezier: true
                     }
                 );
-                self.private._ka_border_arrow = new Konva.Line(kw_border_shape);
+                self.private._ka_line = new Konva.Line(kw_border_shape);
                 break;
 
             case "line":
-                self.private._ka_border_arrow = new Konva.Line(kw_border_shape);
+                self.private._ka_line = new Konva.Line(kw_border_shape);
                 break;
 
             case "arrow":
             default:
-                self.private._ka_border_arrow = new Konva.Arrow(kw_border_shape);
+                self.private._ka_line = new Konva.Arrow(kw_border_shape);
                 break;
         }
-        ka_container.add(self.private._ka_border_arrow);
+        ka_container.add(self.private._ka_line);
 
         if (self.config.draggable) {
             // TODO cuando editar los link desde el grafo hay que entrar por aquí
@@ -453,20 +459,66 @@
 
 
     /********************************************
-     *
+     *  Source or target are moving
      ********************************************/
     function ac_moving(self, event, kw, src)
     {
-        update_link_path(self); // Update the arrow
+        update_link_path(self); // Update the line
+        return 0;
+    }
+
+    /********************************************
+     *  Source or target are end of moving
+     ********************************************/
+    function ac_moved(self, event, kw, src)
+    {
+        update_link_path(self); // Update the line
         return 0;
     }
 
     /********************************************
      *
      ********************************************/
-    function ac_moved(self, event, kw, src)
+    function ac_start_animation(self, event, kw, src)
     {
-        update_link_path(self); // Update the arrow
+        if(!self.private._ka_photon) {
+            self.private._ka_photon = new Konva.Circle({
+                x: 0,
+                y: 0,
+                radius: 10, // TODO a config kw_shape_photon
+                fill: "red" // TODO a config
+            });
+        }
+
+        if(!self.private._ka_animation) {
+            self.private._path_length = self.private._ka_line.getLength(); // TODO move a creacion de line
+
+            self.private._ka_animation = new Konva.Animation(
+                function(frame) {
+                    let increment = self.config.speed * (frame.timeDiff / 1000);
+                    self.private._photon_idx += increment;
+                    if(self.private._photon_idx >= self.private._path_length) {
+                        self.private._photon_idx = 0;
+                    }
+                    let position = self.private._ka_line.getPointAtLength(self.private._photon_idx);
+
+                    self.private._ka_photon.setX(position.x);
+                    self.private._ka_photon.setY(position.y);
+                },
+                self.config.layer
+            );
+        }
+
+        self.private._ka_animation.start();
+
+        return 0;
+    }
+
+    /********************************************
+     *
+     ********************************************/
+    function ac_stop_animation(self, event, kw, src)
+    {
         return 0;
     }
 
@@ -483,7 +535,9 @@
     let FSM = {
         "event_list": [
             "EV_MOVING",
-            "EV_MOVED"
+            "EV_MOVED",
+            "EV_START_ANIMATION",
+            "EV_STOP_ANIMATION"
         ],
         "state_list": [
             "ST_IDLE"
@@ -492,7 +546,9 @@
             "ST_IDLE":
             [
                 ["EV_MOVING",               ac_moving,              undefined],
-                ["EV_MOVED",                ac_moved,               undefined]
+                ["EV_MOVED",                ac_moved,               undefined],
+                ["EV_START_ANIMATION",      ac_start_animation,     undefined],
+                ["EV_STOP_ANIMATION",       ac_stop_animation,      undefined]
             ]
         }
     };
