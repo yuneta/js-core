@@ -50,7 +50,7 @@
         //////////////// Public Attributes //////////////////
         subscriber: null,       // subscriber of publishing messages (Child model: if null will be the parent)
         layer: null,            // Konva layer
-        view: null,             // View containing the node (default the parent)
+        view: null,             // View containing the node (default the parent), used for ports and links
 
         //------------ Own Attributes ------------//
         x: 0,
@@ -150,7 +150,7 @@
 
         json_object_update_missing(kw, common);
 
-        return self.yuno.gobj_create_unique(id, Ka_link, kw, self.gobj_parent());
+        return self.yuno.gobj_create_unique(id, Ka_link, kw, self.config.view);
     }
 
     /********************************************

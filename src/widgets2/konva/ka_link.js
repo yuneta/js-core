@@ -4,6 +4,8 @@
  *          Node's Link
  *          Link two nodes through their ports
  *
+ *          The shape is made with Path class (svg)
+ *
  *          source_node             target_node
  *                  ▼                       ▼
  *              source_port ──────────► target_port
@@ -46,7 +48,8 @@
         //------------ Own Attributes ------------//
         shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_margin: 0,
-        background_color: "#00000070",
+        color: "#000000BB",          /* link (path) color */
+        photon_color: "yellow",
         speed: 50,      /* pixels by second */
 
         visible: true,
@@ -56,15 +59,15 @@
         icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
 
-        kw_border_shape: { /* Border shape */
+        kw_border_shape: { /* Border shape (Path Class)*/
             strokeWidth: 4,
-            pointerLength: 5,
-            pointerWidth: 5,
-            pointerAtBeginning: false,
-            pointerAtEnding: true,
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
+        },
+
+        kw_photon_shape: {
+            radius: 6
         },
 
         timeout_retry: 5,       // timeout retry, in seconds
@@ -432,8 +435,8 @@
         json_object_update_missing(
             kw_border_shape,
             {
-                name: "ka_border_arrow",
-                stroke: kw_get_str(self.config, "background_color", null)
+                name: "ka_border_path",
+                stroke: kw_get_str(self.config, "color", null)
             }
         );
         self.private._ka_path = new Konva.Path(kw_border_shape);
@@ -492,17 +495,24 @@
     function ac_start_animation(self, event, kw, src)
     {
         if(!self.private._ka_photon) {
-            self.private._ka_photon = new Konva.Circle({
-                x: 0,
-                y: 0,
-                radius: 10, // TODO a config kw_shape_photon
-                fill: "red" // TODO a config
-            });
+
+            let kw_photon_shape = __duplicate__(
+                kw_get_dict(self.config, "kw_photon_shape", {}, false, false)
+            );
+            json_object_update_missing(
+                kw_photon_shape,
+                {
+                    name: "ka_border_photon",
+                    fill: kw_get_str(self.config, "photon_color", null)
+                }
+            );
+
+            self.private._ka_photon = new Konva.Circle(kw_photon_shape);
         }
+        self.private._path_length = self.private._ka_path.getLength();
+        self.private._photon_idx = 0;
 
         if(!self.private._ka_animation) {
-            self.private._path_length = self.private._ka_path.getLength(); // TODO move a creacion de line
-
             self.private._ka_animation = new Konva.Animation(
                 function(frame) {
                     let increment = self.config.speed * (frame.timeDiff / 1000);
@@ -529,6 +539,9 @@
      ********************************************/
     function ac_stop_animation(self, event, kw, src)
     {
+        if(self.private._ka_animation) {
+            self.private._ka_animation.stop();
+        }
         return 0;
     }
 
@@ -658,10 +671,56 @@
         return self.private._ka_container;
     };
 
+    /************************************************
+     *  Return the link gobj, null if error
+     ************************************************/
+    function _create_link(self, kw, common)
+    {
+        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
+
+        /*
+         *  Check if link exists
+         */
+        let gobj_link = self.yuno.gobj_find_unique_gobj(id);
+        if(gobj_link) {
+            log_error(sprintf("%s: link already exists '%s'", self.gobj_short_name(), id));
+            return null;
+        }
+
+        // 'id' or 'name' can be use as all port names
+        kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
+        kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
+
+        json_object_update_missing(kw, common);
+
+        return self.yuno.gobj_create_unique(id, Ka_link, kw, self);
+    }
+
+    /************************************************
+     *  Must be call by a graph view
+     ************************************************/
+    function create_link(self, kw)
+    {
+        let links = kw_get_list(kw, "links", null);
+        if(!links) {
+            /*
+             *  Single link
+             */
+            _create_link(self, kw, {});
+
+        } else {
+            for(let i=0; i<links.length; i++) {
+                let link =  links[i];
+                _create_link(self, link, kw);
+            }
+        }
+    }
+
 
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
     exports.Ka_link = Ka_link;
+    exports.create_link = create_link;
 
 })(this);
