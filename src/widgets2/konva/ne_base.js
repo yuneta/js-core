@@ -255,6 +255,12 @@
         if (self.config.draggable) {
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
+                if(ka_container.x() < 0) {
+
+                }
+                if(ka_container.y() < 0) {
+
+                }
                 self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });

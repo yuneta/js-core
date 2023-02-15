@@ -73,6 +73,34 @@
 
 
 
+    /************************************************
+     *  Return the link gobj, null if error
+     ************************************************/
+    function create_link(self, kw, common)
+    {
+        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
+
+        /*
+         *  Check if link exists
+         */
+        let gobj_link = self.yuno.gobj_find_unique_gobj(id);
+        if(gobj_link) {
+            log_error(sprintf("%s: link already exists '%s'", self.gobj_short_name(), id));
+            return null;
+        }
+
+        // 'id' or 'name' can be use as all port names
+        kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
+        kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
+
+        json_object_update_missing(kw, common);
+
+        return self.yuno.gobj_create_unique(id, Ka_link, kw, self);
+    }
+
+
+
+
             /***************************
              *      Actions
              ***************************/
@@ -341,22 +369,33 @@
         } else {
             // Child moving
             if(strcmp(event, "EV_MOVED")===0) {
-                if(kw.x < 0 || kw.y < 0) {
-                    // Refuse negative logic
-                    if(kw.x < 0) {
-                        kw.x = 0;
-                    }
-                    if(kw.y < 0) {
-                        kw.y = 0;
-                    }
-                    src.gobj_send_event("EV_POSITION", kw, self);
-                }
                 let grid = self.config.grid;
+                let change_position = false;
+                if(kw.x < grid || kw.y < grid) {
+                    // Refuse negative logic
+                    if(kw.x < grid) {
+                        kw.x = grid;
+                    }
+                    if(kw.y < grid) {
+                        kw.y = grid;
+                    }
+                    change_position = true;
+                }
                 if(grid > 0) {
                     kw.x = Math.round(kw.x/grid) * grid;
                     kw.y = Math.round(kw.y/grid) * grid;
+                    if(kw.x < grid) {
+                        kw.x = grid;
+                    }
+                    if(kw.y < grid) {
+                        kw.y = grid;
+                    }
+                    change_position = true;
+                }
+                if(change_position) {
                     src.gobj_send_event("EV_POSITION", kw, self);
                 }
+
                 self.private._gobj_ka_scrollview.gobj_send_event(
                     "EV_RESIZE",
                     {
@@ -384,6 +423,60 @@
         return 0;
     }
 
+    /********************************************
+     *  Link supported
+     *
+     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
+     *
+     *  id/name:
+     *      name of link gobj, and name of source_port/target_port if they are empty.
+     *
+     *  source_node:
+     *      - string: name of source gobj (unique or service gobj)
+     *      - gobj: source gobj, must be an unique gobj.
+     *
+     *  target_node:
+     *      - string: name of target gobj (unique or service gobj)
+     *      - gobj: target gobj, must be an unique gobj.
+     *
+     *  source_port: Use `id` if source_port is an empty string
+     *      - string: name of source port gobj, must be a child of self
+     *      - gobj: source port gobj, must be a child of self
+     *
+     *  target_port: Use `id` if target_port is an empty string
+     *      - string: name of target port gobj, must be a child of target_node
+     *      - gobj: target port gobj, must be a child of target_node
+     *
+     ********************************************/
+    function ac_link(self, event, kw, src)
+    {
+        let links = kw_get_list(kw, "links", null);
+        if(!links) {
+            /*
+             *  Single link
+             */
+            create_link(self, kw, {});
+
+        } else {
+            for(let i=0; i<links.length; i++) {
+                let link =  links[i];
+                create_link(self, link, kw);
+            }
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Link supported
+     ********************************************/
+    function ac_unlink(self, event, kw, src)
+    {
+        let source_node = kw_get_dict_value(kw, "source_node", src);
+        // TODO
+        return 0;
+    }
+
 
 
 
@@ -407,6 +500,9 @@
             "EV_SHOW",
             "EV_HIDE",
             "EV_RESIZE",
+
+            "EV_LINK",
+            "EV_UNLINK",
 
             "EV_PANNING",
             "EV_PANNED",
@@ -433,6 +529,9 @@
                 ["EV_POSITION",         ac_position,            undefined],
                 ["EV_SIZE",             ac_size,                undefined],
                 ["EV_RESIZE",           ac_resize,              undefined],
+
+                ["EV_LINK",             ac_link,                undefined],
+                ["EV_UNLINK",           ac_unlink,              undefined],
 
                 ["EV_PANNING",          ac_panning,             undefined],
                 ["EV_PANNED",           ac_panning,             undefined],

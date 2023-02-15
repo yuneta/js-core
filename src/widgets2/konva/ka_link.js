@@ -202,7 +202,7 @@
     /********************************************
      *
      ********************************************/
-    function getConnectorPath(self, from, to)
+    function get_connector_path(self, from, to)
     {
         let from_x, from_y, to_x, to_y;
 
@@ -295,13 +295,15 @@
         kw_source_dim.position = source_port.config.position;
         kw_target_dim.position = target_port.config.position;
 
-        const path = getConnectorPath(
+        const path = get_connector_path(
             self,
             kw_source_dim,
             kw_target_dim
         );
 
         self.private._ka_path.data(path);
+        self.private._path_length = self.private._ka_path.getLength();
+        self.config.layer.draw();
     }
 
     /************************************************
@@ -515,26 +517,34 @@
                 self.config.view
             );
         }
-        self.private._path_length = self.private._ka_path.getLength();
         self.private._photon_idx = 0;
 
         if(!self.private._ka_animation) {
             self.private._ka_animation = new Konva.Animation(
                 function(frame) {
+                    let temporal_hide = false;
                     let increment = self.config.speed * (frame.timeDiff / 1000);
                     self.private._photon_idx += increment;
                     if(self.private._photon_idx >= self.private._path_length) {
                         self.private._photon_idx = 0;
+                        temporal_hide = true;
                     }
                     let position = self.private._ka_path.getPointAtLength(self.private._photon_idx);
 
+                    if(temporal_hide) {
+                        self.private._ka_photon.get_konva_container().visible(false);
+                    }
                     self.private._ka_photon.get_konva_container().x(position.x);
                     self.private._ka_photon.get_konva_container().y(position.y);
+                    if(temporal_hide) {
+                        self.private._ka_photon.get_konva_container().visible(true);
+                    }
                 },
                 self.config.layer
             );
         }
 
+        self.private._ka_photon.get_konva_container().visible(true);
         self.private._ka_animation.start();
 
         return 0;
@@ -547,6 +557,9 @@
     {
         if(self.private._ka_animation) {
             self.private._ka_animation.stop();
+        }
+        if(self.private._ka_photon) {
+            self.private._ka_photon.get_konva_container().visible(false);
         }
         return 0;
     }
