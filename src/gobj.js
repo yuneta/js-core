@@ -321,6 +321,8 @@ let __inside_event_loop__ = 0;
                 return 0;
             }
         }
+        log_error(sprintf("gobj_write_attr(%s): attr not found '%s'", this.gobj_short_name(), key));
+
         return -1;
     };
 

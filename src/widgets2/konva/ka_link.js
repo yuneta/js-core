@@ -48,9 +48,8 @@
         //------------ Own Attributes ------------//
         shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_margin: 0,
-        color: "#000000BB",          /* link (path) color */
-        photon_color: "yellow",
-        speed: 50,      /* pixels by second */
+        color: "#000000BB",     /* link (path) color */
+        speed: 50,              /* animation speed: pixels by second */
 
         visible: true,
         draggable: false,   // Enable (outer dragging) dragging
@@ -67,6 +66,10 @@
         },
 
         kw_photon_shape: {
+            shape: "circle",
+            color: "yellow",
+            width: 12,
+            height: 12,
             radius: 6
         },
 
@@ -502,16 +505,15 @@
                 kw_photon_shape,
                 {
                     name: "ka_border_photon",
-                    fill: kw_get_str(self.config, "photon_color", null)
                 }
             );
 
-
-            // TODO debe ser otro gobj Ka_photon (similar a Ka_port)
-            self.private._ka_photon = new Konva.Circle(kw_photon_shape);
-            self.config.layer.add(self.private._ka_photon);
-
-
+            self.private._ka_photon = self.yuno.gobj_create(
+                "",
+                Ka_photon,
+                kw_photon_shape,
+                self.config.view
+            );
         }
         self.private._path_length = self.private._ka_path.getLength();
         self.private._photon_idx = 0;
@@ -526,8 +528,8 @@
                     }
                     let position = self.private._ka_path.getPointAtLength(self.private._photon_idx);
 
-                    self.private._ka_photon.setX(position.x);
-                    self.private._ka_photon.setY(position.y);
+                    self.private._ka_photon.get_konva_container().x(position.x);
+                    self.private._ka_photon.get_konva_container().y(position.y);
                 },
                 self.config.layer
             );
@@ -701,9 +703,10 @@
     }
 
     /************************************************
+     *  Public function
      *  Must be call by a graph view
      ************************************************/
-    function create_link(self, kw)
+    function create_link(self, kw)  // WARNING: 'self' must be a graph view
     {
         let links = kw_get_list(kw, "links", null);
         if(!links) {

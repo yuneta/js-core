@@ -98,7 +98,6 @@
             let gobj_node = null;
             if(is_gobj(item)) {
                 gobj_node = item;
-                gobj_node.gobj_write_attr("view", self);
 
             } else if(is_object(item)) {
                 let kw_node = kw_get_dict(item, "kw", {});
