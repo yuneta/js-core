@@ -677,14 +677,10 @@
     proto.mt_writing = function(name)
     {
         let self = this;
-        // TODO if(name == "disabled" "selected" "unlocked")
-        // Simulate events:
-        //     "EV_SELECT",
-        //     "EV_UNSELECT",
-        //     "EV_ENABLE",
-        //     "EV_DISABLE",
-        //     "EV_LOCK",
-        //     "EV_UNLOCK",
+
+        if(name === "color") {
+            self.private._ka_border_shape.fill(self.config.color);
+        }
     };
 
     /************************************************

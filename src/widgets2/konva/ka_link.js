@@ -38,21 +38,21 @@
         layer: null,        // Konva layer
         view: null,         // View containing the link
 
+        //------------ Own Attributes ------------//
         // source_node/target_node must support EV_MOVING/EV_MOVED/EV_GET_DIMENSION events
         // these gobj/ports can be strings or gobjs
         source_node: null,  // unique gobj (or his name) with 'node' role
-        source_port: null,  // child gobj of source_node with 'port' role
+        source_port: null,  // child gobj (or his name) of source_node with 'port' role
         target_node: null,  // unique gobj (or his name) with 'node' role
-        target_port: null,  // child gobj or target_node with 'port' role
+        target_port: null,  // child gobj (or his name) of target_node with 'port' role
+        photons: 4,
 
-        //------------ Own Attributes ------------//
         shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_margin: 0,
         color: "#000000BB",     /* link (path) color */
-        speed: 50,              /* animation speed: pixels by second */
+        speed: 100,             /* animation speed: pixels by second */
 
         visible: true,
-        draggable: false,   // Enable (outer dragging) dragging
 
         fontFamily: "sans-serif", // "OpenSans"
         icon_size: 30,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
@@ -79,25 +79,24 @@
         //////////////// Private Attributes /////////////////
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
-        _source_node: null,
-        _source_port: null,
-        _target_node: null,
-        _target_port: null,
+        _gobj_source_node: null,
+        _gobj_source_port: null,
+        _gobj_target_node: null,
+        _gobj_target_port: null,
 
         _ka_container: null,
         _ka_path: null,
         _path_length: 0,
         _ka_animation: null,
-        _ka_photon: null,
-        _photon_idx: 0
+        _ka_photons: []
     };
 
 
 
 
-    /***************************
-     *      Local Methods
-     ***************************/
+                    /***************************
+                     *      Local Methods
+                     ***************************/
 
 
 
@@ -284,8 +283,8 @@
      ********************************************/
     function update_link_path(self)
     {
-        let source_port = self.private._source_port;
-        let target_port = self.private._target_port;
+        let source_port = self.private._gobj_source_port;
+        let target_port = self.private._gobj_target_port;
 
         let kw_source_dim = {};
         let kw_target_dim = {};
@@ -301,9 +300,14 @@
             kw_target_dim
         );
 
+        for(let i=0; i<self.private._ka_photons.length; i++) {
+            let photon = self.private._ka_photons[i];
+            photon.photon_idx = (self.private._path_length / self.private._ka_photons.length) * i;
+        }
+
         self.private._ka_path.data(path);
         self.private._path_length = self.private._ka_path.getLength();
-        self.config.layer.draw();
+        // self.config._ka_path.draw();
     }
 
     /************************************************
@@ -312,8 +316,8 @@
     function link_ports(self)
     {
         let name = self.config.source_node;
-        self.private._source_node = get_unique_gobj(self, name);
-        if(!self.private._source_node) {
+        self.private._gobj_source_node = get_unique_gobj(self, name);
+        if(!self.private._gobj_source_node) {
             log_error(sprintf("%s: unique source node not found: '%s'",
                 self.gobj_short_name(),
                 is_gobj(name)?name.gobj_short_name():name
@@ -322,8 +326,8 @@
         }
 
         name = self.config.target_node;
-        self.private._target_node = get_unique_gobj(self, name);
-        if(!self.private._target_node) {
+        self.private._gobj_target_node = get_unique_gobj(self, name);
+        if(!self.private._gobj_target_node) {
             log_error(sprintf("%s: unique target node not found: '%s'",
                 self.gobj_short_name(),
                 is_gobj(name)?name.gobj_short_name():name
@@ -332,12 +336,12 @@
         }
 
         name = self.config.source_port;
-        self.private._source_port = get_child_gobj(
+        self.private._gobj_source_port = get_child_gobj(
             self,
-            self.private._source_node,
+            self.private._gobj_source_node,
             name
         );
-        if(!self.private._source_port) {
+        if(!self.private._gobj_source_port) {
             log_error(sprintf("%s: source port not found: '%s'",
                 self.gobj_short_name(),
                 is_gobj(name)?name.gobj_short_name():name
@@ -346,12 +350,12 @@
         }
 
         name = self.config.target_port;
-        self.private._target_port = get_child_gobj(
+        self.private._gobj_target_port = get_child_gobj(
             self,
-            self.private._target_node,
+            self.private._gobj_target_node,
             name
         );
-        if(!self.private._target_port) {
+        if(!self.private._gobj_target_port) {
             log_error(sprintf("%s: target port not found: '%s'",
                 self.gobj_short_name(),
                 is_gobj(name)?name.gobj_short_name():name
@@ -359,10 +363,10 @@
             return null;
         }
 
-        self.private._source_node.gobj_subscribe_event("EV_MOVING", {}, self);
-        self.private._source_node.gobj_subscribe_event("EV_MOVED", {}, self);
-        self.private._target_node.gobj_subscribe_event("EV_MOVING", {}, self);
-        self.private._target_node.gobj_subscribe_event("EV_MOVED", {}, self);
+        self.private._gobj_source_node.gobj_subscribe_event("EV_MOVING", {}, self);
+        self.private._gobj_source_node.gobj_subscribe_event("EV_MOVED", {}, self);
+        self.private._gobj_target_node.gobj_subscribe_event("EV_MOVING", {}, self);
+        self.private._gobj_target_node.gobj_subscribe_event("EV_MOVED", {}, self);
 
         update_link_path(self); // Update the arrow
     }
@@ -426,7 +430,6 @@
             id: self.gobj_short_name(),
             name: "ka_container",
             visible: self.config.visible,
-            draggable: self.config.draggable,
             listening: true
         });
         ka_container.gobj = self; // cross-link
@@ -446,32 +449,14 @@
         );
         self.private._ka_path = new Konva.Path(kw_border_shape);
         ka_container.add(self.private._ka_path);
-
-        if (self.config.draggable) {
-            // TODO cuando editar los link desde el grafo hay que entrar por aquí
-            // ka_container.on('dragstart', function (ev) {
-            //     ev.cancelBubble = true;
-            //     self.gobj_publish_event("EV_MOVING", ka_container.position());
-            // });
-            // ka_container.on('dragmove', function (ev) {
-            //     ev.cancelBubble = true;
-            //     document.body.style.cursor = 'pointer';
-            //     self.gobj_publish_event("EV_MOVING", ka_container.position());
-            // });
-            // ka_container.on('dragend', function (ev) {
-            //     ev.cancelBubble = true;
-            //     document.body.style.cursor = 'default';
-            //     self.gobj_publish_event("EV_MOVED", ka_container.position());
-            // });
-        }
     }
 
 
 
 
-    /***************************
-     *      Actions
-     ***************************/
+                    /***************************
+                     *      Actions
+                     ***************************/
 
 
 
@@ -499,7 +484,7 @@
      ********************************************/
     function ac_start_animation(self, event, kw, src)
     {
-        if(!self.private._ka_photon) {
+        if(self.private._ka_photons.length === 0) {
             let kw_photon_shape = __duplicate__(
                 kw_get_dict(self.config, "kw_photon_shape", {}, false, false)
             );
@@ -510,41 +495,44 @@
                 }
             );
 
-            self.private._ka_photon = self.yuno.gobj_create(
-                "",
-                Ka_photon,
-                kw_photon_shape,
-                self.config.view
-            );
+            for(let i=0; i<self.config.photons; i++) {
+                let photon = self.yuno.gobj_create(
+                    "",
+                    Ka_photon,
+                    kw_photon_shape,
+                    self.config.view
+                );
+                self.private._ka_photons.push(photon);
+                photon.photon_idx = (self.private._path_length/self.config.photons)*i;
+            }
         }
-        self.private._photon_idx = 0;
 
         if(!self.private._ka_animation) {
             self.private._ka_animation = new Konva.Animation(
                 function(frame) {
-                    let temporal_hide = false;
                     let increment = self.config.speed * (frame.timeDiff / 1000);
-                    self.private._photon_idx += increment;
-                    if(self.private._photon_idx >= self.private._path_length) {
-                        self.private._photon_idx = 0;
-                        temporal_hide = true;
-                    }
-                    let position = self.private._ka_path.getPointAtLength(self.private._photon_idx);
 
-                    if(temporal_hide) {
-                        self.private._ka_photon.get_konva_container().visible(false);
-                    }
-                    self.private._ka_photon.get_konva_container().x(position.x);
-                    self.private._ka_photon.get_konva_container().y(position.y);
-                    if(temporal_hide) {
-                        self.private._ka_photon.get_konva_container().visible(true);
+                    for(let i=0; i<self.private._ka_photons.length; i++) {
+                        let photon = self.private._ka_photons[i];
+                        photon.photon_idx += increment;
+                        if(photon.photon_idx < 0) {
+                            photon.photon_idx = 0;
+                        }
+                        let idx = photon.photon_idx % self.private._path_length;
+                        let position = self.private._ka_path.getPointAtLength(idx);
+                        photon.get_konva_container().x(position.x);
+                        photon.get_konva_container().y(position.y);
                     }
                 },
                 self.config.layer
             );
         }
 
-        self.private._ka_photon.get_konva_container().visible(true);
+        for(let i=0; i<self.private._ka_photons.length; i++) {
+            let photon = self.private._ka_photons[i];
+            photon.get_konva_container().visible(true);
+        }
+
         self.private._ka_animation.start();
 
         return 0;
@@ -558,8 +546,9 @@
         if(self.private._ka_animation) {
             self.private._ka_animation.stop();
         }
-        if(self.private._ka_photon) {
-            self.private._ka_photon.get_konva_container().visible(false);
+        for(let i=0; i<self.private._ka_photons.length; i++) {
+            let photon = self.private._ka_photons[i];
+            photon.get_konva_container().visible(false);
         }
         return 0;
     }
@@ -567,9 +556,9 @@
 
 
 
-    /***************************
-     *      GClass/Machine
-     ***************************/
+                    /***************************
+                     *      GClass/Machine
+                     ***************************/
 
 
 
@@ -682,12 +671,41 @@
     };
 
     /************************************************
+     *      Framework Method writing
+     ************************************************/
+    proto.mt_writing = function(name)
+    {
+        let self = this;
+
+        if(name === "color") {
+            self.private._ka_path.stroke(self.config.color);
+        }
+    };
+
+    /************************************************
      *      Local Method
      ************************************************/
     proto.get_konva_container = function()
     {
         let self = this;
         return self.private._ka_container;
+    };
+
+    /************************************************
+     *      Local Method
+     ************************************************/
+    proto.get_private_data = function()
+    {
+        let self = this;
+        return {
+            gobj_source_node: self.private._gobj_source_node,
+            gobj_source_port: self.private._gobj_source_port,
+            gobj_target_node: self.private._gobj_target_node,
+            gobj_target_port: self.private._gobj_target_port,
+            ka_container: self.private._ka_container,
+            ka_path: self.private._ka_path,
+            ka_photon: self.private._ka_photon
+        };
     };
 
     /************************************************
@@ -719,8 +737,13 @@
      *  Public function
      *  Must be call by a graph view
      ************************************************/
-    function create_link(self, kw)  // WARNING: 'self' must be a graph view
+    function create_link(self, kw)
     {
+        if(self.gobj_gclass_name()!=="Sw_graph") {
+            log_error(sprintf("create_link(): Not a Sw_graph gclass"));
+            return;
+        }
+
         let links = kw_get_list(kw, "links", null);
         if(!links) {
             /*
@@ -735,7 +758,6 @@
             }
         }
     }
-
 
     //=======================================================================
     //      Expose the class via the global object
