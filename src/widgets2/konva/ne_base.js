@@ -9,7 +9,7 @@
  *
 
 
-                                ┌── Top Ports 'top'
+                                ┌── Top Ports (Channels) 'top'
         Button 'top_left'       │                   ┌──────── Button 'top_right'
               │                 ▼                   ▼
               │      ┌─────┬──┬──┬──┬──┬──┬──┬──┬─────┐
@@ -17,10 +17,10 @@
                      ├─────┼──┴──┴──┴──┴──┴──┴──┼─────┤
                      │     │     'title'        │     │
                      ├─────┤                    ├─────┤
-           ┌───────► │     │                    │     │ ─────► Output Ports 'output'
+           ┌───────► │     │                    │     │ ─────► Output Ports (Channels) 'output'
            │         ├─────┤     Scrollview     ├─────┤
  Input Ports 'input' │     │     'center'       │     │
-                     ├─────┤                    ├─────┤
+ (Channels)          ├─────┤                    ├─────┤
                      │     │                    │     │
                      ├─────┤                    ├─────┤
                      │     │                    │     │
@@ -30,7 +30,7 @@
                       ▲         ▲                    ▲
    Button             │         │                    │
       'bottom_left' ──┘         │                    └─────── Button 'bottom_right'
-                                └─── Bottom Ports 'bottom'
+                                └─── Bottom Ports (Channels) 'bottom'
 
 
  *          Copyright (c) 2023 Niyamaka.

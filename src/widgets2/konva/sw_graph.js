@@ -631,7 +631,7 @@
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
 
         self.gobj_send_event("EV_ADD_ITEM", {items: self.config.nodes}, self);
-        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.links}, self);
+        self.gobj_send_event("EV_ADD_LINK", {links: self.config.links}, self);
         if(visible) {
             self.gobj_send_event("EV_SHOW", {}, self);
         }
