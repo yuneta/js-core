@@ -45,7 +45,8 @@
         source_port: null,  // child gobj (or his name) of source_node with 'port' role
         target_node: null,  // unique gobj (or his name) with 'node' role
         target_port: null,  // child gobj (or his name) of target_node with 'port' role
-        photons: 4,
+        photons: 0,
+        photon_color: "yellow",
 
         shape: "bezier",  /* "bezier", "arrow", "line" */
         connection_margin: 0,
@@ -67,7 +68,6 @@
 
         kw_photon_shape: {
             shape: "circle",
-            color: "yellow",
             width: 12,
             height: 12,
             radius: 6
@@ -492,6 +492,7 @@
                 kw_photon_shape,
                 {
                     name: "ka_border_photon",
+                    color: self.config.photon_color
                 }
             );
 
@@ -507,25 +508,27 @@
             }
         }
 
-        if(!self.private._ka_animation) {
-            self.private._ka_animation = new Konva.Animation(
-                function(frame) {
-                    let increment = self.config.speed * (frame.timeDiff / 1000);
+        if(self.private._ka_photons.length > 0) {
+            if(!self.private._ka_animation) {
+                self.private._ka_animation = new Konva.Animation(
+                    function(frame) {
+                        let increment = self.config.speed * (frame.timeDiff / 1000);
 
-                    for(let i=0; i<self.private._ka_photons.length; i++) {
-                        let photon = self.private._ka_photons[i];
-                        photon.photon_idx += increment;
-                        if(photon.photon_idx < 0) {
-                            photon.photon_idx = 0;
+                        for(let i=0; i<self.private._ka_photons.length; i++) {
+                            let photon = self.private._ka_photons[i];
+                            photon.photon_idx += increment;
+                            if(photon.photon_idx < 0) {
+                                photon.photon_idx = 0;
+                            }
+                            let idx = photon.photon_idx % self.private._path_length;
+                            let position = self.private._ka_path.getPointAtLength(idx);
+                            photon.get_konva_container().x(position.x);
+                            photon.get_konva_container().y(position.y);
                         }
-                        let idx = photon.photon_idx % self.private._path_length;
-                        let position = self.private._ka_path.getPointAtLength(idx);
-                        photon.get_konva_container().x(position.x);
-                        photon.get_konva_container().y(position.y);
-                    }
-                },
-                self.config.layer
-            );
+                    },
+                    self.config.layer
+                );
+            }
         }
 
         for(let i=0; i<self.private._ka_photons.length; i++) {
@@ -533,7 +536,9 @@
             photon.get_konva_container().visible(true);
         }
 
-        self.private._ka_animation.start();
+        if(self.private._ka_animation) {
+            self.private._ka_animation.start();
+        }
 
         return 0;
     }
