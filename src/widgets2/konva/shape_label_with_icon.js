@@ -225,7 +225,7 @@
         );
         json_object_update(kw_icon_font_properties, kw_get_dict(config, "kw_icon_font_properties", {}));
         if(color) {
-            if(!kw_has_key(kw_text_font_properties, "fill")) {
+            if(!kw_has_key(kw_icon_font_properties, "fill")) {
                 kw_icon_font_properties.fill = color;
             }
         }
