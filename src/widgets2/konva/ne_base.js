@@ -91,6 +91,10 @@
         port_shape: "circle",
         port_offset: 0,
 
+        port_label: "",              // label text
+        port_label_background_color: "#00000000",  // opacity 0
+        port_label_color: "black",
+
         title: { // HACK See shape_label_with_icon attributes
             height: 30
         },
@@ -287,7 +291,7 @@
     /********************************************
      *
      ********************************************/
-    function create_ports(self, position, kw_common)
+    function create_ports(self, port_label_position, kw_common)
     {
         let node_width = self.config.width;
         let node_height = self.config.height;
@@ -304,7 +308,7 @@
         let ports = kw_get_list(kw_common, "ports", []);
         let port_x, port_y, port_size;
 
-        switch(position) {
+        switch(port_label_position) {
             case "left":
                 port_size = (node_height - (3*padding + title_height))/(ports.length);
                 break;
@@ -323,6 +327,10 @@
         let port_height = kw_get_int(kw_common, "height", self.config.port_height);
         let port_offset = kw_get_int(kw_common, "port_offset", self.config.port_offset);
         let port_shape = kw_get_str(kw_common, "port_shape", self.config.port_shape);
+        let port_label_background_color = kw_get_str(
+            kw_common, "port_label_background_color", self.config.port_label_background_color
+        );
+        let port_label_color = kw_get_str(kw_common, "port_label_color", self.config.port_label_color);
 
         json_object_update(
             kw_common,
@@ -332,7 +340,9 @@
                 width: port_width,
                 height: port_height,
                 port_shape: port_shape,
-                position: position
+                port_label_position: port_label_position,
+                port_label_background_color: port_label_background_color,
+                port_label_color: port_label_color
             }
         );
 
@@ -341,7 +351,7 @@
 
             let port_shape2 = kw_get_str(kw_port, "port_shape", port_shape);
 
-            switch(position) {
+            switch(port_label_position) {
                 case "left":
                     if(port_shape2 === "circle") {
                         port_x = 0;
@@ -646,11 +656,11 @@
         /*
          *  Resize container
          */
-        let ka_container = self.private._ka_container;
-        shape_label_size(ka_container, {
-            width: self.config.width,
-            height: self.config.height
-        });
+        // let ka_container = self.private._ka_container;
+        // shape_label_size(ka_container, { TODO
+        //     width: self.config.width,
+        //     height: self.config.height
+        // });
 
         return 0;
     }

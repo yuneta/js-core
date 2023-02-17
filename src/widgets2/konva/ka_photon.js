@@ -120,24 +120,6 @@
 
     /********************************************
      *  kw: {
-     *      what: "port" | "icon" | "text"
-     *      color:
-     *  }
-     ********************************************/
-    function ac_color(self, event, kw, src)
-    {
-        let color = kw_get_str(kw, "color", "");
-        if(color) {
-            self.private._ka_border_shape.fill(color);
-        } else {
-            kw["color"] = self.private._ka_border_shape.fill();
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  kw: {
      *      x:
      *      y:
      *  }
@@ -186,7 +168,6 @@
 
     let FSM = {
         "event_list": [
-            "EV_COLOR",
             "EV_POSITION",
             "EV_SIZE"
         ],
@@ -196,7 +177,6 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_COLOR",                ac_color,               undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined]
             ]
@@ -281,6 +261,20 @@
     proto.mt_stop = function(kw)
     {
         let self = this;
+    };
+
+    /************************************************
+     *      Framework Method writing
+     ************************************************/
+    proto.mt_writing = function(name)
+    {
+        let self = this;
+
+        switch(name) {
+            case "color":
+                self.private._ka_border_shape.fill(self.config.color);
+                break;
+        }
     };
 
     /************************************************

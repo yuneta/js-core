@@ -22,20 +22,23 @@
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
         label: "",      // text of item
-        value: null,    // Value for some buttons type TODO
         icon: "",       // icon of item (from an icon font)
-        action: null,   // function(e) | string (event to publish when hit item),
+        background_color: "#FFF7E0",
+        color: "black",
+        text_color: null,
+        icon_color: null,
+
+        value: null,    // TODO Value for some buttons type
+        action: null,   // TODO function(e) | string (event to publish when hit item),
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
 
-        x: 0,
+        x: 0,               // HACK: **ALL** attrs are used by shape_label_with_icon()
         y: 0,
         width: 150,
         height: 40,
-        background_color: "#FFF7E0",
-        color: "black",
 
         visible: true,
         draggable: false,       // Enable (outer dragging) dragging
@@ -44,7 +47,7 @@
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
         autosize: false,    // Change dimension to size of font text
 
-        kw_text_font_properties: {
+        kw_text_font_properties: { // HACK: Used by shape_label_with_icon
             // fontSize:    // Override if you don't want it was calculated internally (_text_size)
             fontFamily: "sans-serif", // "OpenSans"
             fontStyle: "normal",
@@ -53,7 +56,7 @@
             verticalAlign: "middle",
             wrap: "char"
         },
-        kw_icon_font_properties: {
+        kw_icon_font_properties: { // HACK: Used by shape_label_with_icon
             // fontSize:    // Override if you don't want it was calculated internally (_icon_size)
             fontFamily: "yuneta-icon-font",
             fontStyle: "normal",
@@ -63,7 +66,7 @@
             wrap: "char"
         },
 
-        kw_border_shape: { /* Border shape */
+        kw_border_shape: { // HACK: Used by shape_label_with_icon
             cornerRadius: 10,
             strokeWidth: 2,
             stroke: "#f5c211ff",
@@ -79,7 +82,7 @@
         _icon_size: 0,      // Calculated by checking browser
         _text_size: 0,      // Calculated by checking browser
 
-        _ka_container: null
+        _ka_container: null // HACK it's the return of shape_label_with_icon()
     };
 
 
@@ -210,37 +213,6 @@
 
 
 
-
-    /********************************************
-     *  kw: {
-     *      what: "icon" | "text"
-     *      color:
-     *  }
-     ********************************************/
-    function ac_color(self, event, kw, src)
-    {
-        let color = kw_get_str(kw, "color", "");
-        switch(kw.what) {
-            case "text":
-                if(color) {
-                    self.private._ka_container.shape_label_text_color(color);
-                } else {
-                    kw["color"] = self.private._ka_container.shape_label_text_color();
-                }
-                break;
-
-            case "icon":
-            default:
-                if(color) {
-                    self.private._ka_container.shape_label_icon_color(color);
-                } else {
-                    kw["color"] = self.private._ka_container.shape_label_icon_color();
-                }
-                break;
-        }
-
-        return 0;
-    }
 
     /********************************************
      *  kw: {
@@ -413,7 +385,6 @@
         "event_list": [
             "EV_MOVING: output no_warn_subs",
             "EV_MOVED: output no_warn_subs",
-            "EV_COLOR",
             "EV_POSITION",
             "EV_SIZE",
             "EV_GET_DIMENSION",
@@ -432,7 +403,6 @@
         "machine": {
             "ST_IDLE":
             [
-                ["EV_COLOR",                ac_color,               undefined],
                 ["EV_POSITION",             ac_position,            undefined],
                 ["EV_SIZE",                 ac_size,                undefined],
                 ["EV_GET_DIMENSION",        ac_get_dimension,       undefined],
@@ -542,6 +512,21 @@
         //     "EV_DISABLE",
         //     "EV_LOCK",
         //     "EV_UNLOCK",
+
+        switch(name) {
+            case "background_color":
+                self.private._ka_container.shape_label_background_color(self.config.background_color);
+                break;
+            case "color":
+                self.private._ka_container.shape_label_color(self.config.color);
+                break;
+            case "icon_color":
+                self.private._ka_container.shape_label_icon_color(self.config.icon_color);
+                break;
+            case "text_color":
+                self.private._ka_container.shape_label_text_color(self.config.text_color);
+                break;
+        }
     };
 
     /************************************************

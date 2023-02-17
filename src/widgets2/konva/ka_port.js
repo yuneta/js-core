@@ -21,12 +21,15 @@
         view: null,         // View containing the link's port
 
         //------------ Own Attributes ------------//
-        port_shape: "circle",   // "circle" of "rect"
-        position: "",   // "left", "right", "top", "bottom"
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
-        label: {},      // optional label, see create_shape_label_with_icon()
-        value: null,    // Value for some ports type TODO
-        action: null,   // function(e) | string (event to publish when hit item),
+        port_shape: "circle",   // "circle" of "rect"
+        port_color: "#FFEEAA",
+
+        port_label: "",              // label text
+        port_label_position: "",     // position of label: "left", "right", "top", "bottom"
+        port_label_background_color: "#00000000",  // opacity 0
+        port_label_color: "black",
+
         disabled: false,    // When True the port is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the port is selected, managed by EV_SELECT/EV_UNSELECT too
         unlocked: false,    // When True designing is enabled, managed by EV_UNLOCK/EV_LOCK too
@@ -35,34 +38,9 @@
         y: 0,
         width: 20,
         height: 20,
-        background_color: "#FFEEAA",
-        color: "black",
 
         visible: true,
         draggable: false,   // Enable (outer dragging) dragging
-
-        icon_size: 18,  // Wanted size, but change by checking pixels in browser (_icon_size will be used)
-        text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
-        autosize: false,    // Change dimension to size of font text
-
-        kw_text_font_properties: {
-            // fontSize:    // Override if you don't want it was calculated internally (_text_size)
-            fontFamily: "sans-serif", // "OpenSans"
-            fontStyle: "normal",
-            padding: 10,
-            align: "center",
-            verticalAlign: "middle",
-            wrap: "char"
-        },
-        kw_icon_font_properties: {
-            // fontSize:    // Override if you don't want it was calculated internally (_icon_size)
-            fontFamily: "yuneta-icon-font",
-            fontStyle: "normal",
-            padding: 10,
-            align: "center",
-            verticalAlign: "middle",
-            wrap: "char"
-        },
 
         kw_border_shape: { /* Border shape */
             strokeWidth: 1,
@@ -71,6 +49,20 @@
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
+        },
+
+        kw_label: {
+            autosize: true,
+            kw_border_shape: {
+                strokeWidth: 0,
+                cornerRadius: 0
+            },
+            kw_text_font_properties: {
+                padding: 0
+            },
+            kw_icon_font_properties: {
+                padding: 0
+            }
         },
 
         quick_display: false,       // For debugging, draw quickly
@@ -101,7 +93,7 @@
     {
         let width = kw_get_int(self.config, "width", 20);
         let height = kw_get_int(self.config, "height", 20);
-        let background_color = kw_get_str(self.config, "background_color", "white");
+        let port_color = kw_get_str(self.config, "port_color", "red");
 
         /*----------------------------*
          *      Container (Group)
@@ -132,7 +124,7 @@
                 y: 0,
                 width: width,
                 height: height,
-                fill: background_color,
+                fill: port_color
             }
         );
 
@@ -149,33 +141,24 @@
         /*----------------------------*
          *      Label
          *----------------------------*/
-        let label = self.config.label;
-        if(is_string(label)) {
-            label = {
-                label: self.config.label,
-                autosize: true,
-                background_color: "#00000000",
-                color: self.config.color,
-                y: self.config.port_shape === "circle"? -height/2: 0,
-                kw_border_shape: {
-                    strokeWidth: 0,
-                    cornerRadius: 0
-                },
-                kw_text_font_properties: {
-                    padding: 0
-                },
-                kw_icon_font_properties: {
-                    padding: 0
-                }
-            };
-        } else if(!is_object(label)) {
-            label = null;
-        }
-
+        let label = self.config.port_label;
         if(label) {
+            let kw_label = __duplicate__(
+                kw_get_dict(self.config, "kw_label", {})
+            );
+            json_object_update_missing(
+                kw_label,
+                {
+                    name: "ka_label",
+                    background_color: self.config.port_label_background_color,
+                    color: self.config.port_label_color,
+                    y: self.config.port_shape === "circle" ? -height / 2 : 0
+                }
+            );
+
             let x = 0;
             let y = 0;
-            switch(self.config.position) {
+            switch(self.config.port_label_position) {
                 case "left":
                     self.private._ka_label = create_shape_label_with_icon(label);
                     x = width;
@@ -678,8 +661,10 @@
     {
         let self = this;
 
-        if(name === "color") {
-            self.private._ka_border_shape.fill(self.config.color);
+        switch(name) {
+            case "color":
+                self.private._ka_border_shape.fill(self.config.color);
+                break;
         }
     };
 

@@ -17,13 +17,15 @@
         label: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
+        background_color: "#FFF7E0",
+        color: "black",
+        text_color: "black",
+        icon_color: "black",
 
         x: 0,
         y: 0,
         width: 150,
         height: 40,
-        background_color: "#FFF7E0",
-        color: "black",
 
         visible: true,
 
@@ -209,14 +211,16 @@
         let width = kw_get_int(config, "width", CONFIG.width);
         let height = kw_get_int(config, "height", CONFIG.height);
         let color = kw_get_str(config, "color", CONFIG.color);
+        let text_color = kw_get_str(config, "text_color", color);
+        let icon_color = kw_get_str(config, "icon_color", color);
 
         let kw_text_font_properties = __duplicate__(
             kw_get_dict(CONFIG, "kw_text_font_properties", {})
         );
         json_object_update(kw_text_font_properties, kw_get_dict(config, "kw_text_font_properties", {}));
-        if(color) {
+        if(text_color) {
             if(!kw_has_key(kw_text_font_properties, "fill")) {
-                kw_text_font_properties.fill = color;
+                kw_text_font_properties.fill = text_color;
             }
         }
 
@@ -224,9 +228,9 @@
             kw_get_dict(CONFIG, "kw_icon_font_properties", {})
         );
         json_object_update(kw_icon_font_properties, kw_get_dict(config, "kw_icon_font_properties", {}));
-        if(color) {
+        if(icon_color) {
             if(!kw_has_key(kw_icon_font_properties, "fill")) {
-                kw_icon_font_properties.fill = color;
+                kw_icon_font_properties.fill = icon_color;
             }
         }
 
