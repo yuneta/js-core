@@ -21,6 +21,7 @@
 
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
+        action: null,   // function(e) | string (event to publish when hit item),
         label: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         background_color: "#FFF7E0",
@@ -29,7 +30,7 @@
         icon_color: null,
 
         value: null,    // TODO Value for some buttons type
-        action: null,   // TODO function(e) | string (event to publish when hit item),
+
         icon_position: "left", /* position of icon combined with text: "top", "bottom", "left", "right" */
         disabled: false,    // When True the button is disabled, managed by EV_DISABLE/EV_ENABLE too
         selected: false,    // When True the button is selected, managed by EV_SELECT/EV_UNSELECT too

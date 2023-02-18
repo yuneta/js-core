@@ -120,9 +120,9 @@
         let x2 = 0;
         let y2 = 0;
 
-        switch(from.position) {
+        switch(from.port_position) {
             case "left":
-                switch(to.position) {
+                switch(to.port_position) {
                     case "left":
                         // TODO
                         break;
@@ -138,7 +138,7 @@
                 }
                 break;
             case "right":
-                switch(to.position) {
+                switch(to.port_position) {
                     case "left":
                         x1 = from.x + (to.x - from.x)/3 * 2;
                         y1 = from.y;
@@ -157,7 +157,7 @@
                 }
                 break;
             case "top":
-                switch(to.position) {
+                switch(to.port_position) {
                     case "left":
                         // TODO
                         break;
@@ -173,7 +173,7 @@
                 }
                 break;
             case "bottom":
-                switch(to.position) {
+                switch(to.port_position) {
                     case "left":
                         // TODO
                         break;
@@ -219,13 +219,13 @@
                 let from_ = {
                     x: from_x + -from_radius * Math.cos(angle + Math.PI),
                     y: from_y + from_radius * Math.sin(angle + Math.PI),
-                    position: from.position
+                    port_position: from.port_position
                 };
                 let to_radius = to.relative_dimension.width/2 + self.config.connection_margin;
                 let to_ = {
                     x: to_x + -to_radius * Math.cos(angle),
                     y: to_y + to_radius * Math.sin(angle),
-                    position: to.position
+                    port_position: to.port_position
                 };
 
                 let control_points = get_control_points(from_, to_);
@@ -291,8 +291,8 @@
         source_port.gobj_send_event("EV_GET_DIMENSION", kw_source_dim, self);
         target_port.gobj_send_event("EV_GET_DIMENSION", kw_target_dim, self);
 
-        kw_source_dim.position = source_port.config.position;
-        kw_target_dim.position = target_port.config.position;
+        kw_source_dim.port_position = source_port.config.port_position;
+        kw_target_dim.port_position = target_port.config.port_position;
 
         const path = get_connector_path(
             self,
@@ -521,9 +521,9 @@
                                 photon.photon_idx = 0;
                             }
                             let idx = photon.photon_idx % self.private._path_length;
-                            let position = self.private._ka_path.getPointAtLength(idx);
-                            photon.get_konva_container().x(position.x);
-                            photon.get_konva_container().y(position.y);
+                            let pos = self.private._ka_path.getPointAtLength(idx);
+                            photon.get_konva_container().x(pos.x);
+                            photon.get_konva_container().y(pos.y);
                         }
                     },
                     self.config.layer

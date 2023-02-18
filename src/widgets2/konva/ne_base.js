@@ -276,11 +276,7 @@
             ka_container.on('dragend', function (ev) {
                 ka_container.opacity(1);
                 ev.cancelBubble = true;
-                if (self.config.action) {
-                    self.config.layer.getStage().container().style.cursor = "pointer";
-                } else {
-                    self.config.layer.getStage().container().style.cursor = "default";
-                }
+                self.config.layer.getStage().container().style.cursor = "default";
                 self.gobj_publish_event("EV_MOVED", ka_container.position());
             });
         }
@@ -291,7 +287,7 @@
     /********************************************
      *
      ********************************************/
-    function create_ports(self, port_label_position, kw_common)
+    function create_ports(self, port_position, kw_common)
     {
         let node_width = self.config.width;
         let node_height = self.config.height;
@@ -308,7 +304,7 @@
         let ports = kw_get_list(kw_common, "ports", []);
         let port_x, port_y, port_size;
 
-        switch(port_label_position) {
+        switch(port_position) {
             case "left":
                 port_size = (node_height - (3*padding + title_height))/(ports.length);
                 break;
@@ -340,7 +336,7 @@
                 width: port_width,
                 height: port_height,
                 port_shape: port_shape,
-                port_label_position: port_label_position,
+                port_position: port_position,
                 port_label_background_color: port_label_background_color,
                 port_label_color: port_label_color
             }
@@ -351,7 +347,7 @@
 
             let port_shape2 = kw_get_str(kw_port, "port_shape", port_shape);
 
-            switch(port_label_position) {
+            switch(port_position) {
                 case "left":
                     if(port_shape2 === "circle") {
                         port_x = 0;

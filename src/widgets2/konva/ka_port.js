@@ -22,11 +22,13 @@
 
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
+        action: null,   // function(e) | string (event to publish when hit item),
         port_shape: "circle",   // "circle" of "rect"
         port_color: "#FFEEAA",
+        port_position: "",          // position of label: "left", "right", "top", "bottom"
 
-        port_label: "",              // label text
-        port_label_position: "",     // position of label: "left", "right", "top", "bottom"
+        port_label: "",             // label text
+        port_label_position: "",    // position of label: "left", "right", "top", "bottom"
         port_label_background_color: "#00000000",  // opacity 0
         port_label_color: "black",
 
@@ -158,7 +160,7 @@
 
             let x = 0;
             let y = 0;
-            switch(self.config.port_label_position) {
+            switch(self.config.port_position) {
                 case "left":
                     self.private._ka_label = create_shape_label_with_icon(label);
                     x = width;
