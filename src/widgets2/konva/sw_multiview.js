@@ -363,7 +363,7 @@
         );
 
         let childs = self.gobj_match_childs();
-        for(let i=0; i<childs; i++) {
+        for(let i=0; i<childs.length; i++) {
             let child = childs[i];
             if(child.gobj_name() === self.gobj_name()) {
                 // Inside container

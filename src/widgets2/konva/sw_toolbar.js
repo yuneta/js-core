@@ -127,7 +127,7 @@
 
         let x=0,y=0,k=null;
 
-        for(let i=0; i<items; i++) {
+        for(let i=0; i<items.length; i++) {
             let item = items[i];
             let gobj_node = null;
             if(is_gobj(item)) {
@@ -203,7 +203,7 @@
     {
         let items = kw_get_dict_value(kw, "items", null, false, false);
 
-        for(let i=0; i<items; i++) {
+        for(let i=0; i<items.length; i++) {
             let item = items[i];
             let childs = null;
             if(is_string(item)) {

@@ -122,7 +122,7 @@
     {
         let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
 
-        for(let i=0; i<nodes; i++) {
+        for(let i=0; i<nodes.length; i++) {
             let node = nodes[i];
             let gobj_node = null;
             if(is_gobj(node)) {
@@ -168,7 +168,7 @@
     {
         let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
 
-        for(let i=0; i<nodes; i++) {
+        for(let i=0; i<nodes.length; i++) {
             let node = nodes[i];
             let childs = null;
             if(is_string(node)) {
@@ -205,42 +205,64 @@
     /********************************************
      *  Link supported
      *
-     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
+     *  EV_LINK {
+     *      "links": [{id:, gclass:, kw: }, ...]
+     *      or
+     *      "links": [gobj, ...]
+     *  }
      *
-     *  id/name:
-     *      name of link gobj, and name of source_port/target_port if they are empty.
+     *  kw_link:
+     *      You can use "name" instead of "id"
      *
-     *  source_node:
-     *      - string: name of source gobj (unique or service gobj)
-     *      - gobj: source gobj, must be an unique gobj.
+     *      id/name:
+     *          name of link gobj, and name of source_port/target_port if they are empty.
      *
-     *  target_node:
-     *      - string: name of target gobj (unique or service gobj)
-     *      - gobj: target gobj, must be an unique gobj.
+     *      source_node:
+     *          - string: name of source gobj (unique or service gobj)
+     *          - gobj: source gobj, must be an unique gobj.
      *
-     *  source_port: Use `id` if source_port is an empty string
-     *      - string: name of source port gobj, must be a child of self
-     *      - gobj: source port gobj, must be a child of self
+     *      target_node:
+     *          - string: name of target gobj (unique or service gobj)
+     *          - gobj: target gobj, must be an unique gobj.
      *
-     *  target_port: Use `id` if target_port is an empty string
-     *      - string: name of target port gobj, must be a child of target_node
-     *      - gobj: target port gobj, must be a child of target_node
+     *      source_port: Use `id` if source_port is an empty string
+     *          - string: name of source port gobj, must be a child of self
+     *          - gobj: source port gobj, must be a child of self
+     *
+     *      target_port: Use `id` if target_port is an empty string
+     *          - string: name of target port gobj, must be a child of target_node
+     *          - gobj: target port gobj, must be a child of target_node
      *
      ********************************************/
     function ac_link(self, event, kw, src)
     {
-        let links = kw_get_list(kw, "links", null);
-        if(!links) {
-            /*
-             *  Single link
-             */
-            create_link(self, kw, {});
+        let links = kw_get_dict_value(kw, "links", null, false, false);
 
-        } else {
-            for(let i=0; i<links.length; i++) {
-                let link =  links[i];
-                create_link(self, link, kw);
+        for(let i=0; i<links.length; i++) {
+            let link = links[i];
+            let gobj_link = null;
+            if(is_gobj(link)) {
+                gobj_link = link;
+
+            } else if(is_object(link)) {
+                for(let i=0; i<links.length; i++) {
+                    let link =  links[i];
+                    create_link(self, link, kw);
+                }
+                continue; // goes recurrent ac_add_link() by mt_child_added()
+            } else {
+                log_error("What is it?" + link);
+                continue;
             }
+
+            let k = gobj_link.get_konva_container();
+            self.private._gobj_ka_scrollview.gobj_send_event(
+                "EV_ADD_ITEM",
+                {
+                    items: [k]
+                },
+                self
+            );
         }
 
         return 0;
@@ -710,13 +732,25 @@
     proto.mt_child_removed = function(child)
     {
         let self = this;
-        self.gobj_send_event(
-            "EV_REMOVE_NODE",
-            {
-                nodes: [child]
-            },
-            self
-        );
+        if(child.gobj_gclass_name()==="Ne_base") {
+            self.gobj_send_event(
+                "EV_REMOVE_NODE",
+                {
+                    nodes: [child]
+                },
+                self
+            );
+        }
+
+        if(child.gobj_gclass_name()==="Ka_link") {
+            self.gobj_send_event(
+                "EV_UNLINK",
+                {
+                    links: [child]
+                },
+                self
+            );
+        }
     };
 
     /************************************************
