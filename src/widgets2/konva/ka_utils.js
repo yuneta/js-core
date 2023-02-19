@@ -181,7 +181,8 @@
         if(k.getChildren) {
             let list = k.getChildren();
             let childs = jn["zchilds"] = [];
-            for(let child of list) {
+            for(let i=0; i<list.length; i++) {
+                let child = list[i];
                 let _jn = {};
                 childs.push(_jn);
                 _log_konva_tree0(_jn, child, verbose);
@@ -239,7 +240,8 @@
         if(k.getChildren) {
             let list = k.getChildren();
             let childs = jn["zchilds"] = [];
-            for(let child of list) {
+            for(let i=0; i<list.length; i++) {
+                let child = list[i];
                 let _jn = {};
                 childs.push(_jn);
                 _log_konva_tree(_jn, child, verbose);

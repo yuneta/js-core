@@ -674,56 +674,6 @@
         return 0;
     }
 
-    /********************************************
-     *  Link supported
-     *
-     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
-     *
-     *  id/name:
-     *      name of link gobj, and name of source_port/target_port if they are empty.
-     *
-     *  target_node:
-     *      - string: name of target gobj (unique or service gobj)
-     *      - gobj: target gobj, must be an unique gobj.
-     *
-     *  source_port: Use `id` if source_port is an empty string
-     *      - string: name of source port gobj, must be a child of self
-     *      - gobj: source port gobj, must be a child of self
-     *
-     *  target_port: Use `id` if target_port is an empty string
-     *      - string: name of target port gobj, must be a child of target_node
-     *      - gobj: target port gobj, must be a child of target_node
-     *
-     ********************************************/
-    function ac_link(self, event, kw, src)
-    {
-        let links = kw_get_list(kw, "links", null);
-        if(!links) {
-            /*
-             *  Single link
-             */
-            create_link(self, kw, {});
-
-        } else {
-            for(let i=0; i<links.length; i++) {
-                let link =  links[i];
-                create_link(self, link, kw);
-            }
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  Link supported
-     ********************************************/
-    function ac_unlink(self, event, kw, src)
-    {
-        let source_node = kw_get_dict_value(kw, "source_node", src);
-        // TODO
-        return 0;
-    }
-
 
 
 
@@ -748,10 +698,7 @@
             "EV_HIDE",
             "EV_POSITION",
             "EV_SIZE",
-            "EV_RESIZE",
-
-            "EV_LINK",
-            "EV_UNLINK"
+            "EV_RESIZE"
         ],
         "state_list": [
             "ST_IDLE"
@@ -760,6 +707,7 @@
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
+
                 ["EV_ADD_PORT",         ac_add_port,            undefined],
                 ["EV_REMOVE_PORT",      ac_remove_port,         undefined],
 
@@ -771,10 +719,7 @@
                 ["EV_HIDE",             ac_show_or_hide,        undefined],
                 ["EV_POSITION",         ac_position,            undefined],
                 ["EV_SIZE",             ac_size,                undefined],
-                ["EV_RESIZE",           ac_resize,              undefined],
-
-                ["EV_LINK",             ac_link,                undefined],
-                ["EV_UNLINK",           ac_unlink,              undefined]
+                ["EV_RESIZE",           ac_resize,              undefined]
             ]
         }
     };
@@ -829,8 +774,6 @@
         }
 
         create_shape(self);
-
-        self.gobj_send_event("EV_ADD_PORT", self.config, self);
     };
 
     /************************************************
@@ -855,6 +798,7 @@
     proto.mt_start = function(kw)
     {
         let self = this;
+        self.gobj_send_event("EV_ADD_PORT", self.config, self);
     };
 
     /************************************************

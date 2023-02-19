@@ -109,35 +109,36 @@
 
 
     /********************************************
-     *  EV_ADD_ITEM {
-     *      "items": [{id:, gclass:, kw: }, ...]
+     *  EV_ADD_NODE {
+     *      "nodes": [{id:, gclass:, kw: }, ...]
      *      or
-     *      "items": [gobj, ...]
+     *      "nodes": [gobj, ...]
      *  }
      *
      *  You can use "name" instead of "id"
      *
      ********************************************/
-    function ac_add_item(self, event, kw, src)
+    function ac_add_node(self, event, kw, src)
     {
-        let items = kw_get_dict_value(kw, "items", null, false, false);
+        let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
 
-        for(let item of items) {
+        for(let i=0; i<nodes; i++) {
+            let node = nodes[i];
             let gobj_node = null;
-            if(is_gobj(item)) {
-                gobj_node = item;
+            if(is_gobj(node)) {
+                gobj_node = node;
 
-            } else if(is_object(item)) {
-                let kw_node = kw_get_dict(item, "kw", {});
+            } else if(is_object(node)) {
+                let kw_node = kw_get_dict(node, "kw", {});
                 gobj_node = self.yuno.gobj_create(
-                    kw_get_str(item, "id", kw_get_str(item, "name", "")),
-                    kw_get_dict_value(item, "gclass", null),
+                    kw_get_str(node, "id", kw_get_str(node, "name", "")),
+                    kw_get_dict_value(node, "gclass", null),
                     kw_node,
                     self
                 );
-                continue; // goes recurrent ac_add_item() by mt_child_added()
+                continue; // goes recurrent ac_add_node() by mt_child_added()
             } else {
-                log_error("What is it?" + item);
+                log_error("What is it?" + node);
                 continue;
             }
 
@@ -155,30 +156,31 @@
     }
 
     /********************************************
-     *  EV_REMOVE_ITEM {
-     *      "items": ["id", ...]
+     *  EV_REMOVE_NODE {
+     *      "nodes": ["id", ...]
      *      or
-     *      "items": [{id: "id", }, ...]
+     *      "nodes": [{id: "id", }, ...]
      *      or
-     *      "items": [gobj, ...]
+     *      "nodes": [gobj, ...]
      *  }
      ********************************************/
-    function ac_remove_item(self, event, kw, src)
+    function ac_remove_node(self, event, kw, src)
     {
-        let items = kw_get_dict_value(kw, "items", null, false, false);
+        let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
 
-        for(let item of items) {
+        for(let i=0; i<nodes; i++) {
+            let node = nodes[i];
             let childs = null;
-            if(is_string(item)) {
-                let name = item;
+            if(is_string(node)) {
+                let name = node;
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_object(item)) {
-                let name = kw_get_str(item, "id", kw_get_str(item, "name", ""));
+            } else if(is_object(node)) {
+                let name = kw_get_str(node, "id", kw_get_str(node, "name", ""));
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_gobj(item)) {
-                childs = [item];
+            } else if(is_gobj(node)) {
+                childs = [node];
             } else {
-                log_error("What is?" + item);
+                log_error("What is?" + node);
                 continue;
             }
 
@@ -197,6 +199,60 @@
             }
         }
 
+        return 0;
+    }
+
+    /********************************************
+     *  Link supported
+     *
+     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
+     *
+     *  id/name:
+     *      name of link gobj, and name of source_port/target_port if they are empty.
+     *
+     *  source_node:
+     *      - string: name of source gobj (unique or service gobj)
+     *      - gobj: source gobj, must be an unique gobj.
+     *
+     *  target_node:
+     *      - string: name of target gobj (unique or service gobj)
+     *      - gobj: target gobj, must be an unique gobj.
+     *
+     *  source_port: Use `id` if source_port is an empty string
+     *      - string: name of source port gobj, must be a child of self
+     *      - gobj: source port gobj, must be a child of self
+     *
+     *  target_port: Use `id` if target_port is an empty string
+     *      - string: name of target port gobj, must be a child of target_node
+     *      - gobj: target port gobj, must be a child of target_node
+     *
+     ********************************************/
+    function ac_link(self, event, kw, src)
+    {
+        let links = kw_get_list(kw, "links", null);
+        if(!links) {
+            /*
+             *  Single link
+             */
+            create_link(self, kw, {});
+
+        } else {
+            for(let i=0; i<links.length; i++) {
+                let link =  links[i];
+                create_link(self, link, kw);
+            }
+        }
+
+        return 0;
+    }
+
+    /********************************************
+     *  Link supported
+     ********************************************/
+    function ac_unlink(self, event, kw, src)
+    {
+        let source_node = kw_get_dict_value(kw, "source_node", src);
+        // TODO
         return 0;
     }
 
@@ -423,60 +479,6 @@
         return 0;
     }
 
-    /********************************************
-     *  Link supported
-     *
-     *  Pass next parameters directly in kw (single links) or in a 'links' array (multiple links)
-     *
-     *  id/name:
-     *      name of link gobj, and name of source_port/target_port if they are empty.
-     *
-     *  source_node:
-     *      - string: name of source gobj (unique or service gobj)
-     *      - gobj: source gobj, must be an unique gobj.
-     *
-     *  target_node:
-     *      - string: name of target gobj (unique or service gobj)
-     *      - gobj: target gobj, must be an unique gobj.
-     *
-     *  source_port: Use `id` if source_port is an empty string
-     *      - string: name of source port gobj, must be a child of self
-     *      - gobj: source port gobj, must be a child of self
-     *
-     *  target_port: Use `id` if target_port is an empty string
-     *      - string: name of target port gobj, must be a child of target_node
-     *      - gobj: target port gobj, must be a child of target_node
-     *
-     ********************************************/
-    function ac_link(self, event, kw, src)
-    {
-        let links = kw_get_list(kw, "links", null);
-        if(!links) {
-            /*
-             *  Single link
-             */
-            create_link(self, kw, {});
-
-        } else {
-            for(let i=0; i<links.length; i++) {
-                let link =  links[i];
-                create_link(self, link, kw);
-            }
-        }
-
-        return 0;
-    }
-
-    /********************************************
-     *  Link supported
-     ********************************************/
-    function ac_unlink(self, event, kw, src)
-    {
-        let source_node = kw_get_dict_value(kw, "source_node", src);
-        // TODO
-        return 0;
-    }
-
 
 
 
@@ -490,8 +492,8 @@
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_ITEM",
-            "EV_REMOVE_ITEM",
+            "EV_ADD_NODE",
+            "EV_REMOVE_NODE",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -518,20 +520,14 @@
             "ST_IDLE":
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
-                ["EV_ADD_ITEM",         ac_add_item,            undefined],
-                ["EV_REMOVE_ITEM",      ac_remove_item,         undefined],
-                ["EV_ACTIVATE",         ac_activate,            undefined],
-                ["EV_DEACTIVATE",       ac_deactivate,          undefined],
 
-                ["EV_TOGGLE",           ac_show_or_hide,        undefined],
-                ["EV_SHOW",             ac_show_or_hide,        undefined],
-                ["EV_HIDE",             ac_show_or_hide,        undefined],
-                ["EV_POSITION",         ac_position,            undefined],
-                ["EV_SIZE",             ac_size,                undefined],
-                ["EV_RESIZE",           ac_resize,              undefined],
-
+                ["EV_ADD_NODE",         ac_add_node,            undefined],
+                ["EV_REMOVE_NODE",      ac_remove_node,         undefined],
                 ["EV_LINK",             ac_link,                undefined],
                 ["EV_UNLINK",           ac_unlink,              undefined],
+
+                ["EV_ACTIVATE",         ac_activate,            undefined],
+                ["EV_DEACTIVATE",       ac_deactivate,          undefined],
 
                 ["EV_PANNING",          ac_panning,             undefined],
                 ["EV_PANNED",           ac_panning,             undefined],
@@ -539,6 +535,13 @@
                 ["EV_MOVED",            ac_moving,              undefined],
                 ["EV_SHOWED",           ac_showed,              undefined],
                 ["EV_HIDDEN",           ac_hidden,              undefined],
+
+                ["EV_TOGGLE",           ac_show_or_hide,        undefined],
+                ["EV_SHOW",             ac_show_or_hide,        undefined],
+                ["EV_HIDE",             ac_show_or_hide,        undefined],
+                ["EV_POSITION",         ac_position,            undefined],
+                ["EV_SIZE",             ac_size,                undefined],
+                ["EV_RESIZE",           ac_resize,              undefined]
             ]
         }
     };
@@ -589,8 +592,6 @@
             self.config.layer = self.gobj_parent().config.layer;
         }
 
-        let visible = self.config.visible;
-
         self.private._gobj_ka_scrollview = self.yuno.gobj_create(
             self.gobj_name(),
             Ka_scrollview,
@@ -604,7 +605,7 @@
                 padding: self.config.padding,
                 background_color: self.config.background_color,
 
-                visible: visible,
+                visible: self.config.visible,
                 panning: self.config.panning,       // Enable (inner dragging) panning
                 draggable: self.config.draggable,   // Enable (outer dragging) dragging
 
@@ -629,12 +630,6 @@
             self
         );
         self.private._gobj_ka_scrollview.get_konva_container().gobj = self; // cross-link
-
-        self.gobj_send_event("EV_ADD_ITEM", {items: self.config.nodes}, self);
-        self.gobj_send_event("EV_LINK", {links: self.config.links}, self);
-        if(visible) {
-            self.gobj_send_event("EV_SHOW", {}, self);
-        }
     };
 
     /************************************************
@@ -653,6 +648,24 @@
     proto.mt_start = function(kw)
     {
         let self = this;
+        self.gobj_send_event(
+            "EV_ADD_NODE",
+            {
+                nodes: self.config.nodes
+            },
+            self
+        );
+        self.gobj_send_event(
+            "EV_LINK",
+            {
+                links: self.config.links
+            },
+            self
+        );
+
+        if(self.config.visible) {
+            self.gobj_send_event("EV_SHOW", {}, self);
+        }
     };
 
     /************************************************
@@ -669,11 +682,22 @@
     proto.mt_child_added = function(child)
     {
         let self = this;
-        if(self.private._gobj_ka_scrollview) {
+
+        if(child.gobj_gclass_name()==="Ne_base") {
             self.gobj_send_event(
-                "EV_ADD_ITEM",
+                "EV_ADD_NODE",
                 {
-                    items: [child]
+                    nodes: [child]
+                },
+                self
+            );
+        }
+
+        if(child.gobj_gclass_name()==="Ka_link") {
+            self.gobj_send_event(
+                "EV_LINK",
+                {
+                    links: [child]
                 },
                 self
             );
@@ -687,9 +711,9 @@
     {
         let self = this;
         self.gobj_send_event(
-            "EV_REMOVE_ITEM",
+            "EV_REMOVE_NODE",
             {
-                items: [child]
+                nodes: [child]
             },
             self
         );

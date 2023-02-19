@@ -88,7 +88,8 @@
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
-        for(let view of views) {
+        for(let i=0; i<views.length; i++) {
+            let view = views[i];
             let child = null;
             if(is_gobj(view)) {
                 child = view;
@@ -137,7 +138,8 @@
     {
         let views = kw_get_dict_value(kw, "views", null, false, false);
 
-        for(let view of views) {
+        for(let i=0; i<views.length; i++) {
+            let view = views[i];
             let childs = null;
             if(is_string(view)) {
                 let name = view;
@@ -360,7 +362,9 @@
             self
         );
 
-        for(let child of self.gobj_match_childs()) {
+        let childs = self.gobj_match_childs();
+        for(let i=0; i<childs; i++) {
+            let child = childs[i];
             if(child.gobj_name() === self.gobj_name()) {
                 // Inside container
                 continue;
