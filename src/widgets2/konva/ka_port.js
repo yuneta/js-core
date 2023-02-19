@@ -25,10 +25,9 @@
         action: null,   // function(e) | string (event to publish when hit item),
         port_shape: "circle",   // "circle" of "rect"
         port_color: "#FFEEAA",
-        port_position: "",          // position of label: "left", "right", "top", "bottom"
+        port_position: "",          // position of port in ne_base: "left", "right", "top", "bottom"
 
         port_label: "",             // label text
-        port_label_position: "",    // position of label: "left", "right", "top", "bottom"
         port_label_background_color: "#00000000",  // opacity 0
         port_label_color: "black",
 
@@ -45,7 +44,7 @@
         draggable: false,   // Enable (outer dragging) dragging
 
         kw_border_shape: { /* Border shape */
-            strokeWidth: 1,
+            strokeWidth: 2,
             stroke: "#f5c211ff",
             opacity: 1,
             shadowBlur: 0,
@@ -144,7 +143,7 @@
          *      Label
          *----------------------------*/
         let label = self.config.port_label;
-        if(label) {
+        if(!empty_string(label)) {
             let kw_label = __duplicate__(
                 kw_get_dict(self.config, "kw_label", {})
             );
@@ -152,6 +151,7 @@
                 kw_label,
                 {
                     name: "ka_label",
+                    label: label,
                     background_color: self.config.port_label_background_color,
                     color: self.config.port_label_color,
                     y: self.config.port_shape === "circle" ? -height / 2 : 0
@@ -162,7 +162,7 @@
             let y = 0;
             switch(self.config.port_position) {
                 case "left":
-                    self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label = create_shape_label_with_icon(kw_label);
                     x = width;
                     if(self.config.port_shape === "circle") {
                         x = width/2 + 5;
@@ -172,7 +172,7 @@
                     self.private._ka_label.x(x);
                     break;
                 case "right":
-                    self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label = create_shape_label_with_icon(kw_label);
                     x = self.private._ka_label.width() + 5;
                     if(self.config.port_shape === "circle") {
                         x += width/2;
@@ -180,7 +180,7 @@
                     self.private._ka_label.x(-x);
                     break;
                 case "top":
-                    self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label = create_shape_label_with_icon(kw_label);
                     self.private._ka_label.rotation(-45);
                     if(self.config.port_shape === "circle") {
                         y = height + 5;
@@ -192,7 +192,7 @@
                     self.private._ka_label.position({x: x, y: -y});
                     break;
                 case "bottom":
-                    self.private._ka_label = create_shape_label_with_icon(label);
+                    self.private._ka_label = create_shape_label_with_icon(kw_label);
                     self.private._ka_label.rotation(45);
                     if(self.config.port_shape === "circle") {
                         y = height/2 + 5;
@@ -664,8 +664,14 @@
         let self = this;
 
         switch(name) {
-            case "color":
-                self.private._ka_border_shape.fill(self.config.color);
+            case "port_color":
+                self.private._ka_border_shape.fill(self.config.port_color);
+                break;
+            case "port_label_background_color":
+                self.private._ka_label.shape_label_background_color(self.config.port_label_background_color);
+                break;
+            case "port_label_color":
+                self.private._ka_label.fill(self.config.port_label_color);
                 break;
         }
     };

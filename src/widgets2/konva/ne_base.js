@@ -89,6 +89,7 @@
         port_width: 20,
         port_height: 20,
         port_shape: "circle",
+        port_color: "#FFEEAA",
         port_offset: 0,
 
         port_label: "",              // label text
@@ -321,8 +322,10 @@
 
         let port_width = kw_get_int(kw_common, "width", self.config.port_width);
         let port_height = kw_get_int(kw_common, "height", self.config.port_height);
-        let port_offset = kw_get_int(kw_common, "port_offset", self.config.port_offset);
         let port_shape = kw_get_str(kw_common, "port_shape", self.config.port_shape);
+        let port_color = kw_get_str(kw_common, "port_color", self.config.port_color);
+        let port_offset = kw_get_int(kw_common, "port_offset", self.config.port_offset);
+        let port_label = kw_get_str(kw_common, "port_label", self.config.port_label);
         let port_label_background_color = kw_get_str(
             kw_common, "port_label_background_color", self.config.port_label_background_color
         );
@@ -337,6 +340,8 @@
                 height: port_height,
                 port_shape: port_shape,
                 port_position: port_position,
+                port_color: port_color,
+                port_label: port_label,
                 port_label_background_color: port_label_background_color,
                 port_label_color: port_label_color
             }
