@@ -1,7 +1,7 @@
 /***********************************************************************
  *          Sw_graph.js
  *
- *          **View** that manage **gobj** **nodes**
+ *          **View** that contains **gobj** **nodes** and **links** (or others gobj)
  *
  *          A **view** can work inside a multiview
  *
@@ -26,7 +26,7 @@
         layer: null,        // Konva layer
 
         //------------ Own Attributes ------------//
-        nodes: [],
+        items: [],  // can be nodes or buttons or etc
         links: [],
 
         //------- Ka_scrollview Attributes --- HACK use ka_scrollview directly ---------//
@@ -109,40 +109,40 @@
 
 
     /********************************************
-     *  EV_ADD_NODE {
-     *      "nodes": [{id:, gclass:, kw: }, ...]
+     *  EV_ADD_ITEM {
+     *      "items": [{id:, gclass:, kw: }, ...]
      *      or
-     *      "nodes": [gobj, ...]
+     *      "items": [gobj, ...]
      *  }
      *
      *  You can use "name" instead of "id"
      *
      ********************************************/
-    function ac_add_node(self, event, kw, src)
+    function ac_add_item(self, event, kw, src)
     {
-        let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
+        let items = kw_get_dict_value(kw, "items", null, false, false);
 
-        for(let i=0; i<nodes.length; i++) {
-            let node = nodes[i];
-            let gobj_node = null;
-            if(is_gobj(node)) {
-                gobj_node = node;
+        for(let i=0; i<items.length; i++) {
+            let item = items[i];
+            let gobj_item = null;
+            if(is_gobj(item)) {
+                gobj_item = item;
 
-            } else if(is_object(node)) {
-                let kw_node = kw_get_dict(node, "kw", {});
-                gobj_node = self.yuno.gobj_create(
-                    kw_get_str(node, "id", kw_get_str(node, "name", "")),
-                    kw_get_dict_value(node, "gclass", null),
-                    kw_node,
+            } else if(is_object(item)) {
+                let kw_item = kw_get_dict(item, "kw", {});
+                gobj_item = self.yuno.gobj_create(
+                    kw_get_str(item, "id", kw_get_str(item, "name", "")),
+                    kw_get_dict_value(item, "gclass", null),
+                    kw_item,
                     self
                 );
-                continue; // goes recurrent ac_add_node() by mt_child_added()
+                continue; // goes recurrent ac_add_item() by mt_child_added()
             } else {
-                log_error("What is it?" + node);
+                log_error("What is it?" + item);
                 continue;
             }
 
-            let k = gobj_node.get_konva_container();
+            let k = gobj_item.get_konva_container();
             self.private._gobj_ka_scrollview.gobj_send_event(
                 "EV_ADD_ITEM",
                 {
@@ -156,31 +156,31 @@
     }
 
     /********************************************
-     *  EV_REMOVE_NODE {
-     *      "nodes": ["id", ...]
+     *  EV_REMOVE_ITEM {
+     *      "items": ["id", ...]
      *      or
-     *      "nodes": [{id: "id", }, ...]
+     *      "items": [{id: "id", }, ...]
      *      or
-     *      "nodes": [gobj, ...]
+     *      "items": [gobj, ...]
      *  }
      ********************************************/
-    function ac_remove_node(self, event, kw, src)
+    function ac_remove_item(self, event, kw, src)
     {
-        let nodes = kw_get_dict_value(kw, "nodes", null, false, false);
+        let items = kw_get_dict_value(kw, "items", null, false, false);
 
-        for(let i=0; i<nodes.length; i++) {
-            let node = nodes[i];
+        for(let i=0; i<items.length; i++) {
+            let item = items[i];
             let childs = null;
-            if(is_string(node)) {
-                let name = node;
+            if(is_string(item)) {
+                let name = item;
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_object(node)) {
-                let name = kw_get_str(node, "id", kw_get_str(node, "name", ""));
+            } else if(is_object(item)) {
+                let name = kw_get_str(item, "id", kw_get_str(item, "name", ""));
                 childs = self.gobj_match_childs({__gobj_name__: name});
-            } else if(is_gobj(node)) {
-                childs = [node];
+            } else if(is_gobj(item)) {
+                childs = [item];
             } else {
-                log_error("What is?" + node);
+                log_error("What is?" + item);
                 continue;
             }
 
@@ -245,10 +245,7 @@
                 gobj_link = link;
 
             } else if(is_object(link)) {
-                for(let i=0; i<links.length; i++) {
-                    let link =  links[i];
-                    create_link(self, link, kw);
-                }
+                create_link(self, link, kw);
                 continue; // goes recurrent ac_add_link() by mt_child_added()
             } else {
                 log_error("What is it?" + link);
@@ -304,11 +301,11 @@
          *  Show/Hide self
          *-----------------------------*/
         let position = kw;
-        let node_dimension = {};
-        self.private._gobj_ka_scrollview.gobj_send_event("EV_GET_DIMENSION", node_dimension, self);
+        let item_dimension = {};
+        self.private._gobj_ka_scrollview.gobj_send_event("EV_GET_DIMENSION", item_dimension, self);
 
-        self.config.x = kw_get_int(position, "x", node_dimension.x, true, false);
-        self.config.y = kw_get_int(position, "y", node_dimension.y, true, false);
+        self.config.x = kw_get_int(position, "x", item_dimension.x, true, false);
+        self.config.y = kw_get_int(position, "y", item_dimension.y, true, false);
         self.private._gobj_ka_scrollview.gobj_send_event("EV_POSITION", position, self);
         self.private._gobj_ka_scrollview.gobj_send_event(event, kw, self);
 
@@ -514,8 +511,10 @@
     let FSM = {
         "event_list": [
             "EV_KEYDOWN",
-            "EV_ADD_NODE",
-            "EV_REMOVE_NODE",
+            "EV_ADD_ITEM",
+            "EV_REMOVE_ITEM",
+            "EV_LINK",
+            "EV_UNLINK",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
             "EV_TOGGLE",
@@ -524,9 +523,6 @@
             "EV_SHOW",
             "EV_HIDE",
             "EV_RESIZE",
-
-            "EV_LINK",
-            "EV_UNLINK",
 
             "EV_PANNING",
             "EV_PANNED",
@@ -543,8 +539,8 @@
             [
                 ["EV_KEYDOWN",          ac_keydown,             undefined],
 
-                ["EV_ADD_NODE",         ac_add_node,            undefined],
-                ["EV_REMOVE_NODE",      ac_remove_node,         undefined],
+                ["EV_ADD_ITEM",         ac_add_item,            undefined],
+                ["EV_REMOVE_ITEM",      ac_remove_item,         undefined],
                 ["EV_LINK",             ac_link,                undefined],
                 ["EV_UNLINK",           ac_unlink,              undefined],
 
@@ -671,9 +667,9 @@
     {
         let self = this;
         self.gobj_send_event(
-            "EV_ADD_NODE",
+            "EV_ADD_ITEM",
             {
-                nodes: self.config.nodes
+                items: self.config.items
             },
             self
         );
@@ -705,24 +701,24 @@
     {
         let self = this;
 
-        if(child.gobj_gclass_name()==="Ne_base") {
-            self.gobj_send_event(
-                "EV_ADD_NODE",
-                {
-                    nodes: [child]
-                },
-                self
-            );
-        }
-
-        if(child.gobj_gclass_name()==="Ka_link") {
-            self.gobj_send_event(
-                "EV_LINK",
-                {
-                    links: [child]
-                },
-                self
-            );
+        if(self.private._gobj_ka_scrollview) { // It's null when creating the own child _gobj_ka_scrollview
+            if (child.gobj_gclass_name() === "Ka_link") {
+                self.gobj_send_event(
+                    "EV_LINK",
+                    {
+                        links: [child]
+                    },
+                    self
+                );
+            } else {
+                self.gobj_send_event(
+                    "EV_ADD_ITEM",
+                    {
+                        items: [child]
+                    },
+                    self
+                );
+            }
         }
     };
 
@@ -734,9 +730,9 @@
         let self = this;
         if(child.gobj_gclass_name()==="Ne_base") {
             self.gobj_send_event(
-                "EV_REMOVE_NODE",
+                "EV_REMOVE_ITEM",
                 {
-                    nodes: [child]
+                    items: [child]
                 },
                 self
             );
