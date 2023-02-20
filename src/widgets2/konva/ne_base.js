@@ -99,25 +99,29 @@
         title: { // HACK See shape_label_with_icon attributes
             height: 30
         },
-        input: {
-        },
-        output: {
-        },
-        top: {
-        },
-        bottom: {
-        },
 
-        top_left: {},
-        top_right: {},
-        bottom_left: {},
-        bottom_right: {},
-        center: {},
+        // Ports
+        input: {},
+        output: {},
+        top: {},
+        bottom: {},
+
+        // Corners
+        kw_top_left: {},
+        kw_top_right: {},
+        kw_bottom_left: {},
+        kw_bottom_right: {},
+
+        // Center
+        kw_center: {
+
+        },
+        gobj_sw_center: null,   // Center is public available
 
         //////////////// Private Attributes /////////////////
         _ka_container: null,
         _ka_border_shape: null,
-        _ka_title: null,
+        _ka_title: null
     };
 
 
@@ -129,34 +133,6 @@
 
 
 
-
-    /************************************************
-     *  Return the link gobj, null if error
-     ************************************************/
-    function create_link(self, kw, common)
-    {
-        let id = kw_get_str(kw, "id", kw_get_str(kw, "name", ""));
-
-        /*
-         *  Check if link exists
-         */
-        let gobj_link = self.yuno.gobj_find_unique_gobj(id);
-        if(gobj_link) {
-            log_error(sprintf("%s: link already exists '%s'", self.gobj_short_name(), id));
-            return null;
-        }
-
-        kw["source_node"] = self; // source node is self
-
-        // 'id' or 'name' can be use as all port names
-        kw["source_port"] = kw_get_dict_value(kw, "source_port", id);
-        kw["target_port"] = kw_get_dict_value(kw, "target_port", id);
-        kw["view"] = self.config.view;
-
-        json_object_update_missing(kw, common);
-
-        return self.yuno.gobj_create_unique(id, Ka_link, kw, self.config.view);
-    }
 
     /********************************************
      *
@@ -210,8 +186,8 @@
          *  Title
          *----------------------------*/
         let kw_title = kw_get_dict(self.config, "title", {}, false, false);
-        let title_width = kw_get_int(kw_title, "width", width) - 2*padding;
-        let title_height = kw_get_int(kw_title, "height", height);
+        let title_width = width - 2*padding;
+        let title_height = kw_get_int(kw_title, "height", 30);
         json_object_update(
             kw_title,
             {
@@ -252,7 +228,27 @@
         /*--------------------------------------------*
          *  Scrollview: center
          *--------------------------------------------*/
-        // TODO
+        let kw_center = __duplicate__(
+            kw_get_dict(self.config, "kw_center", {}, false, false)
+        );
+
+        json_object_update(
+            kw_center,
+            {
+                name: "ka_center",
+                x: padding,
+                y: padding + title_height,
+                width: width - 2*padding,
+                height: height - 2*padding - title_height,
+                background_color: kw_get_str(kw_center, "background_color", self.config.background_color)
+            }
+        );
+        self.config.gobj_sw_center = self.yuno.gobj_create(
+            self.gobj_name(),
+            Ka_scrollview,
+            kw_center,
+            self
+        );
 
         /*----------------------------*
          *  Dragg events
