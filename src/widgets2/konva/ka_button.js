@@ -172,9 +172,6 @@
                 e["__share_kw__"] = true; // TODO must be in __temp__
                 self.gobj_publish_event(event, e);
             };
-        } else if(!is_function(action)) {
-            log_error("action must be a string or function");
-            return ka_container;
         }
 
         if(is_function(action)) {

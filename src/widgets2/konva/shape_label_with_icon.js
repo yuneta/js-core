@@ -202,10 +202,8 @@
 
         ka_container.shape_label_text = function(text)
         {
-            ka_container.size(size);
-
             /*
-             *  Resize background rect
+             *  Rewrite text
              */
             let ka = ka_container.find(".ka_text");
             if(ka.length === 0) {
@@ -404,10 +402,10 @@
             icon_element = new Konva.Text(kw_icon);
             container.add(icon_element);
 
-        } else if(!empty_string(text)) {
+        } else {
             let kw_text = { // Common fields
                 name: "ka_text",
-                text: text,
+                text: text?text:"",
                 x: 0,
                 y: 0,
                 fontSize: _text_size

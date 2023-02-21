@@ -1701,6 +1701,22 @@ Group(_ka_container)
     };
 
     /************************************************
+     *  Framework Method mt_child_added
+     ************************************************/
+    proto.mt_child_added = function(child)
+    {
+        let self = this;
+
+        self.gobj_send_event(
+            "EV_ADD_ITEM",
+            {
+                items: [child.get_konva_container()]
+            },
+            self
+        );
+    };
+
+    /************************************************
      *      Local Method
      ************************************************/
     proto.get_viewport_rect = function()

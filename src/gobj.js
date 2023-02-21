@@ -307,22 +307,69 @@ let __inside_event_loop__ = 0;
     /************************************************************
      *
      ************************************************************/
-    proto.gobj_write_attr = function(key, value)
+    function _gobj_search_path(gobj, path)
+    {
+        if(!is_gobj(gobj)) {
+            // silence
+            return 0;
+        }
+
+        return gobj;
+    }
+
+    /************************************************************
+     *
+     ************************************************************/
+    proto.gobj_write_attr = function(path, value)
     {
         // TODO implement inherited attributes
         // TODO if attribute not found then find in bottom gobj
-        if(key in this.config) {
-            if (this.config.hasOwnProperty(key)) {
-                this.config[key] = value;
 
-                if(this.mt_writing) {
-                    this.mt_writing(key);
-                }
-                return 0;
-            }
+        if(!is_string(path)) {
+            log_error(sprintf("gobj_write_attr(%s): path must be a string", this.gobj_short_name()));
+            return -1;
         }
-        log_error(sprintf("gobj_write_attr(%s): attr not found '%s'", this.gobj_short_name(), key));
+        let ss = path.split("`");
+        if(ss.length<=1) {
+            let key = path;
+            if(key in this.config) {
+                if (this.config.hasOwnProperty(key)) {
+                    this.config[key] = value;
 
+                    if(this.mt_writing) {
+                        this.mt_writing(key);
+                    }
+                    return 0;
+                }
+            }
+            log_error(sprintf("gobj_write_attr(%s): attr not found '%s'", this.gobj_short_name(), key));
+            return -1;
+        }
+
+        let gobj = this;
+        let len = ss.length;
+        for(let i=0; i<len; i++) {
+            let key = ss[i];
+            let child = gobj.gobj_find_child({"__gobj_name__": key});
+            if(child && i<len-1) {
+                gobj = child;
+                continue;
+            }
+
+            if(key in gobj.config) {
+                if (gobj.config.hasOwnProperty(key)) {
+                    gobj.config[key] = value;
+
+                    if(gobj.mt_writing) {
+                        gobj.mt_writing(key);
+                    }
+                    return 0;
+                }
+            }
+            break;
+        }
+
+        log_error(sprintf("gobj_write_attr(%s): attr not found '%s'", this.gobj_short_name(), key));
         return -1;
     };
 

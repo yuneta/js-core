@@ -1433,13 +1433,13 @@
             log_error("path must be a string: " + String(path));
             return 0;
         }
-        var ss = path.split("`");
+        let ss = path.split("`");
         if(ss.length<=1) {
             return kw[path];
         }
-        var len = ss.length;
-        for(var i=0; i<len; i++) {
-            var key = ss[i];
+        let len = ss.length;
+        for(let i=0; i<len; i++) {
+            let key = ss[i];
             kw = kw[key];
             if(kw === undefined) {
                 return undefined;
