@@ -200,6 +200,22 @@
             return ka_container;
         };
 
+        ka_container.shape_label_text = function(text)
+        {
+            ka_container.size(size);
+
+            /*
+             *  Resize background rect
+             */
+            let ka = ka_container.find(".ka_text");
+            if(ka.length === 0) {
+                log_error("ka not found");
+                return ka_container;
+            }
+            ka[0].text(text);
+            return ka_container;
+        };
+
         return ka_container;
     }
 
