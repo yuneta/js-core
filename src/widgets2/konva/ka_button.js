@@ -550,6 +550,9 @@
             case "text_color":
                 self.private._ka_container.shape_label_text_color(self.config.text_color);
                 break;
+            case "label":
+                self.private._ka_container.shape_label_text(self.config.label);
+                break;
         }
     };
 
