@@ -444,14 +444,14 @@ Group(_ka_container)
 
             let scroll_by_step = self.config.scroll_by_step;
             if(is_number(scroll_by_step)) {
-                if(dx != 0) {
+                if(dx !== 0) {
                     if(dx < 0) {
                         dx = -scroll_by_step;
                     } else {
                         dx = scroll_by_step;
                     }
                 }
-                if(dy != 0) {
+                if(dy !== 0) {
                     if(dy < 0) {
                         dy = -scroll_by_step;
                     } else {
@@ -459,7 +459,7 @@ Group(_ka_container)
                     }
                 }
             } else if(scroll_by_step === true) {
-                if(dy != 0) {
+                if(dy !== 0) {
                     let pos_ = get_first_visible_vertical_pos(self);
                     if(pos_) {
                         let step = pos_.height;
@@ -470,7 +470,7 @@ Group(_ka_container)
                         }
                     }
                 }
-                if(dx != 0) {
+                if(dx !== 0) {
                     let pos_ = get_first_visible_horizontal_pos(self);
                     if(pos_) {
                         let step = pos_.width;
@@ -501,22 +501,22 @@ Group(_ka_container)
         /*-----------------------------------------*
          *          Events: drag (moving)
          *-----------------------------------------*/
-        if(self.config.draggable) {
-            ka_container.on('dragstart', function (ev) {
-                ev.cancelBubble = true;
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragmove', function (ev) {
-                ev.cancelBubble = true;
-                document.body.style.cursor = 'pointer';
-                self.gobj_publish_event("EV_MOVING", ka_container.position());
-            });
-            ka_container.on('dragend', function (ev) {
-                ev.cancelBubble = true;
-                document.body.style.cursor = 'default';
-                self.gobj_publish_event("EV_MOVED", ka_container.position());
-            });
-        }
+        // if(self.config.draggable) {
+        //     ka_container.on('dragstart', function (ev) {
+        //         ev.cancelBubble = true;
+        //         self.gobj_publish_event("EV_MOVING", ka_container.position());
+        //     });
+        //     ka_container.on('dragmove', function (ev) {
+        //         ev.cancelBubble = true;
+        //         document.body.style.cursor = 'pointer';
+        //         self.gobj_publish_event("EV_MOVING", ka_container.position());
+        //     });
+        //     ka_container.on('dragend', function (ev) {
+        //         ev.cancelBubble = true;
+        //         document.body.style.cursor = 'default';
+        //         self.gobj_publish_event("EV_MOVED", ka_container.position());
+        //     });
+        // }
 
         /*-----------------------------------------*
          *          Events: drag (panning)

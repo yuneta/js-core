@@ -109,22 +109,45 @@
 
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
+                }
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
+                }
                 self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragmove', function (ev) {
                 ev.cancelBubble = true;
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
+                }
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
+                }
                 self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragend', function (ev) {
                 ka_container.opacity(1);
                 ev.cancelBubble = true;
-                if (self.config.action) {
-                    self.config.layer.getStage().container().style.cursor = "pointer";
-                } else {
-                    self.config.layer.getStage().container().style.cursor = "default";
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
                 }
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
+                }
+                self.config.layer.getStage().container().style.cursor = "default";
                 self.gobj_publish_event("EV_MOVED", ka_container.position());
             });
         }

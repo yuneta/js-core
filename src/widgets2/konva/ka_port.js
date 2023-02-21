@@ -106,7 +106,8 @@
             y: kw_get_int(self.config, "y", 0),
             width: width,
             height: height,
-            visible: kw_get_bool(self.config, "visible", true)
+            visible: kw_get_bool(self.config, "visible", true),
+            draggable: self.config.draggable
         });
         ka_container.gobj = self; // cross-link
 
@@ -213,8 +214,6 @@
          *      Events
          *----------------------------*/
         if (self.config.draggable) {
-            ka_container.draggable(true);
-
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
                 self.config.layer.getStage().container().style.cursor = "move";

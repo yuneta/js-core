@@ -403,7 +403,7 @@
      ********************************************/
     function ac_panning(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self panning
         }
         return 0;
@@ -414,11 +414,11 @@
      ********************************************/
     function ac_moving(self, event, kw, src)
     {
-        if(src == self.private._gobj_ka_scrollview) {
+        if(src === self.private._gobj_ka_scrollview) {
             // Self moving
         } else {
             // Child moving
-            if(strcmp(event, "EV_MOVED")==0) {
+            if(strcmp(event, "EV_MOVED")===0) {
                 if(kw.x < 0 || kw.y < 0) {
                     // Refuse negative logic
                     if(kw.x < 0) {
@@ -473,6 +473,7 @@
             "EV_REMOVE_ITEM",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
+
             "EV_TOGGLE",
             "EV_POSITION",
             "EV_SIZE",

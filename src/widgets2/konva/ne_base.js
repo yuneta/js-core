@@ -57,7 +57,6 @@
         y: 0,
         width: 400,
         height: 250,
-
         padding: 20,        /* Padding: left space to ports, title and center will decrease in padding size */
 
         background_color: "#FFF7E0",
@@ -256,23 +255,44 @@
         if (self.config.draggable) {
             ka_container.on('dragstart', function (ev) {
                 ev.cancelBubble = true;
-                if(ka_container.x() < 0) {
-
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
                 }
-                if(ka_container.y() < 0) {
-
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
                 }
                 self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragmove', function (ev) {
                 ev.cancelBubble = true;
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
+                }
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
+                }
                 self.config.layer.getStage().container().style.cursor = "move";
                 self.gobj_publish_event("EV_MOVING", ka_container.position());
             });
             ka_container.on('dragend', function (ev) {
                 ka_container.opacity(1);
                 ev.cancelBubble = true;
+                let min_offset = self.config.kw_border_shape.strokeWidth;
+                min_offset +=self.config.kw_border_shape.shadowBlur;
+                let dim = ka_container.getClientRect({relativeTo:ka_container.getParent()});
+                if(dim.x < 0) {
+                    ka_container.x(min_offset);
+                }
+                if(dim.y < 0) {
+                    ka_container.y(min_offset);
+                }
                 self.config.layer.getStage().container().style.cursor = "default";
                 self.gobj_publish_event("EV_MOVED", ka_container.position());
             });
@@ -670,6 +690,46 @@
         return 0;
     }
 
+    /********************************************
+     *  Child panning/panned
+     ********************************************/
+    function ac_panning(self, event, kw, src)
+    {
+        if(src === self.private._gobj_ka_scrollview) {
+            // Self panning
+        }
+        return 0;
+    }
+
+    /********************************************
+     *  Child moving/moved
+     ********************************************/
+    function ac_moving(self, event, kw, src)
+    {
+        if(src === self.private._gobj_ka_scrollview) {
+            // Self moving
+        } else {
+            // Child moving
+        }
+        return 0;
+    }
+
+    /********************************************
+     *  Child showed
+     ********************************************/
+    function ac_showed(self, event, kw, src)
+    {
+        return 0;
+    }
+
+    /********************************************
+     *  Child hidden
+     ********************************************/
+    function ac_hidden(self, event, kw, src)
+    {
+        return 0;
+    }
+
 
 
 
@@ -689,12 +749,20 @@
             "EV_REMOVE_PORT",
             "EV_ACTIVATE",
             "EV_DEACTIVATE",
+
             "EV_TOGGLE",
             "EV_SHOW",
             "EV_HIDE",
             "EV_POSITION",
             "EV_SIZE",
-            "EV_RESIZE"
+            "EV_RESIZE",
+
+            "EV_PANNING",
+            "EV_PANNED",
+            "EV_MOVING",
+            "EV_MOVED",
+            "EV_SHOWED",
+            "EV_HIDDEN"
         ],
         "state_list": [
             "ST_IDLE"
@@ -715,7 +783,14 @@
                 ["EV_HIDE",             ac_show_or_hide,        undefined],
                 ["EV_POSITION",         ac_position,            undefined],
                 ["EV_SIZE",             ac_size,                undefined],
-                ["EV_RESIZE",           ac_resize,              undefined]
+                ["EV_RESIZE",           ac_resize,              undefined],
+
+                ["EV_PANNING",          ac_panning,             undefined],
+                ["EV_PANNED",           ac_panning,             undefined],
+                ["EV_MOVING",           ac_moving,              undefined],
+                ["EV_MOVED",            ac_moving,              undefined],
+                ["EV_SHOWED",           ac_showed,              undefined],
+                ["EV_HIDDEN",           ac_hidden,              undefined],
             ]
         }
     };
