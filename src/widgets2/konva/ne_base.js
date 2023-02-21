@@ -112,10 +112,14 @@
         kw_bottom_right: {},
 
         // Center
+        enable_center: false,
+        center_y_offset: true,
         kw_center: {
-
+            kw_border_shape: {
+                strokeWidth: 0,
+            }
         },
-        gobj_sw_center: null,   // Center is public available
+        gobj_sw_center: null,   // gobj center is public available
 
         //////////////// Private Attributes /////////////////
         _ka_container: null,
@@ -227,27 +231,35 @@
         /*--------------------------------------------*
          *  Scrollview: center
          *--------------------------------------------*/
-        let kw_center = __duplicate__(
-            kw_get_dict(self.config, "kw_center", {}, false, false)
-        );
+        if(self.config.enable_center) {
+            let kw_center = __duplicate__(
+                kw_get_dict(self.config, "kw_center", {}, false, false)
+            );
 
-        json_object_update(
-            kw_center,
-            {
-                name: "ka_center",
-                x: padding,
-                y: padding + title_height,
-                width: width - 2*padding,
-                height: height - 2*padding - title_height,
-                background_color: kw_get_str(kw_center, "background_color", self.config.background_color)
+            let _y = padding + title_height;
+            let _height = height - 2*padding - title_height;
+            if(self.config.center_y_offset) {
+                _y += self.config.center_y_offset;
+                _height -= self.config.center_y_offset;
             }
-        );
-        self.config.gobj_sw_center = self.yuno.gobj_create(
-            self.gobj_name(),
-            Ka_scrollview,
-            kw_center,
-            self
-        );
+            json_object_update(
+                kw_center,
+                {
+                    name: "ka_center",
+                    x: padding,
+                    y: _y,
+                    width: width - 2*padding,
+                    height: _height,
+                    background_color: kw_get_str(kw_center, "background_color", self.config.background_color)
+                }
+            );
+            self.config.gobj_sw_center = self.yuno.gobj_create(
+                "center",
+                Ka_scrollview,
+                kw_center,
+                self
+            );
+        }
 
         /*----------------------------*
          *  Dragg events
@@ -759,8 +771,6 @@
 
             "EV_PANNING",
             "EV_PANNED",
-            "EV_MOVING",
-            "EV_MOVED",
             "EV_SHOWED",
             "EV_HIDDEN"
         ],
