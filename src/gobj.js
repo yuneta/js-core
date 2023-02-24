@@ -326,7 +326,10 @@ let __inside_event_loop__ = 0;
         // TODO if attribute not found then find in bottom gobj
 
         if(!is_string(path)) {
-            log_error(sprintf("gobj_write_attr(%s): path must be a string", this.gobj_short_name()));
+            log_error(sprintf(
+                "gobj_write_attr(%s): path must be a string",
+                this.gobj_short_name())
+            );
             return -1;
         }
         let ss = path.split("`");
