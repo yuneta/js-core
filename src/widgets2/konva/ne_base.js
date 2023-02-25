@@ -115,6 +115,7 @@
         enable_center: false,
         center_y_offset: true,
         kw_center: {
+            padding: 0,
             kw_border_shape: {
                 strokeWidth: 0,
             }
