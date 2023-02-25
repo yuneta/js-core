@@ -354,8 +354,9 @@
      ********************************************/
     function ac_enable(self, event, kw, src)
     {
-        // TODO change appearance
         self.config.disabled = false;
+        self.private._ka_container.listening(true);
+        self.private._ka_container.opacity(1);
         return 0;
     }
 
@@ -364,8 +365,10 @@
      ********************************************/
     function ac_disable(self, event, kw, src)
     {
-        // TODO change appearance
+        self.config.layer.getStage().container().style.cursor = "default";
         self.config.disabled = true;
+        self.private._ka_container.listening(false);
+        self.private._ka_container.opacity(0.6);
         return 0;
     }
 
@@ -520,6 +523,9 @@
     proto.mt_start = function(kw)
     {
         let self = this;
+        if(self.config.disabled) {
+            self.gobj_send_event("EV_DISABLE", {}, self);
+        }
     };
 
     /************************************************
@@ -546,6 +552,13 @@
         //     "EV_UNLOCK",
 
         switch(name) {
+            case "disabled":
+                if(self.config.disabled) {
+                    self.gobj_send_event("EV_DISABLE", {}, self);
+                } else {
+                    self.gobj_send_event("EV_ENABLE", {}, self);
+                }
+                break;
             case "background_color":
                 self.private._ka_container.shape_label_background_color(self.config.background_color);
                 break;
