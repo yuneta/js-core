@@ -248,7 +248,7 @@
         if(is_string(action)) {
             let event = action;
             self.config.action = function(e) {
-                e["__share_kw__"] = true; // TODO must be in __temp__
+                e["__share_kw__"] = true;
                 self.gobj_publish_event(event, e);
             };
         } else if(action && !is_function(action)) {
