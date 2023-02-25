@@ -21,7 +21,9 @@
 
         //------------ Own Attributes ------------//
         id: "",         // unique id (not really). If id is empty then id=action if action is a string
-        action: null,   // function(e) | string (event to publish when hit item),
+        action: null,   // function(e) | string (event to publish when hit item)
+        /* HACK: if no `action` or `id` -> the button is a simple label */
+
         label: "",      // text of item
         icon: "",       // icon of item (from an icon font)
         background_color: "#FFF7E0",
@@ -101,7 +103,16 @@
      ********************************************/
     function create_shape(self)
     {
-        let ka_container = create_shape_label_with_icon(self.config);
+        let config = __duplicate__(self.config);
+
+        if(!config.background_color) {
+            config.background_color = self.parent.config.background_color;
+        }
+        if(!config.color) {
+            config.color = self.parent.config.color;
+        }
+
+        let ka_container = create_shape_label_with_icon(config);
         ka_container.gobj = self; // cross-link
 
         if (self.config.draggable) {
