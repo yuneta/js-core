@@ -121,6 +121,9 @@
      ********************************************/
     function create_canvas(self)
     {
+        self.config.width = window.innerWidth;
+        self.config.height = window.innerHeight;
+
         /*--------------------------------------*
          *  Firstly we need to create a stage
          *--------------------------------------*/
@@ -445,9 +448,6 @@
          */
         window.onresize = resize;
 
-        self.config.width = window.innerWidth;
-        self.config.height = window.innerHeight;
-
         function resize() {
             //trace_msg(sprintf("inner w %d h %d", window.innerWidth, window.innerHeight));
             //trace_msg(sprintf("inner w %d h %d", window.innerWidth, window.innerHeight));
@@ -467,7 +467,7 @@
             );
         }
 
-        //resize();
+        // resize();
     }
 
 
@@ -733,8 +733,6 @@
 
         create_canvas(self);
         create_layers(self);
-
-        subscribe_to_system_resize(self);
     };
 
     /************************************************
@@ -757,6 +755,7 @@
         setTimeout(
             function() {
                 self.config.stage.draw();
+                subscribe_to_system_resize(self);
             },
             200
         );
