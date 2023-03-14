@@ -52,6 +52,7 @@
         connection_margin: 0,
         color: "#000000BB",     /* link (path) color */
         speed: 100,             /* animation speed: pixels by second */
+        width: 4,                /* kw_border_shape.strokeWidth */
 
         visible: true,
 
@@ -60,7 +61,6 @@
         text_size: 18,  // it's different in mobile with text size larger (_text_size will be used)
 
         kw_border_shape: { /* Border shape (Path Class)*/
-            strokeWidth: 4,
             shadowBlur: 0,
             shadowColor: "black",
             shadowForStrokeEnabled: false // HTML5 Canvas Optimizing Strokes Performance Tip
@@ -444,6 +444,7 @@
             kw_border_shape,
             {
                 name: "ka_border_path",
+                strokeWidth: kw_get_int(self.config, "width", 4),
                 stroke: kw_get_str(self.config, "color", null)
             }
         );
@@ -682,8 +683,13 @@
     {
         let self = this;
 
-        if(name === "color") {
-            self.private._ka_path.stroke(self.config.color);
+        switch(name) {
+            case "color":
+                self.private._ka_path.stroke(self.config.color);
+                break;
+            case "width":
+                self.private._ka_path.strokeWidth(self.config.width);
+                break;
         }
     };
 
