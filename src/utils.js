@@ -1316,7 +1316,12 @@
             jn_stack = [];
             msg_write_MIA_key(kw, stack, jn_stack);
         }
-        jn_stack.unshift(user_info);
+        try {
+            // Code throwing an exception
+            jn_stack.unshift(user_info);
+        } catch(e) {
+            console.log(e);
+        }
     }
 
     /************************************************************
