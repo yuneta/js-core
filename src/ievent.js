@@ -468,6 +468,7 @@ DEBUG: {
             );
         } else {
             var services_roles = kw_get_dict_value(kw, "services_roles", {});
+            var data = kw_get_dict_value(kw, "data", null);
 
             self.config.remote_yuno_role = src_role;
             self.config.remote_yuno_name = src_yuno;
@@ -485,7 +486,8 @@ DEBUG: {
                         remote_yuno_name: src_yuno,
                         remote_yuno_role: src_role,
                         remote_yuno_service: src_service,
-                        services_roles: services_roles
+                        services_roles: services_roles,
+                        data: data
                     }
                 );
             }
