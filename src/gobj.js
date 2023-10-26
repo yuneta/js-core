@@ -788,9 +788,9 @@ let __inside_event_loop__ = 0;
         let __config__ = null;
         let __filter__ = null;
         if(kw) {
-            let __global__ = kw["__global__"];
-            let __config__ = kw["__config__"];
-            let __filter__ = kw["__filter__"];
+            __global__ = kw["__global__"];
+            __config__ = kw["__config__"];
+            __filter__ = kw["__filter__"];
         }
 
         for(let i=0; i<dl_subs.length; i++) {
@@ -931,11 +931,11 @@ let __inside_event_loop__ = 0;
          *  Event can be null or undefined
          */
         if(event) {
-            if (!(typeof event === 'string')) {
+            if (typeof event !== 'string') {
                 let msg = "GObj.gobj_subscribe_event('" +
                     this.gobj_short_name() +
-                    "') from " + subscriber.gobj_short_name() + ": '"
-                    + event + "' is not a string";
+                    "') from " + subscriber.gobj_short_name() + ": '" +
+                    event + "' is not a string";
                 log_error(msg);
                 return 0;
             }
@@ -944,8 +944,8 @@ let __inside_event_loop__ = 0;
                 if (!elm_in_list(event, output_events)) {
                     let msg = "GObj.gobj_subscribe_event('" +
                         this.gobj_short_name() +
-                        "') from " + subscriber.gobj_short_name() + ": '"
-                        + event + "' not in output-event list";
+                        "') from " + subscriber.gobj_short_name() + ": '" +
+                        event + "' not in output-event list";
                     log_error(msg);
                     return 0;
                 }

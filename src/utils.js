@@ -173,7 +173,7 @@
         if(!source) {
             return destination;
         }
-        Array.prototype.push.apply(destination, source)
+        Array.prototype.push.apply(destination, source);
         return destination;
     }
 
@@ -425,8 +425,11 @@
         if (count < 1) return "";
         var result = "", pattern = this.valueOf();
         while (count > 1) {
-            if (count & 1) result += pattern;
-            count >>= 1, pattern += pattern;
+            if (count & 1) {
+                result += pattern;
+            }
+            count >>= 1;
+            pattern += pattern;
         }
         result += pattern;
         return result;
@@ -545,7 +548,7 @@
      ************************************************************/
     function is_date(value)
     {
-        return value instanceof Date
+        return value instanceof Date;
     }
 
     /************************************************************
@@ -553,7 +556,7 @@
      ************************************************************/
     function is_function(value)
     {
-        return typeof value === "function"
+        return typeof value === "function";
     }
 
     /************************************************************
@@ -561,7 +564,7 @@
      ************************************************************/
     function is_gobj(value)
     {
-        return value instanceof GObj
+        return value instanceof GObj;
     }
 
     /************************************************************
@@ -646,8 +649,8 @@
          *  First try number
          */
         if(is_number(jn_var1) || is_number(jn_var2)) {
-            var val1 = Number(jn_var1);
-            var val2 = Number(jn_var2);
+            let val1 = Number(jn_var1);
+            let val2 = Number(jn_var2);
             if(val1 > val2) {
                 return 1;
             } else if(val1 < val2) {
@@ -661,8 +664,8 @@
          *  Try boolean
          */
         if(is_boolean(jn_var1) || is_boolean(jn_var2)) {
-            var val1 = Number(jn_var1);
-            var val2 = Number(jn_var2);
+            let val1 = Number(jn_var1);
+            let val2 = Number(jn_var2);
             if(val1 > val2) {
                 return 1;
             } else if(val1 < val2) {
@@ -675,9 +678,9 @@
         /*
          *  Try string
          */
-        var val1 = String(jn_var1);
-        var val2 = String(jn_var2);
-        var ret = strcmp(val1, val2);
+        let val1 = String(jn_var1);
+        let val2 = String(jn_var2);
+        let ret = strcmp(val1, val2);
         return ret;
     }
 
@@ -696,15 +699,15 @@
 //         }
 //         return true;
 
-        var matched = false;
+        let matched = false;
 
         level++;
 
         if(is_array(jn_filter)) {
             // Empty array evaluate as false, until a match condition occurs.
             matched = false;
-            for(var idx = 0; idx < jn_filter.length; idx++) {
-                var jn_filter_value = jn_filter[idx];
+            for(let idx = 0; idx < jn_filter.length; idx++) {
+                let jn_filter_value = jn_filter[idx];
                 matched = _kw_match_simple(
                     kw,                 // not owned
                     jn_filter_value,    // owned
@@ -724,8 +727,8 @@
                 matched = true;
             }
 
-            for(var filter_path in jn_filter) {
-                var jn_filter_value = jn_filter[filter_path];
+            for(let filter_path in jn_filter) {
+                let jn_filter_value = jn_filter[filter_path];
                 /*
                  *  Variable compleja, recursivo
                  */
@@ -744,13 +747,13 @@
                 /*
                  * TODO get the name and op.
                  */
-                var path = filter_path; // TODO
-                var op = "__equal__";
+                let path = filter_path; // TODO
+                let op = "__equal__";
 
                 /*
                  *  Get the record value, firstly by path else by name
                  */
-                var jn_record_value;
+                let jn_record_value;
                 // Firstly try the key as pointers
                 jn_record_value = kw_get_dict_value(kw, path, 0, 0);
                 if(!jn_record_value) {
@@ -766,7 +769,7 @@
                  *  Do simple operation
                  */
                 if(op == "__equal__") { // TODO __equal__ by default
-                    var cmp = cmp_two_simple_json(jn_record_value, jn_filter_value);
+                    let cmp = cmp_two_simple_json(jn_record_value, jn_filter_value);
                     if(cmp!=0) {
                         matched = false;
                         break;
@@ -1117,16 +1120,16 @@
      *************************************************************/
     function filter_dict(dict, keylist)
     {
-        var new_dict = {};
+        let new_dict = {};
         if(is_array(keylist)) {
-            for(var j=0; j<keylist.length; j++) {
-                var key = keylist[j];
+            for(let j=0; j<keylist.length; j++) {
+                let key = keylist[j];
                 if(dict.hasOwnProperty(key)) {
                     new_dict[key] = dict[key];
                 }
             }
         } else if(is_object(keylist)) {
-            for(var key in keylist) {
+            for(let key in keylist) {
                 if(dict.hasOwnProperty(key)) {
                     new_dict[key] = dict[key];
                 }
@@ -1141,9 +1144,9 @@
      *************************************************************/
     function filter_dictlist(dict_list, keylist)
     {
-        var new_dictlist = [];
-        for(var i=0; i<dict_list.length; i++) {
-            var new_dict = filter_dict(dict_list[i], keylist)
+        let new_dictlist = [];
+        for(let i=0; i<dict_list.length; i++) {
+            let new_dict = filter_dict(dict_list[i], keylist);
             new_dictlist.push(new_dict);
         }
         return new_dictlist;
@@ -1155,9 +1158,9 @@
      *************************************************************/
     function filter_list(dict_list, key)
     {
-        var new_list = [];
-        for(var i=0; i<dict_list.length; i++) {
-            var dict = dict_list[i];
+        let new_list = [];
+        for(let i=0; i<dict_list.length; i++) {
+            let dict = dict_list[i];
             if(dict.hasOwnProperty(key)) {
                 new_list.push(dict[key]);
             }
@@ -1170,10 +1173,10 @@
      ************************************************************/
     function ids2str(dictlist)
     {
-        var s = "";
+        let s = "";
 
-        for(var i=0; i<dictlist.length; i++) {
-            var dict = dictlist[i];
+        for(let i=0; i<dictlist.length; i++) {
+            let dict = dictlist[i];
             if(i==0) {
                 s += dict.id;
             } else {
@@ -1184,9 +1187,9 @@
     }
 
     /************************************************************
-     *  DEPRECATED change by kw_get_subdict_value
+     *  OLD msgx_read_MIA_key
      ************************************************************/
-    function msg_read_MIA_key(kw, key, create, default_value) // TODO create, default_value
+    function msg_iev_read_key(kw, key, create, default_value) // TODO create, default_value
     {
         try {
             var __md_iev__ = kw["__md_iev__"];
@@ -1200,9 +1203,9 @@
     }
 
     /************************************************************
-     *  DEPRECATED change by kw_set_subdict_value
+     *  OLD msgx_write_MIA_key
      ************************************************************/
-    function msg_write_MIA_key(kw, key, value)
+    function msg_iev_write_key(kw, key, value)
     {
         var __md_iev__ = kw["__md_iev__"];
         if(!__md_iev__) {
@@ -1213,9 +1216,9 @@
     }
 
     /************************************************************
-     *
+     *  OLD msgx_delete_MIA_key
      ************************************************************/
-    function msg_delete_MIA_key(kw, key)
+    function msg_iev_delete_key(kw, key)
     {
         var __md_iev__ = kw["__md_iev__"];
         if(!__md_iev__) {
@@ -1259,7 +1262,7 @@
             field_name: field_name,
             answer_filter_fn: answer_filter_cb,
             gobj: gobj
-        }
+        };
         message_area_filters.push(filter);
     }
 
@@ -1311,14 +1314,16 @@
             return;
         }
 
-        let jn_stack = msg_read_MIA_key(kw, stack);
+        let jn_stack = msg_iev_read_key(kw, stack);
         if(!jn_stack) {
             jn_stack = [];
-            msg_write_MIA_key(kw, stack, jn_stack);
+            msg_iev_write_key(kw, stack, jn_stack);
         }
         try {
             // Code throwing an exception
-            jn_stack.unshift(user_info);
+            if(is_array(jn_stack)) {
+                jn_stack.unshift(user_info);
+            }
         } catch(e) {
             console.log(e);
         }
@@ -1333,7 +1338,7 @@
             return null;
         }
 
-        var jn_stack = msg_read_MIA_key(kw, stack);
+        var jn_stack = msg_iev_read_key(kw, stack);
         if(!jn_stack) {
             return 0;
         }
@@ -1353,7 +1358,7 @@
             return null;
         }
 
-        let jn_stack = msg_read_MIA_key(kw, stack);
+        let jn_stack = msg_iev_read_key(kw, stack);
         if(!jn_stack) {
             return 0;
         }
@@ -1363,7 +1368,7 @@
         }
         let user_info = jn_stack.shift();
         if(jn_stack.length == 0) {
-            msg_delete_MIA_key(kw, stack);
+            msg_iev_delete_key(kw, stack);
         }
         return user_info;
     }
@@ -1389,7 +1394,7 @@
                 // HACK If it's a metadata key then only admit our message inter-event msg_type_list
                 return;
             }
-            msg_write_MIA_key(kw, "__msg_type__", msg_type)
+            msg_iev_write_key(kw, "__msg_type__", msg_type);
         }
     }
 
@@ -1398,7 +1403,7 @@
      ************************************************************/
     function msg_get_msg_type(kw)
     {
-        return msg_read_MIA_key(kw, "__msg_type__")
+        return msg_iev_read_key(kw, "__msg_type__");
     }
 
     /************************************************************
@@ -1458,7 +1463,7 @@
      ************************************************************/
     function kw_get_bool(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value?true:false;
         }
         let b = _kw_search_path(kw, key);
@@ -1479,7 +1484,7 @@
      ************************************************************/
     function kw_get_int(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         let v = _kw_search_path(kw, key);
@@ -1509,7 +1514,7 @@
      ************************************************************/
     function kw_get_real(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         let v = _kw_search_path(kw, key);
@@ -1539,7 +1544,7 @@
      ************************************************************/
     function kw_get_str(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         let v = _kw_search_path(kw, key);
@@ -1569,7 +1574,7 @@
      ************************************************************/
     function kw_get_dict(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         let v = _kw_search_path(kw, key);
@@ -1598,7 +1603,7 @@
      ************************************************************/
     function kw_get_list(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         let v = _kw_search_path(kw, key);
@@ -1627,7 +1632,7 @@
      ************************************************************/
     function kw_get_dict_value(kw, key, default_value, create, verbose)
     {
-        if(!(kw === Object(kw))) {
+        if(kw !== Object(kw)) {
             return default_value;
         }
         var v = _kw_search_path(kw, key);
@@ -1875,7 +1880,7 @@
                 traverse_dict(obj[key], callback, full_path);
             }
 
-            full_path = full_path.slice(0, -sufix.length)
+            full_path = full_path.slice(0, -sufix.length);
         }
     }
 
@@ -1953,7 +1958,7 @@
                 kw_get_dict_value(topics, full_path, __duplicate__(type), 1);
                 //trace_msg(sprintf("full_path: '%s', key: %s, value: %j", full_path, key, value));
             }
-        }
+        };
         traverse_dict(schema, walk, prefix);
 
         return jdb;
@@ -2046,13 +2051,13 @@
 
         if(ids.length==0 && v) {
             if(is_array(v)) {
-                var idx = id_index_in_obj_list(v, kw["id"]);
+                let idx = id_index_in_obj_list(v, kw["id"]);
                 if(idx >= 0) {
                     v.splice(idx, 1);
                 }
             } else {
-                var v_ = kw_get_dict_value(v, jdb.hook, null, 0);
-                var idx = id_index_in_obj_list(v_, kw["id"]);
+                let v_ = kw_get_dict_value(v, jdb.hook, null, 0);
+                let idx = id_index_in_obj_list(v_, kw["id"]);
                 if(idx >= 0) {
                     v_.splice(idx, 1);
                 }
@@ -2212,7 +2217,7 @@
     function log_error(msg)
     {
         if(is_object(msg)) {
-            msg = JSON.stringify(msg)
+            msg = JSON.stringify(msg);
         }
         let hora = get_current_datetime();
         console.log("%c" + hora + " ERROR: " + String(msg), "color:yellow");
@@ -2232,7 +2237,7 @@
     function log_warning(msg)
     {
         if(is_object(msg)) {
-            msg = JSON.stringify(msg)
+            msg = JSON.stringify(msg);
         }
         let hora = get_current_datetime();
         console.log("%c" + hora + " WARNING: " + String(msg), "color:cyan");
@@ -2244,7 +2249,7 @@
     function log_info(msg)
     {
         if(is_object(msg)) {
-            msg = JSON.stringify(msg)
+            msg = JSON.stringify(msg);
         }
         if(!empty_string(msg)) {
             console.log(String(msg));
@@ -2257,7 +2262,7 @@
     function log_debug(msg)
     {
         if(is_object(msg)) {
-            msg = JSON.stringify(msg)
+            msg = JSON.stringify(msg);
         }
         if(!empty_string(msg)) {
             console.log(String(msg));
@@ -2353,7 +2358,7 @@
         // will match one and only one of the string 'true','1', or 'on' rerardless
         // of capitalization and regardless off surrounding white-space.
         //
-        regex=/^\s*(true|1|on)\s*$/i
+        let regex=/^\s*(true|1|on)\s*$/i
 
         return regex.test(s);
     }
@@ -2380,8 +2385,8 @@
      ********************************************/
     function replace_variable_engine(variable)
     {
-        var variable = escapeRegExp(variable);
-        return new RegExp("#" + variable + "#", "g");
+        var variable2 = escapeRegExp(variable);
+        return new RegExp("#" + variable2 + "#", "g");
     }
 
     /********************************************
@@ -2407,7 +2412,7 @@
             if (typeof styleSheet === 'undefined') {
                 makeStyleSheet();
             }
-        }
+        };
 
         var MediaType = function(styleSheet, media) {
             var styleSheet = styleSheet;
@@ -2415,11 +2420,11 @@
 
             this.mediaType = function() {
                 return media;
-            }
+            };
             this.styleSheet = function() {
                 return styleSheet;
-            }
-        }
+            };
+        };
 
         var StringMediaType = function(styleSheet) {
             var pub = {};
@@ -2433,7 +2438,7 @@
                     }
                 }
                 styleSheet.addRule(selector, style);
-            }
+            };
 
             pub.removeRule = function(selector) {
                 for (var i = 0; i < styleSheet.rules.length; i++) {
@@ -2441,10 +2446,10 @@
                         styleSheet.removeRule(i);
                     }
                 }
-            }
+            };
 
             return pub;
-        }
+        };
 
         StringMediaType.isString = function(styleSheet) {
             var media = styleSheet.media;
@@ -2455,7 +2460,7 @@
                 }
             }
             return false;
-        }
+        };
 
         var ObjectMediaType = function(styleSheet) {
             var pub = {};
@@ -2471,7 +2476,7 @@
                     }
                 }
                 styleSheet.insertRule(selector + '{' + style + '}', styleSheetLength);
-            }
+            };
 
             pub.removeRule = function(selector) {
                 for (var i = 0; i < styleSheet.cssRules.length; i++) {
@@ -2479,9 +2484,9 @@
                         styleSheet.deleteRule(i);
                     }
                 }
-            }
+            };
             return pub;
-        }
+        };
 
         ObjectMediaType.isObject = function(styleSheet) {
             var media = styleSheet.media;
@@ -2492,7 +2497,7 @@
                 }
             }
             return false;
-        }
+        };
         var makeMediaType = function(styleSheet) {
             if (StringMediaType.isString(styleSheet)) {
                 return StringMediaType(styleSheet);
@@ -2501,14 +2506,14 @@
             } else {
                 return undefined;
             }
-        }
+        };
 
         var styleSheetsExist = function() {
             return document.styleSheets;
-        }
+        };
         var headElementExists = function() {
             return document.getElementsByTagName('head').length !== 0;
-        }
+        };
         var makeStyleSheet = function() {
             var styleSheetElement = document.createElement('style');
             styleSheetElement.type = 'text/css';
@@ -2520,8 +2525,7 @@
                 }
                 styleSheet = makeMediaType(document.styleSheets[i]);
             }
-
-        }
+        };
         var getStyleSheet = function() {
             if (document.styleSheets.length > 0) {
                 for (var i = 0, l = document.styleSheets.length; i < l; i++) {
@@ -2533,21 +2537,21 @@
                     if (typeof styleSheet !== 'undefined')
                         break;
                 }
-            }
-        }
+            };
+        };
         var styleSheetDefined = function() {
             return styleSheet !== undefined;
-        }
+        };
 
         pub.addRule = function(selector, style) {
             if (styleSheetDefined())
                 styleSheet.addRule(selector, style);
-        }
+        };
 
         pub.removeRule = function(selector) {
             if (styleSheetDefined())
                 styleSheet.removeRule(selector);
-        }
+        };
         constructor();
         return pub;
     }
@@ -2987,8 +2991,8 @@
     exports.filter_list = filter_list;
     exports.ids2str = ids2str;
 
-    exports.msg_read_MIA_key = msg_read_MIA_key;
-    exports.msg_write_MIA_key = msg_write_MIA_key;
+    exports.msg_iev_read_key = msg_iev_read_key;
+    exports.msg_iev_write_key = msg_iev_write_key;
     exports.msg_iev_add_answer_filter = msg_iev_add_answer_filter;
     exports.msg_iev_answer = msg_iev_answer;
     exports.msg_iev_push_stack = msg_iev_push_stack;

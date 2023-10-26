@@ -80,17 +80,17 @@ DEBUG: {
         function on_open_event(gobj) {
             return function() {
                 gobj.gobj_send_event('EV_ON_OPEN', {url:url}, gobj);
-            }
+            };
         }
         function on_close_event(gobj) {
             return function() {
                 gobj.gobj_send_event('EV_ON_CLOSE', {url:url}, gobj);
-            }
+            };
         }
         function on_error_event(gobj) {
             return function() {
                 gobj.gobj_send_event('EV_ON_CLOSE', {url:url}, gobj);
-            }
+            };
         }
         function on_message_event(gobj) {
             return function(e) {
@@ -102,10 +102,11 @@ DEBUG: {
                     },
                     gobj
                 );
-            }
+            };
         }
+        let websocket;
         try {
-            var websocket = new WebSocket(url);
+            websocket = new WebSocket(url);
             if (!websocket) {
                 log_error(self.gobj_short_name() + ": Cannot open WebSocket to '" + url + "'");
                 return;
@@ -287,8 +288,9 @@ DEBUG: {
      ********************************************/
     function iev_create_from_json(self, data)
     {
+        let x;
         try {
-            var x = JSON.parse(data);
+            x = JSON.parse(data);
         } catch (e) {
             log_error("parsing inter_event json: " + e);
             return null;
@@ -303,7 +305,7 @@ DEBUG: {
             log_error("parsing inter_event: no event");
             return null;
         }
-        if(!(typeof event === 'string' )) {
+        if(typeof event !== 'string') {
             log_error("parsing inter_event: event not a string");
             return null;
         }
@@ -705,14 +707,14 @@ DEBUG: {
         self.config._wanted_yuno_name = self.config.remote_yuno_name;
         self.config._wanted_yuno_role = self.config.remote_yuno_role;
         self.config._wanted_yuno_service = self.config.remote_yuno_service;
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -724,7 +726,7 @@ DEBUG: {
         self.config.idx_url = 0;
         msg_iev_add_answer_filter(self, IEVENT_MESSAGE_AREA_ID, ievent_answer_filter);
         self.websocket = setup_websocket(self);
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -733,7 +735,7 @@ DEBUG: {
     {
         var self = this;
         close_websocket(self);
-    }
+    };
 
     /************************************************
      *      Framework Method stats
@@ -771,14 +773,14 @@ DEBUG: {
         );
 
         kw["__stats__"] = stats;
-        msg_iev_push_stack(
+        msg_iev_write_key(
             kw,         // not owned
             "__stats__",
             stats   // owned
         );
 
         return send_static_iev(self, "EV_MT_STATS", kw);
-    }
+    };
 
     /************************************************
      *      Framework Method command
@@ -816,14 +818,14 @@ DEBUG: {
         );
 
         kw["__command__"] = command;
-        msg_iev_push_stack(
+        msg_iev_write_key(
             kw,         // not owned
             "__command__",
             command   // owned
         );
 
         return send_static_iev(self, "EV_MT_COMMAND", kw);
-    }
+    };
 
     /************************************************
      *      Framework Method inject_event
@@ -865,7 +867,7 @@ DEBUG: {
             );
         }
         return send_static_iev(self, event, kw);
-    }
+    };
 
     /************************************************
      *      Framework Method subscription_added
@@ -926,7 +928,7 @@ DEBUG: {
         );
 
         send_static_iev(this, subs.event, kw);
-    }
+    };
 
     /************************************************
      *      Framework Method subscription_added
@@ -944,7 +946,7 @@ DEBUG: {
             return;
         }
         this.send_remote_subscription(subs);
-    }
+    };
 
     /************************************************
      *      Framework Method subscription_deleted
@@ -995,7 +997,7 @@ DEBUG: {
         );
 
         send_static_iev(this, subs.event, kw);
-    }
+    };
 
     /**************************************
      *
@@ -1007,7 +1009,7 @@ DEBUG: {
             var subs = dl_subs[i];
             this.send_remote_subscription(subs);
         }
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

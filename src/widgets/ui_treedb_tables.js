@@ -98,10 +98,10 @@
             treedb_name: treedb_name,
             topic_name: topic_name,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -133,10 +133,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -168,10 +168,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -203,10 +203,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -238,7 +238,7 @@
      ************************************************************/
     function update_options(self, updated_topic_name)
     {
-        var data = treedb_get_topic_data(self.config.treedb_name, updated_topic_name)
+        let data = treedb_get_topic_data(self.config.treedb_name, updated_topic_name);
         if(json_object_size(data)==0) {
             return;
         }
@@ -246,17 +246,17 @@
         /*
          *  Collect tables to update
          */
-        var reg = treedb_get_register(self.config.treedb_name);
-        var tables2update = {};
-        for(var topic_name in self.config.descs) {
-            var desc = self.config.descs[topic_name];
-            var cols = desc.cols;
-            for(var i=0; i<cols.length; i++) {
-                var col = cols[i];
+        let reg = treedb_get_register(self.config.treedb_name);
+        let tables2update = {};
+        for(let topic_name in self.config.descs) {
+            let desc = self.config.descs[topic_name];
+            let cols = desc.cols;
+            for(let i=0; i<cols.length; i++) {
+                let col = cols[i];
                 if(kw_has_key(col, "fkey")) {
-                    for(var k in col.fkey) {
+                    for(let k in col.fkey) {
                         if(k == updated_topic_name) {
-                            var t = kw_get_dict_value(tables2update, topic_name, {}, true);
+                            let t = kw_get_dict_value(tables2update, topic_name, {}, true);
                             t[col.id] = true;
                             //trace_msg("update " + topic_name + ", fkey " + col.id);
                         }
@@ -265,10 +265,10 @@
             }
         }
 
-        for(var topic_name in tables2update) {
-            var cols = tables2update[topic_name];
-            for(var gobj_name in reg.gobjs) {
-                var gobj = reg.gobjs[gobj_name];
+        for(let topic_name in tables2update) {
+            let cols = tables2update[topic_name];
+            for(let gobj_name in reg.gobjs) {
+                let gobj = reg.gobjs[gobj_name];
                 if(topic_name != gobj.gobj_read_attr("topic_name")) {
                     continue;
                 }
@@ -355,9 +355,9 @@
         var kw = {
             service: self.config.treedb_name,
             treedb_name: self.config.treedb_name
-        }
+        };
 
-        msg_write_MIA_key(kw, "__command__", command);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -381,7 +381,7 @@
          */
         if(self.config.auto_topics) {
             self.config.topics = [];
-            for(var topic_name in self.config.descs) {
+            for(let topic_name in self.config.descs) {
                 if(topic_name.substring(0, 2) == "__") {
                     continue;
                 }
@@ -393,9 +393,9 @@
         /*
          *  Subcribe events
          */
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic_name = self.config.topics[i].topic_name;
-            var desc = self.config.descs[topic_name];
+        for(let i=0; i<self.config.topics.length; i++) {
+            let topic_name = self.config.topics[i].topic_name;
+            let desc = self.config.descs[topic_name];
             if(!desc) {
                 log_error("topic desc unknown: " + topic_name);
                 continue;
@@ -447,13 +447,13 @@
      ********************************************/
     function refresh_data(self)
     {
-        var options = {
+        let options = {
             list_dict: true
         };
 
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
-            var topic_name = topic.topic_name;
+        for(let i=0; i<self.config.topics.length; i++) {
+            let topic = self.config.topics[i];
+            let topic_name = topic.topic_name;
 
             topic.gobj_formtable.gobj_send_event(
                 "EV_CLEAR_DATA",
@@ -498,12 +498,18 @@
 
         self.config.info_no_wait();
 
+        var result;
+        var comment;
+        var schema;
+        var data;
+        var __md_iev__;
+
         try {
-            var result = webix_msg.result;
-            var comment = webix_msg.comment;
-            var schema = webix_msg.schema;
-            var data = webix_msg.data;
-            var __md_iev__ = webix_msg.__md_iev__;
+            result = webix_msg.result;
+            comment = webix_msg.comment;
+            schema = webix_msg.schema;
+            data = webix_msg.data;
+            __md_iev__ = webix_msg.__md_iev__;
         } catch (e) {
             log_error(e);
             return;
@@ -935,7 +941,7 @@
         if(!self.config.auto_topics) {
             create_topics_formtable(self);
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -944,7 +950,7 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -953,8 +959,8 @@
     {
         var self = this;
 
-        treedb_descs(self)
-    }
+        treedb_descs(self);
+    };
 
     /************************************************
      *      Framework Method stop
@@ -962,7 +968,7 @@
     proto.mt_stop = function(kw)
     {
         var self = this;
-    }
+    };
 
 
     //=======================================================================

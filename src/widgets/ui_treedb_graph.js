@@ -212,10 +212,10 @@
             treedb_name: treedb_name,
             topic_name: topic_name,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -247,10 +247,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -282,10 +282,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -317,10 +317,10 @@
             topic_name: topic_name,
             record: record,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__topic_name__", topic_name);
-        msg_write_MIA_key(kw, "__command__", command);
+        msg_iev_write_key(kw, "__topic_name__", topic_name);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -358,9 +358,9 @@
             parent_ref: parent_ref,
             child_ref: child_ref,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__command__", command);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -398,9 +398,9 @@
             parent_ref: parent_ref,
             child_ref: child_ref,
             options: options || {}
-        }
+        };
 
-        msg_write_MIA_key(kw, "__command__", command);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -429,9 +429,9 @@
         var kw = {
             service: treedb_name,
             treedb_name: treedb_name
-        }
+        };
 
-        msg_write_MIA_key(kw, "__command__", command);
+        //msg_iev_write_key(kw, "__command__", command);
 
         self.config.info_wait();
 
@@ -455,7 +455,7 @@
          */
         if(self.config.auto_topics) {
             if(json_size(self.config.topics)==0) {
-                for(var topic_name in self.config.descs) {
+                for(let topic_name in self.config.descs) {
                     if(topic_name.substring(0, 2) == "__") {
                         continue;
                     }
@@ -467,9 +467,9 @@
         /*
          *  Subcribe events
          */
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic_name = self.config.topics[i].topic_name;
-            var desc = self.config.descs[topic_name];
+        for(let i=0; i<self.config.topics.length; i++) {
+            let topic_name = self.config.topics[i].topic_name;
+            let desc = self.config.descs[topic_name];
             if(!desc) {
                 log_error("topic desc unknown: " + topic_name);
                 continue;
@@ -570,13 +570,13 @@
             self
         );
 
-        var options = {
+        let options = {
             list_dict: true
         };
 
-        for(var i=0; i<self.config.topics.length; i++) {
-            var topic = self.config.topics[i];
-            var topic_name = topic.topic_name;
+        for(let i=0; i<self.config.topics.length; i++) {
+            let topic = self.config.topics[i];
+            let topic_name = topic.topic_name;
 
             treedb_nodes(self,
                 self.config.treedb_name,
@@ -614,12 +614,18 @@
     {
         self.config.info_no_wait();
 
+        let result;
+        let comment;
+        let schema;
+        let data;
+        let __md_iev__;
+
         try {
-            var result = kw.result;
-            var comment = kw.comment;
-            var schema = kw.schema;
-            var data = kw.data;
-            var __md_iev__ = kw.__md_iev__;
+            result = kw.result;
+            comment = kw.comment;
+            schema = kw.schema;
+            data = kw.data;
+            __md_iev__ = kw.__md_iev__;
         } catch (e) {
             log_error(e);
             return;
@@ -678,16 +684,16 @@
      ********************************************/
     function ac_treedb_node_created(self, event, kw, src)
     {
-        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
-        var topic_name = kw_get_str(kw, "topic_name", "", 0);
-        var node = kw_get_dict_value(kw, "node", null, 0);
+        let treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        let topic_name = kw_get_str(kw, "topic_name", "", 0);
+        let node = kw_get_dict_value(kw, "node", null, 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
             return 0;
         }
 
-        var schema = self.config.descs[topic_name];
+        let schema = self.config.descs[topic_name];
 
         self.config.gobj_nodes_tree.gobj_send_event(
             "EV_NODE_CREATED",
@@ -707,9 +713,9 @@
      ********************************************/
     function ac_treedb_node_updated(self, event, kw, src)
     {
-        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
-        var topic_name = kw_get_str(kw, "topic_name", "", 0);
-        var node = kw_get_dict_value(kw, "node", null, 0);
+        let treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        let topic_name = kw_get_str(kw, "topic_name", "", 0);
+        let node = kw_get_dict_value(kw, "node", null, 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
@@ -733,9 +739,9 @@
      ********************************************/
     function ac_treedb_node_deleted(self, event, kw, src)
     {
-        var treedb_name = kw_get_str(kw, "treedb_name", "", 0);
-        var topic_name = kw_get_str(kw, "topic_name", "", 0);
-        var node = kw_get_dict_value(kw, "node", null, 0);
+        let treedb_name = kw_get_str(kw, "treedb_name", "", 0);
+        let topic_name = kw_get_str(kw, "topic_name", "", 0);
+        let node = kw_get_dict_value(kw, "node", null, 0);
 
         if(treedb_name != self.config.treedb_name) {
             log_error("It's not my treedb_name: " + treedb_name);
@@ -1272,7 +1278,7 @@
                 );
             }
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -1281,7 +1287,7 @@
      ************************************************/
     proto.mt_destroy = function()
     {
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -1295,8 +1301,8 @@
             self.config.gobj_treedb_tables.gobj_start();
         }
 
-        treedb_descs(self, self.config.treedb_name)
-    }
+        treedb_descs(self, self.config.treedb_name);
+    };
 
     /************************************************
      *      Framework Method stop
@@ -1305,7 +1311,7 @@
     {
         var self = this;
 
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object

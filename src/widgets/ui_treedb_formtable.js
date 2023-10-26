@@ -869,7 +869,7 @@
                 return;
             }
 
-            $gadget.config.width = new_width<0? $gadget.$width:new_width,
+            $gadget.config.width = new_width<0? $gadget.$width:new_width;
             $gadget.config.height = new_height<0? $gadget.$height:new_height;
             $gadget.resize();
             $gadget.setPosition(new_x, new_y);
@@ -942,7 +942,7 @@
                     tranger_col.type === 'integer'? "int":"string":false,
                 minWidth: tranger_col.fillspace * 10,
                 fillspace: tranger_col.fillspace
-            }
+            };
 
             var flag = tranger_col.flag;
             var is_hook = elm_in_list("hook", flag);
@@ -958,6 +958,8 @@
                 }
             }
 
+            var real_type;
+            var enum_list;
             var type = tranger_col.type; // By default is basic type
             if(is_hook) {
                 type = "hook";
@@ -1003,8 +1005,8 @@
                     break;
 
                 case "enum":
-                    var real_type = tranger_col.type;
-                    var enum_list = tranger_col.enum;
+                    real_type = tranger_col.type;
+                    enum_list = tranger_col.enum;
                     switch(real_type) {
                         case "string":
                             webix_col["editor"] = "combo";
@@ -1038,7 +1040,7 @@
                     break;
 
                 case "time":
-                    var real_type = tranger_col.type;
+                    real_type = tranger_col.type;
                     switch(real_type) {
                         case "string":
                             webix_col["editor"] = "date";
@@ -1057,7 +1059,7 @@
                     break;
 
                 case "color":
-                    var real_type = tranger_col.type;
+                    real_type = tranger_col.type;
                     switch(real_type) {
                         case "string":
                             webix_col["editor"] = "color";
@@ -1258,6 +1260,8 @@
                     break;
             }
 
+            var real_type;
+            var enum_list;
             var type = tranger_col.type; // By default is basic type
             if(is_hook) {
                 type = "hook";
@@ -1273,18 +1277,18 @@
 
             switch(type) {
                 case "string":
-                    var type = "text";
+                    var types = "text";
                     if(tranger_col.id.indexOf("email")>=0) {
-                        type = "email";
+                        types = "email";
                     }
                     if(is_email) {
-                        type = "email";
+                        types = "email";
                     }
                     if(is_url) {
-                        type = "url";
+                        types = "url";
                     }
                     if(is_password) {
-                        type = "password";
+                        types = "password";
                     }
                     webix_element = {
                         view: "text",
@@ -1292,7 +1296,7 @@
                         label: t(tranger_col.header),
                         css: "input_font_fijo",
                         readonly: is_writable?false:true,
-                        type: type
+                        type: types
                     };
 
                     if(is_required) {
@@ -1400,8 +1404,8 @@
                     webix_element["invalidMessage"] = t("invalid json");
                     break;
                 case "enum":
-                    var real_type = tranger_col.type;
-                    var enum_list = tranger_col.enum;
+                    real_type = tranger_col.type;
+                    enum_list = tranger_col.enum;
                     switch(real_type) {
                         case "string":
                             webix_element = {
@@ -1447,7 +1451,7 @@
                     break;
 
                 case "time":
-                    var real_type = tranger_col.type;
+                    real_type = tranger_col.type;
                     switch(real_type) {
                         case "string":
                         case "integer":
@@ -1483,7 +1487,7 @@
                     break;
 
                 case "color":
-                    var real_type = tranger_col.type;
+                    real_type = tranger_col.type;
                     switch(real_type) {
                         case "string":
                         case "integer":
@@ -1745,14 +1749,14 @@
      ********************************************/
     function get_schema_col(self, field_name)
     {
-        var col = null;
-        var cols = self.config.cols;
+        let col = null;
+        let cols = self.config.cols;
         if(!cols) {
             cols = self.config.schema;
         }
 
-        for(var i=0; i<cols.length; i++) {
-            var col = cols[i];
+        for(let i=0; i<cols.length; i++) {
+            let col = cols[i];
             if(col.id == field_name) {
                 return col;
             }
@@ -1788,6 +1792,8 @@
         var is_time = elm_in_list("time", flag);
         var is_color = elm_in_list("color", flag);
 
+        var real_type;
+        var enum_list;
         var type = col.type; // By default is basic type
         if(is_hook) {
             type = "hook";
@@ -1823,8 +1829,8 @@
                 break;
 
             case "enum":
-                var real_type = col.type;
-                var enum_list = col.enum;
+                real_type = col.type;
+                enum_list = col.enum;
                 switch(real_type) {
                     case "string":
                         break;
@@ -1842,7 +1848,7 @@
                 break;
 
             case "time":
-                var real_type = col.type;
+                real_type = col.type;
                 switch(real_type) {
                     case "string":
                         if(value) {
@@ -1867,7 +1873,7 @@
                 break;
 
             case "color":
-                var real_type = col.type;
+                real_type = col.type;
                 switch(real_type) {
                     case "string":
                         // TODO
@@ -1884,7 +1890,7 @@
                 break;
 
             case "hook":    // Convert data from backend to frontend
-                var items = treedb_hook_data_size(value);
+                let items = treedb_hook_data_size(value);
                 if(items > 0) {
                     value = "<span class='webix_icon fas fa-eye hook-class'></span>";
                     value += "&nbsp;&nbsp;[&nbsp;<u>" + items + "</u>&nbsp;]";
@@ -1897,13 +1903,13 @@
                 var new_value = [];
                 if(value) {
                     if(is_string(value)) {
-                        var fkey = decoder_fkey(col, value);
+                        let fkey = decoder_fkey(col, value);
                         if(fkey) {
                             new_value.push(fkey.id);
                         }
                     } else if(is_array(value)) {
-                        for(var i=0; i<value.length; i++) {
-                            var fkey = decoder_fkey(col, value[i]);
+                        for(let i=0; i<value.length; i++) {
+                            let fkey = decoder_fkey(col, value[i]);
                             if(fkey) {
                                 new_value.push(fkey.id);
                             }
@@ -1957,6 +1963,8 @@
         var is_time = elm_in_list("time", flag);
         var is_color = elm_in_list("color", flag);
 
+        var real_type;
+        var enum_list;
         var type = col.type; // By default is basic type
         if(is_enum) {
             type = "enum";
@@ -2010,8 +2018,8 @@
                 break;
 
             case "enum":
-                var real_type = col.type;
-                var enum_list = col.enum;
+                real_type = col.type;
+                enum_list = col.enum;
                 switch(real_type) {
                     case "string":
                         break;
@@ -2027,7 +2035,7 @@
                 break;
 
             case "time":
-                var real_type = col.type;
+                real_type = col.type;
                 switch(real_type) {
                     case "string":
                         if(value && is_date(value)) {
@@ -2050,7 +2058,7 @@
                 break;
 
             case "color":
-                var real_type = col.type;
+                real_type = col.type;
                 switch(real_type) {
                     case "string":
                         // TODO
@@ -2096,7 +2104,7 @@
                 // TODO check if widget is not multi select
                 refs = "";
                 if(value.length > 0) {
-                    var v = value[0];
+                    let v = value[0];
                     if(!empty_string(v)) {
                         refs = topic_name + "^" + v + "^" + hook;
                     }
@@ -2106,8 +2114,8 @@
             case "dict":
                 refs = {};
                 if(value.length > 0) {
-                    for(var i=0; i<value.length; i++) {
-                        var v = value[i];
+                    for(let i=0; i<value.length; i++) {
+                        let v = value[i];
                         if(!empty_string(v)) {
                             refs[topic_name + "^" + v + "^" + hook] = true;
                         }
@@ -2118,8 +2126,8 @@
             case "list":
                 refs = [];
                 if(value.length > 0) {
-                    for(var i=0; i<value.length; i++) {
-                        var v = value[i];
+                    for(let i=0; i<value.length; i++) {
+                        let v = value[i];
                         if(!empty_string(v)) {
                             refs.push(topic_name + "^" + v + "^" + hook);
                         }
@@ -2167,8 +2175,8 @@
         }
 
         var new_data = [];
-        for(var i=0; i<data.length; i++) {
-            var record = data[i];
+        for(let i=0; i<data.length; i++) {
+            let record = data[i];
             new_data.push(record2frontend(self, record));
         }
         $table.parse(new_data);
@@ -2296,7 +2304,7 @@
             log_error("$form create not found: " + build_name(self, "create_form"));
         }
 
-        var eles = cols2webix_form_elements(self, cols, "update");
+        eles = cols2webix_form_elements(self, cols, "update");
         var $update_form = $$(build_name(self, "update_form"));
         if($update_form) {
             $update_form.define("elements", eles[0]);
@@ -2366,8 +2374,7 @@
                 new_kw = record2backend(self, new_kw, "update");
             } catch (e) {
                 log_warning(e);
-                throw e
-                return -1;
+                throw e;
             }
 
             self.gobj_publish_event(
@@ -2407,8 +2414,7 @@
             new_kw = record2backend(self, new_kw, "delete");
         } catch (e) {
             log_warning(e);
-            throw e
-            return -1;
+            throw e;
         }
 
         self.gobj_publish_event(
@@ -2474,8 +2480,7 @@
                 new_kw = record2backend(self, new_kw, "create");
             } catch (e) {
                 log_warning(e);
-                throw e
-                return -1;
+                throw e;
             }
 
             self.gobj_publish_event(
@@ -2664,10 +2669,10 @@
         var idx = kw.record_idx -1;
 
         if(idx >= 0 && idx < self.config.total) {
-            var id = $table.getIdByIndex(idx);
+            let id = $table.getIdByIndex(idx);
             $table.select(id);
         } else {
-            var id = $table.getSelectedId();
+            let id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
         }
@@ -2710,11 +2715,11 @@
         var idx = ((page-1) * self.config.page_size);
 
         if(idx >= 0 && idx < self.config.total) {
-            var id = $table.getIdByIndex(idx);
+            let id = $table.getIdByIndex(idx);
             self.config.page = page;
             $table.select(id);
         } else {
-            var id = $table.getSelectedId();
+            let id = $table.getSelectedId();
             $table.unselectAll();
             $table.select(id);
         }
@@ -2979,7 +2984,7 @@
                 self
             );
         }
-    }
+    };
 
     /************************************************
      *      Framework Method destroy
@@ -3005,7 +3010,7 @@
             webix.eventRemove(self.config.resizing_event_id);
             self.config.resizing_event_id = 0;
         }
-    }
+    };
 
     /************************************************
      *      Framework Method start
@@ -3014,7 +3019,7 @@
     {
         var self = this;
 
-    }
+    };
 
     /************************************************
      *      Framework Method stop
@@ -3023,7 +3028,7 @@
     {
         var self = this;
 
-    }
+    };
 
     //=======================================================================
     //      Expose the class via the global object
