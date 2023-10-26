@@ -1693,7 +1693,7 @@
 
         for (var attr in kw) {
             if (kw.hasOwnProperty(attr)) {
-                if(strncmp(attr, "_", 1)==0) {
+                if(is_private_key(attr)) {
                     copy[attr] = kw[attr];
                     delete kw[attr];
                 }
