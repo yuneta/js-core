@@ -740,7 +740,7 @@
         let self = this;
 
         /*
-         *  Child model
+         *  Child model? subscriber is the parent
          */
         if(!self.config.subscriber) {
             self.config.subscriber = self.gobj_parent();  // Remove if not child model
