@@ -208,7 +208,7 @@ let __inside_event_loop__ = 0;
      ************************************************************/
     proto.gobj_is_service = function()
     {
-        return this.config.__service__;
+        return this.__service__;
     };
 
     /************************************************************
