@@ -2299,7 +2299,7 @@
             return undefined;
         }
 
-        var value = window.localStorage.getItem(key);
+        let value = window.localStorage.getItem(key);
         if(value === null || value===undefined) {
             if(create) {
                 kw_set_local_storage_value(key, default_value);
@@ -2936,6 +2936,343 @@
         };
     }
 
+    /***************************************************************************
+     *  Get the dirName of window.location.pathname
+     ***************************************************************************/
+    function get_location_path_root() {
+        /*
+         *  window.location.pathname
+         *  en browser  = "/"
+         *  en electron = "/yuneta/development/.../gui_yunetas.js/tags/0.00.aa/index.html"
+         *  en android  = "/index.html"
+         */
+        // Split the path by '/' and get the last component
+        const segments = window.location.pathname.split('/');
+        const baseName = segments.pop(); // remove basename
+
+        // Join the remaining segments back into a string
+        return segments.join('/');
+    }
+
+    /***************************************************************************
+     *  implement a debounce or throttle mechanism to limit the number
+     *  of times the callback function is executed
+     ***************************************************************************/
+    function debounce(func, wait)
+    {
+        let timeout;
+        return function executedFunction() {
+            const later = () => {
+               clearTimeout(timeout);
+                func();
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    /***************************************************************************
+     *
+     ***************************************************************************/
+    function buildOneHtml(htmlString)
+    {
+        // Convert the HTML string to DOM nodes
+        const template = document.createElement('template');
+        template.innerHTML = htmlString.trim(); // Trim to avoid extra text nodes
+
+        return template.content.firstChild;
+    }
+
+    /***************************************************************************
+     *  Code written by ChatGPT
+        Example usage:
+
+        function makeDraggable(handle, target) {
+            let offsetX = 0;
+            let offsetY = 0;
+
+            // Called when the drag starts
+            const onMouseDown = (e) => {
+                // Calculate the initial offset
+                offsetX = e.clientX - target.getBoundingClientRect().left;
+                offsetY = e.clientY - target.getBoundingClientRect().top;
+
+                // Attach the listeners to the document to allow for free movement
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            };
+
+            // Called when the mouse is moved
+            const onMouseMove = (e) => {
+                // Calculate the new position
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+
+                // Update the position of the target
+                target.style.left = `${x}px`;
+                target.style.top = `${y}px`;
+            };
+
+            // Called when the mouse button is released
+            const onMouseUp = () => {
+                // Remove the listeners from the document
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            // Attach the mousedown listener to the handle
+            handle.addEventListener('mousedown', onMouseDown);
+        }
+
+        function addResizeFunctionality(resizeHandle, windowElement) {
+            let startX, startY, startWidth, startHeight;
+
+            const onMouseDown = (e) => {
+                // Prevent default action (like text selection) during resize
+                e.preventDefault();
+
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = parseInt(document.defaultView.getComputedStyle(windowElement).width, 10);
+                startHeight = parseInt(document.defaultView.getComputedStyle(windowElement).height, 10);
+
+                document.documentElement.addEventListener('mousemove', onMouseMove, false);
+                document.documentElement.addEventListener('mouseup', onMouseUp, false);
+            };
+
+            const onMouseMove = (e) => {
+                // Calculate new size
+                const newWidth = startWidth + e.clientX - startX;
+                const newHeight = startHeight + e.clientY - startY;
+
+                // Update window size
+                windowElement.style.width = `${newWidth}px`;
+                windowElement.style.height = `${newHeight}px`;
+            };
+
+            const onMouseUp = () => {
+                // Remove the listeners when resizing is done
+                document.documentElement.removeEventListener('mousemove', onMouseMove, false);
+                document.documentElement.removeEventListener('mouseup', onMouseUp, false);
+            };
+
+            // Attach the mousedown listener to the resize handle
+            resizeHandle.addEventListener('mousedown', onMouseDown, false);
+        }
+
+
+        function createWindow({ title, x, y, width, height, parent }) {
+            const windowEl = createElement([
+                'div',
+                {
+                    class: 'window',
+                    // style: `position: absolute; left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; display: flex; flex-direction: column; border: 1px solid black;`
+                    style: {
+                        position: "absolute",
+                        left: `${x}px`,
+                        top: `${y}px`,
+                        width: `${width}px`,
+                        height: `${height}px`,
+                        display: "flex",
+                        "flex-direction": "column",
+                        border: "1px solid black",
+                    }
+                },
+                [
+                    ['div', { class: 'window-top', style: 'display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid black;cursor:move;' },
+                        [
+                            ['span', {}, title],
+                            ['button', {}, 'Close', {
+                                click: (e) => {
+                                    e.target.closest('.window').remove();
+                                }
+                            }]
+                        ]
+                    ],
+                    ['div', { class: 'window-content', style: 'flex-grow: 1; padding: 5px;' }, 'This is the content area.'],
+                    ['div', { class: 'window-bottom', style: 'padding: 5px; border-top: 1px solid black; display: flex; justify-content: flex-end;' },
+                        [
+                            ['div', { class: 'resize-handle', style: 'width: 20px; height: 20px; cursor: nwse-resize;' }, '', {
+                                mousedown: (e) => {
+                                    // Resize logic here
+                                }
+                            }]
+                        ]
+                    ]
+                ]
+            ]);
+
+            const resizeHandle = windowEl.querySelector('.resize-handle');
+
+            makeDraggable(windowEl.querySelector('.window-top'), windowEl);
+            addResizeFunctionality(resizeHandle, windowEl);
+
+            parent.appendChild(windowEl);
+        }
+
+
+        // Example usage
+        createWindow({
+            title: 'My Draggable Window',
+            x: 100,
+            y: 100,
+            width: 400,
+            height: 300,
+            parent: document.body
+        });
+     ***************************************************************************/
+
+
+    /***************************************************************************
+     *  Create a HTMLElement:
+     *      [tag, attrs, content, events]
+     *
+     *      tag     -> string
+     *
+     *      attrs   -> {key:string}
+     *                  Special case for key=='style'
+     *                      could be `style:'string'`
+     *                      or `style:{k:s}`
+     *                 Special case for key=='i18n' (or 'data-i18n' or 'data_i18next')
+     *                      will be 'data-i18n' attr
+     *
+     *      content -> string | [createElement() or parameters of createElement]
+     *                  if string begins with '<' then
+     *                      it will be converted to HTMLElement
+     *                          content = buildOneHtml(string)
+     *                  if attrs['i18n'] is not empty then (or 'data-i18n' or 'data_i18next')
+ *                          it will be overridden with the translation
+     *                          content = i18next.t(attrs['i18n']));
+     *
+     *      events  -> {event: ()}
+     *
+     *  Return the created element
+     *
+     *  Examples:
+     *      ['div', { class: 'window-top', style: 'border-bottom: 1px solid black;' },
+     *          [
+     *              ['span', {}, 'title'],
+     *              ['button', {}, 'Close', {
+     *                  click: (e) => {
+     *                      e.target.closest('.window').remove();
+     *                  }
+     *              }]
+     *          ]
+     *      ]
+     *
+     *      ['span', {style: {position: 'absolute'} }, 'title'],
+     *
+     ***************************************************************************/
+    function createElement(description) {
+        let [tag, attrs, content, events] = description;
+
+        /*
+         *  Create the html element
+         */
+        if (!tag) {
+            console.error("Tag must be a valid HTML element.");
+            return;
+        }
+        let el = document.createElement(tag);
+
+        /*
+         *  Append attributes
+         */
+        let data_i18next = '';
+
+        if(attrs && typeof attrs === 'object') {
+            for (let attr in attrs) {
+                if (attr === 'style' && typeof attrs[attr] === 'object') {
+                    // Convert the style object to a CSS string
+                    let styleString = '';
+                    for (let prop in attrs[attr]) {
+                        styleString += `${prop}: ${attrs[attr][prop]};`;
+                    }
+                    el.style.cssText = styleString;
+                } else if (attr === 'style') {
+                    el.style.cssText = attrs[attr];
+                } else {
+                    if(attr === 'i18n' || attr === 'data-i18n' ||
+                            attr === 'data_i18next' || attr === 'data-i18next') {
+                        data_i18next = attrs[attr];
+                        el.setAttribute('data-i18n', data_i18next);
+                    } else {
+                        el.setAttribute(attr, attrs[attr]);
+                    }
+                }
+            }
+        }
+
+        /*
+         *  Append content, can be a string or another kids
+         */
+        if (typeof content === 'string') {
+            content = content.trim();
+            if(content.length > 0 && content[0] === '<') {
+                el.appendChild(buildOneHtml(content));
+            } else {
+                if(data_i18next) {
+                    el.textContent = i18next.t(data_i18next, content);
+                } else {
+                    el.textContent = content;
+                }
+            }
+        } else if (Array.isArray(content) && content.length > 0) {
+            if(is_string(content[0])) {
+                el.appendChild(createElement(content));
+            } else {
+                for (let child of content) {
+                    // Check if the child is an array description or an HTMLElement
+                    if (Array.isArray(child)) {
+                        el.appendChild(createElement(child));
+                    } else if (child instanceof HTMLElement) {
+                        el.appendChild(child);
+                    }
+                }
+            }
+        } else if (content instanceof HTMLElement) {
+            el.appendChild(content);
+        }
+
+        /*
+         *  Attach event listeners
+         */
+        if (events && typeof events === 'object') {
+            for (let eventType in events) {
+                el.addEventListener(eventType, events[eventType]);
+            }
+        }
+
+        return el;
+    }
+
+    /***************************************************************************
+     *  Code written by ChatGPT
+        // Usage example:
+        var element = document.getElementById("myElement");
+        var position = getPositionRelativeToBody(element);
+        console.log("Top: " + position.top + ", Left: " + position.left + ", Right: " + position.right + ", Bottom: " + position.bottom);
+     ***************************************************************************/
+    function getPositionRelativeToBody(element)
+    {
+        let rect = element.getBoundingClientRect();
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
+
+        let top = rect.top + scrollTop;
+        let left = rect.left + scrollLeft;
+        let right = left + rect.width;
+        let bottom = top + rect.height;
+
+        return {
+            top: top,
+            left: left,
+            right: right,
+            bottom: bottom
+        };
+    }
+
+
     //=======================================================================
     //      Expose the class via the global object
     //=======================================================================
@@ -3057,5 +3394,9 @@
     exports.icono = icono;
     exports.find_gobj_in_list = find_gobj_in_list; // TODO elimina, usa gobj api
     exports.get_str_list_difference = get_str_list_difference;
-
+    exports.get_location_path_root = get_location_path_root;
+    exports.debounce = debounce;
+    exports.buildOneHtml = buildOneHtml;
+    exports.createElement = createElement;
+    exports.getPositionRelativeToBody = getPositionRelativeToBody;
 })(this);

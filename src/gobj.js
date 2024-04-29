@@ -57,6 +57,7 @@ let __inside_event_loop__ = 0;
         this.config = __duplicate__(config);
         json_object_update_config(this.config, kw || {});
         this.private = kw_extract_private(this.config);
+        this.command_table = {};
         this.gcflag = gcflag;
 
         this.user_data = {};
@@ -154,6 +155,7 @@ let __inside_event_loop__ = 0;
         if((this.gcflag & gcflag_manual_start)) {
             return 0;
         }
+
         if(this.is_tracing()) {
             log_debug(sprintf("⏺ ⏺ ⏺ ⏺ start_tree: %s", this.gobj_full_name()));
         }
@@ -585,9 +587,12 @@ let __inside_event_loop__ = 0;
     };
 
     /************************************************************
-     *  Exec gobj command. Return a webixof
+     *  Exec gobj command. Return a webix
      ************************************************************/
     proto.gobj_command = function(command, kw, src) {
+        /*-----------------------------------------------*
+         *  The local mt_command_parser has preference
+         *-----------------------------------------------*/
         if(this.mt_command) {
             let tracing = this.is_tracing();
             if (tracing) {
@@ -606,6 +611,13 @@ let __inside_event_loop__ = 0;
             }
             return this.mt_command(command, kw, src);
         }
+
+        /*-----------------------------------------------*
+         *  If it has command_table
+         *  then use the global command parser
+         *-----------------------------------------------*/
+        // TODO
+
         return this.gobj_build_webix_answer(
             this,
             -1,
@@ -617,12 +629,21 @@ let __inside_event_loop__ = 0;
     };
 
     /************************************************************
-     *  Exec gobj stats. Return a webixof
+     *  Exec gobj stats. Return a webix
      ************************************************************/
     proto.gobj_stats = function(stat, kw, src) {
+        /*--------------------------------------*
+         *  The local mt_stats has preference
+         *--------------------------------------*/
         if(this.mt_stats) {
             return this.mt_stats(stat, kw, src);
         }
+
+        /*-----------------------------------------------*
+         *  Then use the global stats parser
+         *-----------------------------------------------*/
+        // TODO
+
         return this.gobj_build_webix_answer(
             this,
             -1,
